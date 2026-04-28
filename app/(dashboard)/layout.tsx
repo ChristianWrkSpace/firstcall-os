@@ -6,6 +6,9 @@ const navItems = [
   { href: "/jobs", label: "Jobs", icon: "◈" },
   { href: "/customers", label: "Customers", icon: "◉" },
   { href: "/calls", label: "Calls", icon: "◎" },
+  { href: "/equipment", label: "Equipment", icon: "▤" },
+  { href: "/ar", label: "AR", icon: "$" },
+  { href: "/progress", label: "Progress", icon: "▰" },
   { href: "/settings", label: "Settings", icon: "◇" },
 ];
 

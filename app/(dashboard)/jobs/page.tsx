@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { STATUS_COLORS } from "@/lib/constants";
 import Link from "next/link";
 

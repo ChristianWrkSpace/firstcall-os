@@ -1,8 +1,14 @@
-import { createServerSupabaseClient } from "@/lib/supabase";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import StatusSelector from "./StatusSelector";
 import AddNoteForm from "./AddNoteForm";
+import PhotoUploader from "./PhotoUploader";
+import PhotoGallery from "./PhotoGallery";
+import AnalyzeButton from "./AnalyzeButton";
+import ScopeAssessment from "./ScopeAssessment";
+import DispatchInputsForm from "./DispatchInputs";
+import GenerateEstimateButton from "./GenerateEstimateButton";
 import { STATUS_COLORS } from "@/lib/constants";
 
 export default async function JobDetailPage({
@@ -13,7 +19,13 @@ export default async function JobDetailPage({
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const [{ data: job }, { data: notes }] = await Promise.all([
+  const [
+    { data: job },
+    { data: notes },
+    { data: photos },
+    { data: estimates },
+    { data: invoices },
+  ] = await Promise.all([
     supabase
       .from("jobs")
       .select("*, customers(*)")
@@ -22,6 +34,23 @@ export default async function JobDetailPage({
     supabase
       .from("job_notes")
       .select("*, profiles(name)")
+      .eq("job_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("job_photos")
+      .select("id, storage_path")
+      .eq("job_id", id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("estimates")
+      .select("id, version, status, line_items:estimate_line_items(line_total)")
+      .eq("job_id", id)
+      .order("version", { ascending: false }),
+    supabase
+      .from("invoices")
+      .select(
+        "id, invoice_number, status, sent_at, due_date, line_items:invoice_line_items(line_total), payments(amount)"
+      )
       .eq("job_id", id)
       .order("created_at", { ascending: false }),
   ]);
@@ -78,6 +107,174 @@ export default async function JobDetailPage({
               )}
             </div>
           </section>
+
+          {/* Argus: Site Photos + Scope */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <div>
+                <h2 className="text-white font-semibold">Site Photos & Scope</h2>
+                <p className="text-zinc-500 text-xs mt-0.5">
+                  Argus analyzes photos to produce IICRC S500-compliant scope and equipment list.
+                </p>
+              </div>
+              <div className="flex gap-2 items-start flex-wrap">
+                {job.scope_assessment && (
+                  <Link
+                    href={`/jobs/${job.id}/loadout`}
+                    className="px-4 py-2 border border-zinc-700 hover:bg-zinc-800 text-zinc-200 text-sm font-medium rounded-lg transition-colors"
+                  >
+                    📋 Loadout Sheet
+                  </Link>
+                )}
+                <PhotoUploader jobId={job.id} />
+                <AnalyzeButton
+                  jobId={job.id}
+                  hasPhotos={(photos?.length ?? 0) > 0}
+                  hasScope={!!job.scope_assessment}
+                />
+              </div>
+            </div>
+
+            <DispatchInputsForm jobId={job.id} initial={job.dispatch_inputs} />
+
+            <PhotoGallery jobId={job.id} photos={photos ?? []} />
+
+            {job.scope_assessment && (
+              <div className="mt-6 pt-6 border-t border-zinc-800">
+                <ScopeAssessment
+                  scope={job.scope_assessment}
+                  analyzedAt={job.scope_analyzed_at}
+                />
+              </div>
+            )}
+          </section>
+
+          {/* Ledger: Estimates */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <div>
+                <h2 className="text-white font-semibold">Estimates</h2>
+                <p className="text-zinc-500 text-xs mt-0.5">
+                  Ledger generates Xactimate-style line items from the Argus scope.
+                </p>
+              </div>
+              <GenerateEstimateButton
+                jobId={job.id}
+                hasScope={!!job.scope_assessment}
+              />
+            </div>
+
+            {!estimates?.length ? (
+              <p className="text-zinc-500 text-sm italic">
+                {job.scope_assessment
+                  ? "No estimates yet. Click 'Generate Estimate' to draft one."
+                  : "Run Argus scope analysis first, then generate an estimate."}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {estimates.map((est: any) => {
+                  const total = (est.line_items ?? []).reduce(
+                    (s: number, li: any) => s + Number(li.line_total ?? 0),
+                    0
+                  );
+                  const statusColors: Record<string, string> = {
+                    draft:    "bg-zinc-700 text-zinc-300",
+                    approved: "bg-green-500/15 text-green-400",
+                    sent:     "bg-blue-500/15 text-blue-400",
+                    rejected: "bg-red-500/15 text-red-400",
+                    revised:  "bg-yellow-500/15 text-yellow-400",
+                  };
+                  return (
+                    <Link
+                      key={est.id}
+                      href={`/jobs/${job.id}/estimates/${est.id}`}
+                      className="flex items-center justify-between px-4 py-3 bg-zinc-800/40 border border-zinc-700/50 rounded-lg hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-blue-400 font-mono text-sm">
+                          v{est.version}
+                        </span>
+                        <span
+                          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[est.status] ?? ""}`}
+                        >
+                          {est.status}
+                        </span>
+                        <span className="text-zinc-500 text-xs">
+                          {(est.line_items ?? []).length} line items
+                        </span>
+                      </div>
+                      <span className="text-white font-mono font-semibold">
+                        ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Abacus: Invoices */}
+          {invoices && invoices.length > 0 && (
+            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-white font-semibold">Invoices</h2>
+                  <p className="text-zinc-500 text-xs mt-0.5">
+                    Abacus tracks billing, payments, and reminders.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                {invoices.map((inv: any) => {
+                  const total = (inv.line_items ?? []).reduce(
+                    (s: number, li: any) => s + Number(li.line_total ?? 0),
+                    0
+                  );
+                  const paid = (inv.payments ?? []).reduce(
+                    (s: number, p: any) => s + Number(p.amount),
+                    0
+                  );
+                  const balance = total - paid;
+                  const statusColors: Record<string, string> = {
+                    draft:   "bg-zinc-700 text-zinc-300",
+                    sent:    "bg-blue-500/15 text-blue-400",
+                    partial: "bg-yellow-500/15 text-yellow-400",
+                    paid:    "bg-green-500/15 text-green-400",
+                    overdue: "bg-red-500/15 text-red-400",
+                    void:    "bg-zinc-800 text-zinc-500",
+                  };
+                  return (
+                    <Link
+                      key={inv.id}
+                      href={`/jobs/${job.id}/invoices/${inv.id}`}
+                      className="flex items-center justify-between px-4 py-3 bg-zinc-800/40 border border-zinc-700/50 rounded-lg hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-blue-400 font-mono text-sm">
+                          {inv.invoice_number}
+                        </span>
+                        <span
+                          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[inv.status] ?? ""}`}
+                        >
+                          {inv.status}
+                        </span>
+                        {paid > 0 && balance > 0 && (
+                          <span className="text-zinc-500 text-xs">
+                            ${paid.toFixed(0)} of ${total.toFixed(0)} paid
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        className={`font-mono font-semibold ${balance > 0 ? "text-white" : "text-green-400"}`}
+                      >
+                        ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Notes */}
           <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">

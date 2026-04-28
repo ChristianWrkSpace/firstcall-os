@@ -24,3 +24,36 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Print: hide app chrome, switch to white background, conserve ink */
+@media print {
+  aside,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .print-page {
+    background: white !important;
+    color: black !important;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+}
+
+@page {
+  size: letter;
+  margin: 0.5in;
+}
