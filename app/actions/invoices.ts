@@ -5,6 +5,8 @@ import { sendEmail } from "@/lib/resend";
 import { buildInvoiceEmail, buildReminderEmail } from "@/lib/abacus-templates";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
+import { logAudit } from "@/lib/audit";
 
 async function requireUser() {
   const supabase = await createServerSupabaseClient();
@@ -244,8 +246,9 @@ export async function sendInvoice(
   jobId: string,
   recipientEmail: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const check = await requirePermission("invoices.send");
+  if ("error" in check) return { error: check.error };
+  const user = check.user;
   if (!recipientEmail.trim()) return { error: "Recipient email required." };
 
   const admin = createAdminClient();
@@ -275,6 +278,14 @@ export async function sendInvoice(
     })
     .eq("id", invoiceId);
   if (error) return { error: error.message };
+
+  await logAudit({
+    user,
+    action: "invoice.sent",
+    entity_type: "invoice",
+    entity_id: invoiceId,
+    details: { recipient: recipientEmail, job_id: jobId },
+  });
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
@@ -338,8 +349,9 @@ export async function recordPayment(
   jobId: string,
   formData: FormData
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const check = await requirePermission("invoices.record_payment");
+  if ("error" in check) return { error: check.error };
+  const user = check.user;
 
   const amount = Number(formData.get("amount"));
   if (!amount || amount <= 0) return { error: "Amount must be positive." };
@@ -382,6 +394,14 @@ export async function recordPayment(
       updated_at: new Date().toISOString(),
     })
     .eq("id", invoiceId);
+
+  await logAudit({
+    user,
+    action: "payment.recorded",
+    entity_type: "invoice",
+    entity_id: invoiceId,
+    details: { amount, method, reference, new_status: newStatus, job_id: jobId },
+  });
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
@@ -427,8 +447,9 @@ export async function deletePayment(
 }
 
 export async function voidInvoice(invoiceId: string, jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const check = await requirePermission("invoices.void");
+  if ("error" in check) return { error: check.error };
+  const user = check.user;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -436,6 +457,14 @@ export async function voidInvoice(invoiceId: string, jobId: string) {
     .update({ status: "void", updated_at: new Date().toISOString() })
     .eq("id", invoiceId);
   if (error) return { error: error.message };
+
+  await logAudit({
+    user,
+    action: "invoice.voided",
+    entity_type: "invoice",
+    entity_id: invoiceId,
+    details: { job_id: jobId },
+  });
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");

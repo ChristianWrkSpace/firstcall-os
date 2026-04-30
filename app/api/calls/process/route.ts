@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic } from "@/lib/ai";
 import type Anthropic from "@anthropic-ai/sdk";
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { checkRateLimit, LIMITS, maybeSweep } from "@/lib/rate-limit";
 
 const EXTRACT_TOOL: Anthropic.Tool = {
   name: "extract_call_data",
@@ -90,6 +92,25 @@ async function transcribeAudio(audioBuffer: ArrayBuffer, mimeType: string): Prom
 
 export async function POST(req: NextRequest) {
   try {
+    // Auth + rate limit
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    maybeSweep();
+    const minLimit = checkRateLimit({ key: `ai:${user.id}:1m`, ...LIMITS.ai_call });
+    if (!minLimit.ok) {
+      return NextResponse.json(
+        { error: "Rate limit hit. Try again in a minute." },
+        { status: 429 }
+      );
+    }
+    const hourLimit = checkRateLimit({ key: `ai:${user.id}:1h`, ...LIMITS.ai_call_hourly });
+    if (!hourLimit.ok) {
+      return NextResponse.json(
+        { error: "Hourly AI quota exceeded. Try again later." },
+        { status: 429 }
+      );
+    }
+
     const formData = await req.formData();
     const audio = formData.get("audio") as File | null;
 

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic } from "@/lib/ai";
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { checkRateLimit, LIMITS, maybeSweep } from "@/lib/rate-limit";
 
 const ATHENA_SYSTEM = `You are Athena, dispatcher for First Call Mitigation — a water/fire/mold restoration company in Austin TX.
 
@@ -83,6 +85,14 @@ async function synthesizeSpeech(text: string, settings: VoiceSettings): Promise<
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    maybeSweep();
+    const limit = checkRateLimit({ key: `ai:${user.id}:converse:1m`, ...LIMITS.ai_call });
+    if (!limit.ok) {
+      return NextResponse.json({ error: "Slow down — try again in a sec." }, { status: 429 });
+    }
+
     const formData = await req.formData();
     const audio = formData.get("audio") as File | null;
     const historyJson = (formData.get("history") as string) ?? "[]";

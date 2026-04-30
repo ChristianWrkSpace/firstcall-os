@@ -484,10 +484,18 @@ export const ROADMAP: RoadmapItem[] = [
     id: "roles-permissions",
     title: "Multi-User Roles & Permissions",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Owner / Manager / Office / Tech roles. Permission gates on every action. RLS policies tightened so a tech can't query other techs' jobs.",
+      "4 roles (owner/manager/office/technician) with explicit permission matrix in lib/permissions.ts. Server-side enforcement via requirePermission(). /settings/users page for role management. Money + admin actions gated.",
+    features: [
+      "lib/permissions.ts: 17 permissions × 4 roles matrix",
+      "requirePermission() helper for server actions",
+      "/settings/users with role dropdowns + activate/deactivate",
+      "Self-protection: can't demote yourself from Owner or deactivate self",
+      "Note: full per-action audit is a follow-up; money + role-change actions are gated now",
+    ],
   },
   {
     id: "rls-audit",
@@ -500,12 +508,19 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "rate-limiting",
-    title: "Rate Limiting & Abuse Prevention",
+    title: "Rate Limiting on AI Routes",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Protect API routes (especially /api/calls/process — Anthropic + Deepgram costs money per call). Login brute-force protection. Per-user quotas on AI features.",
+      "Per-user sliding-window rate limits on /api/calls/process and /api/calls/converse. 30/min and 200/hour caps stop runaway Anthropic + Deepgram + ElevenLabs spend.",
+    features: [
+      "lib/rate-limit.ts: in-memory sliding window with auto-sweep",
+      "Per-user keys (not just per-IP) so abuse is tied to identity",
+      "Returns 429 with friendly message",
+      "Note: in-memory means per-Vercel-instance; Upstash Redis recommended for scale",
+    ],
   },
   {
     id: "security-headers",
@@ -549,10 +564,18 @@ export const ROADMAP: RoadmapItem[] = [
     id: "audit-logs",
     title: "Audit Logs",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Track sensitive actions: who deleted a job, who exported customer list, who changed permissions, who signed in from a new device. Append-only audit table.",
+      "audit_logs table + lib/audit.ts logAudit() helper. Wired into invoice send/void, payment record, and user role/active changes. Visible at /settings/audit (Owner/Manager only).",
+    features: [
+      "Append-only audit_logs table with user/action/entity/details JSONB",
+      "logAudit() helper — fire-and-forget, never blocks user flow",
+      "Wired actions: invoice.sent, invoice.voided, payment.recorded, user.role_changed, user.activated, user.deactivated",
+      "/settings/audit viewer (latest 200 events)",
+      "More actions can be wired incrementally — pattern is in place",
+    ],
   },
   {
     id: "pii-inventory",
