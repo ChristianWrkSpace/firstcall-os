@@ -501,10 +501,18 @@ export const ROADMAP: RoadmapItem[] = [
     id: "rls-audit",
     title: "RLS Policy Audit",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Current RLS is permissive ('authenticated user can do anything'). Lock down per-table: who can read, write, delete. Test policies with multiple user accounts.",
+      "Tightened row-level security across customers/jobs/invoices/payments/profiles/audit_logs. Defense-in-depth: even with a stolen JWT direct to Supabase, DB blocks deletes for non-owner/manager and audit logs become append-only.",
+    features: [
+      "current_user_role() + is_owner_or_manager() helpers (security definer)",
+      "Per-table SELECT/INSERT/UPDATE/DELETE policies replace catch-alls",
+      "DELETE on customers/jobs/invoices/payments restricted to owner/manager",
+      "audit_logs are append-only at DB level (no UPDATE/DELETE policies)",
+      "profiles: users update themselves; owners can update anyone",
+    ],
   },
   {
     id: "rate-limiting",
