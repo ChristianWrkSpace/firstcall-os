@@ -407,12 +407,18 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "monitoring",
-    title: "Error Monitoring",
+    title: "Web Analytics + Speed Insights",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-04-30",
     description:
-      "Sentry or similar. Catch silent server-action failures. Alert on rate spikes, API failures.",
+      "Vercel-native analytics + speed monitoring (free with the Vercel deploy). Visible at vercel.com/christianwrkspaces-projects/firstcall-os/analytics. Sentry-style error tracking is a separate item if needed later.",
+    features: [
+      "@vercel/analytics — page views, top pages, referrers",
+      "@vercel/speed-insights — Core Web Vitals (LCP, CLS, INP) per route",
+      "No signup, free with the Vercel plan",
+    ],
   },
   {
     id: "backups",
@@ -473,12 +479,20 @@ export const ROADMAP: RoadmapItem[] = [
   // ═══════════════════════════════════════════════════════════════════
   {
     id: "auth-hardening",
-    title: "Auth Hardening",
+    title: "Auth Hardening (password reset + min length)",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "MFA via Supabase. Strong password policy. Email verification. Password reset flow. Session timeout configuration.",
+      "Forgot/reset password flow via Supabase email magic link. /forgot-password requests a reset link, /reset-password accepts the new password (8+ chars, confirmation). 'Forgot?' link added to login. MFA + email verification enforcement are follow-ups.",
+    features: [
+      "/forgot-password page with email enumeration protection",
+      "/reset-password page with confirmation field",
+      "8-char minimum password enforced server-side",
+      "Auto-redirect to /dashboard after successful reset",
+      "Note: MFA via Supabase TOTP is a follow-up item",
+    ],
   },
   {
     id: "roles-permissions",
@@ -645,12 +659,21 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "stripe",
-    title: "Stripe Payments",
+    title: "Stripe Online Payments",
     track: "integrations",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Accept customer deductibles online. Subscription billing if FirstCall OS becomes SaaS. Env var already set; nothing wired yet.",
+      "Customers pay invoices online from their portal. Stripe Checkout flow, webhook records payment + flips invoice status to paid/partial automatically. No manual payment entry needed for online payments.",
+    features: [
+      "lib/stripe.ts client + lib/stripe-checkout.ts server action",
+      "💳 Pay $X Online button on customer portal (per unpaid invoice)",
+      "Stripe Checkout hosted checkout (PCI compliance handled by Stripe)",
+      "Webhook at /api/stripe/webhook with signature verification",
+      "Auto-records payment + flips invoice status (sent → partial → paid)",
+      "Audit-logged as payment.recorded_via_stripe",
+    ],
   },
   {
     id: "resend",

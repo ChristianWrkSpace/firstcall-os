@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { signIn } from "@/app/actions/auth";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(signIn, undefined);
@@ -37,9 +38,17 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-zinc-300 text-sm font-medium" htmlFor="password">
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-zinc-300 text-sm font-medium" htmlFor="password">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-blue-400 hover:text-blue-300 text-xs"
+              >
+                Forgot?
+              </Link>
+            </div>
             <input
               id="password"
               name="password"

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
+import PayInvoiceButton from "./PayInvoiceButton";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   lead: { label: "We've received your call", color: "bg-blue-500/15 text-blue-300" },
@@ -44,7 +45,12 @@ export default async function PortalPage({
   const customer = (job as any).customers;
 
   // Pull only customer-friendly things — no internal pricing, scope details, partner info
-  const [{ data: photos }, { data: signedDocs }, { data: notifications }] = await Promise.all([
+  const [
+    { data: photos },
+    { data: signedDocs },
+    { data: notifications },
+    { data: openInvoices },
+  ] = await Promise.all([
     admin
       .from("job_photos")
       .select("id, storage_path")
@@ -63,7 +69,30 @@ export default async function PortalPage({
       .eq("job_id", job.id)
       .order("sent_at", { ascending: false })
       .limit(8),
+    admin
+      .from("invoices")
+      .select(
+        "id, invoice_number, status, due_date, line_items:invoice_line_items(line_total), payments(amount)"
+      )
+      .eq("job_id", job.id)
+      .in("status", ["sent", "partial", "overdue"])
+      .order("created_at", { ascending: false }),
   ]);
+
+  // Compute unpaid balance per invoice
+  const unpaidInvoices = (openInvoices ?? [])
+    .map((inv: any) => {
+      const total = (inv.line_items ?? []).reduce(
+        (s: number, li: any) => s + Number(li.line_total ?? 0),
+        0
+      );
+      const paid = (inv.payments ?? []).reduce(
+        (s: number, p: any) => s + Number(p.amount),
+        0
+      );
+      return { ...inv, total, paid, balance: total - paid };
+    })
+    .filter((inv) => inv.balance > 0);
 
   // Generate signed URLs for photos
   const photoUrls: Array<{ id: string; url: string }> = [];
@@ -166,6 +195,46 @@ export default async function PortalPage({
             </div>
           )}
         </section>
+
+        {/* Unpaid invoices — Pay Online */}
+        {unpaidInvoices.length > 0 && (
+          <section className="bg-zinc-900 border border-blue-500/30 rounded-xl p-6 mb-5">
+            <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-3">
+              💳 Pay Your Invoice
+            </p>
+            <div className="flex flex-col gap-3">
+              {unpaidInvoices.map((inv: any) => (
+                <div
+                  key={inv.id}
+                  className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4"
+                >
+                  <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+                    <p className="text-white text-sm font-mono">
+                      {inv.invoice_number}
+                    </p>
+                    <p className="text-2xl font-bold text-white font-mono">
+                      $
+                      {inv.balance.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                  {inv.due_date && (
+                    <p className="text-zinc-500 text-xs mb-3">
+                      Due {new Date(inv.due_date).toLocaleDateString()}
+                    </p>
+                  )}
+                  <PayInvoiceButton
+                    invoiceId={inv.id}
+                    customerToken={token}
+                    amount={inv.balance}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Site Photos */}
         {photoUrls.length > 0 && (
