@@ -1,7 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const protectedPrefixes = ["/dashboard", "/jobs", "/customers", "/calls", "/settings"];
+const protectedPrefixes = [
+  "/dashboard",
+  "/jobs",
+  "/customers",
+  "/calls",
+  "/equipment",
+  "/schedule",
+  "/reports",
+  "/ar",
+  "/partners",
+  "/settings",
+];
+
+// Security headers applied to every response
+function applySecurityHeaders(res: NextResponse): NextResponse {
+  res.headers.set("X-Frame-Options", "SAMEORIGIN");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("Permissions-Policy", "camera=(self), microphone=(self), geolocation=()");
+  res.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload"
+  );
+  return res;
+}
 
 export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
@@ -29,20 +53,20 @@ export async function proxy(req: NextRequest) {
   const isProtected = protectedPrefixes.some((p) => path.startsWith(p));
 
   if (isProtected && !session) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return applySecurityHeaders(NextResponse.redirect(new URL("/login", req.url)));
   }
 
   if (path === "/login" && session) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", req.url)));
   }
 
   if (path === "/") {
-    return NextResponse.redirect(
-      new URL(session ? "/dashboard" : "/login", req.url)
+    return applySecurityHeaders(
+      NextResponse.redirect(new URL(session ? "/dashboard" : "/login", req.url))
     );
   }
 
-  return res;
+  return applySecurityHeaders(res);
 }
 
 export const config = {

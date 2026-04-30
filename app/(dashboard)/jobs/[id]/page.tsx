@@ -13,6 +13,8 @@ import CustomerNotifications from "./CustomerNotifications";
 import DocumentsVault from "./DocumentsVault";
 import SchedulingPanel from "./SchedulingPanel";
 import CustomerShareCard from "./CustomerShareCard";
+import AdjusterShareCard from "./AdjusterShareCard";
+import MoistureLog from "./MoistureLog";
 import { STATUS_COLORS } from "@/lib/constants";
 
 export default async function JobDetailPage({
@@ -33,6 +35,7 @@ export default async function JobDetailPage({
     { data: documents },
     { data: assignments },
     { data: availableTechs },
+    { data: moistureReadings },
   ] = await Promise.all([
     supabase
       .from("jobs")
@@ -81,7 +84,14 @@ export default async function JobDetailPage({
       .select("id, name, role")
       .eq("active", true)
       .order("name", { ascending: true }),
+    supabase
+      .from("moisture_readings")
+      .select("*, recorder:profiles!recorded_by(name)")
+      .eq("job_id", id)
+      .order("reading_date", { ascending: false })
+      .order("created_at", { ascending: false }),
   ]);
+
 
   if (!job) notFound();
 
@@ -252,6 +262,17 @@ export default async function JobDetailPage({
             <DocumentsVault jobId={job.id} documents={documents ?? []} />
           </section>
 
+          {/* Moisture Readings (IICRC S500) */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="mb-4">
+              <h2 className="text-white font-semibold">💧 Moisture Readings</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                Daily psychrometric capture per IICRC S500. Required to certify drying.
+              </p>
+            </div>
+            <MoistureLog jobId={job.id} readings={(moistureReadings ?? []) as any} />
+          </section>
+
           {/* Abacus: Invoices */}
           {invoices && invoices.length > 0 && (
             <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
@@ -418,6 +439,20 @@ export default async function JobDetailPage({
             <CustomerShareCard
               jobId={job.id}
               initialToken={job.customer_share_token}
+            />
+          </section>
+
+          {/* Adjuster Portal Share */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="mb-3">
+              <h2 className="text-white font-semibold">Adjuster Portal</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                Read-only claim packet for the insurance adjuster.
+              </p>
+            </div>
+            <AdjusterShareCard
+              jobId={job.id}
+              initialToken={(job as any).adjuster_share_token}
             />
           </section>
 

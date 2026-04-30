@@ -229,10 +229,19 @@ export const ROADMAP: RoadmapItem[] = [
     title: "Hunter — B2B Sales Outreach",
     agent: "Hunter",
     track: "core",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Scrapes commercial lead data (Austin hotels, property managers). Drafts cold outreach for preferred-vendor contracts.",
+      "B2B outreach pipeline at /partners/outreach. Hunter (Claude Opus 4.7) drafts personalized cold emails, voicemail scripts, follow-ups based on business type pitch angles. Lead lifecycle: new → drafted → sent → replied → converted-to-partner.",
+    features: [
+      "10 business-type pitch angles (hotels, plumbers, property mgmt, insurance, etc.)",
+      "AI-drafted cold email + voicemail + follow-up via Claude Opus 4.7",
+      "Inline editing of any draft, copy-to-clipboard for paste-into-email-client workflow",
+      "Lead lifecycle tracking (9 statuses)",
+      "Convert lead → Partner (auto-creates partners row)",
+      "Reply tracking with notes",
+    ],
   },
   {
     id: "twilio-athena",
@@ -353,12 +362,19 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "adjuster-portal",
-    title: "Adjuster Portal",
+    title: "Adjuster Portal (claim packet)",
     track: "core",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Insurance adjusters get a read-only link per claim — scope, photos, moisture logs, invoices, drying certificates. Speeds approvals.",
+      "Per-job public claim packet at /adjuster/[token] for insurance adjusters. No login needed — token is the auth. Shows scope, approved estimate, photos, signed documents (AOB etc.), moisture readings.",
+    features: [
+      "Generate / regenerate / revoke shareable token",
+      "Full claim packet view: scope summary, approved estimate w/ line items, photos gallery, signed docs, moisture log",
+      "Mobile-friendly read-only layout",
+      "Internal-only data hidden (notes, partner info, etc.)",
+    ],
   },
   {
     id: "tech-mobile",
@@ -377,10 +393,17 @@ export const ROADMAP: RoadmapItem[] = [
     id: "deploy-prod",
     title: "Production Deployment",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-29",
     description:
-      "Currently localhost only. Deploy to Vercel + production Supabase. Custom domain. Env-specific configs.",
+      "Live at https://firstcall-os.vercel.app. All env vars pushed via Vercel API. Deployment protection disabled for public access. Auto-deploy on every git push to main.",
+    features: [
+      "9 env vars pushed to Vercel (production + dev)",
+      "GitHub-connected CI: every push deploys",
+      "Aliased domain firstcall-os.vercel.app",
+      "Vercel CLI + Claude Code plugin wired",
+    ],
   },
   {
     id: "monitoring",
@@ -420,12 +443,20 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "mobile-audit",
-    title: "Mobile Responsiveness Audit",
+    title: "Mobile Responsiveness Pass",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-29",
     description:
-      "Walk every page on iPhone/Android. Fix touch targets, scroll issues, viewport bugs. Critical because techs use phones.",
+      "First mobile pass: hamburger drawer nav, responsive padding, table horizontal scroll, viewport meta, job detail stacks on mobile. Not perfect (Reports KPI grid + line-item editing are still desktop-y) but app is usable on phone.",
+    features: [
+      "Slide-out drawer nav with hamburger menu",
+      "Responsive padding: p-4 md:p-8 across all dashboard pages",
+      "Tables wrap in overflow-x-auto",
+      "Job detail 3-col grid stacks on mobile",
+      "Proper viewport meta + theme color in root layout",
+    ],
   },
   {
     id: "multi-tenant",
@@ -478,12 +509,13 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "security-headers",
-    title: "Security Headers (CSP, HSTS, X-Frame)",
+    title: "Security Headers",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-04-30",
     description:
-      "Content Security Policy, Strict-Transport-Security, X-Frame-Options, Referrer-Policy. Configure in next.config + middleware. Quick win.",
+      "X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security applied to every response via proxy.ts middleware.",
   },
   {
     id: "webhook-signatures",
@@ -507,10 +539,11 @@ export const ROADMAP: RoadmapItem[] = [
     id: "dependency-scanning",
     title: "Dependency Vulnerability Scanning",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-04-30",
     description:
-      "Enable GitHub Dependabot + CodeQL. Auto-PR security patches. Block PRs that introduce known-vulnerable deps.",
+      "GitHub Dependabot configured via .github/dependabot.yml. Weekly Monday scans for npm + GitHub Actions deps. Auto-PRs for security patches.",
   },
   {
     id: "audit-logs",
@@ -621,12 +654,19 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "moisture-readings",
-    title: "Daily Moisture Reading Capture",
+    title: "Daily Moisture Readings (IICRC S500)",
     track: "core",
-    status: "idea",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Tech logs daily psychrometric readings (GPP, RH, temp, material moisture %) per IICRC S500. AI flags drying anomalies.",
+      "Per-job moisture log on the job detail page. Tech captures psychrometric readings (GPP, RH, temp, material moisture %) per IICRC S500. Grouped by date, dry-standard checkbox, viewable from adjuster portal.",
+    features: [
+      "Inline log entry: room, location detail, material, moisture %, RH %, temp °F, GPP",
+      "Grouped by date for daily-walkthrough cadence",
+      "'Dry standard met' checkbox per reading",
+      "Full reading history visible to adjuster via portal",
+    ],
   },
   {
     id: "turing",
