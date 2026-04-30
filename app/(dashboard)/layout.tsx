@@ -2,6 +2,8 @@ import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { NAV_ITEMS } from "@/lib/nav";
 import MobileNav from "./MobileNav";
+import CommandPalette from "./CommandPalette";
+import SearchTrigger from "./SearchTrigger";
 
 export default function DashboardLayout({
   children,
@@ -10,6 +12,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="md:flex md:h-screen bg-zinc-950 text-white md:overflow-hidden">
+      {/* Global Cmd+K palette — listens for keyboard or "open-command-palette" event */}
+      <CommandPalette />
+
       {/* Mobile drawer (sticky top bar + slide-out) */}
       <MobileNav />
 
@@ -29,6 +34,9 @@ export default function DashboardLayout({
             </p>
           </div>
         </div>
+
+        {/* Search */}
+        <SearchTrigger />
 
         {/* Nav */}
         <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/nav";
 import { signOut } from "@/app/actions/auth";
+import SearchTrigger from "./SearchTrigger";
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function MobileNav() {
           </div>
           <p className="text-white text-sm font-semibold">FirstCall OS</p>
         </div>
-        <div className="w-8" />
+        <SearchTrigger variant="mobile" />
       </header>
 
       {/* Drawer overlay */}

@@ -342,6 +342,23 @@ export const ROADMAP: RoadmapItem[] = [
     ],
   },
   {
+    id: "global-search",
+    title: "Global Search (⌘K)",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-04-30",
+    description:
+      "Cmd+K command palette searches across jobs, customers, equipment, partners, and outreach leads. Triggered by keyboard or by the search button in sidebar / mobile header.",
+    features: [
+      "⌘K / Ctrl+K from anywhere opens the palette",
+      "Searches: jobs (number/address/desc), customers (name/email/phone/insurance), equipment (serial/model/manufacturer), partners, outreach leads",
+      "Debounced (200ms) live results grouped by type",
+      "Arrow-key navigation, Enter to open, Esc to close",
+      "Search button in desktop sidebar + mobile header",
+    ],
+  },
+  {
     id: "customer-portal",
     title: "Customer Portal (public link)",
     track: "core",
