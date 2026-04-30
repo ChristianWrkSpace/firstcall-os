@@ -193,7 +193,7 @@ export default function SimulateCallPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <div className="mb-6">
         <Link href="/calls" className="text-zinc-500 hover:text-white text-sm transition-colors">
           ← Calls

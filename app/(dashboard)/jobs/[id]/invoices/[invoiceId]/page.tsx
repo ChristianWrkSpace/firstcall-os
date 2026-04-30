@@ -79,7 +79,7 @@ export default async function InvoiceDetail({
     : null;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <Link

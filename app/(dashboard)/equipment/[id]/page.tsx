@@ -39,7 +39,7 @@ export default async function EquipmentDetailPage({
   const currentJob = (equipment as any).jobs;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="mb-8">
         <Link

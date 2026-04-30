@@ -132,7 +132,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
         <div>

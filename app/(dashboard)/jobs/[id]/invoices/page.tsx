@@ -31,7 +31,7 @@ export default async function InvoicesIndex({
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <Link
           href={`/jobs/${id}`}

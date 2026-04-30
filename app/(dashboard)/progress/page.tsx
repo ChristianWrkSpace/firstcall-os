@@ -38,7 +38,7 @@ export default function ProgressPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 md:p-8 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Project Progress</h1>
         <p className="text-zinc-400 text-sm mt-0.5">

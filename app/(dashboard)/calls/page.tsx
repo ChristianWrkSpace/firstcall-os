@@ -11,7 +11,7 @@ export default async function CallsPage() {
     .limit(50);
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white">Calls</h1>
@@ -33,7 +33,7 @@ export default async function CallsPage() {
         </div>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
         {!calls?.length ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No calls recorded yet.{" "}

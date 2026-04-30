@@ -68,7 +68,7 @@ export default async function ARDashboard() {
   const drafts = enriched.filter((i) => !i.sent_at);
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Accounts Receivable</h1>
         <p className="text-zinc-400 text-sm mt-0.5">
@@ -128,7 +128,7 @@ export default async function ARDashboard() {
       )}
 
       {/* Open invoice table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
         <div className="px-5 py-3 border-b border-zinc-800">
           <h2 className="text-white font-semibold">Open Invoices</h2>
         </div>

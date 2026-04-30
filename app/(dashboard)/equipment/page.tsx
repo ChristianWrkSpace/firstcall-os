@@ -42,7 +42,7 @@ export default async function EquipmentListPage({
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Equipment</h1>
@@ -87,7 +87,7 @@ export default async function EquipmentListPage({
         ))}
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
         {!equipment?.length ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No equipment yet.{" "}

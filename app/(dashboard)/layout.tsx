@@ -1,16 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: "▦" },
-  { href: "/jobs", label: "Jobs", icon: "◈" },
-  { href: "/customers", label: "Customers", icon: "◉" },
-  { href: "/calls", label: "Calls", icon: "◎" },
-  { href: "/equipment", label: "Equipment", icon: "▤" },
-  { href: "/ar", label: "AR", icon: "$" },
-  { href: "/progress", label: "Progress", icon: "▰" },
-  { href: "/settings", label: "Settings", icon: "◇" },
-];
+import { NAV_ITEMS } from "@/lib/nav";
+import MobileNav from "./MobileNav";
 
 export default function DashboardLayout({
   children,
@@ -18,23 +9,30 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-zinc-950 text-white overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-56 flex flex-col bg-zinc-900 border-r border-zinc-800 shrink-0">
+    <div className="md:flex md:h-screen bg-zinc-950 text-white md:overflow-hidden">
+      {/* Mobile drawer (sticky top bar + slide-out) */}
+      <MobileNav />
+
+      {/* Desktop sidebar — hidden on mobile */}
+      <aside className="hidden md:flex w-56 flex-col bg-zinc-900 border-r border-zinc-800 shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-5 border-b border-zinc-800">
           <div className="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center shrink-0">
             <span className="text-white text-xs font-bold">FC</span>
           </div>
           <div className="min-w-0">
-            <p className="text-white text-sm font-semibold leading-none truncate">FirstCall OS</p>
-            <p className="text-zinc-500 text-xs leading-none mt-0.5 truncate">First Call Mitigation</p>
+            <p className="text-white text-sm font-semibold leading-none truncate">
+              FirstCall OS
+            </p>
+            <p className="text-zinc-500 text-xs leading-none mt-0.5 truncate">
+              First Call Mitigation
+            </p>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5">
-          {navItems.map((item) => (
+        <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
+          {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -61,7 +59,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 md:overflow-auto">{children}</main>
     </div>
   );
 }

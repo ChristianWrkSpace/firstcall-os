@@ -13,7 +13,7 @@ export default function NewEquipmentPage() {
   const [state, action, pending] = useActionState(createEquipment, undefined);
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 md:p-8 max-w-2xl">
       <div className="mb-6">
         <Link href="/equipment" className="text-zinc-500 hover:text-white text-sm transition-colors">
           ← Equipment

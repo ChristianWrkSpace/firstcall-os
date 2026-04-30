@@ -9,6 +9,10 @@ import AnalyzeButton from "./AnalyzeButton";
 import ScopeAssessment from "./ScopeAssessment";
 import DispatchInputsForm from "./DispatchInputs";
 import GenerateEstimateButton from "./GenerateEstimateButton";
+import CustomerNotifications from "./CustomerNotifications";
+import DocumentsVault from "./DocumentsVault";
+import SchedulingPanel from "./SchedulingPanel";
+import CustomerShareCard from "./CustomerShareCard";
 import { STATUS_COLORS } from "@/lib/constants";
 
 export default async function JobDetailPage({
@@ -25,6 +29,10 @@ export default async function JobDetailPage({
     { data: photos },
     { data: estimates },
     { data: invoices },
+    { data: notifications },
+    { data: documents },
+    { data: assignments },
+    { data: availableTechs },
   ] = await Promise.all([
     supabase
       .from("jobs")
@@ -53,6 +61,26 @@ export default async function JobDetailPage({
       )
       .eq("job_id", id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("customer_notifications")
+      .select("id, event_type, sent_to, subject, sent_at")
+      .eq("job_id", id)
+      .order("sent_at", { ascending: false })
+      .limit(10),
+    supabase
+      .from("job_documents")
+      .select("*")
+      .eq("job_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("job_assignments")
+      .select("id, profile_id, profiles(id, name)")
+      .eq("job_id", id),
+    supabase
+      .from("profiles")
+      .select("id, name, role")
+      .eq("active", true)
+      .order("name", { ascending: true }),
   ]);
 
   if (!job) notFound();
@@ -60,14 +88,14 @@ export default async function JobDetailPage({
   const customer = job.customers as any;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
           <Link href="/jobs" className="text-zinc-500 hover:text-white text-sm transition-colors">
             ← Jobs
           </Link>
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
             <h1 className="text-2xl font-bold text-white font-mono">{job.job_number}</h1>
             <span
               className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[job.status] ?? ""}`}
@@ -82,13 +110,13 @@ export default async function JobDetailPage({
         <StatusSelector jobId={job.id} currentStatus={job.status} />
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: Job Info + Notes */}
-        <div className="col-span-2 flex flex-col gap-5">
+        <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Job Info */}
           <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h2 className="text-white font-semibold mb-4">Job Details</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <Field label="Site Address" value={job.site_address} />
               <Field
                 label="City / State / Zip"
@@ -211,6 +239,17 @@ export default async function JobDetailPage({
                 })}
               </div>
             )}
+          </section>
+
+          {/* Documents Vault */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="mb-4">
+              <h2 className="text-white font-semibold">Documents</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                AOBs, Direction to Pay, COIs, adjuster correspondence, drying certificates.
+              </p>
+            </div>
+            <DocumentsVault jobId={job.id} documents={documents ?? []} />
           </section>
 
           {/* Abacus: Invoices */}
@@ -345,6 +384,56 @@ export default async function JobDetailPage({
             ) : (
               <p className="text-zinc-500 text-sm">No customer linked.</p>
             )}
+          </section>
+
+          {/* Scheduling */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="mb-3">
+              <h2 className="text-white font-semibold">Schedule & Crew</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                Set the appointment time and assign techs.
+              </p>
+            </div>
+            <SchedulingPanel
+              jobId={job.id}
+              scheduledAt={job.scheduled_at}
+              leadTechId={job.lead_tech_id}
+              assignments={(assignments ?? []).map((a: any) => ({
+                id: a.id,
+                profile_id: a.profile_id,
+                profiles: Array.isArray(a.profiles) ? a.profiles[0] : a.profiles,
+              }))}
+              availableTechs={availableTechs ?? []}
+            />
+          </section>
+
+          {/* Customer Portal Share */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="mb-3">
+              <h2 className="text-white font-semibold">Customer Portal</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                Share a public link so the customer can track progress, no login.
+              </p>
+            </div>
+            <CustomerShareCard
+              jobId={job.id}
+              initialToken={job.customer_share_token}
+            />
+          </section>
+
+          {/* Customer Notifications */}
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="mb-3">
+              <h2 className="text-white font-semibold">Notify Customer</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                Branded touchpoints. Reduces "where's the tech?" calls.
+              </p>
+            </div>
+            <CustomerNotifications
+              jobId={job.id}
+              customerEmail={customer?.email}
+              history={notifications ?? []}
+            />
           </section>
         </div>
       </div>
