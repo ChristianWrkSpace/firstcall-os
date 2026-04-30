@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
-import { BUSINESS_TYPES } from "@/lib/hunter";
+import { BUSINESS_TYPES } from "@/lib/hunter-types";
 
 const STATUS_COLORS: Record<string, string> = {
   new:           "bg-blue-500/15 text-blue-400",

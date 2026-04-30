@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { createLead } from "@/app/actions/outreach";
-import { BUSINESS_TYPES } from "@/lib/hunter";
+import { BUSINESS_TYPES } from "@/lib/hunter-types";
 import Link from "next/link";
 
 const INPUT =
