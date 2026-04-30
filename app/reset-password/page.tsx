@@ -1,19 +1,10 @@
-"use client";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
+import Link from "next/link";
+import ResetPasswordForm from "./ResetPasswordForm";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { updatePassword } from "@/app/actions/auth";
-
-export default function ResetPasswordPage() {
-  const [state, action, pending] = useActionState(updatePassword, undefined);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (state?.ok) {
-      const t = setTimeout(() => router.push("/dashboard"), 1500);
-      return () => clearTimeout(t);
-    }
-  }, [state, router]);
+export default async function ResetPasswordPage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
@@ -28,45 +19,28 @@ export default function ResetPasswordPage() {
           </div>
         </div>
 
-        {state?.ok ? (
-          <div className="mt-5 px-4 py-3 bg-green-500/10 border border-green-500/30 text-green-300 rounded-lg text-sm">
-            ✓ Password updated. Redirecting to dashboard…
-          </div>
+        {user ? (
+          <ResetPasswordForm email={user.email ?? null} />
         ) : (
-          <form action={action} className="flex flex-col gap-3 mt-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-zinc-300 text-sm">New password</label>
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                placeholder="At least 8 characters"
-                className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-zinc-300 text-sm">Confirm</label>
-              <input
-                name="confirm"
-                type="password"
-                required
-                minLength={8}
-                placeholder="Same again"
-                className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
-              />
-            </div>
-            {state?.error && (
-              <p className="text-red-400 text-xs">{state.error}</p>
-            )}
-            <button
-              type="submit"
-              disabled={pending}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          <div className="mt-2">
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              This page only works after clicking the link in your password-reset
+              email. If your link expired or you landed here directly, request a new
+              one.
+            </p>
+            <Link
+              href="/forgot-password"
+              className="block mt-5 text-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
             >
-              {pending ? "Updating…" : "Update password"}
-            </button>
-          </form>
+              Request a new link
+            </Link>
+            <Link
+              href="/login"
+              className="block mt-3 text-center text-zinc-500 hover:text-white text-xs"
+            >
+              ← Back to login
+            </Link>
+          </div>
         )}
       </div>
     </div>

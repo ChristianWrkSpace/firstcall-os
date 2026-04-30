@@ -82,7 +82,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
       meta: c.insurance_company
         ? `${c.insurance_company}${c.insurance_claim_number ? ` · ${c.insurance_claim_number}` : ""}`
         : undefined,
-      href: `/customers`,
+      href: `/customers/${c.id}`,
       emoji: "◉",
     });
   }

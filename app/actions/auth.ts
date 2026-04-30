@@ -45,7 +45,7 @@ export async function requestPasswordReset(
     `https://${hdrs.get("host") ?? "firstcall-os.vercel.app"}`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/reset-password`,
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
   });
 
   // Always return ok to prevent email enumeration
