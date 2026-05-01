@@ -15,7 +15,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Resolve OG/Twitter image URLs against the deployed site so social
+// previews work in production. Vercel injects VERCEL_URL automatically;
+// fall back to the canonical domain if missing.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  ? process.env.NEXT_PUBLIC_SITE_URL
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "https://firstcall-os.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "FirstCall OS — First Call Mitigation",
   description:
     "AI-powered operating system for First Call Mitigation. Water · Fire · Mold restoration in Austin, TX.",

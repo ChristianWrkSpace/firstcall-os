@@ -120,6 +120,62 @@ export async function updatePaymentRoute(
   return { ok: true };
 }
 
+export interface JobIntakePatch {
+  type?: string;
+  description?: string | null;
+  site_address?: string | null;
+  site_city?: string | null;
+  site_state?: string | null;
+  site_zip?: string | null;
+}
+
+const VALID_JOB_TYPES = new Set(["water", "fire", "mold", "storm", "other"]);
+
+/**
+ * Edit the core job intake fields (damage type, description, site address)
+ * after creation. Office often takes the call before they have the full
+ * address — this lets them go back and fix it once the tech is on site.
+ */
+export async function updateJobIntake(
+  jobId: string,
+  patch: JobIntakePatch
+) {
+  const supabase = await createServerSupabaseClient();
+
+  const update: Record<string, unknown> = {};
+  if (patch.type !== undefined) {
+    if (!VALID_JOB_TYPES.has(patch.type)) return { error: "Invalid damage type." };
+    update.type = patch.type;
+  }
+  if (patch.description !== undefined) {
+    update.description = patch.description?.trim() || null;
+  }
+  if (patch.site_address !== undefined) {
+    update.site_address = patch.site_address?.trim() || null;
+  }
+  if (patch.site_city !== undefined) {
+    update.site_city = patch.site_city?.trim() || null;
+  }
+  if (patch.site_state !== undefined) {
+    update.site_state = patch.site_state?.trim().toUpperCase().slice(0, 2) || null;
+  }
+  if (patch.site_zip !== undefined) {
+    update.site_zip = patch.site_zip?.trim() || null;
+  }
+
+  if (Object.keys(update).length === 0) return { ok: true };
+
+  const { error } = await supabase
+    .from("jobs")
+    .update(update)
+    .eq("id", jobId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/jobs/${jobId}`);
+  return { ok: true };
+}
+
 export async function updateJobStatus(
   prevState: { error?: string } | undefined,
   formData: FormData

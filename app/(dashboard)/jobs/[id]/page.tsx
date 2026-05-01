@@ -28,6 +28,8 @@ import DeployEquipmentPicker from "./DeployEquipmentPicker";
 import JobActivityTimeline from "./JobActivityTimeline";
 import JobPnlCard from "./JobPnlCard";
 import JobCostEntries from "./JobCostEntries";
+import EditableCustomerCard from "./EditableCustomerCard";
+import EditableJobDetailsCard from "./EditableJobDetails";
 import { getCostBasis } from "@/lib/job-pnl";
 import SectionHeader from "@/components/SectionHeader";
 import { STATUS_COLORS, PAYMENT_ROUTE_BY_VALUE, type PaymentRoute } from "@/lib/constants";
@@ -259,27 +261,20 @@ export default async function JobDetailPage({
             </div>
           </section>
 
-          {/* Job Info */}
+          {/* Job Info — editable so the office can fix the address / type after intake */}
           <section className="glass-card p-6">
-            <h2 className="text-white font-semibold mb-4">Job Details</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <Field label="Site Address" value={job.site_address} />
-              <Field
-                label="City / State / Zip"
-                value={[job.site_city, job.site_state, job.site_zip].filter(Boolean).join(", ")}
-              />
-              <Field label="Type" value={job.type} capitalize />
-              <Field
-                label="Estimated Value"
-                value={job.estimated_value ? `$${Number(job.estimated_value).toLocaleString()}` : undefined}
-              />
-              {job.description && (
-                <div className="col-span-2">
-                  <p className="text-zinc-400 text-xs uppercase tracking-wide mb-1">Description</p>
-                  <p className="text-zinc-200">{job.description}</p>
-                </div>
-              )}
-            </div>
+            <EditableJobDetailsCard
+              jobId={job.id}
+              job={{
+                type: job.type,
+                description: job.description,
+                site_address: job.site_address,
+                site_city: job.site_city,
+                site_state: job.site_state,
+                site_zip: job.site_zip,
+                estimated_value: job.estimated_value,
+              }}
+            />
           </section>
 
           {/* Argus: Site Photos + Scope */}
@@ -556,48 +551,25 @@ export default async function JobDetailPage({
         {/* Right: Customer Info */}
         <div className="flex flex-col gap-5">
           <section className="glass-card p-6">
-            <h2 className="text-white font-semibold mb-4">Customer</h2>
             {customer ? (
-              <div className="flex flex-col gap-3 text-sm">
-                <div>
-                  <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">Name</p>
-                  <p className="text-white font-medium">{customer.name}</p>
-                </div>
-                {customer.phone && (
-                  <div>
-                    <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">Phone</p>
-                    <a href={`tel:${customer.phone}`} className="text-blue-400 hover:underline">
-                      {customer.phone}
-                    </a>
-                  </div>
-                )}
-                {customer.email && (
-                  <div>
-                    <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">Email</p>
-                    <a href={`mailto:${customer.email}`} className="text-blue-400 hover:underline truncate block">
-                      {customer.email}
-                    </a>
-                  </div>
-                )}
-                {customer.insurance_company && (
-                  <div>
-                    <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">Insurance</p>
-                    <p className="text-zinc-200">{customer.insurance_company}</p>
-                    {customer.insurance_policy_number && (
-                      <p className="text-zinc-500 text-xs mt-0.5 font-mono">
-                        Policy: {customer.insurance_policy_number}
-                      </p>
-                    )}
-                    {customer.insurance_claim_number && (
-                      <p className="text-zinc-500 text-xs mt-0.5 font-mono">
-                        Claim: {customer.insurance_claim_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+              <EditableCustomerCard
+                jobId={job.id}
+                showInsurance={isInsurance}
+                customer={{
+                  id: customer.id,
+                  name: customer.name,
+                  phone: customer.phone,
+                  email: customer.email,
+                  insurance_company: customer.insurance_company,
+                  insurance_policy_number: customer.insurance_policy_number,
+                  insurance_claim_number: customer.insurance_claim_number,
+                }}
+              />
             ) : (
-              <p className="text-zinc-500 text-sm">No customer linked.</p>
+              <>
+                <h2 className="text-white font-semibold mb-4">Customer</h2>
+                <p className="text-zinc-500 text-sm">No customer linked.</p>
+              </>
             )}
           </section>
 
@@ -718,19 +690,3 @@ export default async function JobDetailPage({
   );
 }
 
-function Field({
-  label,
-  value,
-  capitalize,
-}: {
-  label: string;
-  value?: string | null;
-  capitalize?: boolean;
-}) {
-  return (
-    <div>
-      <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">{label}</p>
-      <p className={`text-zinc-200 ${capitalize ? "capitalize" : ""}`}>{value || "—"}</p>
-    </div>
-  );
-}
