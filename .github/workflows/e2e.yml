@@ -1,0 +1,47 @@
+name: E2E Smoke
+
+# Runs Playwright smoke tests against the live production deployment.
+# Triggered manually or on a daily schedule — not on every PR (cost + flakiness).
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Base URL to smoke test (defaults to firstcall-os.vercel.app)"
+        required: false
+        default: ""
+  schedule:
+    # 06:00 UTC daily = 01:00 Austin
+    - cron: "0 6 * * *"
+
+jobs:
+  e2e:
+    name: Playwright smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright smoke
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ github.event.inputs.base_url || 'https://firstcall-os.vercel.app' }}
+        run: npm run test:e2e
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
