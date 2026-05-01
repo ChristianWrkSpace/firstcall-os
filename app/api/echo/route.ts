@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-helpers";
-import { askIris, recordIrisFeedback } from "@/lib/iris";
+import { askEcho, recordEchoFeedback } from "@/lib/echo";
 import { checkRateLimit, LIMITS } from "@/lib/rate-limit";
 
-// POST /api/iris — ask Iris a question. Returns { answer, conversationId, ... }.
-// PATCH /api/iris — record thumbs-up / thumbs-down feedback.
+// POST /api/echo — ask Echo a question. Returns { answer, conversationId, ... }.
+// PATCH /api/echo — record thumbs-up / thumbs-down feedback.
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
   const me = await getCurrentUser();
   if (!me) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  // Per-user rate limit on Iris specifically — independent of global limits.
+  // Per-user rate limit on Echo specifically — independent of global limits.
   // 30 questions / 5 min is generous for normal use, blocks runaway scripts.
   const rl = checkRateLimit({
-    key: `iris:${me.id}`,
+    key: `echo:${me.id}`,
     max: 30,
     windowMs: 5 * 60 * 1000,
   });
@@ -47,15 +47,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await askIris({
+    const result = await askEcho({
       operator: { id: me.id, name: me.name, role: me.role },
       question,
     });
     return NextResponse.json(result);
   } catch (err: any) {
-    console.error("[iris] failed:", err);
+    console.error("[echo] failed:", err);
     return NextResponse.json(
-      { error: err?.message ?? "Iris failed to answer." },
+      { error: err?.message ?? "Echo failed to answer." },
       { status: 500 }
     );
   }
@@ -82,7 +82,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   try {
-    await recordIrisFeedback({
+    await recordEchoFeedback({
       conversationId,
       feedback,
       note: typeof note === "string" ? note : undefined,

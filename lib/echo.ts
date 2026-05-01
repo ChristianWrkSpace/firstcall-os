@@ -1,15 +1,15 @@
 import { anthropic, MODELS } from "./ai";
 import { feedbackPreamble } from "./agent-feedback";
-import { buildIrisContext } from "./iris-context";
+import { buildEchoContext } from "./echo-context";
 import { createAdminClient } from "./supabase-server";
 
-export interface IrisRequest {
+export interface EchoRequest {
   question: string;
   operator: { id: string; name: string; role: string };
   history?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
-export interface IrisResponse {
+export interface EchoResponse {
   answer: string;
   conversationId: string;
   model: string;
@@ -17,9 +17,9 @@ export interface IrisResponse {
   costUsd: number;
 }
 
-// Cap Iris-specific spend so chat-y questions can't accidentally rack up
+// Cap Echo-specific spend so chat-y questions can't accidentally rack up
 // $50/day. Tunable per env if you want it tighter.
-const DAILY_CAP_USD = Number(process.env.IRIS_DAILY_CAP_USD ?? 2);
+const DAILY_CAP_USD = Number(process.env.ECHO_DAILY_CAP_USD ?? 2);
 
 /**
  * Heuristic: route to BALANCED (Sonnet) when the question is genuinely
@@ -40,13 +40,13 @@ async function todaySpendUsd(): Promise<number> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { data } = await admin
-    .from("iris_conversations")
+    .from("echo_conversations")
     .select("cost_usd")
     .gte("created_at", todayStart.toISOString());
   return (data ?? []).reduce((s: number, r: any) => s + Number(r.cost_usd ?? 0), 0);
 }
 
-export async function askIris(req: IrisRequest): Promise<IrisResponse> {
+export async function askEcho(req: EchoRequest): Promise<EchoResponse> {
   const t0 = Date.now();
 
   // ── Cost cap (cheap pre-check)
@@ -56,7 +56,7 @@ export async function askIris(req: IrisRequest): Promise<IrisResponse> {
     const conversationId = await persist({
       userId: req.operator.id,
       question: req.question,
-      answer: `Iris is paused for the day — you've used $${spent.toFixed(2)} of the $${cap} daily cap. Resets at midnight. Need more? Set IRIS_DAILY_CAP_USD higher in env.`,
+      answer: `Echo is paused for the day — you've used $${spent.toFixed(2)} of the $${cap} daily cap. Resets at midnight. Need more? Set ECHO_DAILY_CAP_USD higher in env.`,
       model: "skipped (cap)",
       tokensIn: 0,
       tokensOut: 0,
@@ -65,7 +65,7 @@ export async function askIris(req: IrisRequest): Promise<IrisResponse> {
     });
     return {
       conversationId,
-      answer: `Iris is paused for the day — used $${spent.toFixed(2)} of $${cap} cap. Resets at midnight.`,
+      answer: `Echo is paused for the day — used $${spent.toFixed(2)} of $${cap} cap. Resets at midnight.`,
       model: "skipped",
       tier: "fast",
       costUsd: 0,
@@ -75,9 +75,9 @@ export async function askIris(req: IrisRequest): Promise<IrisResponse> {
   const tier: "fast" | "balanced" = pickTier(req.question);
   const model = tier === "balanced" ? MODELS.BALANCED : MODELS.FAST;
 
-  // Recursive learning: pull past corrections to Iris
-  const preamble = await feedbackPreamble("iris", "qa", 5);
-  const systemContext = await buildIrisContext({
+  // Recursive learning: pull past corrections to Echo
+  const preamble = await feedbackPreamble("echo", "qa", 5);
+  const systemContext = await buildEchoContext({
     name: req.operator.name,
     role: req.operator.role,
   });
@@ -94,9 +94,9 @@ export async function askIris(req: IrisRequest): Promise<IrisResponse> {
     max_tokens: tier === "balanced" ? 800 : 500,
     system: preamble + systemContext,
     messages,
-    // Tag the call so agent_invocations can attribute it to Iris (the SDK
+    // Tag the call so agent_invocations can attribute it to Echo (the SDK
     // wrapper in lib/ai.ts strips these before sending to the API).
-    ...({ _agent: "iris", _task: "qa", _user_id: req.operator.id } as any),
+    ...({ _agent: "echo", _task: "qa", _user_id: req.operator.id } as any),
   } as any);
 
   const tokensIn = (result as any)?.usage?.input_tokens ?? 0;
@@ -138,7 +138,7 @@ async function persist(args: {
   try {
     const admin = createAdminClient();
     const { data } = await admin
-      .from("iris_conversations")
+      .from("echo_conversations")
       .insert({
         user_id: args.userId,
         question: args.question,
@@ -153,17 +153,17 @@ async function persist(args: {
       .single();
     return data?.id ?? "unknown";
   } catch (err) {
-    console.error("[iris] failed to persist conversation:", err);
+    console.error("[echo] failed to persist conversation:", err);
     return "unknown";
   }
 }
 
 /**
- * Capture user feedback (👍 / 👎) on an Iris answer. Writes to
- * iris_conversations + the global agent_outcomes table so the recursive
+ * Capture user feedback (👍 / 👎) on an Echo answer. Writes to
+ * echo_conversations + the global agent_outcomes table so the recursive
  * feedback preamble picks it up on the next ask.
  */
-export async function recordIrisFeedback(args: {
+export async function recordEchoFeedback(args: {
   conversationId: string;
   feedback: "up" | "down";
   note?: string;
@@ -171,7 +171,7 @@ export async function recordIrisFeedback(args: {
 }): Promise<void> {
   const admin = createAdminClient();
   await admin
-    .from("iris_conversations")
+    .from("echo_conversations")
     .update({
       feedback: args.feedback,
       feedback_note: args.note?.trim() || null,
@@ -182,15 +182,15 @@ export async function recordIrisFeedback(args: {
   // Mirror to agent_outcomes for the cross-agent feedback preamble
   try {
     await admin.from("agent_outcomes").insert({
-      agent: "iris",
+      agent: "echo",
       task: "qa",
       outcome: args.feedback === "up" ? "approved_unchanged" : "rejected",
-      entity_type: "iris_conversation",
+      entity_type: "echo_conversation",
       entity_id: args.conversationId,
       user_id: args.userId ?? null,
       delta: args.note ? { note: args.note } : {},
     });
   } catch (err) {
-    console.error("[iris] failed to mirror to agent_outcomes:", err);
+    console.error("[echo] failed to mirror to agent_outcomes:", err);
   }
 }

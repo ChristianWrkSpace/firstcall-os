@@ -232,7 +232,7 @@ function Sep() {
 }
 
 // ─── Multimodal Command Bar ──────────────────────────────────────────────
-interface IrisAnswer {
+interface EchoAnswer {
   conversationId: string;
   question: string;
   answer: string;
@@ -247,7 +247,7 @@ function CommandBar() {
   const [recording, setRecording] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<IrisAnswer | null>(null);
+  const [answer, setAnswer] = useState<EchoAnswer | null>(null);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
 
   async function ask() {
@@ -258,14 +258,14 @@ function CommandBar() {
     setFeedback(null);
     setPending(true);
     try {
-      const res = await fetch("/api/iris", {
+      const res = await fetch("/api/echo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.error ?? "Iris failed.");
+        setError(data?.error ?? "Echo failed.");
       } else {
         setAnswer({ ...data, question: q });
         setText("");
@@ -281,7 +281,7 @@ function CommandBar() {
     if (!answer) return;
     setFeedback(v);
     try {
-      await fetch("/api/iris", {
+      await fetch("/api/echo", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversationId: answer.conversationId, feedback: v }),
@@ -323,10 +323,10 @@ function CommandBar() {
             disabled={pending}
             placeholder={
               pending
-                ? "Iris is thinking…"
+                ? "Echo is thinking…"
                 : dragOver
                   ? "Drop photos to dispatch Argus…"
-                  : "Ask Iris anything · drop photos · /command · ⌘K"
+                  : "Ask Echo anything · drop photos · /command · ⌘K"
             }
             className="flex-1 bg-transparent outline-none text-sm md:text-base placeholder:text-white/35 text-white/90 disabled:opacity-50"
           />
@@ -358,7 +358,7 @@ function CommandBar() {
               disabled={!text.trim() || pending}
               className="ml-1 h-8 px-3 rounded-xl bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_18px_rgba(107,138,217,0.25)] hover:shadow-[0_0_22px_rgba(95,189,176,0.35)] transition-shadow"
             >
-              {pending ? "…" : "Ask Iris →"}
+              {pending ? "…" : "Ask Echo →"}
             </button>
           </div>
         </div>
@@ -376,7 +376,7 @@ function CommandBar() {
         )}
       </div>
 
-      {/* Iris answer panel */}
+      {/* Echo answer panel */}
       {(answer || error) && (
         <div className="rounded-2xl border border-[#5FBDB0]/20 bg-[#5FBDB0]/[0.04] backdrop-blur-2xl p-4 animate-rise-in">
           {error ? (
@@ -385,7 +385,7 @@ function CommandBar() {
             <>
               <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-[0.18em] text-[#A8DCD3]">
                 <span>◐</span>
-                <span>Iris</span>
+                <span>Echo</span>
                 <span className="text-white/30">·</span>
                 <span className="text-white/40 normal-case tracking-normal font-mono">
                   {answer.tier} tier · ${answer.costUsd.toFixed(4)}
@@ -436,7 +436,7 @@ function CommandBar() {
                 </button>
                 {feedback && (
                   <span className="text-white/35 ml-2">
-                    Logged — Iris will learn from this.
+                    Logged — Echo will learn from this.
                   </span>
                 )}
               </div>

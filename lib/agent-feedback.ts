@@ -8,7 +8,7 @@ export type Agent =
   | "hunter"
   | "extract"
   | "abacus"
-  | "iris";
+  | "echo";
 
 export type Outcome =
   | "approved_unchanged"

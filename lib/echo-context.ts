@@ -1,22 +1,20 @@
 import { createAdminClient } from "./supabase-server";
 
 /**
- * One-shot context summary for Iris. Pre-aggregates the org's current
- * state into a compact text block that Iris reads as system context on
- * every question. Cheap because it's pre-aggregated — Iris never queries
+ * One-shot context summary for Echo. Pre-aggregates the org's current
+ * state into a compact text block that Echo reads as system context on
+ * every question. Cheap because it's pre-aggregated — Echo never queries
  * raw tables itself, so token costs stay bounded regardless of org size.
  *
  * Caps:
- *   • Top 10 active jobs · top 5 carriers · top 5 subs · last 7d agent
- *     activity. Anything beyond that is summarized as a count.
+ *   • Top 10 active jobs · agent feedback last 7d · MTD money · approvals
  *   • Total target: ~2K tokens worst-case.
  */
-export async function buildIrisContext(operator: { name: string; role: string }): Promise<string> {
+export async function buildEchoContext(operator: { name: string; role: string }): Promise<string> {
   const admin = createAdminClient();
   const today = new Date();
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
   const since7d = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const since30d = new Date(Date.now() - 30 * 86_400_000).toISOString();
 
   const [
     { data: jobs },
@@ -135,7 +133,7 @@ export async function buildIrisContext(operator: { name: string; role: string })
       )
     : 999;
 
-  return `You are Iris, the personal AI assistant for First Call Mitigation — an IICRC-certified water/fire/mold restoration company in Austin, Texas.
+  return `You are Echo, the personal AI assistant for First Call Mitigation — an IICRC-certified water/fire/mold restoration company in Austin, Texas.
 
 You answer ${operator.name}'s (the ${operator.role}) questions about the business using the live snapshot below. Your tone: direct, honest, no fluff. Numbers when you have them, "I don't know" when you don't. Don't make things up — if the answer isn't in the snapshot, say so and suggest where to look.
 
