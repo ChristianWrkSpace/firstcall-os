@@ -24,6 +24,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/customers", label: "Customers", icon: "◉" }, // everyone — contact info
   { href: "/calls", label: "Calls", icon: "◎" }, // everyone — Athena history
   { href: "/equipment", label: "Equipment", icon: "▤" }, // everyone — techs deploy/retrieve
+  { href: "/expenses", label: "Expenses", icon: "🚐", roles: STAFF },
   { href: "/partners", label: "Partners", icon: "◐", roles: STAFF },
   { href: "/ar", label: "AR", icon: "$", roles: STAFF },
   { href: "/reports", label: "Reports", icon: "◊", roles: LEAD },

@@ -223,6 +223,12 @@ export default async function ReportsPage({
               💰 Job Economics →
             </Link>
             <Link
+              href="/reports/tech-performance"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
+              👷 Tech Performance →
+            </Link>
+            <Link
               href="/reports/quickbooks"
               className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
             >

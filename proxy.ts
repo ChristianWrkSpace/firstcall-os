@@ -14,7 +14,46 @@ const protectedPrefixes = [
   "/settings",
 ];
 
-// Security headers applied to every response
+// Security headers applied to every response.
+//
+// CSP design notes:
+// - 'unsafe-inline' on styles is needed for Tailwind utility classes inlined
+//   by Next.js. Removing it breaks the UI; documented tradeoff.
+// - 'unsafe-eval' is allowed in dev only because Turbopack uses it; in prod
+//   we keep scripts strict.
+// - We allow Supabase, Stripe, Vercel, Resend, Deepgram domains where they
+//   actually fetch / connect. Anthropic + AI Gateway hits server-side only.
+// - frame-ancestors 'none' supersedes X-Frame-Options for modern browsers.
+const IS_DEV = process.env.NODE_ENV !== "production";
+
+const CSP_DIRECTIVES = [
+  "default-src 'self'",
+  // Scripts: own + Vercel analytics + Stripe.js. unsafe-eval only in dev.
+  `script-src 'self' 'unsafe-inline' ${IS_DEV ? "'unsafe-eval'" : ""} https://va.vercel-scripts.com https://js.stripe.com https://*.stripe.com`,
+  // Styles: own + inline (Tailwind needs this) + Google Fonts if used.
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  // Images: own + data: (base64) + Supabase storage signed URLs + photo galleries
+  "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com",
+  // Connections: Supabase (auth + REST + realtime), Photon (address autocomplete),
+  // Deepgram (transcription), Stripe (checkout), Vercel (analytics)
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://photon.komoot.io https://api.deepgram.com https://*.stripe.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+  // Frames: Stripe Elements is iframed in
+  "frame-src https://js.stripe.com https://*.stripe.com",
+  // Workers (PWA service worker)
+  "worker-src 'self' blob:",
+  // Manifests (PWA)
+  "manifest-src 'self'",
+  // Block clickjacking
+  "frame-ancestors 'none'",
+  // Lock down forms
+  "form-action 'self'",
+  // Restrict where the document can navigate via meta-refresh, etc.
+  "base-uri 'self'",
+  // Always upgrade insecure requests
+  "upgrade-insecure-requests",
+].join("; ");
+
 function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set("X-Frame-Options", "SAMEORIGIN");
   res.headers.set("X-Content-Type-Options", "nosniff");
@@ -24,6 +63,10 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
     "Strict-Transport-Security",
     "max-age=63072000; includeSubDomains; preload"
   );
+  // Cross-Origin policies — protect against side-channel attacks
+  res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  // CSP — comprehensive content security policy
+  res.headers.set("Content-Security-Policy", CSP_DIRECTIVES);
   return res;
 }
 

@@ -76,6 +76,14 @@ export default async function SettingsPage() {
       emoji: "🧮",
       visible: me.role === "owner" || me.role === "manager",
     },
+    {
+      href: "/settings/security",
+      title: "Security (2FA)",
+      description:
+        "Two-factor authentication. Strongly recommended for owner + manager accounts handling claim data.",
+      emoji: "🔒",
+      visible: true,
+    },
   ];
 
   return (

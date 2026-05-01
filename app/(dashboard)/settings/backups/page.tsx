@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ManualBackupButton, DownloadBackupLink } from "./BackupActions";
+import { ManualBackupButton, DownloadBackupLink, VerifyLatestBackupButton } from "./BackupActions";
 
 const STATUS_BADGE: Record<string, string> = {
   ok:      "bg-green-500/15 text-green-400",
@@ -212,31 +212,41 @@ export default async function BackupsPage() {
 
       {/* Restore drill */}
       <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-5">
-        <h2 className="text-white font-semibold mb-3">Restore Drill (run quarterly)</h2>
-        <ol className="flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside">
-          <li>
-            Spin up a sandbox Supabase project (or restore PITR snapshot to a
-            sister project).
-          </li>
-          <li>
-            Pick a recent backup JSON from this page and download it (Owner only).
-          </li>
-          <li>
-            Confirm row counts in the sandbox match the JSON metadata.
-          </li>
-          <li>
-            Document the elapsed restore time (target: under 60 minutes for a
-            full cold restore).
-          </li>
-          <li>
-            Tear down the sandbox. Note any gaps in this page's "Recent Runs"
-            for the next iteration.
-          </li>
-        </ol>
-        <p className="text-zinc-500 text-xs mt-3">
-          Last drill: <span className="text-amber-300">not yet documented</span>{" "}
-          — update this once your first quarterly drill is on file.
+        <h2 className="text-white font-semibold mb-1">Restore Drill</h2>
+        <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
+          A backup you've never restored is a backup you don't have. The Verify
+          button below downloads the latest successful backup, parses it, and
+          confirms row counts match the metadata — answers "is this actually
+          restorable?" in 30 seconds without spinning up a sandbox.
         </p>
+
+        <VerifyLatestBackupButton />
+
+        <div className="mt-5 pt-5 border-t border-zinc-800">
+          <p className="text-white text-sm font-semibold mb-2">Full quarterly drill (still recommended)</p>
+          <ol className="flex flex-col gap-1.5 text-sm text-zinc-300 list-decimal list-inside leading-relaxed">
+            <li>Click Verify above to confirm the latest backup is intact.</li>
+            <li>
+              Spin up a sandbox Supabase project (or restore PITR snapshot to a
+              sister project).
+            </li>
+            <li>
+              Download a recent backup JSON from this page (Owner only) and
+              import into the sandbox via your seed script.
+            </li>
+            <li>
+              Sign into the sandbox with a test user and confirm jobs / customers /
+              invoices look right.
+            </li>
+            <li>
+              Document elapsed restore time (target: under 60 minutes for a full
+              cold restore). Tear down the sandbox.
+            </li>
+          </ol>
+          <p className="text-zinc-500 text-xs mt-3">
+            Drills are auto-logged to the audit trail (action <code className="text-zinc-300 bg-zinc-800 px-1 rounded">backup.drill_verify</code>) so you can see the last 4 quarters at a glance from /settings/audit.
+          </p>
+        </div>
       </section>
     </div>
   );
