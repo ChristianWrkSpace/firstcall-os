@@ -1,0 +1,146 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { signOutOtherSessions, forceSignOutUser } from "@/app/actions/sessions";
+
+interface UserSession {
+  id: string;
+  email: string | null;
+  name: string;
+  role: string;
+  active: boolean;
+  lastSignInAt: string | null;
+  createdAt: string;
+}
+
+const fmtAgo = (iso: string | null) => {
+  if (!iso) return "never";
+  const ms = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  return `${d}d ago`;
+};
+
+export default function SessionsPanel({
+  ownerView,
+  users,
+  currentUserId,
+}: {
+  ownerView: boolean;
+  users: UserSession[];
+  currentUserId: string;
+}) {
+  const [pending, start] = useTransition();
+  const [msg, setMsg] = useState<string | null>(null);
+  const router = useRouter();
+
+  function signOutOthers() {
+    if (
+      !confirm(
+        "Sign out from all other devices/browsers? You'll stay signed in here."
+      )
+    )
+      return;
+    setMsg(null);
+    start(async () => {
+      const res = await signOutOtherSessions();
+      if (res.error) setMsg(res.error);
+      else {
+        setMsg("✓ All other sessions signed out.");
+        router.refresh();
+      }
+    });
+  }
+
+  function forceOut(userId: string, name: string) {
+    if (
+      !confirm(
+        `Force-sign-out ${name} from EVERY device? They'll need to sign in again.`
+      )
+    )
+      return;
+    setMsg(null);
+    start(async () => {
+      const res = await forceSignOutUser(userId);
+      if (res.error) setMsg(res.error);
+      else {
+        setMsg(`✓ ${name} signed out everywhere.`);
+        router.refresh();
+      }
+    });
+  }
+
+  return (
+    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mt-6">
+      <h2 className="text-white font-semibold mb-1">Sessions</h2>
+      <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
+        Suspect your password leaked? Sign out everywhere and rotate it.
+      </p>
+
+      <button
+        type="button"
+        onClick={signOutOthers}
+        disabled={pending}
+        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+      >
+        {pending ? "Signing out…" : "🚪 Sign out everywhere except here"}
+      </button>
+      {msg && <p className="text-zinc-300 text-xs mt-2">{msg}</p>}
+
+      {ownerView && (
+        <div className="mt-6 pt-6 border-t border-zinc-800">
+          <h3 className="text-white text-sm font-semibold mb-2">
+            All Org Users (Owner-only)
+          </h3>
+          <p className="text-zinc-500 text-xs mb-3 leading-relaxed">
+            Last sign-in per user. Force sign-out a compromised or
+            departed account from every device.
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {users.map((u) => (
+              <li
+                key={u.id}
+                className="flex items-center justify-between gap-3 px-3 py-2 bg-zinc-800/40 border border-zinc-700/50 rounded-lg"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-white text-sm font-medium truncate">{u.name}</p>
+                    <span className="text-zinc-500 text-xs capitalize">{u.role}</span>
+                    {!u.active && (
+                      <span className="text-yellow-400 text-[10px] uppercase tracking-wide">
+                        deactivated
+                      </span>
+                    )}
+                    {u.id === currentUserId && (
+                      <span className="text-blue-400 text-[10px] uppercase tracking-wide">
+                        you
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-zinc-500 text-xs truncate">
+                    {u.email} · last sign-in {fmtAgo(u.lastSignInAt)}
+                  </p>
+                </div>
+                {u.id !== currentUserId && (
+                  <button
+                    type="button"
+                    onClick={() => forceOut(u.id, u.name)}
+                    disabled={pending}
+                    className="text-zinc-500 hover:text-red-400 text-xs disabled:opacity-50 shrink-0"
+                  >
+                    Force sign-out
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}

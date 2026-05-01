@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { listMfaFactors } from "@/app/actions/mfa";
+import { listAllUserSessions } from "@/app/actions/sessions";
 import MfaEnrollment from "./MfaEnrollment";
 import UnenrollButton from "./UnenrollButton";
+import SessionsPanel from "./SessionsPanel";
 
 export default async function SecuritySettingsPage() {
   const me = await getCurrentUser();
@@ -12,6 +14,7 @@ export default async function SecuritySettingsPage() {
   const { factors } = await listMfaFactors();
   const verifiedFactors = factors.filter((f) => f.status === "verified");
   const hasMfa = verifiedFactors.length > 0;
+  const sessionsData = me.role === "owner" ? await listAllUserSessions() : { users: [] };
 
   return (
     <div className="p-4 md:p-8 max-w-3xl">
@@ -73,6 +76,13 @@ export default async function SecuritySettingsPage() {
         </p>
         <MfaEnrollment />
       </div>
+
+      {/* Sessions */}
+      <SessionsPanel
+        ownerView={me.role === "owner"}
+        users={sessionsData.users}
+        currentUserId={me.id}
+      />
 
       {/* Footer guidance */}
       <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">

@@ -28,6 +28,22 @@ export function checkRateLimit(opts: RateLimitOptions): RateLimitResult {
   const recent = arr.filter((t) => t > cutoff);
 
   if (recent.length >= opts.max) {
+    // Persist the hit so the security activity dashboard can surface it.
+    // Fire-and-forget — we don't await, and we don't import logAudit at the
+    // top to avoid forcing a server-only dependency on every checkRateLimit
+    // call site (some callers run in edge / middleware contexts).
+    import("./audit")
+      .then(({ logAudit }) =>
+        logAudit({
+          user: null,
+          action: "rate_limit.hit",
+          entity_type: "rate_limit",
+          details: { key: opts.key, max: opts.max, window_ms: opts.windowMs },
+        })
+      )
+      .catch(() => {
+        // Audit failures never break the request path
+      });
     return {
       ok: false,
       remaining: 0,

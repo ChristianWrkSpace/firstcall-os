@@ -80,9 +80,17 @@ export default async function SettingsPage() {
       href: "/settings/security",
       title: "Security (2FA)",
       description:
-        "Two-factor authentication. Strongly recommended for owner + manager accounts handling claim data.",
+        "Two-factor authentication + session controls. Strongly recommended for owner + manager.",
       emoji: "🔒",
       visible: true,
+    },
+    {
+      href: "/settings/security-activity",
+      title: "Security Activity",
+      description:
+        "Auth events, MFA changes, rate-limit hits, secret rotations, backup drills. Surfaces brute-force + abuse signals.",
+      emoji: "🛰️",
+      visible: me.role === "owner" || me.role === "manager",
     },
   ];
 

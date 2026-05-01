@@ -25,10 +25,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/calls", label: "Calls", icon: "◎" }, // everyone — Athena history
   { href: "/equipment", label: "Equipment", icon: "▤" }, // everyone — techs deploy/retrieve
   { href: "/expenses", label: "Expenses", icon: "🚐", roles: STAFF },
+  { href: "/subs", label: "Subs", icon: "🤝", roles: STAFF },
   { href: "/partners", label: "Partners", icon: "◐", roles: STAFF },
   { href: "/ar", label: "AR", icon: "$", roles: STAFF },
   { href: "/reports", label: "Reports", icon: "◊", roles: LEAD },
   { href: "/solomon", label: "Solomon", icon: "🧠", roles: LEAD },
+  { href: "/turing", label: "Turing", icon: "🔬", roles: LEAD },
   { href: "/activity", label: "Activity", icon: "🎛️", roles: STAFF },
   { href: "/progress", label: "Progress", icon: "▰", roles: LEAD },
   { href: "/help", label: "Help", icon: "?" }, // everyone
