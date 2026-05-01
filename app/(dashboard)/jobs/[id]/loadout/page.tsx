@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import PrintButton from "./PrintButton";
 
 function asArray<T = string>(v: unknown): T[] {
@@ -58,8 +59,8 @@ export default async function LoadoutSheetPage({
         {/* Header */}
         <div className="border-b-2 border-black pb-4 mb-6 flex items-start justify-between">
           <div>
-            <p className="text-xs uppercase tracking-widest text-zinc-500">First Call Mitigation</p>
-            <h1 className="text-3xl font-bold mt-1">Truck Loadout</h1>
+            <Logo variant="banner" size={36} priority />
+            <h1 className="text-3xl font-bold mt-2">Truck Loadout</h1>
             <p className="text-sm text-zinc-700 mt-1">
               Job <span className="font-mono font-semibold">{job.job_number}</span> · {customer?.name ?? "—"}
             </p>

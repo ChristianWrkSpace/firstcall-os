@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { anthropic } from "@/lib/ai";
+import { anthropic, MODELS } from "@/lib/ai";
 import type Anthropic from "@anthropic-ai/sdk";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { checkRateLimit, LIMITS, maybeSweep } from "@/lib/rate-limit";
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     }
 
     const message = await anthropic.messages.create({
-      model: "claude-opus-4-7",
+      model: MODELS.SMART,
       max_tokens: 2048,
       tools: [EXTRACT_TOOL],
       tool_choice: { type: "tool", name: "extract_call_data" },

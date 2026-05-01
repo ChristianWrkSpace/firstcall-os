@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
 import { headers } from "next/headers";
 
 export async function signIn(
@@ -16,13 +16,33 @@ export async function signIn(
   }
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: signInData, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (error) {
+  if (error || !signInData.user) {
     return { error: "Invalid email or password." };
   }
 
-  redirect("/dashboard");
+  // Route by role: technicians land on My Day (their assigned jobs);
+  // everyone else (owner / manager / office) goes to the operational Dashboard.
+  let redirectTo = "/dashboard";
+  try {
+    const admin = createAdminClient();
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", signInData.user.id)
+      .single();
+    if (profile?.role === "technician") {
+      redirectTo = "/my-day";
+    }
+  } catch {
+    // Fall through to /dashboard if profile lookup fails — never block login.
+  }
+
+  redirect(redirectTo);
 }
 
 export async function signOut() {

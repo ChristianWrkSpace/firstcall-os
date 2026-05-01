@@ -1,4 +1,4 @@
-import { anthropic } from "./ai";
+import { anthropic, MODELS } from "./ai";
 import { BUSINESS_TYPES, type BusinessType } from "./hunter-types";
 
 // Re-export for convenience so existing server-side imports keep working.
@@ -16,7 +16,7 @@ interface LeadContext {
 export async function generateColdEmail(lead: LeadContext) {
   const meta = BUSINESS_TYPES[lead.business_type];
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-7",
+    model: MODELS.FAST,
     max_tokens: 600,
     messages: [
       {
@@ -64,7 +64,7 @@ BODY:
 export async function generateVoicemailScript(lead: LeadContext) {
   const meta = BUSINESS_TYPES[lead.business_type];
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-7",
+    model: MODELS.FAST,
     max_tokens: 400,
     messages: [
       {
@@ -98,7 +98,7 @@ export async function generateFollowUpEmail(
   previousMessage: string
 ) {
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-7",
+    model: MODELS.FAST,
     max_tokens: 500,
     messages: [
       {

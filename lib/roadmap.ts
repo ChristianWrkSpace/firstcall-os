@@ -1,7 +1,7 @@
 // FirstCall OS — Project Roadmap (Source of Truth)
 // Update this file as work ships. Be honest about effort + status.
 // "Done" = shipped + working. NOT "shipped but needs hardening."
-// Last reviewed: 2026-04-28
+// Last reviewed: 2026-04-30
 
 export type Status = "done" | "in_progress" | "planned" | "idea";
 export type Effort = "S" | "M" | "L" | "XL";
@@ -209,20 +209,40 @@ export const ROADMAP: RoadmapItem[] = [
     title: "Esquire — Legal & Compliance",
     agent: "Esquire",
     track: "core",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Drafts AOBs for DocuSign. Bad-faith warning letters and Notices of Appraisal with state-law citations. HITL before send.",
+      "AI-drafts five restoration legal templates with TX-statute citations: AOB, Direction to Pay, Demand Letter (§ 542.058 prompt-pay), Notice of Appraisal, IICRC S500 Drying Certificate. Approval gate before send/sign. Audit-logged at every status flip.",
+    features: [
+      "5 templates: AOB, Direction to Pay, Demand Letter, Notice of Appraisal, Drying Certificate",
+      "Claude Opus 4.7 with adaptive thinking drafts each one",
+      "Pulls live job/customer/insurance/invoice/moisture data into the prompt",
+      "Status flow: draft → approved → sent / signed (no editing post-approval)",
+      "Inline editor on the doc page; print-friendly white-paper layout",
+      "Audit-logged: legal_doc.generated, .approved, .sent, .signed, .deleted",
+      "RLS: only owner/manager can delete; everyone authenticated can draft + edit drafts",
+    ],
   },
   {
     id: "solomon",
     title: "Solomon — FP&A & Margin Analysis",
     agent: "Solomon",
     track: "core",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Analyzes Ledger for margin leaks. Flags low-margin zip codes. Suggests pivots and pricing adjustments.",
+      "FP&A agent at /solomon. Aggregates jobs/invoices/payments by zip, type, and carrier. Claude Opus 4.7 with structured tool-use returns categorized insights (revenue/carrier/geography/type/operations/pricing) and prioritized recommendations. Owner/manager only. Reports persisted in solomon_reports.",
+    features: [
+      "/solomon dashboard with windowed analysis (30d / 60d / 90d / 6mo / 1yr)",
+      "Aggregates by zip, job type, and insurance carrier with avg-days-to-pay",
+      "AR aging buckets fed into prompt (0-30/31-60/61-90/90+)",
+      "Claude Opus 4.7 + adaptive thinking + tool_use schema → structured insights",
+      "Severity-coded insights (info/watch/alert) and priority-coded recommendations",
+      "Honest about COGS gap — doesn't claim gross margin without cost data",
+      "Saves history; past reports listed for trend tracking",
+    ],
   },
   {
     id: "hunter",
@@ -441,28 +461,52 @@ export const ROADMAP: RoadmapItem[] = [
     id: "backups",
     title: "Backups & Disaster Recovery",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Automated DB backups, point-in-time recovery, storage bucket replication. Documented restore procedure.",
+      "Three-layer backup story: (L1) Supabase PITR, (L2) Supabase daily auto-snapshots, (L3) weekly cron exports operational tables to private Storage bucket as JSON. /settings/backups shows status + history + manual trigger + restore drill checklist.",
+    features: [
+      "Vercel Cron Sundays 03:00 UTC → /api/cron/backup",
+      "Logical export of 17 operational tables to private 'backups' bucket",
+      "Manual trigger button (owner/manager only) for ad-hoc snapshots",
+      "Owner-only signed-URL download from history",
+      "backups_log table + audit-logged manual triggers",
+      "Quarterly restore-drill checklist embedded on the page",
+    ],
   },
   {
     id: "tests",
     title: "Test Suite",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Currently zero tests. E2E for critical paths (auth, job creation, call extraction). Unit tests for extraction/scope tools.",
+      "Vitest unit tests + Playwright E2E smoke. 29 unit tests across permissions matrix, rate-limiter sliding window, payment-routing deductible cap, Esquire doc-type invariants, webhook HMAC verification. Smoke tests hit live prod for public surfaces, redirect logic, 404s, and webhook signature rejection.",
+    features: [
+      "Vitest config with @ alias resolution",
+      "5 unit-test files covering permissions / rate-limit / payment-route / esquire-types / verify-webhook",
+      "Playwright config defaulting to firstcall-os.vercel.app, override via PLAYWRIGHT_BASE_URL",
+      "Smoke spec covers login + forgot-password + auth redirects + portal/adjuster 404s + webhook 400s",
+      "npm scripts: typecheck / test / test:watch / test:e2e",
+    ],
   },
   {
     id: "ci-cd",
     title: "CI/CD Pipeline",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "GitHub Actions: type-check, run tests, deploy preview to Vercel on PR, deploy main to production.",
+      "GitHub Actions: typecheck + Vitest on every push/PR. Separate workflow runs Playwright smoke daily at 06:00 UTC and on manual dispatch (avoiding cost + flakiness on every PR). Vercel still owns deploys.",
+    features: [
+      ".github/workflows/ci.yml — typecheck + unit tests, in-progress cancel on new pushes",
+      ".github/workflows/e2e.yml — Playwright smoke daily + workflow_dispatch with optional base_url input",
+      "Failure artifacts uploaded for E2E runs (playwright-report)",
+      "Already had Dependabot weekly scans in place",
+    ],
   },
   {
     id: "mobile-audit",
@@ -575,19 +619,28 @@ export const ROADMAP: RoadmapItem[] = [
     id: "webhook-signatures",
     title: "Webhook Signature Verification",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-04-30",
     description:
-      "When Stripe / Twilio / Resend send webhooks, verify the signature header. Prevents spoofed events triggering actions.",
+      "Stripe webhook already verifies via SDK constructEvent. Added lib/verify-webhook.ts as a generic HMAC-SHA256 helper for future Twilio / Resend / partner integrations — supports raw, sha256= prefix, and base64 modes. Constant-time compare via crypto.timingSafeEqual. Unit-tested against tampered bodies and wrong secrets.",
   },
   {
     id: "secrets-rotation",
     title: "Secrets Management & Rotation",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Currently API keys live in .env.local indefinitely. Document rotation cadence (quarterly). Move production secrets to Vercel env / Doppler / 1Password Connect. Rotate now, since keys were typed in chat.",
+      "/settings/secrets-rotation lists every secret with vendor, blast radius, target cadence, last-rotated date, and current status (ok / soon / overdue / never). 'Mark rotated' button resets the clock on each. Rotation procedure for every secret + vendor link inline.",
+    features: [
+      "lib/secrets-catalog.ts — single source of truth for the 9 secrets in the app",
+      "secrets_rotation_log table (append-only, owner/manager scoped via RLS)",
+      "Status flags overdue/soon/ok/never against per-secret cadence (90-180 days)",
+      "Audit-logged via secret.rotated action",
+      "Step-by-step rotation procedure embedded on the page",
+    ],
   },
   {
     id: "dependency-scanning",
@@ -620,10 +673,19 @@ export const ROADMAP: RoadmapItem[] = [
     id: "pii-inventory",
     title: "PII Data Inventory & Policy",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Document every field that holds PII (customer name, phone, email, address, claim #, photos of homes). Define retention, redaction, deletion-on-request procedures.",
+      "/settings/pii-inventory documents every PII column across customers/jobs/invoices/photos/calls/legal/auth/outreach with classification (direct/contact/claim/financial/biometric/auth) and retention. Customer-deletion request flow with PII redaction (preserves financial records for IRS § 6001). Cross-border + vendor data movement table.",
+    features: [
+      "Data inventory: 26 PII columns mapped across 13 tables",
+      "Classification system: direct / contact / claim / financial / biometric / auth",
+      "Retention policy with TX § 521 + IRS § 6001 references",
+      "Customer-search + Owner-only PII redaction (keeps financials, blanks identifiers)",
+      "audit-logged as customer.pii_redacted with original values for trace",
+      "Vendor data movement section (Anthropic/Deepgram/ElevenLabs/Stripe/Resend/Supabase/Vercel)",
+    ],
   },
   {
     id: "pen-test",
@@ -638,10 +700,11 @@ export const ROADMAP: RoadmapItem[] = [
     id: "incident-response",
     title: "Incident Response Plan",
     track: "security",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-04-30",
     description:
-      "Documented playbook: what to do if a key leaks, if a customer reports unauthorized access, if Supabase is breached. Notification timelines. State breach-notification law (TX) compliance.",
+      "/settings/incident-response runbook. Severity matrix, leaked-key playbook (Anthropic/Supabase/Stripe/Deepgram/ElevenLabs/Resend rotations), customer breach playbook citing Tex. Bus. & Com. Code § 521.053 (60-day notification, 250+ AG threshold), vendor compromise procedure, contact tree, drill cadence.",
   },
   {
     id: "soc2",
@@ -669,10 +732,19 @@ export const ROADMAP: RoadmapItem[] = [
     id: "quickbooks",
     title: "QuickBooks Export",
     track: "integrations",
-    status: "planned",
+    status: "done",
     effort: "L",
+    shipped_at: "2026-04-30",
     description:
-      "Push invoices, customers, payments to QBO. Avoid double-entry bookkeeping.",
+      "CSV exports of customers, invoices, and payments at /reports/quickbooks. Date-range picker, RFC 4180-compliant CSV, QBO-import-ready column headers (Customer Name, InvoiceNo, ItemAmount, etc.). One-way export — bidirectional OAuth sync is a separate future item.",
+    features: [
+      "/reports/quickbooks page (owner/manager only)",
+      "3 separate CSV downloads: customers / invoices / payments",
+      "Invoices flatten to one row per line item for QBO multi-line import",
+      "Date range selector (defaults to last 30 days)",
+      "Audit-logged on every export",
+      "How-to-import instructions inline (Customers → Invoices → Payments order)",
+    ],
   },
   {
     id: "stripe",
@@ -693,13 +765,39 @@ export const ROADMAP: RoadmapItem[] = [
     ],
   },
   {
-    id: "resend",
-    title: "Resend Email",
-    track: "integrations",
-    status: "planned",
+    id: "payment-routing",
+    title: "Payment Routing (customer-pay vs insurance vs deductible)",
+    track: "core",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-04-30",
     description:
-      "Wire transactional emails: invoice sent, scope approved, drying complete. Env var set; nothing wired yet.",
+      "Every job is now classified at intake as customer-pay, insurance-primary, or insurance-with-deductible. Customer portal branches accordingly: full Pay button, 'insurer billed directly' panel, or deductible-only Pay button. Stripe charge is server-side capped at the deductible. Insurance routes get an 'Email Adjuster' draft button on the job page with prefilled carrier/policy/claim + adjuster portal link.",
+    features: [
+      "jobs.payment_route + jobs.deductible_amount columns (migration 014)",
+      "Radio-group route picker on job intake form, conditional deductible field",
+      "Editable PaymentRoutePanel on job detail (right column) with badge in header",
+      "Customer portal hides Pay button for insurance_primary, caps at deductible for insurance_with_deductible",
+      "Stripe Checkout server action enforces the cap (defense in depth)",
+      "AdjusterContactCard with mailto-prefilled draft email + Copy Info button",
+    ],
+  },
+  {
+    id: "resend",
+    title: "Resend Email — Auto Event Emails",
+    track: "integrations",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-04-30",
+    description:
+      "Customer-facing auto-emails on job status transitions. Mitigation/Drying/Completed each fire a branded email exactly once per job (deduped against customer_notifications). Per-customer opt-out toggle. Manual sends and password-reset emails were already wired previously; this closes the auto-event gap.",
+    features: [
+      "lib/auto-notify.ts fire-and-forget helper, never blocks the user response",
+      "STATUS_TO_EVENT map: mitigation→started / drying→started / completed→done",
+      "Dedupe via existing customer_notifications row check (no spam on re-flip)",
+      "Per-customer auto_notify_emails toggle (default on; opt-out via job page)",
+      "Audit-logged via customer.auto_notify_set",
+    ],
   },
   {
     id: "carrier-portals",

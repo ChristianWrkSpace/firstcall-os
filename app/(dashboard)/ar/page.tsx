@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
+import { requireRoles } from "@/components/RoleGate";
 
 const STATUS_COLORS: Record<string, string> = {
   draft:   "bg-zinc-700 text-zinc-300",
@@ -14,6 +15,7 @@ const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default async function ARDashboard() {
+  await requireRoles(["owner", "manager", "office"]);
   const supabase = await createServerSupabaseClient();
 
   const { data: invoices } = await supabase

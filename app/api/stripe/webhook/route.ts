@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
 
     const amount = (session.amount_total ?? 0) / 100;
     const reference = session.payment_intent as string;
+    const paymentKind = session.metadata?.payment_kind ?? "full";
     const admin = createAdminClient();
 
     // Insert payment record (paid via Stripe)
@@ -46,7 +47,10 @@ export async function POST(req: NextRequest) {
       method: "credit_card",
       reference: `stripe:${reference}`,
       received_at: new Date().toISOString().split("T")[0],
-      notes: "Paid online via Stripe Checkout",
+      notes:
+        paymentKind === "deductible"
+          ? "Deductible paid online via Stripe Checkout"
+          : "Paid online via Stripe Checkout",
     });
 
     // Recompute invoice status

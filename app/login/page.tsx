@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { signIn } from "@/app/actions/auth";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(signIn, undefined);
@@ -11,14 +12,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-zinc-950">
       <div className="w-full max-w-sm px-8 py-10 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-xl">
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">FC</span>
-            </div>
-            <span className="text-white font-semibold text-lg">FirstCall OS</span>
+          <div className="flex justify-center mb-6">
+            <Logo variant="banner" size={44} priority />
           </div>
-          <h1 className="text-2xl font-bold text-white">Sign in</h1>
-          <p className="text-zinc-400 text-sm mt-1">First Call Mitigation — Austin, TX</p>
+          <h1 className="text-2xl font-bold text-white text-center">Sign in</h1>
+          <p className="text-zinc-400 text-sm mt-1 text-center">Austin, TX</p>
         </div>
 
         <form action={action} className="flex flex-col gap-4">

@@ -28,7 +28,12 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
 }
 
 export async function proxy(req: NextRequest) {
-  const res = NextResponse.next();
+  // Mirror the request so Supabase can write refreshed auth cookies onto BOTH
+  // the request (so server components see them this turn) and the response
+  // (so the browser stores them for next turn). Without this, an expired
+  // session token never gets refreshed and `auth.getUser()` silently returns
+  // null in the dashboard layout — degrading an owner's nav to technician.
+  let res = NextResponse.next({ request: req });
   const path = req.nextUrl.pathname;
 
   const supabase = createServerClient(
@@ -40,29 +45,33 @@ export async function proxy(req: NextRequest) {
           return req.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options);
-          });
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          res = NextResponse.next({ request: req });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            res.cookies.set(name, value, options)
+          );
         },
       },
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  // getUser() (not getSession()) actually verifies the token with Supabase
+  // and triggers a refresh when needed. getSession() only reads the cookie.
+  const { data: { user } } = await supabase.auth.getUser();
 
   const isProtected = protectedPrefixes.some((p) => path.startsWith(p));
 
-  if (isProtected && !session) {
+  if (isProtected && !user) {
     return applySecurityHeaders(NextResponse.redirect(new URL("/login", req.url)));
   }
 
-  if (path === "/login" && session) {
+  if (path === "/login" && user) {
     return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", req.url)));
   }
 
   if (path === "/") {
     return applySecurityHeaders(
-      NextResponse.redirect(new URL(session ? "/dashboard" : "/login", req.url))
+      NextResponse.redirect(new URL(user ? "/dashboard" : "/login", req.url))
     );
   }
 

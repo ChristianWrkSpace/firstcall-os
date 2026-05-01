@@ -56,6 +56,10 @@ interface CtxBase {
   site_address?: string | null;
 }
 
+// Absolute URL — emails are rendered in clients (Gmail, Outlook) that can't
+// resolve relative paths. PNG used here because some email clients don't render SVG.
+const EMAIL_LOGO_URL = "https://firstcall-os.vercel.app/logo-banner.png";
+
 function shell(body: string) {
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -66,8 +70,10 @@ function shell(body: string) {
         <tr><td style="padding:24px 28px 16px 28px;border-bottom:2px solid #2563eb;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="font-size:18px;font-weight:bold;color:#18181b;">First Call Mitigation</td>
-              <td align="right" style="font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:1px;">Water · Fire · Mold</td>
+              <td>
+                <img src="${EMAIL_LOGO_URL}" alt="First Call Mitigation" height="40" style="display:block;height:40px;width:auto;border:0;outline:none;text-decoration:none;">
+              </td>
+              <td align="right" style="font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:1px;vertical-align:middle;">Water · Fire · Mold</td>
             </tr>
           </table>
         </td></tr>

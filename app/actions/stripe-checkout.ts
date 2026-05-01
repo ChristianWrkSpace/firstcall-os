@@ -17,10 +17,20 @@ export async function createInvoiceCheckout(
   // Verify the customer token + load invoice + customer
   const { data: job } = await admin
     .from("jobs")
-    .select("id, customer_share_token, customers(name, email)")
+    .select(
+      "id, customer_share_token, payment_route, deductible_amount, customers(name, email)"
+    )
     .eq("customer_share_token", customerToken)
     .single();
   if (!job) return { error: "Invalid portal link." };
+
+  const paymentRoute = (job as any).payment_route ?? "customer_pay";
+  if (paymentRoute === "insurance_primary") {
+    return {
+      error:
+        "This claim is being billed directly to your insurance — no out-of-pocket payment is owed.",
+    };
+  }
 
   const { data: invoice } = await admin
     .from("invoices")
@@ -49,6 +59,26 @@ export async function createInvoiceCheckout(
   const balance = total - paid;
   if (balance <= 0) return { error: "Nothing left to pay." };
 
+  // For deductible routes, cap the amount the customer can pay at their
+  // remaining deductible (not the full invoice balance — insurance covers the rest).
+  let chargeAmount = balance;
+  if (paymentRoute === "insurance_with_deductible") {
+    const deductible =
+      (job as any).deductible_amount != null
+        ? Number((job as any).deductible_amount)
+        : null;
+    if (deductible == null || deductible <= 0) {
+      return { error: "Deductible has not been set on this job." };
+    }
+    chargeAmount = Math.max(0, Math.min(balance, deductible - paid));
+    if (chargeAmount <= 0) {
+      return {
+        error:
+          "Your deductible has already been paid. Insurance is settling the remainder.",
+      };
+    }
+  }
+
   const customer = job.customers as any;
   const stripe = getStripe();
 
@@ -56,6 +86,14 @@ export async function createInvoiceCheckout(
   const origin =
     hdrs.get("origin") ??
     `https://${hdrs.get("host") ?? "firstcall-os.vercel.app"}`;
+
+  const isDeductible = paymentRoute === "insurance_with_deductible";
+  const productName = isDeductible
+    ? `Invoice ${invoice.invoice_number} — Deductible`
+    : `Invoice ${invoice.invoice_number}`;
+  const productDesc = isDeductible
+    ? "Customer deductible payment for First Call Mitigation services"
+    : "Payment for First Call Mitigation services";
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -66,10 +104,10 @@ export async function createInvoiceCheckout(
         price_data: {
           currency: "usd",
           product_data: {
-            name: `Invoice ${invoice.invoice_number}`,
-            description: `Payment for First Call Mitigation services`,
+            name: productName,
+            description: productDesc,
           },
-          unit_amount: Math.round(balance * 100),
+          unit_amount: Math.round(chargeAmount * 100),
         },
         quantity: 1,
       },
@@ -78,6 +116,8 @@ export async function createInvoiceCheckout(
       invoice_id: invoice.id,
       job_id: job.id,
       invoice_number: invoice.invoice_number,
+      payment_route: paymentRoute,
+      payment_kind: isDeductible ? "deductible" : "full",
     },
     success_url: `${origin}/portal/${customerToken}?paid=1`,
     cancel_url: `${origin}/portal/${customerToken}?cancelled=1`,

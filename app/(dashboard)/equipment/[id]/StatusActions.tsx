@@ -21,35 +21,24 @@ type Mode = null | "deploy" | "retrieve";
 export default function StatusActions({
   equipmentId,
   status,
-  hoursLogged,
   activeJobs,
 }: {
   equipmentId: string;
   status: string;
-  hoursLogged: number;
   activeJobs: ActiveJob[];
 }) {
   const [mode, setMode] = useState<Mode>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // Deploy form fields
   const [jobId, setJobId] = useState("");
-  const [hoursAtDeploy, setHoursAtDeploy] = useState(hoursLogged.toString());
-
-  // Retrieve form fields
-  const [hoursAtReturn, setHoursAtReturn] = useState("");
   const [retrieveNotes, setRetrieveNotes] = useState("");
 
   function handleDeploy() {
     setError(null);
     if (!jobId) return setError("Pick a job.");
     startTransition(async () => {
-      const res = await assignToJob(
-        equipmentId,
-        jobId,
-        Number(hoursAtDeploy) || 0
-      );
+      const res = await assignToJob(equipmentId, jobId);
       if (res.error) setError(res.error);
       else {
         setMode(null);
@@ -60,17 +49,11 @@ export default function StatusActions({
 
   function handleRetrieve() {
     setError(null);
-    if (!hoursAtReturn) return setError("Enter the meter reading.");
     startTransition(async () => {
-      const res = await retrieveFromJob(
-        equipmentId,
-        Number(hoursAtReturn) || 0,
-        retrieveNotes
-      );
+      const res = await retrieveFromJob(equipmentId, null, retrieveNotes);
       if (res.error) setError(res.error);
       else {
         setMode(null);
-        setHoursAtReturn("");
         setRetrieveNotes("");
       }
     });
@@ -119,19 +102,6 @@ export default function StatusActions({
               ))}
             </select>
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">
-              Meter at deploy (hrs)
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.5"
-              value={hoursAtDeploy}
-              onChange={(e) => setHoursAtDeploy(e.target.value)}
-              className={INPUT}
-            />
-          </div>
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setMode(null)}
@@ -163,20 +133,6 @@ export default function StatusActions({
       {mode === "retrieve" && (
         <div className="bg-zinc-800/60 border border-zinc-700 rounded-lg p-3 flex flex-col gap-3">
           <p className="text-white text-sm font-semibold">Retrieve from Job</p>
-          <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">
-              Meter at return (hrs)
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.5"
-              value={hoursAtReturn}
-              onChange={(e) => setHoursAtReturn(e.target.value)}
-              className={INPUT}
-              placeholder="e.g. 1452"
-            />
-          </div>
           <div className="flex flex-col gap-1">
             <label className="text-zinc-400 text-xs uppercase tracking-wide">
               Notes (optional)

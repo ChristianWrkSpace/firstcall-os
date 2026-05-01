@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
+import Logo from "@/components/Logo";
 import { docTypeMeta } from "@/lib/document-types";
 
 export default async function AdjusterPortal({
@@ -22,7 +23,7 @@ export default async function AdjusterPortal({
 
   const customer = (job as any).customers;
 
-  const [{ data: photos }, { data: documents }, { data: moisture }, { data: estimates }] =
+  const [{ data: photos }, { data: documents }, { data: moisture }, { data: estimates }, { data: legalDocs }] =
     await Promise.all([
       admin
         .from("job_photos")
@@ -49,6 +50,12 @@ export default async function AdjusterPortal({
         .eq("job_id", job.id)
         .in("status", ["approved", "sent"])
         .order("version", { ascending: false }),
+      admin
+        .from("legal_documents")
+        .select("id, doc_type, status, signed_at, signed_by_name, sent_at, sent_to, signing_token")
+        .eq("job_id", job.id)
+        .in("status", ["sent", "signed"])
+        .order("created_at", { ascending: false }),
     ]);
 
   // Photo signed URLs
@@ -83,18 +90,16 @@ export default async function AdjusterPortal({
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <header className="bg-zinc-900 border-b-2 border-blue-600 px-6 py-5">
+      <header
+        className="bg-zinc-900 border-b-2 border-blue-600 px-6 pb-5"
+        style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
+      >
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">FC</span>
-            </div>
-            <div>
-              <p className="text-white font-semibold">First Call Mitigation</p>
-              <p className="text-zinc-500 text-xs uppercase tracking-wider">
-                Claim Packet · Adjuster View
-              </p>
-            </div>
+          <div className="flex flex-col gap-1">
+            <Logo variant="banner" size={36} priority />
+            <p className="text-zinc-500 text-xs uppercase tracking-wider">
+              Claim Packet · Adjuster View
+            </p>
           </div>
           <div className="text-right">
             <p className="text-zinc-500 text-xs uppercase tracking-wide">Job #</p>
@@ -236,7 +241,56 @@ export default async function AdjusterPortal({
           </section>
         )}
 
-        {/* Documents */}
+        {/* Legal Documents (Esquire-drafted, e-signed) */}
+        {(legalDocs?.length ?? 0) > 0 && (
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+            <h2 className="text-white font-semibold mb-3">⚖️ Legal Documents</h2>
+            <ul className="flex flex-col gap-2">
+              {(legalDocs as any[]).map((d) => {
+                const labels: Record<string, string> = {
+                  aob: "Assignment of Benefits",
+                  direction_to_pay: "Direction to Pay",
+                  work_authorization: "Work Authorization",
+                  drying_certificate: "Drying Certificate",
+                };
+                const isSigned = d.status === "signed";
+                return (
+                  <li
+                    key={d.id}
+                    className="flex items-center justify-between bg-zinc-800/40 rounded-lg px-3 py-2 text-sm gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white">
+                        {labels[d.doc_type] ?? d.doc_type}
+                      </p>
+                      <p className="text-zinc-500 text-[10px]">
+                        {isSigned
+                          ? `Signed by ${d.signed_by_name ?? "homeowner"} ${new Date(d.signed_at).toLocaleDateString()}`
+                          : `Awaiting signature — sent ${new Date(d.sent_at).toLocaleDateString()}`}
+                      </p>
+                    </div>
+                    {d.signing_token && (
+                      <a
+                        href={`/sign/${d.signing_token}`}
+                        target="_blank"
+                        rel="noopener"
+                        className={`text-[10px] px-2.5 py-1 rounded font-semibold uppercase ${
+                          isSigned
+                            ? "bg-green-500/15 text-green-400 hover:bg-green-500/25"
+                            : "bg-zinc-700 text-zinc-300"
+                        }`}
+                      >
+                        {isSigned ? "✓ View" : "Pending"}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
+        {/* Documents (uploaded paper docs) */}
         {docsWithUrls.length > 0 && (
           <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
             <h2 className="text-white font-semibold mb-3">📑 Documents</h2>

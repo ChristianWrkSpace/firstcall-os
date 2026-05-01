@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
+import { requireRoles } from "@/components/RoleGate";
 
 const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -12,6 +13,7 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{ window?: string }>;
 }) {
+  await requireRoles(["owner", "manager"]);
   const { window: w } = await searchParams;
   const windowDays = Math.min(Math.max(parseInt(w ?? "30"), 7), 365);
   const since = NDAYS_AGO(windowDays);
@@ -207,6 +209,12 @@ export default async function ReportsPage({
           <p className="text-zinc-400 text-sm mt-0.5">
             Operational + financial KPIs over the last {windowDays} days.
           </p>
+          <Link
+            href="/reports/quickbooks"
+            className="inline-flex items-center gap-1.5 mt-2 text-blue-400 hover:text-blue-300 text-xs"
+          >
+            📤 QuickBooks Export →
+          </Link>
         </div>
         <div className="flex items-center gap-1">
           {windowOptions.map((opt) => (

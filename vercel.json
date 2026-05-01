@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/backup",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/demand-letter-sweep",
+      "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/audit-drying-certs",
+      "schedule": "23 16 * * 1"
+    }
+  ]
+}

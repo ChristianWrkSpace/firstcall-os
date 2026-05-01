@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import ResetPasswordForm from "./ResetPasswordForm";
 
 export default async function ResetPasswordPage() {
@@ -9,14 +10,9 @@ export default async function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
       <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">FC</span>
-          </div>
-          <div>
-            <p className="text-white font-semibold leading-none">FirstCall OS</p>
-            <p className="text-zinc-500 text-xs mt-0.5">Set a new password</p>
-          </div>
+        <div className="flex flex-col items-center mb-6">
+          <Logo variant="banner" size={40} priority />
+          <p className="text-zinc-500 text-xs mt-3">Set a new password</p>
         </div>
 
         {user ? (

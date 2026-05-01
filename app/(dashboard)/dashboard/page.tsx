@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
 import { STATUS_COLORS, JOB_STATUSES } from "@/lib/constants";
+import WelcomeBanner from "./WelcomeBanner";
 
 const FOUR_HOURS_AGO = () => new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
 const SEVEN_DAYS_AGO = () => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -133,6 +134,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 md:p-8">
+      <WelcomeBanner />
+
       {/* Header */}
       <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
         <div>

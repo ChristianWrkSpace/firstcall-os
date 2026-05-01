@@ -15,8 +15,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FirstCall OS",
-  description: "AI-powered restoration business operating system",
+  title: "FirstCall OS — First Call Mitigation",
+  description:
+    "AI-powered operating system for First Call Mitigation. Water · Fire · Mold restoration in Austin, TX.",
+  applicationName: "FirstCall OS",
+  // PWA + iOS Add-to-Home-Screen
+  appleWebApp: {
+    capable: true,
+    title: "FirstCall",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: true,
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/logo-mark.png", type: "image/png" },
+    ],
+    apple: [{ url: "/logo-mark.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/icon.svg"],
+  },
+  openGraph: {
+    title: "FirstCall OS",
+    description: "AI-powered restoration operating system",
+    images: ["/logo-banner.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "FirstCall OS",
+    description: "AI-powered restoration operating system",
+    images: ["/logo-banner.png"],
+  },
 };
 
 export const viewport: Viewport = {
@@ -24,6 +55,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: "#0a0a0a",
+  // viewport-fit=cover lets the PWA paint into the iPhone notch / dynamic island
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

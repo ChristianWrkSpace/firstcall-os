@@ -1,4 +1,4 @@
-import { anthropic } from "./ai";
+import { anthropic, MODELS } from "./ai";
 import type Anthropic from "@anthropic-ai/sdk";
 
 export const SCOPE_TOOL: Anthropic.Tool = {
@@ -166,7 +166,7 @@ export async function assessScope(
     : `\n\n(No dispatcher inputs provided — note your assumptions in calculations.key_assumptions)`;
 
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-7",
+    model: MODELS.SMART,
     max_tokens: 4096,
     tools: [SCOPE_TOOL],
     tool_choice: { type: "tool", name: "assess_damage_scope" },

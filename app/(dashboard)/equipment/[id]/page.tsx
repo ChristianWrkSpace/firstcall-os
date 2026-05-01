@@ -173,7 +173,6 @@ export default async function EquipmentDetailPage({
             <StatusActions
               equipmentId={equipment.id}
               status={equipment.status}
-              hoursLogged={Number(equipment.hours_logged ?? 0)}
               activeJobs={activeJobs}
             />
           </section>

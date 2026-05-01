@@ -4,6 +4,10 @@ import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-se
 import { generateEstimate } from "@/lib/ledger";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { autoCreateInvoiceDraft } from "@/lib/auto-triggers";
+import { resolveApprovalsForEntity } from "@/lib/auto-actions";
+import { logAgentOutcome } from "@/lib/agent-feedback";
 
 async function requireUser() {
   const supabase = await createServerSupabaseClient();
@@ -210,6 +214,26 @@ export async function approveEstimate(estimateId: string, jobId: string) {
     .eq("id", estimateId);
   if (error) return { error: error.message };
 
+  // Auto-resolve any pending_approvals on this estimate (the office just acted on it)
+  after(() => resolveApprovalsForEntity("estimate", estimateId, user.id, "estimate approved"));
+
+  // Recursive feedback: an approved estimate is a positive signal for Ledger.
+  after(() =>
+    logAgentOutcome({
+      agent: "ledger",
+      task: "estimate_draft",
+      outcome: "approved_unchanged",
+      jobId,
+      entityType: "estimate",
+      entityId: estimateId,
+      userId: user.id,
+    })
+  );
+
+  // Wire 3: invoice draft creation. Stays in DRAFT status — sending remains
+  // manual per the "no auto-send" rule.
+  after(() => autoCreateInvoiceDraft(estimateId, jobId));
+
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
   return { ok: true };
 }
@@ -248,6 +272,19 @@ export async function rejectEstimate(estimateId: string, jobId: string) {
     .update({ status: "rejected", updated_at: new Date().toISOString() })
     .eq("id", estimateId);
   if (error) return { error: error.message };
+
+  // Recursive feedback: rejection is the strongest learning signal.
+  after(() =>
+    logAgentOutcome({
+      agent: "ledger",
+      task: "estimate_draft",
+      outcome: "rejected",
+      jobId,
+      entityType: "estimate",
+      entityId: estimateId,
+      userId: user.id,
+    })
+  );
 
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
   return { ok: true };

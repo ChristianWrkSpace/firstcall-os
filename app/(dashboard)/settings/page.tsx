@@ -28,6 +28,38 @@ export default async function SettingsPage() {
       emoji: "📜",
       visible: hasPermission(me.role, "audit.view"),
     },
+    {
+      href: "/settings/backups",
+      title: "Backups & DR",
+      description:
+        "Weekly auto-export, manual trigger, restore drill checklist.",
+      emoji: "💾",
+      visible: me.role === "owner" || me.role === "manager",
+    },
+    {
+      href: "/settings/incident-response",
+      title: "Incident Response",
+      description:
+        "Leak playbook, breach-notification (TX § 521.053), vendor compromise.",
+      emoji: "🚨",
+      visible: me.role === "owner" || me.role === "manager",
+    },
+    {
+      href: "/settings/secrets-rotation",
+      title: "Secrets Rotation",
+      description:
+        "Rotation cadence + status for every API key. Mark rotated to reset clock.",
+      emoji: "🔑",
+      visible: me.role === "owner" || me.role === "manager",
+    },
+    {
+      href: "/settings/pii-inventory",
+      title: "PII Inventory",
+      description:
+        "Data dictionary, retention policy, customer-deletion request flow.",
+      emoji: "🗂",
+      visible: me.role === "owner" || me.role === "manager",
+    },
   ];
 
   return (

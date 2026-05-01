@@ -2,13 +2,36 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import crypto from "crypto";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { autoNotifyOnStatusChange } from "@/lib/auto-notify";
+import { autoDraftInsuranceLegalDocs } from "@/lib/auto-triggers";
+
+const VALID_ROUTES = new Set([
+  "customer_pay",
+  "insurance_primary",
+  "insurance_with_deductible",
+]);
 
 export async function createJob(
   prevState: { error?: string } | undefined,
   formData: FormData
 ) {
   const supabase = await createServerSupabaseClient();
+
+  const rawRoute = (formData.get("payment_route") as string) || "customer_pay";
+  const payment_route = VALID_ROUTES.has(rawRoute) ? rawRoute : "customer_pay";
+
+  let deductible_amount: number | null = null;
+  if (payment_route === "insurance_with_deductible") {
+    const raw = (formData.get("deductible_amount") as string) || "";
+    const parsed = Number(raw);
+    if (!raw || Number.isNaN(parsed) || parsed < 0) {
+      return { error: "Enter a valid deductible amount." };
+    }
+    deductible_amount = parsed;
+  }
 
   const { data: customer, error: customerError } = await supabase
     .from("customers")
@@ -17,6 +40,8 @@ export async function createJob(
       phone: (formData.get("customer_phone") as string) || null,
       email: (formData.get("customer_email") as string) || null,
       insurance_company: (formData.get("insurance_company") as string) || null,
+      insurance_policy_number:
+        (formData.get("insurance_policy_number") as string) || null,
       insurance_claim_number:
         (formData.get("insurance_claim_number") as string) || null,
     })
@@ -24,6 +49,13 @@ export async function createJob(
     .single();
 
   if (customerError) return { error: customerError.message };
+
+  // Wire 4: auto-generate customer portal token at create. URL-safe random,
+  // matches the existing portal.ts generator. No user interaction needed —
+  // office can copy the link from the customer portal panel immediately.
+  const customerShareToken = crypto.randomBytes(24).toString("base64url");
+
+  const referredById = (formData.get("referred_by_id") as string) || null;
 
   const { data: job, error: jobError } = await supabase
     .from("jobs")
@@ -36,13 +68,56 @@ export async function createJob(
       site_state: (formData.get("site_state") as string) || "TX",
       site_zip: (formData.get("site_zip") as string) || null,
       status: "lead",
+      payment_route,
+      deductible_amount,
+      customer_share_token: customerShareToken,
+      referred_by_id: referredById,
     })
     .select()
     .single();
 
   if (jobError) return { error: jobError.message };
 
+  // Wire 2: AOB + Work Auth drafts when insurance route + sufficient
+  // customer data. Esquire calls take ~20-40s. We use Next.js `after()`
+  // (not bare `void`) because Vercel kills the worker as soon as the
+  // response is sent — including on redirect. `after()` keeps the function
+  // alive long enough to finish the AI work after the response.
+  after(() => autoDraftInsuranceLegalDocs(job.id));
+
   redirect(`/jobs/${job.id}`);
+}
+
+export async function updatePaymentRoute(
+  prevState: { error?: string; ok?: boolean } | undefined,
+  formData: FormData
+) {
+  const supabase = await createServerSupabaseClient();
+  const jobId = formData.get("job_id") as string;
+  const rawRoute = (formData.get("payment_route") as string) || "customer_pay";
+  if (!VALID_ROUTES.has(rawRoute)) {
+    return { error: "Invalid payment route." };
+  }
+
+  let deductible_amount: number | null = null;
+  if (rawRoute === "insurance_with_deductible") {
+    const raw = (formData.get("deductible_amount") as string) || "";
+    const parsed = Number(raw);
+    if (!raw || Number.isNaN(parsed) || parsed < 0) {
+      return { error: "Enter a valid deductible amount." };
+    }
+    deductible_amount = parsed;
+  }
+
+  const { error } = await supabase
+    .from("jobs")
+    .update({ payment_route: rawRoute, deductible_amount })
+    .eq("id", jobId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/jobs/${jobId}`);
+  return { ok: true };
 }
 
 export async function updateJobStatus(
@@ -59,6 +134,10 @@ export async function updateJobStatus(
     .eq("id", jobId);
 
   if (error) return { error: error.message };
+
+  // Auto-email customer when status enters a notify-worthy phase. Uses
+  // after() so the SMTP call finishes even after this response goes out.
+  after(() => autoNotifyOnStatusChange(jobId, status));
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath("/jobs");

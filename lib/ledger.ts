@@ -1,4 +1,5 @@
-import { anthropic } from "./ai";
+import { anthropic, MODELS } from "./ai";
+import { feedbackPreamble } from "./agent-feedback";
 import type Anthropic from "@anthropic-ai/sdk";
 
 // Common Xactimate codes for water mitigation. Reference for Claude.
@@ -127,15 +128,19 @@ export async function generateEstimate(
     (c) => `  ${c.code} (${c.unit}) — ${c.description}`
   ).join("\n");
 
+  // Recursive self-learning: pull recent rejected/edited estimates so Ledger
+  // learns from prior corrections without retraining.
+  const preamble = await feedbackPreamble("ledger", "estimate_draft", 5);
+
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-7",
+    model: MODELS.BALANCED,
     max_tokens: 4096,
     tools: [ESTIMATE_TOOL],
     tool_choice: { type: "tool", name: "generate_water_mitigation_estimate" },
     messages: [
       {
         role: "user",
-        content: `You are Ledger, the AI estimator for First Call Mitigation in Austin TX.
+        content: preamble + `You are Ledger, the AI estimator for First Call Mitigation in Austin TX.
 
 Generate a complete Xactimate-style estimate from the scope below. Every line item the carrier would expect to see — extraction, equipment setup/removal, daily drying, demolition (flood cuts, baseboards, insulation removal), antimicrobial, cleaning. Use realistic 2026 Austin TX market pricing.
 

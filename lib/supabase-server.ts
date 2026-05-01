@@ -24,9 +24,15 @@ export async function createServerSupabaseClient() {
         return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          cookieStore.set(name, value, options);
-        });
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        } catch {
+          // `setAll` was called from a Server Component, where Next.js
+          // forbids cookie writes. Middleware handles session refresh, so
+          // dropping the write here is safe.
+        }
       },
     },
   });

@@ -1,4 +1,4 @@
-import { anthropic } from "./ai";
+import { anthropic, MODELS } from "./ai";
 import type Anthropic from "@anthropic-ai/sdk";
 
 export const EXTRACT_TOOL: Anthropic.Tool = {
@@ -66,7 +66,7 @@ export const EXTRACT_TOOL: Anthropic.Tool = {
 
 export async function extractFromTranscript(transcript: string) {
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-7",
+    model: MODELS.FAST,
     max_tokens: 2048,
     tools: [EXTRACT_TOOL],
     tool_choice: { type: "tool", name: "extract_call_data" },

@@ -3,6 +3,8 @@
 import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
 import { assessScope, type ScopeImage, type DispatchInputs } from "@/lib/argus";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { autoDraftEstimate } from "@/lib/auto-triggers";
 
 const BUCKET = "job-photos";
 
@@ -108,6 +110,10 @@ export async function analyzeJobPhotos(jobId: string) {
       })
       .eq("id", jobId);
     if (updateErr) throw updateErr;
+
+    // Wire 1: Ledger drafts an estimate from the scope. Use after() so the
+    // ~30s Ledger call survives the response/redirect on Vercel.
+    after(() => autoDraftEstimate(jobId));
 
     revalidatePath(`/jobs/${jobId}`);
     return { ok: true };

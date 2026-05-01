@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { anthropic } from "@/lib/ai";
+import { anthropic, MODELS } from "@/lib/ai";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { checkRateLimit, LIMITS, maybeSweep } from "@/lib/rate-limit";
 
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     ];
 
     const completion = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
+      model: MODELS.FAST,
       max_tokens: 120,
       system: ATHENA_SYSTEM,
       messages,

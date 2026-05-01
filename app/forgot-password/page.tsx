@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { requestPasswordReset } from "@/app/actions/auth";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(requestPasswordReset, undefined);
@@ -10,14 +11,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
       <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">FC</span>
-          </div>
-          <div>
-            <p className="text-white font-semibold leading-none">FirstCall OS</p>
-            <p className="text-zinc-500 text-xs mt-0.5">First Call Mitigation</p>
-          </div>
+        <div className="flex justify-center mb-6">
+          <Logo variant="banner" size={40} priority />
         </div>
 
         <h1 className="text-xl font-bold text-white">Reset your password</h1>

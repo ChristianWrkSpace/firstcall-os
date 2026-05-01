@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
+import Logo from "@/components/Logo";
 import PayInvoiceButton from "./PayInvoiceButton";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -35,7 +36,7 @@ export default async function PortalPage({
   const { data: job } = await admin
     .from("jobs")
     .select(
-      "id, job_number, status, type, description, created_at, scheduled_at, site_address, site_city, site_state, site_zip, customers(name)"
+      "id, job_number, status, type, description, created_at, scheduled_at, site_address, site_city, site_state, site_zip, payment_route, deductible_amount, customers(name, insurance_company, insurance_claim_number)"
     )
     .eq("customer_share_token", token)
     .single();
@@ -50,6 +51,7 @@ export default async function PortalPage({
     { data: signedDocs },
     { data: notifications },
     { data: openInvoices },
+    { data: signedLegalDocs },
   ] = await Promise.all([
     admin
       .from("job_photos")
@@ -77,9 +79,29 @@ export default async function PortalPage({
       .eq("job_id", job.id)
       .in("status", ["sent", "partial", "overdue"])
       .order("created_at", { ascending: false }),
+    // Permanent record of legal docs the customer has signed or received
+    admin
+      .from("legal_documents")
+      .select("id, doc_type, status, signed_at, signed_by_name, signing_token, sent_at")
+      .eq("job_id", job.id)
+      .in("doc_type", [
+        "aob",
+        "work_authorization",
+        "direction_to_pay",
+        "drying_certificate",
+      ])
+      .in("status", ["sent", "signed"])
+      .order("created_at", { ascending: false }),
   ]);
 
-  // Compute unpaid balance per invoice
+  const paymentRoute = (job as any).payment_route ?? "customer_pay";
+  const deductible =
+    (job as any).deductible_amount != null
+      ? Number((job as any).deductible_amount)
+      : null;
+
+  // Compute unpaid balance per invoice. For deductible routes, the customer's
+  // share is capped at the deductible (less anything they've already paid).
   const unpaidInvoices = (openInvoices ?? [])
     .map((inv: any) => {
       const total = (inv.line_items ?? []).reduce(
@@ -90,7 +112,20 @@ export default async function PortalPage({
         (s: number, p: any) => s + Number(p.amount),
         0
       );
-      return { ...inv, total, paid, balance: total - paid };
+      const fullBalance = total - paid;
+      let payable = fullBalance;
+      if (paymentRoute === "insurance_with_deductible" && deductible != null) {
+        payable = Math.max(0, Math.min(fullBalance, deductible - paid));
+      } else if (paymentRoute === "insurance_primary") {
+        payable = 0;
+      }
+      return {
+        ...inv,
+        total,
+        paid,
+        balance: fullBalance,
+        payable,
+      };
     })
     .filter((inv) => inv.balance > 0);
 
@@ -119,16 +154,14 @@ export default async function PortalPage({
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* Header */}
-      <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-5">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">FC</span>
-            </div>
-            <div>
-              <p className="text-white font-semibold">First Call Mitigation</p>
-              <p className="text-zinc-500 text-xs">Customer Portal</p>
-            </div>
+      <header
+        className="bg-zinc-900 border-b border-zinc-800 px-6 pb-5"
+        style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
+      >
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <Logo variant="banner" size={36} priority />
+            <p className="text-zinc-500 text-xs">Customer Portal</p>
           </div>
           <div className="text-right">
             <p className="text-zinc-500 text-xs uppercase tracking-wide">
@@ -196,45 +229,87 @@ export default async function PortalPage({
           )}
         </section>
 
-        {/* Unpaid invoices — Pay Online */}
-        {unpaidInvoices.length > 0 && (
+        {/* Insurance-primary: no Pay button, just status */}
+        {paymentRoute === "insurance_primary" && unpaidInvoices.length > 0 && (
           <section className="bg-zinc-900 border border-blue-500/30 rounded-xl p-6 mb-5">
             <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-3">
-              💳 Pay Your Invoice
+              🏛️ Insurance Claim
             </p>
-            <div className="flex flex-col gap-3">
-              {unpaidInvoices.map((inv: any) => (
-                <div
-                  key={inv.id}
-                  className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4"
-                >
-                  <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                    <p className="text-white text-sm font-mono">
-                      {inv.invoice_number}
-                    </p>
-                    <p className="text-2xl font-bold text-white font-mono">
-                      $
-                      {inv.balance.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                  {inv.due_date && (
-                    <p className="text-zinc-500 text-xs mb-3">
-                      Due {new Date(inv.due_date).toLocaleDateString()}
-                    </p>
-                  )}
-                  <PayInvoiceButton
-                    invoiceId={inv.id}
-                    customerToken={token}
-                    amount={inv.balance}
-                  />
-                </div>
-              ))}
-            </div>
+            <p className="text-zinc-200 text-sm">
+              Your insurance carrier
+              {customer?.insurance_company ? (
+                <> (<span className="text-white">{customer.insurance_company}</span>)</>
+              ) : null}{" "}
+              is being billed directly. You don't owe anything out of pocket for
+              this work.
+            </p>
+            {customer?.insurance_claim_number && (
+              <p className="text-zinc-500 text-xs mt-3 font-mono">
+                Claim #{customer.insurance_claim_number}
+              </p>
+            )}
           </section>
         )}
+
+        {/* Customer-pay or insurance-with-deductible: show Pay button */}
+        {(paymentRoute === "customer_pay" ||
+          paymentRoute === "insurance_with_deductible") &&
+          unpaidInvoices.length > 0 && (
+            <section className="bg-zinc-900 border border-blue-500/30 rounded-xl p-6 mb-5">
+              <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-3">
+                {paymentRoute === "insurance_with_deductible"
+                  ? "💳 Pay Your Deductible"
+                  : "💳 Pay Your Invoice"}
+              </p>
+              {paymentRoute === "insurance_with_deductible" && (
+                <p className="text-zinc-400 text-xs mb-4">
+                  Your insurance is covering the bulk of this claim. The amount
+                  below is your deductible — that's all you owe.
+                </p>
+              )}
+              <div className="flex flex-col gap-3">
+                {unpaidInvoices.map((inv: any) => {
+                  const payable = Number(inv.payable ?? inv.balance);
+                  const alreadySettled = payable <= 0;
+                  return (
+                    <div
+                      key={inv.id}
+                      className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4"
+                    >
+                      <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+                        <p className="text-white text-sm font-mono">
+                          {inv.invoice_number}
+                        </p>
+                        <p className="text-2xl font-bold text-white font-mono">
+                          $
+                          {payable.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </p>
+                      </div>
+                      {inv.due_date && (
+                        <p className="text-zinc-500 text-xs mb-3">
+                          Due {new Date(inv.due_date).toLocaleDateString()}
+                        </p>
+                      )}
+                      {alreadySettled ? (
+                        <p className="text-green-400 text-xs font-medium">
+                          ✓ Your portion is paid. Awaiting insurance settlement.
+                        </p>
+                      ) : (
+                        <PayInvoiceButton
+                          invoiceId={inv.id}
+                          customerToken={token}
+                          amount={payable}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
         {/* Site Photos */}
         {photoUrls.length > 0 && (
@@ -265,11 +340,62 @@ export default async function PortalPage({
           </section>
         )}
 
-        {/* Signed Documents */}
+        {/* Legal Documents — auto-drafted + e-signed via /sign */}
+        {(signedLegalDocs?.length ?? 0) > 0 && (
+          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+            <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
+              Legal Documents
+            </p>
+            <ul className="flex flex-col gap-2">
+              {signedLegalDocs!.map((d: any) => {
+                const labels: Record<string, string> = {
+                  aob: "Assignment of Benefits",
+                  direction_to_pay: "Direction to Pay",
+                  work_authorization: "Work Authorization",
+                  drying_certificate: "Drying Certificate",
+                };
+                const isSigned = d.status === "signed";
+                return (
+                  <li
+                    key={d.id}
+                    className="flex items-center justify-between bg-zinc-800/40 rounded-lg px-3 py-2.5 text-sm gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white">
+                        {labels[d.doc_type] ?? d.doc_type}
+                      </p>
+                      <p className="text-zinc-500 text-[10px]">
+                        {isSigned
+                          ? `Signed by ${d.signed_by_name ?? "you"} ${new Date(d.signed_at).toLocaleDateString()}`
+                          : `Sent ${new Date(d.sent_at).toLocaleDateString()} — awaiting your signature`}
+                      </p>
+                    </div>
+                    {d.signing_token && (
+                      <a
+                        href={`/sign/${d.signing_token}`}
+                        target="_blank"
+                        rel="noopener"
+                        className={`text-[10px] px-2.5 py-1 rounded font-semibold uppercase ${
+                          isSigned
+                            ? "bg-green-500/15 text-green-400 hover:bg-green-500/25"
+                            : "bg-blue-600 text-white hover:bg-blue-500"
+                        }`}
+                      >
+                        {isSigned ? "✓ View" : "Sign now →"}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
+        {/* Other signed documents (uploaded paper docs) */}
         {(signedDocs?.length ?? 0) > 0 && (
           <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
             <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
-              Your Signed Documents
+              Other Signed Documents
             </p>
             <ul className="flex flex-col gap-2">
               {signedDocs!.map((d: any) => (

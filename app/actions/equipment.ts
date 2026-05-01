@@ -73,7 +73,7 @@ export async function updateEquipment(id: string, formData: FormData) {
 export async function assignToJob(
   equipmentId: string,
   jobId: string,
-  hoursAtDeploy: number
+  hoursAtDeploy?: number | null
 ) {
   const user = await requireUser();
   if (!user) return { error: "Not authenticated." };
@@ -85,7 +85,7 @@ export async function assignToJob(
     equipment_id: equipmentId,
     job_id: jobId,
     deployed_by: user.id,
-    hours_at_deploy: hoursAtDeploy,
+    hours_at_deploy: hoursAtDeploy ?? null,
   });
   if (assignErr) return { error: assignErr.message };
 
@@ -108,8 +108,8 @@ export async function assignToJob(
 
 export async function retrieveFromJob(
   equipmentId: string,
-  hoursAtReturn: number,
-  notes: string
+  hoursAtReturn?: number | null,
+  notes?: string
 ) {
   const user = await requireUser();
   if (!user) return { error: "Not authenticated." };
@@ -136,35 +136,42 @@ export async function retrieveFromJob(
     .update({
       retrieved_at: new Date().toISOString(),
       retrieved_by: user.id,
-      hours_at_return: hoursAtReturn,
-      notes: notes || null,
+      hours_at_return: hoursAtReturn ?? null,
+      notes: notes?.trim() || null,
     })
     .eq("id", openAssign.id);
   if (closeErr) return { error: closeErr.message };
 
-  // Update equipment: clear deployment, add hours
-  const hoursWorked = Math.max(
-    0,
-    hoursAtReturn - (Number(openAssign.hours_at_deploy) || 0)
-  );
+  // Update equipment: clear deployment. Roll up logged hours only when both
+  // ends of the meter were captured; otherwise keep existing total.
+  let newHoursLogged: number | null = null;
+  if (
+    hoursAtReturn != null &&
+    !Number.isNaN(Number(hoursAtReturn)) &&
+    openAssign.hours_at_deploy != null
+  ) {
+    const hoursWorked = Math.max(
+      0,
+      Number(hoursAtReturn) - Number(openAssign.hours_at_deploy)
+    );
+    const { data: equip } = await admin
+      .from("equipment")
+      .select("hours_logged")
+      .eq("id", equipmentId)
+      .single();
+    newHoursLogged = (Number(equip?.hours_logged) || 0) + hoursWorked;
+  }
 
-  // Get current hours_logged
-  const { data: equip } = await admin
-    .from("equipment")
-    .select("hours_logged")
-    .eq("id", equipmentId)
-    .single();
-
-  const newHoursLogged = (Number(equip?.hours_logged) || 0) + hoursWorked;
+  const updates: Record<string, any> = {
+    status: "available",
+    current_job_id: null,
+    updated_at: new Date().toISOString(),
+  };
+  if (newHoursLogged != null) updates.hours_logged = newHoursLogged;
 
   const { error: equipErr } = await admin
     .from("equipment")
-    .update({
-      status: "available",
-      current_job_id: null,
-      hours_logged: newHoursLogged,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updates)
     .eq("id", equipmentId);
   if (equipErr) return { error: equipErr.message };
 

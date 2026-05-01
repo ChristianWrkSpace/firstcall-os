@@ -3,11 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS } from "@/lib/nav";
+import { NAV_ITEMS, type NavItem } from "@/lib/nav";
 import { signOut } from "@/app/actions/auth";
+import Logo from "@/components/Logo";
 import SearchTrigger from "./SearchTrigger";
 
-export default function MobileNav() {
+export default function MobileNav({
+  items,
+}: {
+  items?: readonly NavItem[];
+}) {
+  const navItems = items ?? NAV_ITEMS;
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -30,8 +36,13 @@ export default function MobileNav() {
 
   return (
     <>
-      {/* Mobile top bar */}
-      <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
+      {/* Mobile top bar — pt accounts for iOS status bar / notch when running
+          as installed PWA (display:standalone) so the hamburger isn't tucked
+          under the system clock. */}
+      <header
+        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-zinc-900 border-b border-zinc-800"
+        style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
+      >
         <button
           onClick={() => setOpen(true)}
           aria-label="Open menu"
@@ -53,9 +64,7 @@ export default function MobileNav() {
           </svg>
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">FC</span>
-          </div>
+          <Logo variant="mark" size={28} />
           <p className="text-white text-sm font-semibold">FirstCall OS</p>
         </div>
         <SearchTrigger variant="mobile" />
@@ -75,25 +84,16 @@ export default function MobileNav() {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Logo + close */}
-        <div className="flex items-center justify-between gap-2.5 px-4 py-5 border-b border-zinc-800">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-md bg-blue-600 flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-bold">FC</span>
-            </div>
-            <div className="min-w-0">
-              <p className="text-white text-sm font-semibold leading-none truncate">
-                FirstCall OS
-              </p>
-              <p className="text-zinc-500 text-xs leading-none mt-0.5 truncate">
-                First Call Mitigation
-              </p>
-            </div>
-          </div>
+        {/* Brand + close — top padding respects notch when drawer is open */}
+        <div
+          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-zinc-800"
+          style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
+        >
+          <Logo variant="banner" size={28} />
           <button
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="p-2 text-zinc-400 hover:text-white"
+            className="p-2 text-zinc-400 hover:text-white text-2xl min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             ✕
           </button>
@@ -101,7 +101,7 @@ export default function MobileNav() {
 
         {/* Nav */}
         <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
               <Link

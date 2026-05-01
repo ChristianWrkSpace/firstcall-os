@@ -21,7 +21,7 @@ export default function StatusSelector({
         defaultValue={currentStatus}
         onChange={(e) => e.target.form?.requestSubmit()}
         disabled={pending}
-        className="px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent capitalize disabled:opacity-50 cursor-pointer"
+        className="px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-base focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent capitalize disabled:opacity-50 cursor-pointer min-h-[44px]"
       >
         {JOB_STATUSES.map((s) => (
           <option key={s} value={s} className="capitalize">

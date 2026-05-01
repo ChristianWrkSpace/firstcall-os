@@ -9,6 +9,7 @@ import {
   type Track,
   type Effort,
 } from "@/lib/roadmap";
+import { requireRoles } from "@/components/RoleGate";
 
 const STATUS_META: Record<Status, { label: string; color: string; emoji: string }> = {
   done: { label: "Shipped", color: "text-green-400", emoji: "✅" },
@@ -27,7 +28,8 @@ const EFFORT_META: Record<Effort, { label: string; hours: string; color: string 
 const TRACKS: Track[] = ["core", "production", "security", "integrations"];
 const STATUS_ORDER: Status[] = ["in_progress", "done", "planned", "idea"];
 
-export default function ProgressPage() {
+export default async function ProgressPage() {
+  await requireRoles(["owner", "manager"]);
   const overall = computeTrackProgress("all");
   const counts = computeStatusCounts();
   const trackProgress: Record<Track, ReturnType<typeof computeTrackProgress>> = {

@@ -40,19 +40,28 @@ const SEVERITY_COLORS = {
   severe: "bg-red-500/15 text-red-400",
 };
 
-// Claude occasionally returns a string for fields the schema declared as arrays.
-// Coerce defensively so the UI never crashes.
+const CONFIDENCE_COLORS = {
+  low: "bg-red-500/15 text-red-400",
+  medium: "bg-yellow-500/15 text-yellow-400",
+  high: "bg-green-500/15 text-green-400",
+};
+
 function asArray<T = string>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[];
   if (typeof value === "string" && value.trim()) return [value as T];
   return [];
 }
 
-const CONFIDENCE_COLORS = {
-  low: "bg-red-500/15 text-red-400",
-  medium: "bg-yellow-500/15 text-yellow-400",
-  high: "bg-green-500/15 text-green-400",
-};
+// Argus sometimes returns mitigation steps as "1. Verify…" already-numbered.
+// We render them in <ol>, so strip a leading "N. " to avoid "1. 1. Verify…".
+function stripLeadingNumber(s: string): string {
+  return s.replace(/^\s*\d+\.\s*/, "");
+}
+
+function firstSentence(s: string): string {
+  const m = s.match(/^[^.!?]*[.!?]/);
+  return (m ? m[0] : s).trim();
+}
 
 export default function ScopeAssessment({
   scope,
@@ -70,15 +79,23 @@ export default function ScopeAssessment({
   }>(scope.affected_areas);
   const safetyConcerns = asArray<string>(scope.safety_concerns);
   const ppeRequired = asArray<string>(scope.ppe_required);
-  const mitigationSteps = asArray<string>(scope.mitigation_steps);
+  const mitigationSteps = asArray<string>(scope.mitigation_steps).map(stripLeadingNumber);
   const equipmentOther = asArray<string>(scope.equipment_needed?.other);
   const totalSqft = affectedAreas.reduce((sum, a) => sum + (a.estimated_sqft ?? 0), 0);
+  const eq = scope.equipment_needed ?? {};
+  const equipmentTotal =
+    (eq.lgr_dehumidifiers ?? 0) +
+    (eq.conventional_dehumidifiers ?? 0) +
+    (eq.air_movers ?? 0) +
+    (eq.air_scrubbers ?? 0) +
+    equipmentOther.length;
+  const tldr = scope.summary ? firstSentence(scope.summary) : null;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Header with confidence + meta */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-col gap-3">
+      {/* Headline: badges + 1-line tldr */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {scope.water_category && scope.water_category !== "n/a" && (
             <Badge color="bg-blue-500/15 text-blue-300">Cat {scope.water_category}</Badge>
           )}
@@ -86,7 +103,7 @@ export default function ScopeAssessment({
             <Badge color="bg-purple-500/15 text-purple-300">Class {scope.water_class}</Badge>
           )}
           {totalSqft > 0 && (
-            <Badge color="bg-zinc-800 text-zinc-300">~{totalSqft} sqft affected</Badge>
+            <Badge color="bg-zinc-800 text-zinc-300">~{totalSqft} sqft</Badge>
           )}
           {scope.estimated_dry_days && (
             <Badge color="bg-zinc-800 text-zinc-300">{scope.estimated_dry_days}-day dry</Badge>
@@ -96,102 +113,179 @@ export default function ScopeAssessment({
               {scope.confidence} confidence
             </Badge>
           )}
+          {analyzedAt && (
+            <span className="text-zinc-600 text-[10px] ml-auto">
+              {new Date(analyzedAt).toLocaleString()}
+            </span>
+          )}
         </div>
-        {analyzedAt && (
-          <p className="text-zinc-500 text-xs">
-            Analyzed {new Date(analyzedAt).toLocaleString()}
-          </p>
+        {tldr && (
+          <p className="text-zinc-200 text-sm leading-relaxed">{tldr}</p>
         )}
       </div>
 
-      {/* Summary */}
-      {scope.summary && (
-        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
-          <p className="text-zinc-200 text-sm leading-relaxed">{scope.summary}</p>
-        </div>
+      {/* Photos suggested — nudge stays visible since it's actionable */}
+      {scope.additional_photos_needed && (
+        <Disclosure
+          summary={
+            <span className="flex items-center gap-2 text-yellow-300">
+              <span>📷</span>
+              <span className="font-medium text-sm">More photos suggested</span>
+            </span>
+          }
+          accent="yellow"
+        >
+          <p className="text-yellow-200/90 text-sm leading-relaxed">
+            {scope.additional_photos_needed}
+          </p>
+        </Disclosure>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Equipment */}
-        {scope.equipment_needed && (
-          <Section title="🛠 Equipment Needed">
-            <ul className="text-sm space-y-1.5">
-              {scope.equipment_needed.lgr_dehumidifiers ? (
-                <li className="flex justify-between">
-                  <span className="text-zinc-300">LGR Dehumidifiers</span>
-                  <span className="text-white font-mono font-semibold">
-                    × {scope.equipment_needed.lgr_dehumidifiers}
-                  </span>
-                </li>
-              ) : null}
-              {scope.equipment_needed.conventional_dehumidifiers ? (
-                <li className="flex justify-between">
-                  <span className="text-zinc-300">Conventional Dehus</span>
-                  <span className="text-white font-mono font-semibold">
-                    × {scope.equipment_needed.conventional_dehumidifiers}
-                  </span>
-                </li>
-              ) : null}
-              {scope.equipment_needed.air_movers ? (
-                <li className="flex justify-between">
-                  <span className="text-zinc-300">Air Movers</span>
-                  <span className="text-white font-mono font-semibold">
-                    × {scope.equipment_needed.air_movers}
-                  </span>
-                </li>
-              ) : null}
-              {scope.equipment_needed.air_scrubbers ? (
-                <li className="flex justify-between">
-                  <span className="text-zinc-300">Air Scrubbers</span>
-                  <span className="text-white font-mono font-semibold">
-                    × {scope.equipment_needed.air_scrubbers}
-                  </span>
-                </li>
-              ) : null}
-              {equipmentOther.map((o, i) => (
-                <li key={i} className="text-zinc-300">• {o}</li>
-              ))}
-            </ul>
-          </Section>
-        )}
+      {/* Workflow order: where → what → how → steps → math → full summary */}
 
-        {/* Safety + PPE */}
-        {(safetyConcerns.length > 0 || ppeRequired.length > 0) && (
-          <Section title="⚠️ Safety & PPE">
-            {safetyConcerns.length > 0 && (
-              <div className="mb-3">
-                <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Concerns</p>
-                <ul className="text-sm text-zinc-300 space-y-1">
-                  {safetyConcerns.map((s, i) => (
-                    <li key={i}>• {s}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {ppeRequired.length > 0 && (
-              <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Required PPE</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {ppeRequired.map((p, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-zinc-800 text-zinc-200 text-xs rounded">
-                      {p}
-                    </span>
-                  ))}
+      {/* Affected Areas */}
+      {affectedAreas.length > 0 && (
+        <Disclosure
+          summary={
+            <SummaryRow
+              icon="📍"
+              title="Affected Areas"
+              count={`${affectedAreas.length} ${affectedAreas.length === 1 ? "zone" : "zones"}`}
+            />
+          }
+        >
+          <div className="flex flex-col gap-2.5">
+            {affectedAreas.map((area, i) => {
+              const materials = asArray<string>(area.materials);
+              const severityColor =
+                SEVERITY_COLORS[area.severity] ?? "bg-zinc-700 text-zinc-300";
+              return (
+                <div key={i} className="border-l-2 border-zinc-700 pl-3 py-0.5">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <p className="text-white text-sm font-medium">{area.location}</p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {area.estimated_sqft && (
+                        <span className="text-zinc-400 text-xs">{area.estimated_sqft} sqft</span>
+                      )}
+                      {area.severity && <Badge color={severityColor}>{area.severity}</Badge>}
+                    </div>
+                  </div>
+                  {materials.length > 0 && (
+                    <p className="text-zinc-400 text-xs mt-0.5">{materials.join(" · ")}</p>
+                  )}
+                  {area.notes && (
+                    <p className="text-zinc-500 text-xs italic mt-1 leading-relaxed">
+                      {area.notes}
+                    </p>
+                  )}
                 </div>
-              </div>
-            )}
-          </Section>
-        )}
-      </div>
+              );
+            })}
+          </div>
+        </Disclosure>
+      )}
 
-      {/* Calculations / Show the Math */}
+      {/* Equipment to Load */}
+      {equipmentTotal > 0 && (
+        <Disclosure
+          summary={
+            <SummaryRow
+              icon="🛠"
+              title="Equipment to load"
+              count={`${equipmentTotal} ${equipmentTotal === 1 ? "item" : "items"}`}
+            />
+          }
+        >
+          <ul className="text-sm space-y-1.5">
+            {eq.lgr_dehumidifiers ? (
+              <EqRow label="LGR Dehumidifiers" qty={eq.lgr_dehumidifiers} />
+            ) : null}
+            {eq.conventional_dehumidifiers ? (
+              <EqRow label="Conventional Dehus" qty={eq.conventional_dehumidifiers} />
+            ) : null}
+            {eq.air_movers ? <EqRow label="Air Movers" qty={eq.air_movers} /> : null}
+            {eq.air_scrubbers ? <EqRow label="Air Scrubbers" qty={eq.air_scrubbers} /> : null}
+            {equipmentOther.map((o, i) => (
+              <li key={i} className="text-zinc-300">• {o}</li>
+            ))}
+          </ul>
+        </Disclosure>
+      )}
+
+      {/* Safety & PPE */}
+      {(safetyConcerns.length > 0 || ppeRequired.length > 0) && (
+        <Disclosure
+          summary={
+            <SummaryRow
+              icon="⚠️"
+              title="Safety & PPE"
+              count={
+                [
+                  safetyConcerns.length && `${safetyConcerns.length} concern${safetyConcerns.length === 1 ? "" : "s"}`,
+                  ppeRequired.length && `${ppeRequired.length} PPE`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ") || undefined
+              }
+            />
+          }
+        >
+          {safetyConcerns.length > 0 && (
+            <div className="mb-3">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1.5">Concerns</p>
+              <ul className="text-sm text-zinc-300 space-y-1 leading-relaxed">
+                {safetyConcerns.map((s, i) => (
+                  <li key={i}>• {s}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {ppeRequired.length > 0 && (
+            <div>
+              <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1.5">Required PPE</p>
+              <div className="flex flex-wrap gap-1.5">
+                {ppeRequired.map((p, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-1 bg-zinc-800 text-zinc-200 text-xs rounded"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </Disclosure>
+      )}
+
+      {/* Mitigation Plan */}
+      {mitigationSteps.length > 0 && (
+        <Disclosure
+          summary={
+            <SummaryRow
+              icon="📋"
+              title="Mitigation plan"
+              count={`${mitigationSteps.length} steps`}
+            />
+          }
+        >
+          <ol className="text-sm text-zinc-300 space-y-1.5 list-decimal pl-5 leading-relaxed">
+            {mitigationSteps.map((step, i) => (
+              <li key={i} className="pl-1">{step}</li>
+            ))}
+          </ol>
+        </Disclosure>
+      )}
+
+      {/* Show the Math */}
       {scope.calculations && (
-        <details className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 group" open>
-          <summary className="cursor-pointer flex items-center justify-between">
-            <span className="text-blue-300 text-sm font-semibold">🧮 Show the Math</span>
-            <span className="text-zinc-500 text-xs group-open:hidden">click to expand</span>
-          </summary>
-          <div className="mt-3 flex flex-col gap-3 text-sm">
+        <Disclosure
+          summary={
+            <SummaryRow icon="🧮" title="Show the math" count="audit trail" />
+          }
+          accent="blue"
+        >
+          <div className="flex flex-col gap-3 text-sm">
             {scope.calculations.air_mover_math && (
               <CalcRow label="Air Movers" formula={scope.calculations.air_mover_math} />
             )}
@@ -209,7 +303,7 @@ export default function ScopeAssessment({
                 <p className="text-yellow-400 text-xs uppercase tracking-wide mb-1.5">
                   ⚠ Verify on arrival
                 </p>
-                <ul className="text-zinc-300 text-xs space-y-1">
+                <ul className="text-zinc-300 text-xs space-y-1 leading-relaxed">
                   {asArray<string>(scope.calculations.key_assumptions).map((a, i) => (
                     <li key={i}>• {a}</li>
                   ))}
@@ -217,60 +311,75 @@ export default function ScopeAssessment({
               </div>
             )}
           </div>
-        </details>
+        </Disclosure>
       )}
 
-      {/* Affected Areas */}
-      {affectedAreas.length > 0 && (
-        <Section title="📍 Affected Areas">
-          <div className="flex flex-col gap-2">
-            {affectedAreas.map((area, i) => {
-              const materials = asArray<string>(area.materials);
-              const severityColor =
-                SEVERITY_COLORS[area.severity] ?? "bg-zinc-700 text-zinc-300";
-              return (
-                <div key={i} className="border-l-2 border-zinc-700 pl-3 py-1">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <p className="text-white text-sm font-medium">{area.location}</p>
-                    <div className="flex items-center gap-2">
-                      {area.estimated_sqft && (
-                        <span className="text-zinc-400 text-xs">{area.estimated_sqft} sqft</span>
-                      )}
-                      {area.severity && <Badge color={severityColor}>{area.severity}</Badge>}
-                    </div>
-                  </div>
-                  {materials.length > 0 && (
-                    <p className="text-zinc-400 text-xs mt-0.5">{materials.join(" · ")}</p>
-                  )}
-                  {area.notes && <p className="text-zinc-500 text-xs italic mt-1">{area.notes}</p>}
-                </div>
-              );
-            })}
-          </div>
-        </Section>
-      )}
-
-      {/* Mitigation Steps */}
-      {mitigationSteps.length > 0 && (
-        <Section title="📋 Mitigation Plan">
-          <ol className="text-sm text-zinc-300 space-y-1 list-decimal list-inside">
-            {mitigationSteps.map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ol>
-        </Section>
-      )}
-
-      {/* Photos needed callout */}
-      {scope.additional_photos_needed && (
-        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3">
-          <p className="text-yellow-400 text-xs uppercase tracking-wide mb-1">
-            Argus suggests additional photos
-          </p>
-          <p className="text-yellow-200 text-sm">{scope.additional_photos_needed}</p>
-        </div>
+      {/* Full summary — last because the tldr is up top */}
+      {scope.summary && scope.summary !== tldr && (
+        <Disclosure
+          summary={<SummaryRow icon="📝" title="Full summary" />}
+        >
+          <p className="text-zinc-300 text-sm leading-relaxed">{scope.summary}</p>
+        </Disclosure>
       )}
     </div>
+  );
+}
+
+function SummaryRow({
+  icon,
+  title,
+  count,
+}: {
+  icon: string;
+  title: string;
+  count?: string;
+}) {
+  return (
+    <span className="flex items-center gap-2 flex-1 min-w-0">
+      <span className="text-base">{icon}</span>
+      <span className="text-white text-sm font-medium">{title}</span>
+      {count && (
+        <span className="text-zinc-500 text-xs ml-auto">{count}</span>
+      )}
+    </span>
+  );
+}
+
+function Disclosure({
+  summary,
+  children,
+  accent = "zinc",
+}: {
+  summary: React.ReactNode;
+  children: React.ReactNode;
+  accent?: "zinc" | "blue" | "yellow";
+}) {
+  const accentClasses =
+    accent === "blue"
+      ? "bg-blue-500/5 border-blue-500/20 hover:border-blue-500/40"
+      : accent === "yellow"
+        ? "bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40"
+        : "bg-zinc-800/40 border-zinc-700/50 hover:border-zinc-600";
+  return (
+    <details className={`group border rounded-lg transition-colors ${accentClasses}`}>
+      <summary className="cursor-pointer list-none flex items-center gap-2 px-3.5 py-2.5 select-none">
+        <span className="flex-1 min-w-0">{summary}</span>
+        <span className="text-zinc-500 text-xs transition-transform group-open:rotate-90 shrink-0">
+          ▸
+        </span>
+      </summary>
+      <div className="px-3.5 pb-3.5 pt-1">{children}</div>
+    </details>
+  );
+}
+
+function EqRow({ label, qty }: { label: string; qty: number }) {
+  return (
+    <li className="flex justify-between">
+      <span className="text-zinc-300">{label}</span>
+      <span className="text-white font-mono font-semibold">× {qty}</span>
+    </li>
   );
 }
 
@@ -278,23 +387,18 @@ function CalcRow({ label, formula }: { label: string; formula: string }) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-zinc-400 text-xs uppercase tracking-wide">{label}</span>
-      <span className="text-zinc-100 text-sm font-mono leading-relaxed">{formula}</span>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4">
-      <h3 className="text-white text-sm font-semibold mb-2">{title}</h3>
-      {children}
+      <span className="text-zinc-100 text-sm font-mono leading-relaxed whitespace-pre-wrap">
+        {formula}
+      </span>
     </div>
   );
 }
 
 function Badge({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${color}`}>
+    <span
+      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${color}`}
+    >
       {children}
     </span>
   );

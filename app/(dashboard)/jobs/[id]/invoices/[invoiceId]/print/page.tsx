@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import PrintTrigger from "./PrintTrigger";
 
 export default async function InvoicePrintPage({
@@ -94,17 +95,10 @@ export default async function InvoicePrintPage({
         {/* Letterhead */}
         <header className="flex justify-between items-start pb-5 border-b-2 border-black">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-600 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-lg">FC</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">First Call Mitigation</h1>
-                <p className="text-xs text-zinc-600 uppercase tracking-wider">
-                  Water · Fire · Mold Restoration
-                </p>
-              </div>
-            </div>
+            <Logo variant="banner" size={48} priority />
+            <p className="text-xs text-zinc-600 uppercase tracking-wider mt-2">
+              Water · Fire · Mold Restoration
+            </p>
             <div className="mt-3 text-xs text-zinc-700 leading-relaxed">
               <p>Austin, Texas</p>
               <p>Licensed · Bonded · Insured · IICRC Certified</p>

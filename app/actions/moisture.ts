@@ -2,6 +2,8 @@
 
 import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { autoTriggerOnMoistureReading } from "@/lib/auto-triggers";
 
 async function requireUser() {
   const supabase = await createServerSupabaseClient();
@@ -16,16 +18,19 @@ export async function recordMoistureReading(jobId: string, formData: FormData) {
   const room = (formData.get("room") as string)?.trim();
   if (!room) return { error: "Room is required." };
 
+  const moisture_pct = parseNullableNum(formData.get("moisture_pct"));
+  const reading_date =
+    (formData.get("reading_date") as string) ||
+    new Date().toISOString().split("T")[0];
+
   const admin = createAdminClient();
   const { error } = await admin.from("moisture_readings").insert({
     job_id: jobId,
-    reading_date:
-      (formData.get("reading_date") as string) ||
-      new Date().toISOString().split("T")[0],
+    reading_date,
     room,
     location_detail: (formData.get("location_detail") as string)?.trim() || null,
     material: (formData.get("material") as string) || null,
-    moisture_pct: parseNullableNum(formData.get("moisture_pct")),
+    moisture_pct,
     rh_pct: parseNullableNum(formData.get("rh_pct")),
     temp_f: parseNullableNum(formData.get("temp_f")),
     gpp: parseNullableNum(formData.get("gpp")),
@@ -34,6 +39,13 @@ export async function recordMoistureReading(jobId: string, formData: FormData) {
     recorded_by: user.id,
   });
   if (error) return { error: error.message };
+
+  // Wires 5/7/8: helper handles status flip (mitigation→drying), drying-cert
+  // auto-draft if 3+ days all-dry, and status_suggestion (drying→completed).
+  // Uses after() to survive the response.
+  after(() =>
+    autoTriggerOnMoistureReading(jobId, { moisture_pct, reading_date })
+  );
 
   revalidatePath(`/jobs/${jobId}`);
   return { ok: true };
