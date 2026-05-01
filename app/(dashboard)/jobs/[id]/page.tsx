@@ -25,6 +25,9 @@ import JobChecklist from "./JobChecklist";
 import JobEquipment from "./JobEquipment";
 import DeployEquipmentPicker from "./DeployEquipmentPicker";
 import JobActivityTimeline from "./JobActivityTimeline";
+import JobPnlCard from "./JobPnlCard";
+import JobCostEntries from "./JobCostEntries";
+import { getCostBasis } from "@/lib/job-pnl";
 import SectionHeader from "@/components/SectionHeader";
 import { STATUS_COLORS, PAYMENT_ROUTE_BY_VALUE, type PaymentRoute } from "@/lib/constants";
 
@@ -55,6 +58,8 @@ export default async function JobDetailPage({
     { data: legalDocs },
     { data: equipmentAssignments },
     { data: availableEquipment },
+    { data: laborEntries },
+    { data: consumableEntries },
   ] = await Promise.all([
     supabase
       .from("jobs")
@@ -128,7 +133,19 @@ export default async function JobDetailPage({
       .eq("status", "available")
       .order("type", { ascending: true })
       .order("serial_number", { ascending: true }),
+    supabase
+      .from("tech_labor_entries")
+      .select("id, work_date, hours, hourly_rate, profile_id, profiles(name)")
+      .eq("job_id", id)
+      .order("work_date", { ascending: false }),
+    supabase
+      .from("consumables_used")
+      .select("id, item, quantity, unit_cost")
+      .eq("job_id", id)
+      .order("created_at", { ascending: false }),
   ]);
+
+  const costBasis = await getCostBasis();
 
 
   if (!job) notFound();
@@ -211,6 +228,34 @@ export default async function JobDetailPage({
                 <JobActivityTimeline jobId={job.id} />
               </div>
             </details>
+          </section>
+
+          {/* Live Job P&L */}
+          <section id="pnl" className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 scroll-mt-20">
+            <div className="mb-4">
+              <SectionHeader
+                title="Job P&L"
+                emoji="💰"
+                hint="Live revenue minus all COGS (labor + consumables + equipment + van). Updates the moment you log entries below. Tune defaults in Settings → Cost Basis."
+              />
+            </div>
+            <JobPnlCard jobId={job.id} />
+            <div className="mt-5">
+              <JobCostEntries
+                jobId={job.id}
+                defaultHourlyRate={costBasis.default_hourly_rate}
+                techs={(availableTechs ?? []).map((t: any) => ({ id: t.id, name: t.name }))}
+                laborEntries={(laborEntries ?? []).map((e: any) => ({
+                  id: e.id,
+                  work_date: e.work_date,
+                  hours: e.hours,
+                  hourly_rate: e.hourly_rate,
+                  profile_id: e.profile_id,
+                  profiles: Array.isArray(e.profiles) ? e.profiles[0] : e.profiles,
+                }))}
+                consumableEntries={consumableEntries ?? []}
+              />
+            </div>
           </section>
 
           {/* Job Info */}

@@ -68,6 +68,14 @@ export default async function SettingsPage() {
       emoji: "❤️‍🩹",
       visible: me.role === "owner" || me.role === "manager",
     },
+    {
+      href: "/settings/cost-basis",
+      title: "Cost Basis",
+      description:
+        "Hourly rate, van $/job, equipment daily cost, monthly overhead. Drives every Job P&L computation.",
+      emoji: "🧮",
+      visible: me.role === "owner" || me.role === "manager",
+    },
   ];
 
   return (
