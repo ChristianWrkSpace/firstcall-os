@@ -48,9 +48,16 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
   const ctxAgent = params?._agent ?? null;
   const ctxTask = params?._task ?? null;
   const ctxJobId = params?._job_id ?? null;
-  if (params?._agent) delete params._agent;
-  if (params?._task) delete params._task;
-  if (params?._job_id) delete params._job_id;
+  // Strip ANY `_*` private context field so future call sites can't leak
+  // unknown tags into the upstream API (Anthropic/Gateway both 400 on
+  // unknown body params). Belt-and-suspenders over the explicit deletes
+  // above; the explicit captures still grab the tags we care about for
+  // logging.
+  if (params && typeof params === "object") {
+    for (const k of Object.keys(params)) {
+      if (k.startsWith("_")) delete params[k];
+    }
+  }
 
   try {
     const result = await _originalCreate(params, options);

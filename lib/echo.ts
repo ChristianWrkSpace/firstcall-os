@@ -96,7 +96,7 @@ export async function askEcho(req: EchoRequest): Promise<EchoResponse> {
     messages,
     // Tag the call so agent_invocations can attribute it to Echo (the SDK
     // wrapper in lib/ai.ts strips these before sending to the API).
-    ...({ _agent: "echo", _task: "qa", _user_id: req.operator.id } as any),
+    ...({ _agent: "echo", _task: "qa" } as any),
   } as any);
 
   const tokensIn = (result as any)?.usage?.input_tokens ?? 0;
