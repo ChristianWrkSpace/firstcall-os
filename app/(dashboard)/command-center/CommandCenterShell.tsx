@@ -232,82 +232,217 @@ function Sep() {
 }
 
 // ─── Multimodal Command Bar ──────────────────────────────────────────────
+interface IrisAnswer {
+  conversationId: string;
+  question: string;
+  answer: string;
+  model: string;
+  tier: "fast" | "balanced";
+  costUsd: number;
+}
+
 function CommandBar() {
   const [text, setText] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [answer, setAnswer] = useState<IrisAnswer | null>(null);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+
+  async function ask() {
+    const q = text.trim();
+    if (!q || pending) return;
+    setError(null);
+    setAnswer(null);
+    setFeedback(null);
+    setPending(true);
+    try {
+      const res = await fetch("/api/iris", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error ?? "Iris failed.");
+      } else {
+        setAnswer({ ...data, question: q });
+        setText("");
+      }
+    } catch (e: any) {
+      setError(e?.message ?? "Network error.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function vote(v: "up" | "down") {
+    if (!answer) return;
+    setFeedback(v);
+    try {
+      await fetch("/api/iris", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId: answer.conversationId, feedback: v }),
+      });
+    } catch {
+      // Silent — UI already updated
+    }
+  }
 
   return (
-    <div
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragOver(true);
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragOver(false);
-        // Drop is a no-op in the isolated shell — wire to a real handler later.
-      }}
-      className={`relative rounded-2xl border backdrop-blur-2xl transition-all duration-300
-        ${dragOver
-          ? "border-[#5FBDB0]/60 bg-[#5FBDB0]/5 shadow-[0_0_40px_rgba(95,189,176,0.25)]"
-          : "border-white/[0.07] bg-white/[0.025]"}
-      `}
-    >
-      <div className="flex items-center gap-3 px-4 py-3">
-        <SearchIcon className="text-white/40 shrink-0" />
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={
-            dragOver
-              ? "Drop photos to dispatch Argus…"
-              : "Ask anything · drop photos · /command · ⌘K"
-          }
-          className="flex-1 bg-transparent outline-none text-sm md:text-base placeholder:text-white/35 text-white/90"
-        />
+    <div className="flex flex-col gap-3">
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+        }}
+        className={`relative rounded-2xl border backdrop-blur-2xl transition-all duration-300
+          ${dragOver
+            ? "border-[#5FBDB0]/60 bg-[#5FBDB0]/5 shadow-[0_0_40px_rgba(95,189,176,0.25)]"
+            : "border-white/[0.07] bg-white/[0.025]"}
+        `}
+      >
+        <div className="flex items-center gap-3 px-4 py-3">
+          <SearchIcon className="text-white/40 shrink-0" />
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey && text.trim()) {
+                e.preventDefault();
+                ask();
+              }
+            }}
+            disabled={pending}
+            placeholder={
+              pending
+                ? "Iris is thinking…"
+                : dragOver
+                  ? "Drop photos to dispatch Argus…"
+                  : "Ask Iris anything · drop photos · /command · ⌘K"
+            }
+            className="flex-1 bg-transparent outline-none text-sm md:text-base placeholder:text-white/35 text-white/90 disabled:opacity-50"
+          />
 
-        <div className="flex items-center gap-1.5">
-          <ModeChip label="⌘K" />
-          <button
-            type="button"
-            onClick={() => setRecording((r) => !r)}
-            aria-label="Voice"
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-colors
-              ${recording
-                ? "bg-[#5FBDB0]/15 text-[#5FBDB0] ring-1 ring-[#5FBDB0]/40"
-                : "text-white/50 hover:text-white/90 hover:bg-white/5"}
-            `}
-          >
-            {recording ? <PulseMicIcon /> : <MicIcon />}
-          </button>
-          <button
-            type="button"
-            aria-label="Attach"
-            className="h-8 w-8 rounded-xl flex items-center justify-center text-white/50 hover:text-white/90 hover:bg-white/5 transition-colors"
-          >
-            <PaperclipIcon />
-          </button>
-          <button
-            type="button"
-            disabled={!text.trim() && !recording}
-            className="ml-1 h-8 px-3 rounded-xl bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_18px_rgba(107,138,217,0.25)] hover:shadow-[0_0_22px_rgba(95,189,176,0.35)] transition-shadow"
-          >
-            Dispatch →
-          </button>
+          <div className="flex items-center gap-1.5">
+            <ModeChip label="↵" />
+            <button
+              type="button"
+              onClick={() => setRecording((r) => !r)}
+              aria-label="Voice"
+              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-colors
+                ${recording
+                  ? "bg-[#5FBDB0]/15 text-[#5FBDB0] ring-1 ring-[#5FBDB0]/40"
+                  : "text-white/50 hover:text-white/90 hover:bg-white/5"}
+              `}
+            >
+              {recording ? <PulseMicIcon /> : <MicIcon />}
+            </button>
+            <button
+              type="button"
+              aria-label="Attach"
+              className="h-8 w-8 rounded-xl flex items-center justify-center text-white/50 hover:text-white/90 hover:bg-white/5 transition-colors"
+            >
+              <PaperclipIcon />
+            </button>
+            <button
+              type="button"
+              onClick={ask}
+              disabled={!text.trim() || pending}
+              className="ml-1 h-8 px-3 rounded-xl bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_18px_rgba(107,138,217,0.25)] hover:shadow-[0_0_22px_rgba(95,189,176,0.35)] transition-shadow"
+            >
+              {pending ? "…" : "Ask Iris →"}
+            </button>
+          </div>
         </div>
+
+        {!answer && !error && (
+          <div className="px-4 pb-3 flex items-center gap-1.5 flex-wrap">
+            <Hint>💬 Ask: &quot;what jobs are stuck on AR?&quot;</Hint>
+            <Hint>📊 Ask: &quot;why is my margin low this month?&quot;</Hint>
+            <Hint>🎯 Ask: &quot;which carrier pays slowest?&quot;</Hint>
+          </div>
+        )}
+
+        {dragOver && (
+          <div className="absolute inset-0 rounded-2xl pointer-events-none animate-shimmer-border" />
+        )}
       </div>
 
-      {/* Context hints below */}
-      <div className="px-4 pb-3 flex items-center gap-1.5 flex-wrap">
-        <Hint>📸 Drop site photos → Argus auto-scopes</Hint>
-        <Hint>🎙 Voice memo → transcribed to job notes</Hint>
-        <Hint>/new job · /log labor · /run audit</Hint>
-      </div>
-
-      {dragOver && (
-        <div className="absolute inset-0 rounded-2xl pointer-events-none animate-shimmer-border" />
+      {/* Iris answer panel */}
+      {(answer || error) && (
+        <div className="rounded-2xl border border-[#5FBDB0]/20 bg-[#5FBDB0]/[0.04] backdrop-blur-2xl p-4 animate-rise-in">
+          {error ? (
+            <p className="text-red-300 text-sm">{error}</p>
+          ) : answer ? (
+            <>
+              <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-[0.18em] text-[#A8DCD3]">
+                <span>◐</span>
+                <span>Iris</span>
+                <span className="text-white/30">·</span>
+                <span className="text-white/40 normal-case tracking-normal font-mono">
+                  {answer.tier} tier · ${answer.costUsd.toFixed(4)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAnswer(null);
+                    setError(null);
+                    setFeedback(null);
+                  }}
+                  aria-label="Dismiss"
+                  className="ml-auto text-white/30 hover:text-white/70"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">
+                {answer.answer}
+              </p>
+              <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center gap-2 text-[11px]">
+                <span className="text-white/40">Was this helpful?</span>
+                <button
+                  type="button"
+                  onClick={() => vote("up")}
+                  disabled={feedback !== null}
+                  className={`px-2 py-1 rounded-md transition-colors ${
+                    feedback === "up"
+                      ? "bg-green-400/15 text-green-300"
+                      : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+                  } disabled:opacity-60`}
+                  aria-label="Helpful"
+                >
+                  👍
+                </button>
+                <button
+                  type="button"
+                  onClick={() => vote("down")}
+                  disabled={feedback !== null}
+                  className={`px-2 py-1 rounded-md transition-colors ${
+                    feedback === "down"
+                      ? "bg-red-400/15 text-red-300"
+                      : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+                  } disabled:opacity-60`}
+                  aria-label="Not helpful"
+                >
+                  👎
+                </button>
+                {feedback && (
+                  <span className="text-white/35 ml-2">
+                    Logged — Iris will learn from this.
+                  </span>
+                )}
+              </div>
+            </>
+          ) : null}
+        </div>
       )}
     </div>
   );
