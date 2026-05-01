@@ -347,6 +347,23 @@ export const ROADMAP: RoadmapItem[] = [
     ],
   },
   {
+    id: "job-activity-timeline",
+    title: "Job Activity Timeline",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-04-30",
+    description:
+      "Collapsible 'Activity Timeline' section on every job detail page. Unifies events from 9 sources (audit_logs, customer_notifications, legal_documents create/send/sign, moisture_readings, equipment_assignments deploy/retrieve, estimates create/approve, invoices create/send, payments) into one chronological feed with actor attribution. No new schema — all reads from existing tables.",
+    features: [
+      "13 distinct event kinds with color-coded borders",
+      "Actor attribution: 'by Esquire' / 'by Christian' / 'by Tech'",
+      "Capped at 460px scroll height + 50 audit log rows + 20 moisture readings to keep render fast",
+      "Collapsed by default so it doesn't bloat the page",
+      "Scrolls-to anchor (#timeline) so future links can deep-link to it",
+    ],
+  },
+  {
     id: "ops-dashboard",
     title: "Operational Dashboard",
     track: "core",

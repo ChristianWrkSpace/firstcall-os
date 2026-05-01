@@ -24,6 +24,7 @@ import AutoPauseToggle from "./AutoPauseToggle";
 import JobChecklist from "./JobChecklist";
 import JobEquipment from "./JobEquipment";
 import DeployEquipmentPicker from "./DeployEquipmentPicker";
+import JobActivityTimeline from "./JobActivityTimeline";
 import SectionHeader from "@/components/SectionHeader";
 import { STATUS_COLORS, PAYMENT_ROUTE_BY_VALUE, type PaymentRoute } from "@/lib/constants";
 
@@ -194,6 +195,23 @@ export default async function JobDetailPage({
               equipmentDeployed: equipmentAssignments?.length ?? 0,
             }}
           />
+
+          {/* Activity Timeline — collapsible by default to keep page tight */}
+          <section id="timeline" className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 scroll-mt-20">
+            <details>
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-2 select-none group">
+                <SectionHeader
+                  title="Activity Timeline"
+                  emoji="📜"
+                  hint="Every event on this job — emails sent, docs created/sent/signed, moisture readings, equipment deploy/retrieve, estimates approved, payments received — in one chronological feed."
+                />
+                <span className="text-zinc-500 text-xs transition-transform group-open:rotate-90">▸</span>
+              </summary>
+              <div className="mt-4">
+                <JobActivityTimeline jobId={job.id} />
+              </div>
+            </details>
+          </section>
 
           {/* Job Info */}
           <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
