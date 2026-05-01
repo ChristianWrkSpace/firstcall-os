@@ -26,7 +26,11 @@ export async function saveDispatchInputs(jobId: string, inputs: DispatchInputs) 
   return { ok: true };
 }
 
-export async function recordJobPhoto(jobId: string, storagePath: string) {
+export async function recordJobPhoto(
+  jobId: string,
+  storagePath: string,
+  source?: { videoId?: string; frameTimestampSec?: number }
+) {
   const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
@@ -37,6 +41,8 @@ export async function recordJobPhoto(jobId: string, storagePath: string) {
     job_id: jobId,
     storage_path: storagePath,
     uploaded_by: user.id,
+    source_video_id: source?.videoId ?? null,
+    frame_timestamp_sec: source?.frameTimestampSec ?? null,
   });
   if (dbErr) {
     console.error("[recordJobPhoto]", dbErr);
@@ -45,6 +51,43 @@ export async function recordJobPhoto(jobId: string, storagePath: string) {
 
   revalidatePath(`/jobs/${jobId}`);
   return { ok: true };
+}
+
+/**
+ * Record a job_videos row after the client has uploaded the original
+ * video + thumbnail to Supabase Storage. Returns the new id so the
+ * caller can link extracted frames to it via recordJobPhoto.
+ */
+export async function recordJobVideo(args: {
+  jobId: string;
+  storagePath: string;
+  thumbnailPath?: string | null;
+  durationSec?: number | null;
+}) {
+  const supabase = await createServerSupabaseClient();
+  const admin = createAdminClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { data, error } = await admin
+    .from("job_videos")
+    .insert({
+      job_id: args.jobId,
+      storage_path: args.storagePath,
+      thumbnail_path: args.thumbnailPath ?? null,
+      duration_sec: args.durationSec ?? null,
+      uploaded_by: user.id,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    console.error("[recordJobVideo]", error);
+    return { error: error?.message ?? "Could not record video." };
+  }
+
+  revalidatePath(`/jobs/${args.jobId}`);
+  return { ok: true as const, videoId: data.id };
 }
 
 export async function analyzeJobPhotos(jobId: string) {

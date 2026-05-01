@@ -78,6 +78,41 @@ export const SCOPE_TOOL: Anthropic.Tool = {
         items: { type: "string" },
         description: "High-level work plan: extraction, demolition (cuts), antimicrobial, drying setup, monitoring.",
       },
+      containment_plan: {
+        type: "array",
+        description:
+          "Where to install poly containment / decon chambers / negative-air zones, in setup order. Be specific about geometry — wall-to-wall, ceiling-to-floor, doorway, etc.",
+        items: {
+          type: "object",
+          properties: {
+            area: {
+              type: "string",
+              description: "Specific location, e.g. 'Bathroom doorway, ceiling-to-floor critical barrier'",
+            },
+            type: {
+              type: "string",
+              enum: [
+                "full_critical_barrier",
+                "partial_barrier",
+                "decon_chamber",
+                "negative_air_zone",
+                "splash_guard",
+              ],
+            },
+            reason: {
+              type: "string",
+              description: "Why here — e.g. 'isolate active mold growth from kitchen during demo'",
+            },
+          },
+          required: ["area", "type", "reason"],
+        },
+      },
+      tech_playbook: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Step-by-step instructions for the tech, ordered. 8–12 steps max. Each step is concrete and actionable: 'Don PPE before entering containment', 'Set up zipper door at bathroom entry', 'Place LGR1 in bathroom under negative pressure', etc. This is what the tech reads on the truck before walking in.",
+      },
       summary: {
         type: "string",
         description: "One-paragraph executive summary the tech reads on arrival.",
@@ -181,16 +216,22 @@ export async function assessScope(
         content: [
           {
             type: "text",
-            text: preamble + `You are Argus, the AI scoping engineer for First Call Mitigation. Assess the following site photos following IICRC S500 (water) / S520 (mold) standards.
+            text: preamble + `You are Argus, the AI scoping engineer for First Call Mitigation. Assess the following site photos (some may be frames extracted from a walk-through video) following IICRC S500 (water) / S520 (mold) standards.
 
-Your job: produce a TIGHT equipment list the tech will load on the truck. Don't overload (waste) and don't underload (return trips). Show your math in the calculations field so the tech can verify before rolling.
+Your job — three deliverables in one pass:
 
-Be honest about confidence — if the photos don't show enough, say so in additional_photos_needed.
+1. TIGHT EQUIPMENT LIST the tech loads on the truck. Don't overload (waste) and don't underload (return trips). Show your math in the calculations field so the tech can verify before rolling.
+
+2. CONTAINMENT PLAN — where to install poly, decon chambers, negative-air zones, splash guards, and IN WHAT ORDER. Be specific about geometry (wall-to-wall, ceiling-to-floor, doorway, transition between rooms). The tech reads this and walks straight in knowing where to tape.
+
+3. TECH PLAYBOOK — the step-by-step the tech follows from arrival to first reading. 8–12 concrete actions ordered chronologically. Includes PPE donning, source verification, containment install, equipment placement, first moisture readings, photos to take. This is the dummy-proof checklist.
+
+Be honest about confidence — if the photos/frames don't show enough, say so in additional_photos_needed.
 
 Job context:
 ${jobContext}${dispatcherInputBlock}
 
-Now analyze every photo and produce the structured scope.`,
+Now analyze every frame/photo and produce the full structured scope.`,
           },
           ...imageBlocks,
         ],

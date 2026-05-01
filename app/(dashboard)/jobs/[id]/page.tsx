@@ -5,6 +5,7 @@ import StatusSelector from "./StatusSelector";
 import AddNoteForm from "./AddNoteForm";
 import VoiceNote from "./VoiceNote";
 import PhotoUploader from "./PhotoUploader";
+import VideoUploader from "./VideoUploader";
 import PhotoGallery from "./PhotoGallery";
 import AnalyzeButton from "./AnalyzeButton";
 import ScopeAssessment from "./ScopeAssessment";
@@ -298,6 +299,7 @@ export default async function JobDetailPage({
                   </Link>
                 )}
                 <PhotoUploader jobId={job.id} />
+                <VideoUploader jobId={job.id} />
                 <AnalyzeButton
                   jobId={job.id}
                   hasPhotos={(photos?.length ?? 0) > 0}

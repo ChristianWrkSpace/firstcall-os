@@ -19,6 +19,12 @@ interface ScopeData {
   ppe_required?: string[];
   estimated_dry_days?: number;
   mitigation_steps?: string[];
+  containment_plan?: Array<{
+    area: string;
+    type: string;
+    reason: string;
+  }>;
+  tech_playbook?: string[];
   summary?: string;
   confidence?: "low" | "medium" | "high";
   additional_photos_needed?: string;
@@ -33,6 +39,14 @@ interface ScopeData {
     key_assumptions?: string[];
   };
 }
+
+const CONTAINMENT_TYPE_META: Record<string, { label: string; emoji: string; color: string }> = {
+  full_critical_barrier: { label: "Full critical barrier", emoji: "🛡", color: "text-red-300" },
+  partial_barrier:       { label: "Partial barrier",       emoji: "▦", color: "text-yellow-300" },
+  decon_chamber:         { label: "Decon chamber",         emoji: "🚪", color: "text-purple-300" },
+  negative_air_zone:     { label: "Negative-air zone",     emoji: "💨", color: "text-blue-300" },
+  splash_guard:          { label: "Splash guard",          emoji: "💧", color: "text-cyan-300" },
+};
 
 const SEVERITY_COLORS = {
   minor: "bg-green-500/15 text-green-400",
@@ -80,6 +94,10 @@ export default function ScopeAssessment({
   const safetyConcerns = asArray<string>(scope.safety_concerns);
   const ppeRequired = asArray<string>(scope.ppe_required);
   const mitigationSteps = asArray<string>(scope.mitigation_steps).map(stripLeadingNumber);
+  const techPlaybook = asArray<string>(scope.tech_playbook).map(stripLeadingNumber);
+  const containmentPlan = asArray<{ area: string; type: string; reason: string }>(
+    scope.containment_plan
+  );
   const equipmentOther = asArray<string>(scope.equipment_needed?.other);
   const totalSqft = affectedAreas.reduce((sum, a) => sum + (a.estimated_sqft ?? 0), 0);
   const eq = scope.equipment_needed ?? {};
@@ -212,6 +230,45 @@ export default function ScopeAssessment({
         </Disclosure>
       )}
 
+      {/* Containment Plan — where to put poly, decon chambers, neg-air zones */}
+      {containmentPlan.length > 0 && (
+        <Disclosure
+          summary={
+            <SummaryRow
+              icon="🛡"
+              title="Containment plan"
+              count={`${containmentPlan.length} ${containmentPlan.length === 1 ? "zone" : "zones"}`}
+            />
+          }
+          accent="blue"
+        >
+          <ul className="flex flex-col gap-2.5">
+            {containmentPlan.map((c, i) => {
+              const meta =
+                CONTAINMENT_TYPE_META[c.type] ?? {
+                  label: c.type,
+                  emoji: "▦",
+                  color: "text-zinc-300",
+                };
+              return (
+                <li
+                  key={i}
+                  className="border-l-2 border-white/[0.08] pl-3 py-1"
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-sm font-medium ${meta.color}`}>
+                      {meta.emoji} {meta.label}
+                    </span>
+                    <span className="text-white/60 text-xs">→ {c.area}</span>
+                  </div>
+                  <p className="text-zinc-500 text-xs mt-0.5 leading-relaxed">{c.reason}</p>
+                </li>
+              );
+            })}
+          </ul>
+        </Disclosure>
+      )}
+
       {/* Safety & PPE */}
       {(safetyConcerns.length > 0 || ppeRequired.length > 0) && (
         <Disclosure
@@ -258,7 +315,30 @@ export default function ScopeAssessment({
         </Disclosure>
       )}
 
-      {/* Mitigation Plan */}
+      {/* Tech Playbook — dummy-proof step-by-step the tech follows on arrival */}
+      {techPlaybook.length > 0 && (
+        <Disclosure
+          summary={
+            <SummaryRow
+              icon="✅"
+              title="Tech playbook"
+              count={`${techPlaybook.length} steps`}
+            />
+          }
+          accent="teal"
+        >
+          <p className="text-[#A8DCD3] text-[11px] mb-2 italic">
+            Read this from the truck before walking in.
+          </p>
+          <ol className="text-sm text-zinc-200 space-y-2 list-decimal pl-5 leading-relaxed">
+            {techPlaybook.map((step, i) => (
+              <li key={i} className="pl-1">{step}</li>
+            ))}
+          </ol>
+        </Disclosure>
+      )}
+
+      {/* Mitigation Plan — high-level work phases */}
       {mitigationSteps.length > 0 && (
         <Disclosure
           summary={
@@ -353,14 +433,16 @@ function Disclosure({
 }: {
   summary: React.ReactNode;
   children: React.ReactNode;
-  accent?: "zinc" | "blue" | "yellow";
+  accent?: "zinc" | "blue" | "yellow" | "teal";
 }) {
   const accentClasses =
     accent === "blue"
       ? "bg-blue-500/5 border-blue-500/20 hover:border-blue-500/40"
       : accent === "yellow"
         ? "bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40"
-        : "bg-white/[0.03] border-white/[0.06] hover:border-zinc-600";
+        : accent === "teal"
+          ? "bg-[#5FBDB0]/[0.04] border-[#5FBDB0]/25 hover:border-[#5FBDB0]/45"
+          : "bg-white/[0.03] border-white/[0.06] hover:border-zinc-600";
   return (
     <details className={`group border rounded-lg transition-colors ${accentClasses}`}>
       <summary className="cursor-pointer list-none flex items-center gap-2 px-3.5 py-2.5 select-none">
