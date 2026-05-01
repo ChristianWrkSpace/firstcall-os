@@ -116,26 +116,54 @@ export async function analyzeJobPhotos(jobId: string) {
     if (photosErr) throw photosErr;
     if (!photos?.length) return { error: "No photos uploaded yet." };
 
-    // Download each photo, normalize (resize/convert to JPEG) for Claude Vision
+    // Cap images sent to the model. More images = more vision tokens + more
+    // model latency. 8 evenly-spaced is plenty for a scope assessment; if
+    // there are more (e.g. video frames + extra photos), pick a strided
+    // subset so we still cover the whole walk-through.
+    const MAX_IMAGES = 8;
+    let chosenPhotos = photos;
+    if (photos.length > MAX_IMAGES) {
+      const stride = photos.length / MAX_IMAGES;
+      chosenPhotos = Array.from({ length: MAX_IMAGES }, (_, i) =>
+        photos[Math.min(photos.length - 1, Math.floor(i * stride))]
+      );
+    }
+
+    // Download + Sharp-normalize all photos in parallel. Was sequential —
+    // for 8 photos at ~400ms each that's 3.2s of pure waiting on a single
+    // CPU core. Promise.all + per-photo failure isolation drops it to
+    // roughly the slowest single download (~600ms).
     const sharp = (await import("sharp")).default;
-    const images: ScopeImage[] = [];
-    for (const p of photos) {
-      const { data: blob, error: dlErr } = await admin.storage
-        .from(BUCKET)
-        .download(p.storage_path);
-      if (dlErr || !blob) throw dlErr ?? new Error("Photo download failed");
-
-      const buf = Buffer.from(await blob.arrayBuffer());
-
-      // Normalize: resize to max 1568px long edge, convert to JPEG quality 85.
-      // This handles HEIC, large phone photos, weird formats — Claude only sees clean JPEG.
-      const normalized = await sharp(buf)
-        .rotate() // honor EXIF orientation
-        .resize({ width: 1568, height: 1568, fit: "inside", withoutEnlargement: true })
-        .jpeg({ quality: 85 })
-        .toBuffer();
-
-      images.push({ mediaType: "image/jpeg", data: normalized.toString("base64") });
+    const downloads = await Promise.all(
+      chosenPhotos.map(async (p): Promise<ScopeImage | null> => {
+        try {
+          const { data: blob, error: dlErr } = await admin.storage
+            .from(BUCKET)
+            .download(p.storage_path);
+          if (dlErr || !blob) return null;
+          const buf = Buffer.from(await blob.arrayBuffer());
+          // Resize to max 1024px long edge — plenty for vision scope, half
+          // the upload bytes vs 1568, ~30% lower vision token cost.
+          const normalized = await sharp(buf)
+            .rotate() // honor EXIF orientation
+            .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
+            .jpeg({ quality: 82 })
+            .toBuffer();
+          return {
+            mediaType: "image/jpeg",
+            data: normalized.toString("base64"),
+          };
+        } catch (err) {
+          console.warn("[analyzeJobPhotos] skipping bad photo:", p.storage_path, err);
+          return null;
+        }
+      })
+    );
+    const images: ScopeImage[] = downloads.filter(
+      (i): i is ScopeImage => i !== null
+    );
+    if (images.length === 0) {
+      return { error: "No usable photos — all downloads/decoding failed." };
     }
 
     const jobContext = [

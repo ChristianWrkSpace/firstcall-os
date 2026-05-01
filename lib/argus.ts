@@ -206,8 +206,12 @@ export async function assessScope(
   const preamble = await feedbackPreamble("argus", "scope_assessment", 5);
 
   const message = await anthropic.messages.create({
-    model: MODELS.SMART,
-    max_tokens: 4096,
+    // Sonnet (BALANCED) — vision quality is excellent for scope work and
+    // it's 2-3x faster than Opus on multi-image inputs. Forced tool_use
+    // keeps the structured output exactly as before. Bump to SMART later
+    // if scope quality regressions show up in agent_outcomes.
+    model: MODELS.BALANCED,
+    max_tokens: 3000,
     tools: [SCOPE_TOOL],
     tool_choice: { type: "tool", name: "assess_damage_scope" },
     messages: [
