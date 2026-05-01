@@ -32,7 +32,7 @@ export default function Loading() {
 
 function SkeletonCard({ h }: { h: string }) {
   return (
-    <div className={`bg-zinc-900 border border-zinc-800 rounded-xl p-6 ${h}`}>
+    <div className={`glass-card p-6 ${h}`}>
       <div className="h-4 w-24 bg-zinc-800 rounded mb-4" />
       <div className="h-3 w-full bg-zinc-800/60 rounded mb-2" />
       <div className="h-3 w-5/6 bg-zinc-800/60 rounded mb-2" />

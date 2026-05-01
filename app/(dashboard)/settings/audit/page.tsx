@@ -47,14 +47,14 @@ export default async function AuditPage() {
       </div>
 
       {!logs?.length ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
+        <div className="glass-card p-8 text-center">
           <p className="text-zinc-500 text-sm">No audit events yet.</p>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+        <div className="glass-card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">When</th>
                 <th className="px-5 py-3 text-left">Who</th>
                 <th className="px-5 py-3 text-left">Action</th>
@@ -71,7 +71,7 @@ export default async function AuditPage() {
                 return (
                   <tr
                     key={log.id}
-                    className="border-b border-zinc-800/60 last:border-0 hover:bg-zinc-800/40"
+                    className="border-b border-white/[0.06]/60 last:border-0 hover:bg-white/[0.04]"
                   >
                     <td className="px-5 py-3 text-zinc-400 text-xs whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString()}

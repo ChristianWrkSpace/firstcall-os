@@ -149,7 +149,7 @@ export default async function TechPerformancePage({
       </div>
 
       {/* Per-tech table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {rows.length === 0 ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No labor logged in this window. Log hours from any job's P&L section.
@@ -157,7 +157,7 @@ export default async function TechPerformancePage({
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Tech</th>
                 <th className="px-4 py-3 text-right">Hours</th>
                 <th className="px-4 py-3 text-right">Labor Cost</th>
@@ -180,7 +180,7 @@ export default async function TechPerformancePage({
                 return (
                   <tr
                     key={r.profileId}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04]"
                   >
                     <td className="px-4 py-3 text-white font-medium">{r.name}</td>
                     <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
@@ -238,7 +238,7 @@ function Tile({
   color?: string;
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
       {sub && <p className="text-zinc-500 text-xs mt-1">{sub}</p>}

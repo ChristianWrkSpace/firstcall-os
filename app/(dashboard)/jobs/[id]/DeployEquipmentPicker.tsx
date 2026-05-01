@@ -67,7 +67,7 @@ export default function DeployEquipmentPicker({
   }
 
   return (
-    <div className="w-full mt-3 bg-zinc-800/40 border border-zinc-700 rounded-lg p-3">
+    <div className="w-full mt-3 bg-white/[0.03] border border-zinc-700 rounded-lg p-3">
       <div className="flex items-center justify-between mb-2 gap-2">
         <p className="text-zinc-300 text-xs font-semibold uppercase tracking-wide">
           Pick from available inventory

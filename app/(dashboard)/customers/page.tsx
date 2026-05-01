@@ -45,7 +45,7 @@ export default async function CustomersPage({
         )}
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {!customers?.length ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             {q ? `No customers match "${q}".` : "No customers yet — they're created automatically when you create a job or take a call."}
@@ -53,7 +53,7 @@ export default async function CustomersPage({
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Name</th>
                 <th className="px-5 py-3 text-left">Phone</th>
                 <th className="px-5 py-3 text-left">Email</th>
@@ -72,7 +72,7 @@ export default async function CustomersPage({
                 return (
                   <tr
                     key={c.id}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link

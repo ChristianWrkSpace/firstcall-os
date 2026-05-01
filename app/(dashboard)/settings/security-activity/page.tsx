@@ -180,7 +180,7 @@ export default async function SecurityActivityPage({
 
       {/* Rate-limit key breakdown */}
       {rateLimitKeys.size > 0 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+        <div className="glass-card p-5 mb-6">
           <h2 className="text-white font-semibold mb-3">🚦 Rate Limit Hits by Key</h2>
           <ul className="flex flex-col gap-1.5">
             {Array.from(rateLimitKeys.entries())
@@ -189,7 +189,7 @@ export default async function SecurityActivityPage({
               .map(([key, count]) => (
                 <li
                   key={key}
-                  className="flex items-center justify-between text-xs px-3 py-1.5 bg-zinc-800/40 rounded"
+                  className="flex items-center justify-between text-xs px-3 py-1.5 bg-white/[0.03] rounded"
                 >
                   <code className="text-zinc-300 truncate">{key}</code>
                   <span className="text-yellow-400 font-mono font-semibold">×{count}</span>
@@ -200,7 +200,7 @@ export default async function SecurityActivityPage({
       )}
 
       {/* Event stream */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div className="glass-card p-5">
         <h2 className="text-white font-semibold mb-3">Event Stream</h2>
         {!events?.length ? (
           <p className="text-zinc-500 text-sm italic">No security events in this window.</p>
@@ -211,7 +211,7 @@ export default async function SecurityActivityPage({
               return (
                 <li
                   key={e.id}
-                  className="flex items-start gap-2 px-3 py-2 bg-zinc-800/40 border border-zinc-700/40 rounded-lg"
+                  className="flex items-start gap-2 px-3 py-2 bg-white/[0.03] border border-zinc-700/40 rounded-lg"
                 >
                   <span className="text-base shrink-0 leading-none mt-0.5">{meta.emoji}</span>
                   <div className="flex-1 min-w-0">

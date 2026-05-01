@@ -145,7 +145,7 @@ export default function NewCallPage() {
 
       {/* Recording UI */}
       {(state === "idle" || state === "recording") && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 flex flex-col items-center gap-5">
+        <div className="glass-card p-8 flex flex-col items-center gap-5">
           <div
             className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
               state === "recording"
@@ -186,7 +186,7 @@ export default function NewCallPage() {
 
       {/* Processing spinner */}
       {state === "processing" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 flex flex-col items-center gap-4">
+        <div className="glass-card p-8 flex flex-col items-center gap-4">
           <SpinnerIcon className="w-10 h-10 text-blue-400 animate-spin" />
           <p className="text-white font-medium">Transcribing & extracting…</p>
           <p className="text-zinc-500 text-xs text-center">
@@ -212,7 +212,7 @@ export default function NewCallPage() {
           )}
 
           {/* Caller type */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <div className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Call Type</h2>
             <span
               className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
@@ -227,7 +227,7 @@ export default function NewCallPage() {
 
           {/* Partner info */}
           {extraction.caller_type === "partner" && extraction.partner && (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <div className="glass-card p-5">
               <h2 className="text-white font-semibold mb-3">Partner / Referral</h2>
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <ReviewField label="Name" value={extraction.partner.name} />
@@ -243,7 +243,7 @@ export default function NewCallPage() {
           )}
 
           {/* Customer */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <div className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Customer</h2>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <ReviewField label="Name" value={extraction.customer.name} />
@@ -255,7 +255,7 @@ export default function NewCallPage() {
           </div>
 
           {/* Job */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <div className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Job Details</h2>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <ReviewField label="Type" value={extraction.job.type} capitalize />
@@ -289,7 +289,7 @@ export default function NewCallPage() {
           </div>
 
           {/* Transcript */}
-          <details className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <details className="glass-card p-5">
             <summary className="text-zinc-400 text-sm cursor-pointer hover:text-white transition-colors">
               View transcript
             </summary>

@@ -157,7 +157,7 @@ export default function SchedulingPanel({
               return (
                 <div
                   key={a.id}
-                  className="flex items-center justify-between gap-2 bg-zinc-800/40 rounded px-2 py-1.5 text-xs"
+                  className="flex items-center justify-between gap-2 bg-white/[0.03] rounded px-2 py-1.5 text-xs"
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span className="text-zinc-200 truncate">

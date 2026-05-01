@@ -45,7 +45,7 @@ export default async function UsersPage() {
       </div>
 
       {!canManage && (
-        <div className="mb-5 px-4 py-3 bg-zinc-800/40 border border-zinc-700/50 rounded-lg text-zinc-400 text-sm">
+        <div className="mb-5 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-lg text-zinc-400 text-sm">
           ℹ️ View-only — only Owners can change roles.
         </div>
       )}
@@ -55,7 +55,7 @@ export default async function UsersPage() {
         {ALL_ROLES.map((r) => {
           const meta = ROLE_META[r];
           return (
-            <div key={r} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+            <div key={r} className="glass-card p-4">
               <div className="flex items-baseline justify-between mb-1">
                 <p className="text-white text-sm font-semibold">{meta.label}</p>
                 <p className="text-2xl font-bold text-blue-400 font-mono">
@@ -69,10 +69,10 @@ export default async function UsersPage() {
       </div>
 
       {/* User table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
               <th className="px-5 py-3 text-left">Name</th>
               <th className="px-5 py-3 text-left">Email</th>
               <th className="px-5 py-3 text-left">Role</th>
@@ -84,7 +84,7 @@ export default async function UsersPage() {
             {(profiles ?? []).map((p: any) => (
               <tr
                 key={p.id}
-                className={`border-b border-zinc-800 last:border-0 ${
+                className={`border-b border-white/[0.06] last:border-0 ${
                   !p.active ? "opacity-50" : ""
                 }`}
               >

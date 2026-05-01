@@ -9,7 +9,7 @@ export default function Loading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 h-28"
+            className="glass-card p-4 h-28"
           />
         ))}
       </div>

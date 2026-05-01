@@ -80,7 +80,7 @@ export default async function ARDashboard() {
 
       {/* AR Aging buckets */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <div className="glass-card p-4">
           <p className="text-zinc-500 text-xs uppercase tracking-wide">Total Open AR</p>
           <p className="text-3xl font-bold text-white font-mono mt-1">{fmt(totalAR)}</p>
           <p className="text-zinc-500 text-xs mt-1">
@@ -88,7 +88,7 @@ export default async function ARDashboard() {
           </p>
         </div>
         {Object.values(buckets).map((b) => (
-          <div key={b.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <div key={b.label} className="glass-card p-4">
             <p className="text-zinc-500 text-xs uppercase tracking-wide">{b.label}</p>
             <p className={`text-2xl font-bold font-mono mt-1 ${b.color}`}>
               {fmt(b.amount)}
@@ -130,8 +130,8 @@ export default async function ARDashboard() {
       )}
 
       {/* Open invoice table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
-        <div className="px-5 py-3 border-b border-zinc-800">
+      <div className="glass-card overflow-x-auto">
+        <div className="px-5 py-3 border-b border-white/[0.06]">
           <h2 className="text-white font-semibold">Open Invoices</h2>
         </div>
         {enriched.filter((i) => i.sent_at).length === 0 ? (
@@ -144,7 +144,7 @@ export default async function ARDashboard() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Invoice #</th>
                 <th className="px-5 py-3 text-left">Customer</th>
                 <th className="px-5 py-3 text-left">Carrier</th>
@@ -160,7 +160,7 @@ export default async function ARDashboard() {
                 .map((inv: any) => (
                   <tr
                     key={inv.id}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link

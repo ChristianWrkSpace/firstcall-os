@@ -87,7 +87,7 @@ export default async function EquipmentListPage({
         ))}
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {!equipment?.length ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No equipment yet.{" "}
@@ -98,7 +98,7 @@ export default async function EquipmentListPage({
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Type</th>
                 <th className="px-5 py-3 text-left">Serial #</th>
                 <th className="px-5 py-3 text-left">Model</th>
@@ -113,7 +113,7 @@ export default async function EquipmentListPage({
                 return (
                   <tr
                     key={eq.id}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                   >
                     <td className="px-5 py-3 text-zinc-300">
                       {equipmentTypeLabel(eq.type)}

@@ -40,7 +40,7 @@ export default function MobileNav({
           as installed PWA (display:standalone) so the hamburger isn't tucked
           under the system clock. */}
       <header
-        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-zinc-900 border-b border-zinc-800"
+        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-[#0E1012]/90 backdrop-blur-2xl border-b border-white/[0.06]"
         style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
       >
         <button
@@ -80,13 +80,13 @@ export default function MobileNav({
 
       {/* Drawer */}
       <aside
-        className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-zinc-900 border-r border-zinc-800 flex flex-col transform transition-transform duration-200 ${
+        className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0E1012]/95 backdrop-blur-2xl border-r border-white/[0.08] flex flex-col transform transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand + close — top padding respects notch when drawer is open */}
         <div
-          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-zinc-800"
+          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-white/[0.06]"
           style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
         >
           <Logo variant="banner" size={28} />

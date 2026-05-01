@@ -15,13 +15,13 @@ const TYPE_COLORS = {
 
 export default function RemindersPanel({ reminders }: { reminders: Reminder[] }) {
   return (
-    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <section className="glass-card p-5">
       <h2 className="text-white font-semibold mb-3">Reminder History</h2>
       <ul className="flex flex-col gap-2">
         {reminders.map((r) => (
           <li
             key={r.id}
-            className="flex items-start justify-between gap-3 px-3 py-2 bg-zinc-800/40 rounded-lg"
+            className="flex items-start justify-between gap-3 px-3 py-2 bg-white/[0.03] rounded-lg"
           >
             <div className="min-w-0 flex-1">
               <p className={`text-xs font-semibold capitalize ${TYPE_COLORS[r.reminder_type]}`}>

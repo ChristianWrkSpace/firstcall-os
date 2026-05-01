@@ -45,7 +45,7 @@ export default async function JobPnlCard({ jobId }: { jobId: string }) {
       </div>
 
       {/* Cost waterfall — full breakdown */}
-      <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4">
+      <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
         <p className="text-zinc-400 text-xs uppercase tracking-wide mb-3 font-semibold">
           Where the money goes
         </p>
@@ -125,7 +125,7 @@ function Tile({
   color?: string;
 }) {
   return (
-    <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-3">
+    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3">
       <p className="text-zinc-500 text-[10px] uppercase tracking-wide">{label}</p>
       <p className={`text-lg font-bold font-mono mt-0.5 ${color}`}>{value}</p>
     </div>

@@ -147,7 +147,7 @@ export default async function PartnerDetailPage({
       )}
 
       {/* Referred jobs */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+      <section className="glass-card p-6 mb-5">
         <h2 className="text-white font-semibold mb-3">Referred Jobs</h2>
         {(referredJobs?.length ?? 0) === 0 ? (
           <p className="text-zinc-500 text-sm italic">
@@ -158,7 +158,7 @@ export default async function PartnerDetailPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                   <th className="text-left py-2">Job #</th>
                   <th className="text-left py-2">Customer</th>
                   <th className="text-left py-2">Status</th>
@@ -180,7 +180,7 @@ export default async function PartnerDetailPage({
                   return (
                     <tr
                       key={j.id}
-                      className="border-b border-zinc-800/60 last:border-0 hover:bg-zinc-800/40"
+                      className="border-b border-white/[0.06]/60 last:border-0 hover:bg-white/[0.04]"
                     >
                       <td className="py-2.5">
                         <Link
@@ -213,7 +213,7 @@ export default async function PartnerDetailPage({
 
       {/* Cash payouts (1099) */}
       {canLog && (
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+        <section className="glass-card p-6 mb-5">
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
             <div>
               <h2 className="text-white font-semibold">Cash Payouts</h2>
@@ -228,7 +228,7 @@ export default async function PartnerDetailPage({
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                   <th className="text-left py-2">Date</th>
                   <th className="text-left py-2">Method</th>
                   <th className="text-left py-2">Reference</th>
@@ -241,7 +241,7 @@ export default async function PartnerDetailPage({
                 {(payouts as any[]).map((p) => (
                   <tr
                     key={p.id}
-                    className="border-b border-zinc-800/60 last:border-0"
+                    className="border-b border-white/[0.06]/60 last:border-0"
                   >
                     <td className="py-2.5 text-zinc-300 text-xs">{p.occurred_on}</td>
                     <td className="py-2.5 text-zinc-300 text-xs capitalize">{p.method}</td>
@@ -263,7 +263,7 @@ export default async function PartnerDetailPage({
 
       {/* Soft investments */}
       {canLog && (
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
             <div>
               <h2 className="text-white font-semibold">Soft Investments</h2>
@@ -278,7 +278,7 @@ export default async function PartnerDetailPage({
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                   <th className="text-left py-2">Date</th>
                   <th className="text-left py-2">Category</th>
                   <th className="text-left py-2">Notes</th>
@@ -290,7 +290,7 @@ export default async function PartnerDetailPage({
                 {(investments as any[]).map((i) => (
                   <tr
                     key={i.id}
-                    className="border-b border-zinc-800/60 last:border-0"
+                    className="border-b border-white/[0.06]/60 last:border-0"
                   >
                     <td className="py-2.5 text-zinc-300 text-xs">{i.occurred_on}</td>
                     <td className="py-2.5 text-zinc-300 text-xs">{CATEGORY_LABEL[i.category] ?? i.category}</td>
@@ -332,7 +332,7 @@ function Tile({
           ? "text-blue-400"
           : "text-white";
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
         {label}
       </p>

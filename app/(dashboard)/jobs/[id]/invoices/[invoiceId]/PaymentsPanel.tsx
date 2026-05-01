@@ -50,7 +50,7 @@ export default function PaymentsPanel({
   }
 
   return (
-    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <section className="glass-card p-5">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-white font-semibold">Payments</h2>
         {!invoiceLocked && balance > 0 && !adding && (
@@ -128,7 +128,7 @@ export default function PaymentsPanel({
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
               <th className="text-left py-2">Date</th>
               <th className="text-left py-2">Method</th>
               <th className="text-left py-2">Ref</th>
@@ -139,7 +139,7 @@ export default function PaymentsPanel({
           </thead>
           <tbody>
             {payments.map((p) => (
-              <tr key={p.id} className="border-b border-zinc-800/40 last:border-0">
+              <tr key={p.id} className="border-b border-white/[0.06]/40 last:border-0">
                 <td className="py-2 text-zinc-300 text-xs">
                   {new Date(p.received_at).toLocaleDateString()}
                 </td>

@@ -137,8 +137,8 @@ export default async function InvoiceDetail({
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="lg:col-span-3 flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="px-5 py-3 border-b border-zinc-800 flex items-center justify-between">
+          <section className="glass-card overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
               <h2 className="text-white font-semibold">Line Items</h2>
               <p className="text-zinc-500 text-xs">{items.length} items · ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
@@ -165,7 +165,7 @@ export default async function InvoiceDetail({
         </div>
 
         <div className="flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <section className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Actions</h2>
             <InvoiceActions
               invoiceId={invoiceId}
@@ -176,7 +176,7 @@ export default async function InvoiceDetail({
             />
           </section>
 
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <section className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Meta</h2>
             <dl className="text-sm space-y-2">
               <Meta label="Issued" value={new Date(invoice.issue_date ?? invoice.created_at).toLocaleDateString()} />

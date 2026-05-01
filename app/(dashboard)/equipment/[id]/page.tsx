@@ -80,7 +80,7 @@ export default async function EquipmentDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Info + history */}
         <div className="lg:col-span-2 flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <EditForm
               id={equipment.id}
               defaults={{
@@ -98,7 +98,7 @@ export default async function EquipmentDetailPage({
             />
           </section>
 
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Assignment History</h2>
             {!assignments?.length ? (
               <p className="text-zinc-500 text-sm italic">
@@ -107,7 +107,7 @@ export default async function EquipmentDetailPage({
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                  <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                     <th className="text-left py-2">Job</th>
                     <th className="text-left py-2">Deployed</th>
                     <th className="text-left py-2">Retrieved</th>
@@ -123,7 +123,7 @@ export default async function EquipmentDetailPage({
                     return (
                       <tr
                         key={a.id}
-                        className="border-b border-zinc-800/60 last:border-0"
+                        className="border-b border-white/[0.06]/60 last:border-0"
                       >
                         <td className="py-2.5">
                           <Link
@@ -168,7 +168,7 @@ export default async function EquipmentDetailPage({
 
         {/* Right: Actions */}
         <div className="flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <section className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Actions</h2>
             <StatusActions
               equipmentId={equipment.id}

@@ -112,14 +112,14 @@ export default async function EstimateDetailPage({
         {/* Left: line items */}
         <div className="lg:col-span-3 flex flex-col gap-5">
           {meta.summary && (
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <section className="glass-card p-5">
               <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Summary</p>
               <p className="text-zinc-200 text-sm leading-relaxed">{meta.summary}</p>
             </section>
           )}
 
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="px-5 py-3 border-b border-zinc-800 flex items-center justify-between">
+          <section className="glass-card overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
               <h2 className="text-white font-semibold">Line Items</h2>
               <p className="text-zinc-500 text-xs">{items.length} items</p>
             </div>
@@ -135,7 +135,7 @@ export default async function EstimateDetailPage({
 
         {/* Right: actions + meta */}
         <div className="flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <section className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Actions</h2>
             <EstimateActions
               estimateId={estimateId}
@@ -154,7 +154,7 @@ export default async function EstimateDetailPage({
             )}
           </section>
 
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <section className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Meta</h2>
             <dl className="text-sm space-y-2">
               <Meta label="Generated" value={new Date(estimate.created_at).toLocaleString()} />
@@ -191,7 +191,7 @@ export default async function EstimateDetailPage({
           )}
 
           {meta.notes_for_estimator && (
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <section className="glass-card p-5">
               <h2 className="text-white font-semibold text-sm mb-2">
                 Notes for Estimator
               </h2>

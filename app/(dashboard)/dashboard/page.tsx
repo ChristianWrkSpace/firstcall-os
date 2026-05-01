@@ -389,9 +389,9 @@ function PipelineColumn({
   const statusColor = STATUS_COLORS[status] ?? "bg-zinc-700 text-zinc-300";
   return (
     <div
-      className={`w-64 shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col ${dim ? "opacity-70" : ""}`}
+      className={`w-64 shrink-0 glass-card flex flex-col ${dim ? "opacity-70" : ""}`}
     >
-      <div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-800 sticky top-0 bg-zinc-900 rounded-t-xl">
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] sticky top-0 bg-zinc-900 rounded-t-xl">
         <span
           className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColor}`}
         >
@@ -413,7 +413,7 @@ function PipelineColumn({
                 className={`block px-2.5 py-2 rounded-lg border transition-colors ${
                   stale
                     ? "bg-amber-500/5 border-amber-500/30 hover:bg-amber-500/10"
-                    : "bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800"
+                    : "bg-white/[0.03] border-white/[0.06] hover:bg-zinc-800"
                 }`}
               >
                 <p className="text-blue-400 font-mono text-xs">{job.job_number}</p>
@@ -449,7 +449,7 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition-colors h-full">
+    <div className="glass-card p-4 hover:border-zinc-700 transition-colors h-full">
       <p className="text-zinc-400 text-xs uppercase tracking-wide">{label}</p>
       <p className="text-3xl font-bold text-white mt-1.5">{value}</p>
       {secondary && <p className="text-zinc-500 text-xs mt-1">{secondary}</p>}

@@ -42,7 +42,7 @@ export default async function ApprovalsPage() {
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center">
+        <div className="glass-card p-10 text-center">
           <p className="text-zinc-400 text-sm">
             ✓ No pending approvals. The agents are caught up.
           </p>
@@ -52,7 +52,7 @@ export default async function ApprovalsPage() {
           {items.map((it: any) => (
             <article
               key={it.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex gap-4 items-start"
+              className="glass-card p-5 flex gap-4 items-start"
             >
               <div className="text-2xl shrink-0">
                 {KIND_EMOJI[it.kind] ?? "•"}

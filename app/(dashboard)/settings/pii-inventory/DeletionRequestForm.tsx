@@ -99,7 +99,7 @@ export default function DeletionRequestForm({
               className={`text-left px-3 py-2 rounded-lg border transition-colors ${
                 picked?.id === h.id
                   ? "border-blue-500 bg-blue-500/5"
-                  : "border-zinc-700 hover:border-zinc-600 bg-zinc-800/40"
+                  : "border-zinc-700 hover:border-zinc-600 bg-white/[0.03]"
               }`}
             >
               <p className="text-white text-sm font-medium">{h.name}</p>
@@ -112,7 +112,7 @@ export default function DeletionRequestForm({
       )}
 
       {picked && (
-        <div className="bg-zinc-800/40 border border-zinc-700 rounded-lg p-4 flex flex-col gap-3">
+        <div className="bg-white/[0.03] border border-zinc-700 rounded-lg p-4 flex flex-col gap-3">
           <div>
             <p className="text-zinc-400 text-xs uppercase tracking-wide">
               Selected

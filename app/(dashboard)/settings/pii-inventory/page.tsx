@@ -113,7 +113,7 @@ export default async function PiiInventoryPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="text-left py-2 pr-3">Table</th>
                 <th className="text-left py-2 pr-3">Column</th>
                 <th className="text-left py-2 pr-3">Class</th>
@@ -125,7 +125,7 @@ export default async function PiiInventoryPage() {
               {PII_INVENTORY.map((p, i) => (
                 <tr
                   key={i}
-                  className="border-b border-zinc-800/60 last:border-0 align-top"
+                  className="border-b border-white/[0.06]/60 last:border-0 align-top"
                 >
                   <td className="py-2 pr-3 text-zinc-300 font-mono text-xs">
                     {p.table}
@@ -233,7 +233,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+    <section className="glass-card p-6 mb-5">
       <h2 className="text-white font-semibold mb-3">{title}</h2>
       {children}
     </section>

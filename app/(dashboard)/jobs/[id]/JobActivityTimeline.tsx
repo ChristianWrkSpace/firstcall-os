@@ -27,14 +27,14 @@ interface TimelineEvent {
 
 const KIND_COLOR: Record<EventKind, string> = {
   job_created: "border-blue-500/50 bg-blue-500/5",
-  audit: "border-zinc-700 bg-zinc-800/40",
+  audit: "border-zinc-700 bg-white/[0.03]",
   notification_sent: "border-purple-500/40 bg-purple-500/5",
   legal_doc_created: "border-yellow-500/40 bg-yellow-500/5",
   legal_doc_sent: "border-blue-500/40 bg-blue-500/5",
   legal_doc_signed: "border-green-500/40 bg-green-500/5",
   moisture_reading: "border-cyan-500/40 bg-cyan-500/5",
   equipment_deployed: "border-orange-500/40 bg-orange-500/5",
-  equipment_retrieved: "border-zinc-600 bg-zinc-800/40",
+  equipment_retrieved: "border-zinc-600 bg-white/[0.03]",
   estimate_created: "border-purple-500/40 bg-purple-500/5",
   estimate_approved: "border-green-500/40 bg-green-500/5",
   invoice_created: "border-blue-500/40 bg-blue-500/5",

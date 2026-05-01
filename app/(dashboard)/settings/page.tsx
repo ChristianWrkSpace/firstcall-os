@@ -113,7 +113,7 @@ export default async function SettingsPage() {
             <Link
               key={c.href}
               href={c.href}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-700 transition-colors"
+              className="glass-card p-5 hover:border-zinc-700 transition-colors"
             >
               <div className="text-2xl mb-2">{c.emoji}</div>
               <h2 className="text-white font-semibold">{c.title}</h2>

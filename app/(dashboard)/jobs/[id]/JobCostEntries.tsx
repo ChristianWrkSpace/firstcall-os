@@ -103,7 +103,7 @@ function LaborSection({
   }
 
   return (
-    <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4">
+    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div>
           <p className="text-white text-sm font-semibold">👷 Tech Labor</p>
@@ -247,7 +247,7 @@ function ConsumablesSection({
   }
 
   return (
-    <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4">
+    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div>
           <p className="text-white text-sm font-semibold">🧪 Consumables</p>

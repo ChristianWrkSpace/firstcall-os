@@ -132,7 +132,7 @@ export default function CustomerNotifications({
               return (
                 <li
                   key={h.id}
-                  className="text-xs flex items-center justify-between gap-2 bg-zinc-800/40 rounded px-2 py-1.5"
+                  className="text-xs flex items-center justify-between gap-2 bg-white/[0.03] rounded px-2 py-1.5"
                 >
                   <span className="text-zinc-300 truncate">
                     {ev?.emoji ?? "•"} {ev?.label ?? h.event_type}

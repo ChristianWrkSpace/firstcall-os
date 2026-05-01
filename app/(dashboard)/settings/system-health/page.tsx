@@ -217,7 +217,7 @@ export default async function SystemHealthPage() {
 
       {/* Agent feedback breakdown */}
       {totalOutcomes7d > 0 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+        <div className="glass-card p-5 mb-6">
           <h2 className="text-white font-semibold mb-3">Agent Feedback (last 7d)</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {["argus", "ledger", "esquire", "solomon", "hunter", "extract"].map((a) => {
@@ -225,7 +225,7 @@ export default async function SystemHealthPage() {
               return (
                 <div
                   key={a}
-                  className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-3 text-center"
+                  className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3 text-center"
                 >
                   <p className="text-zinc-400 text-[10px] uppercase tracking-wide capitalize">{a}</p>
                   <p className={`text-2xl font-bold font-mono mt-1 ${c > 0 ? "text-green-400" : "text-zinc-600"}`}>

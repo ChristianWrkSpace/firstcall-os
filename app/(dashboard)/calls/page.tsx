@@ -33,7 +33,7 @@ export default async function CallsPage() {
         </div>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {!calls?.length ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No calls recorded yet.{" "}
@@ -44,7 +44,7 @@ export default async function CallsPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Job</th>
                 <th className="px-5 py-3 text-left">Summary</th>
                 <th className="px-5 py-3 text-left">Type</th>
@@ -55,7 +55,7 @@ export default async function CallsPage() {
               {calls.map((call) => (
                 <tr
                   key={call.id}
-                  className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                 >
                   <td className="px-5 py-3">
                     {(call.jobs as any)?.job_number ? (

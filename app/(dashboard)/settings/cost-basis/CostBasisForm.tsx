@@ -14,7 +14,7 @@ export default function CostBasisForm({ initial }: { initial: CostBasis }) {
   return (
     <form
       action={action}
-      className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col gap-5"
+      className="glass-card p-6 flex flex-col gap-5"
     >
       <Field
         label="Default hourly rate"

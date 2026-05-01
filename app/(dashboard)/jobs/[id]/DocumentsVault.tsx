@@ -150,7 +150,7 @@ export default function DocumentsVault({
     <>
       <div className="flex flex-col gap-4">
         {/* Required docs checklist */}
-        <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4">
+        <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
           <p className="text-zinc-400 text-xs uppercase tracking-wide font-semibold mb-2">
             Required for Mitigation Work
           </p>
@@ -369,7 +369,7 @@ function DocRow({
   }
 
   return (
-    <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-3 hover:bg-zinc-800/60 transition-colors">
+    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3 hover:bg-zinc-800/60 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2 min-w-0 flex-1">
           <span className="text-xl leading-none mt-0.5">{meta.emoji}</span>
@@ -523,7 +523,7 @@ function PreviewModal({
         onClick={(e) => e.stopPropagation()}
         className="bg-zinc-900 rounded-xl p-3 max-w-5xl w-full max-h-[90vh] flex flex-col cursor-default"
       >
-        <div className="flex items-center justify-between px-2 pb-2 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-2 pb-2 border-b border-white/[0.06]">
           <p className="text-white text-sm truncate">{filename}</p>
           <button
             onClick={onClose}

@@ -25,7 +25,7 @@ export default function NewLeadPage() {
       </div>
 
       <form action={action} className="flex flex-col gap-5">
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Company</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2 flex flex-col gap-1.5">
@@ -62,7 +62,7 @@ export default function NewLeadPage() {
           </div>
         </section>
 
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Contact</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">

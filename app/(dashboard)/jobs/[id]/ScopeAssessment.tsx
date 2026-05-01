@@ -360,7 +360,7 @@ function Disclosure({
       ? "bg-blue-500/5 border-blue-500/20 hover:border-blue-500/40"
       : accent === "yellow"
         ? "bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40"
-        : "bg-zinc-800/40 border-zinc-700/50 hover:border-zinc-600";
+        : "bg-white/[0.03] border-white/[0.06] hover:border-zinc-600";
   return (
     <details className={`group border rounded-lg transition-colors ${accentClasses}`}>
       <summary className="cursor-pointer list-none flex items-center gap-2 px-3.5 py-2.5 select-none">

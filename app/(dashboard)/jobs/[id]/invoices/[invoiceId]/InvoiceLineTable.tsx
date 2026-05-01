@@ -60,7 +60,7 @@ export default function InvoiceLineTable({
   return (
     <div>
       <table className="w-full text-sm">
-        <thead className="bg-zinc-800/40">
+        <thead className="bg-white/[0.03]">
           <tr className="text-zinc-500 text-xs uppercase tracking-wide">
             <th className="px-4 py-2 text-left">Code</th>
             <th className="px-4 py-2 text-left">Description</th>
@@ -224,7 +224,7 @@ function Row({
   }
 
   return (
-    <tr className="border-b border-zinc-800/40 hover:bg-zinc-800/20 transition-colors group">
+    <tr className="border-b border-white/[0.06]/40 hover:bg-zinc-800/20 transition-colors group">
       <td className="px-4 py-2.5 text-zinc-400 text-xs font-mono">{item.xactimate_code ?? "—"}</td>
       <td className="px-4 py-2.5 text-zinc-200">
         {item.description}

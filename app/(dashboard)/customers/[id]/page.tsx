@@ -39,7 +39,7 @@ export default async function CustomerDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Contact */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Contact</h2>
           <dl className="flex flex-col gap-3 text-sm">
             <Field
@@ -64,7 +64,7 @@ export default async function CustomerDetailPage({
         </section>
 
         {/* Insurance */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Insurance</h2>
           <dl className="flex flex-col gap-3 text-sm">
             <Field label="Carrier" value={customer.insurance_company} />
@@ -74,7 +74,7 @@ export default async function CustomerDetailPage({
         </section>
 
         {/* Notes */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Notes</h2>
           {customer.notes ? (
             <p className="text-zinc-200 text-sm whitespace-pre-wrap">
@@ -87,7 +87,7 @@ export default async function CustomerDetailPage({
       </div>
 
       {/* Jobs */}
-      <section className="mt-5 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <section className="mt-5 glass-card p-6">
         <h2 className="text-white font-semibold mb-4">
           Jobs ({jobs?.length ?? 0})
         </h2>
@@ -97,7 +97,7 @@ export default async function CustomerDetailPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                   <th className="text-left py-2">Job #</th>
                   <th className="text-left py-2">Type</th>
                   <th className="text-left py-2">Status</th>
@@ -109,7 +109,7 @@ export default async function CustomerDetailPage({
                 {jobs.map((j: any) => (
                   <tr
                     key={j.id}
-                    className="border-b border-zinc-800/60 last:border-0 hover:bg-zinc-800/40"
+                    className="border-b border-white/[0.06]/60 last:border-0 hover:bg-white/[0.04]"
                   >
                     <td className="py-2.5">
                       <Link

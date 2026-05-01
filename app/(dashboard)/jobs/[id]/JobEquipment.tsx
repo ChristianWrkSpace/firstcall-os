@@ -161,7 +161,7 @@ export default function JobEquipment({
           return (
             <li
               key={a.id}
-              className="flex items-center justify-between gap-3 px-3 py-2 bg-zinc-800/40 border border-zinc-700/50 rounded-lg"
+              className="flex items-center justify-between gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg"
             >
               <Link
                 href={`/equipment/${a.equipment?.id ?? ""}`}

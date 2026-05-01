@@ -215,7 +215,7 @@ export default function HelpPage() {
           reading, and dollar so nothing falls through the cracks. Each AI
           agent handles one slice of the boring admin work.
         </p>
-        <div className="mt-4 bg-zinc-800/40 border border-zinc-700 rounded-lg p-4 text-sm text-zinc-300 leading-relaxed">
+        <div className="mt-4 bg-white/[0.03] border border-zinc-700 rounded-lg p-4 text-sm text-zinc-300 leading-relaxed">
           <p>
             <strong className="text-white">The daily flow:</strong> Athena
             picks up the call → Argus scopes the damage → Ledger prices it →

@@ -423,7 +423,7 @@ function KPI({
       }[accent]
     : "text-white";
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-3xl font-bold mt-1 ${accentColor}`}>{value}</p>
       {secondary && (
@@ -443,7 +443,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <section className="glass-card p-5">
       <div className="mb-3">
         <h3 className="text-white font-semibold text-sm">{title}</h3>
         {subtitle && <p className="text-zinc-500 text-xs">{subtitle}</p>}

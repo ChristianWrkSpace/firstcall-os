@@ -167,12 +167,12 @@ export default async function JobEconomicsPage({
 
       {/* Per job-type breakdown */}
       {pnl.byType.length > 1 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-5">
+        <div className="glass-card p-5 mb-5">
           <h2 className="text-white font-semibold mb-3">By Job Type</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                   <th className="text-left px-3 py-2">Type</th>
                   <th className="text-right px-3 py-2">Jobs</th>
                   <th className="text-right px-3 py-2">Revenue</th>
@@ -184,7 +184,7 @@ export default async function JobEconomicsPage({
               </thead>
               <tbody>
                 {pnl.byType.map((t) => (
-                  <tr key={t.type} className="border-b border-zinc-800 last:border-0">
+                  <tr key={t.type} className="border-b border-white/[0.06] last:border-0">
                     <td className="px-3 py-2 text-white capitalize">{t.type}</td>
                     <td className="px-3 py-2 text-right text-zinc-400 font-mono text-xs">{t.jobCount}</td>
                     <td className="px-3 py-2 text-right text-white font-mono text-xs">{fmt(t.revenueBilled)}</td>
@@ -217,7 +217,7 @@ export default async function JobEconomicsPage({
       </div>
 
       {/* Per-job table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {sortedJobs.length === 0 ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No jobs in this window.
@@ -225,7 +225,7 @@ export default async function JobEconomicsPage({
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Job #</th>
                 <th className="px-4 py-3 text-left">Customer</th>
                 <th className="px-4 py-3 text-left">Type</th>
@@ -243,7 +243,7 @@ export default async function JobEconomicsPage({
               {sortedJobs.slice(0, 50).map((j) => (
                 <tr
                   key={j.jobId}
-                  className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                 >
                   <td className="px-4 py-3">
                     <Link href={`/jobs/${j.jobId}`} className="text-blue-400 hover:underline font-mono text-xs">
@@ -314,7 +314,7 @@ function Tile({
   color?: string;
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
       {sub && <p className="text-zinc-500 text-[10px] mt-1">{sub}</p>}
@@ -338,7 +338,7 @@ function PerformerCard({
   positive: boolean;
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-white text-sm font-semibold mb-2">{title}</p>
       {rows.length === 0 ? (
         <p className="text-zinc-500 text-xs italic">Not enough data yet.</p>

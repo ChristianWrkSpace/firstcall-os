@@ -116,7 +116,7 @@ export default function CommandPalette() {
         className="w-full max-w-xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
           <SearchIcon className="w-5 h-5 text-zinc-500 shrink-0" />
           <input
             ref={inputRef}

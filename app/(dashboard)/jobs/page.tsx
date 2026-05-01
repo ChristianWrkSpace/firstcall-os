@@ -113,7 +113,7 @@ export default async function JobsPage({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-zinc-800">
+      <div className="flex gap-1 mb-4 border-b border-white/[0.06]">
         {(Object.keys(TAB_LABELS) as Filter[]).map((f) => {
           const active = f === filter;
           return (
@@ -135,10 +135,10 @@ export default async function JobsPage({
         })}
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800">
+            <tr className="border-b border-white/[0.06]">
               {["Job #", "Customer", "Type", "Status", "Site", "A/R", "Created"].map(
                 (h) => (
                   <th
@@ -169,7 +169,7 @@ export default async function JobsPage({
               return (
                 <tr
                   key={job.id}
-                  className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                 >
                   <td className="px-4 py-3">
                     <Link

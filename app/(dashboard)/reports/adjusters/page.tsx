@@ -302,7 +302,7 @@ export default async function AdjusterScoringPage() {
       )}
 
       {/* Per-carrier table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {rows.length === 0 ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No invoiced carriers yet. Send some invoices and check back.
@@ -310,7 +310,7 @@ export default async function AdjusterScoringPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Carrier</th>
                 <th className="px-4 py-3 text-center">Grade</th>
                 <th className="px-4 py-3 text-right">Jobs</th>
@@ -345,7 +345,7 @@ export default async function AdjusterScoringPage() {
                 return (
                   <tr
                     key={r.carrier}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                   >
                     <td className="px-4 py-3 text-white font-medium">
                       {r.carrier}
@@ -443,7 +443,7 @@ function Tile({
   color?: string;
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="glass-card p-4">
       <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
       {sub && <p className="text-zinc-500 text-xs mt-1">{sub}</p>}

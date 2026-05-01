@@ -212,7 +212,7 @@ export default function SimulateCallPage() {
 
       {/* Idle */}
       {phase === "idle" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 flex flex-col items-center gap-5">
+        <div className="glass-card p-8 flex flex-col items-center gap-5">
           <div className="w-24 h-24 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
             <PhoneIcon className="w-10 h-10 text-blue-400" />
           </div>
@@ -230,7 +230,7 @@ export default function SimulateCallPage() {
 
       {/* Voice tuning sliders — always visible */}
       {(phase === "idle" || phase === "in_call") && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-4">
+        <div className="glass-card p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-zinc-300 text-sm font-medium">Voice Tuning</h3>
             <button
@@ -274,7 +274,7 @@ export default function SimulateCallPage() {
       {phase === "in_call" && (
         <div className="flex flex-col gap-4">
           {/* Conversation */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 min-h-[280px] max-h-[420px] overflow-y-auto flex flex-col gap-3">
+          <div className="glass-card p-5 min-h-[280px] max-h-[420px] overflow-y-auto flex flex-col gap-3">
             {history.length === 0 && !thinking && (
               <p className="text-zinc-500 text-sm italic text-center my-auto">
                 Athena is dialing in…
@@ -306,7 +306,7 @@ export default function SimulateCallPage() {
           </div>
 
           {/* Mic + End Call */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center justify-between gap-4">
+          <div className="glass-card p-6 flex items-center justify-between gap-4">
             <button
               onMouseDown={startTalking}
               onMouseUp={stopTalking}
@@ -334,7 +334,7 @@ export default function SimulateCallPage() {
 
       {/* Ending */}
       {phase === "ending" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 flex flex-col items-center gap-4">
+        <div className="glass-card p-8 flex flex-col items-center gap-4">
           <SpinnerIcon className="w-10 h-10 text-blue-400 animate-spin" />
           <p className="text-white font-medium">Extracting job details…</p>
         </div>
@@ -387,7 +387,7 @@ export default function SimulateCallPage() {
             )}
           </ReviewSection>
 
-          <details className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <details className="glass-card p-5">
             <summary className="text-zinc-400 text-sm cursor-pointer hover:text-white">
               View full transcript
             </summary>
@@ -428,7 +428,7 @@ export default function SimulateCallPage() {
 
 function ReviewSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className="glass-card p-5">
       <h2 className="text-white font-semibold mb-3">{title}</h2>
       <dl className="grid grid-cols-2 gap-3 text-sm">{children}</dl>
     </div>

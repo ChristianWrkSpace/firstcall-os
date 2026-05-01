@@ -64,10 +64,10 @@ export default async function SecretsRotationPage() {
         </p>
       </div>
 
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <section className="glass-card p-6">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
               <th className="text-left py-2">Secret</th>
               <th className="text-left py-2">Vendor</th>
               <th className="text-left py-2">Blast</th>
@@ -106,7 +106,7 @@ export default async function SecretsRotationPage() {
               return (
                 <tr
                   key={s.name}
-                  className="border-b border-zinc-800/60 last:border-0 align-top"
+                  className="border-b border-white/[0.06]/60 last:border-0 align-top"
                 >
                   <td className="py-3 pr-3">
                     <p className="text-white font-mono text-xs">{s.name}</p>
@@ -162,7 +162,7 @@ export default async function SecretsRotationPage() {
         </table>
       </section>
 
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-5">
+      <section className="glass-card p-6 mt-5">
         <h2 className="text-white font-semibold mb-3">Rotation Steps (every secret)</h2>
         <ol className="flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside">
           <li>Log into the vendor and create a NEW key (don't delete the old one yet).</li>

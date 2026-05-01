@@ -71,7 +71,7 @@ export default function AdjusterContactCard({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="bg-zinc-800/40 rounded-lg p-3 flex flex-col gap-1.5 text-xs">
+      <div className="bg-white/[0.03] rounded-lg p-3 flex flex-col gap-1.5 text-xs">
         <div className="flex justify-between gap-2">
           <span className="text-zinc-500">Carrier</span>
           <span className="text-zinc-200 font-medium">{carrier}</span>

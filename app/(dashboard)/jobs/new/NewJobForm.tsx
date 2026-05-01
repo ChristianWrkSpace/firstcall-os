@@ -34,7 +34,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
 
       <form action={action} className="flex flex-col gap-5">
         {/* Customer */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Customer</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 flex flex-col gap-1.5">
@@ -53,7 +53,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         </section>
 
         {/* Referral source */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-1">Referred by</h2>
           <p className="text-zinc-500 text-xs mb-3">
             Did a partner send this lead our way? Pick them so revenue rolls into their ROI.
@@ -83,7 +83,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         </section>
 
         {/* Payment Route */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-1">Payment Route</h2>
           <p className="text-zinc-500 text-xs mb-4">
             How is this job being paid? Drives what the customer sees on their portal.
@@ -140,7 +140,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
 
         {/* Insurance — only when relevant */}
         {showInsurance && (
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Insurance</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex flex-col gap-1.5">
@@ -171,7 +171,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         )}
 
         {/* Job Details */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <h2 className="text-white font-semibold mb-4">Job Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">

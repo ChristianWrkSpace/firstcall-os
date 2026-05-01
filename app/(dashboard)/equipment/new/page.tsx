@@ -23,7 +23,7 @@ export default function NewEquipmentPage() {
       </div>
 
       <form action={action} className="flex flex-col gap-5">
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <section className="glass-card p-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className={LABEL}>Type *</label>

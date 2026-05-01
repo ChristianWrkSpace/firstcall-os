@@ -76,7 +76,7 @@ export default function SessionsPanel({
   }
 
   return (
-    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mt-6">
+    <section className="glass-card p-5 mt-6">
       <h2 className="text-white font-semibold mb-1">Sessions</h2>
       <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
         Suspect your password leaked? Sign out everywhere and rotate it.
@@ -105,7 +105,7 @@ export default function SessionsPanel({
             {users.map((u) => (
               <li
                 key={u.id}
-                className="flex items-center justify-between gap-3 px-3 py-2 bg-zinc-800/40 border border-zinc-700/50 rounded-lg"
+                className="flex items-center justify-between gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">

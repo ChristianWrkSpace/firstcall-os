@@ -214,7 +214,7 @@ export default async function JobDetailPage({
           />
 
           {/* Activity Timeline — collapsible by default to keep page tight */}
-          <section id="timeline" className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 scroll-mt-20">
+          <section id="timeline" className="glass-card p-5 scroll-mt-20">
             <details>
               <summary className="cursor-pointer list-none flex items-center justify-between gap-2 select-none group">
                 <SectionHeader
@@ -231,7 +231,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Live Job P&L */}
-          <section id="pnl" className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 scroll-mt-20">
+          <section id="pnl" className="glass-card p-5 scroll-mt-20">
             <div className="mb-4">
               <SectionHeader
                 title="Job P&L"
@@ -259,7 +259,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Job Info */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Job Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <Field label="Site Address" value={job.site_address} />
@@ -282,7 +282,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Argus: Site Photos + Scope */}
-          <section id="photos-scope" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 scroll-mt-20">
+          <section id="photos-scope" className="glass-card p-6 scroll-mt-20">
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
               <SectionHeader
                 title="Site Photos & Scope"
@@ -321,7 +321,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Equipment On Site */}
-          <section id="equipment" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 scroll-mt-20">
+          <section id="equipment" className="glass-card p-6 scroll-mt-20">
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
               <SectionHeader
                 title="Equipment On Site"
@@ -352,7 +352,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Ledger: Estimates */}
-          <section id="estimates" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 scroll-mt-20">
+          <section id="estimates" className="glass-card p-6 scroll-mt-20">
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
               <SectionHeader
                 title="Estimates"
@@ -388,7 +388,7 @@ export default async function JobDetailPage({
                     <Link
                       key={est.id}
                       href={`/jobs/${job.id}/estimates/${est.id}`}
-                      className="flex items-center justify-between px-4 py-3 bg-zinc-800/40 border border-zinc-700/50 rounded-lg hover:bg-zinc-800 transition-colors"
+                      className="flex items-center justify-between px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-lg hover:bg-zinc-800 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-blue-400 font-mono text-sm">
@@ -414,7 +414,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Paperwork — Esquire drafts + uploaded files in one place */}
-          <section id="paperwork" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 scroll-mt-20">
+          <section id="paperwork" className="glass-card p-6 scroll-mt-20">
             <div className="mb-4">
               <SectionHeader
                 title="Paperwork"
@@ -447,7 +447,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Moisture Readings (IICRC S500) */}
-          <section id="moisture" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 scroll-mt-20">
+          <section id="moisture" className="glass-card p-6 scroll-mt-20">
             <div className="mb-4">
               <SectionHeader
                 title="Moisture Readings"
@@ -460,7 +460,7 @@ export default async function JobDetailPage({
 
           {/* Abacus: Invoices */}
           {invoices && invoices.length > 0 && (
-            <section id="invoices" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 scroll-mt-20">
+            <section id="invoices" className="glass-card p-6 scroll-mt-20">
               <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
                 <SectionHeader
                   title="Invoices"
@@ -490,7 +490,7 @@ export default async function JobDetailPage({
                     <Link
                       key={inv.id}
                       href={`/jobs/${job.id}/invoices/${inv.id}`}
-                      className="flex items-center justify-between px-4 py-3 bg-zinc-800/40 border border-zinc-700/50 rounded-lg hover:bg-zinc-800 transition-colors"
+                      className="flex items-center justify-between px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-lg hover:bg-zinc-800 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-blue-400 font-mono text-sm">
@@ -520,7 +520,7 @@ export default async function JobDetailPage({
           )}
 
           {/* Notes */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Notes & Activity</h2>
             <div className="mb-4">
               <VoiceNote jobId={job.id} />
@@ -552,7 +552,7 @@ export default async function JobDetailPage({
 
         {/* Right: Customer Info */}
         <div className="flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Customer</h2>
             {customer ? (
               <div className="flex flex-col gap-3 text-sm">
@@ -599,7 +599,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Payment Route */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <div className="mb-3">
               <SectionHeader
                 title="Payment Route"
@@ -623,7 +623,7 @@ export default async function JobDetailPage({
 
           {/* Adjuster Contact — only for insurance routes */}
           {isInsurance && (
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <section className="glass-card p-6">
               <div className="mb-3">
                 <SectionHeader
                   title="Contact Adjuster"
@@ -640,7 +640,7 @@ export default async function JobDetailPage({
           )}
 
           {/* Scheduling */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <div className="mb-3">
               <SectionHeader
                 title="Schedule & Crew"
@@ -661,7 +661,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Customer Portal Share */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <div className="mb-3">
               <SectionHeader
                 title="Customer Portal"
@@ -675,7 +675,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Adjuster Portal Share */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <div className="mb-3">
               <SectionHeader
                 title="Adjuster Portal"
@@ -689,7 +689,7 @@ export default async function JobDetailPage({
           </section>
 
           {/* Customer Notifications */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <div className="mb-3">
               <SectionHeader
                 title="Notify Customer"

@@ -40,7 +40,7 @@ export default function TuringRunner() {
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className="glass-card p-5">
       <div className="flex items-end justify-between gap-3 flex-wrap mb-5">
         <div>
           <p className="text-white text-sm font-semibold">Run audit</p>
@@ -85,7 +85,7 @@ export default function TuringRunner() {
       {report && (
         <div className="mt-6 flex flex-col gap-4">
           {/* Summary */}
-          <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4">
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
             <p className="text-zinc-300 text-xs uppercase tracking-wide font-semibold mb-2">
               Executive Summary
             </p>

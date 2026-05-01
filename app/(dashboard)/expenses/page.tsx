@@ -77,21 +77,21 @@ export default async function ExpensesPage({
 
       {/* Totals */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <div className="glass-card p-4">
           <p className="text-zinc-500 text-xs uppercase tracking-wide">Window Total</p>
           <p className="text-2xl font-bold font-mono mt-1 text-white">{fmt(totals.total)}</p>
           <p className="text-zinc-500 text-xs mt-1">{expenses?.length ?? 0} entries · last {windowDays}d</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <div className="glass-card p-4">
           <p className="text-zinc-500 text-xs uppercase tracking-wide">Daily Avg</p>
           <p className="text-2xl font-bold font-mono mt-1 text-white">{fmt(dailyAvg)}</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <div className="glass-card p-4">
           <p className="text-zinc-500 text-xs uppercase tracking-wide">Monthly Burn</p>
           <p className="text-2xl font-bold font-mono mt-1 text-yellow-400">{fmt(monthlyBurn)}</p>
           <p className="text-zinc-500 text-[10px] mt-1">project at current pace</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <div className="glass-card p-4">
           <p className="text-zinc-500 text-xs uppercase tracking-wide">Top Category</p>
           {(() => {
             const top = Object.entries(totals.byCategory).sort((a, b) => b[1] - a[1])[0];
@@ -108,14 +108,14 @@ export default async function ExpensesPage({
       </div>
 
       {/* Entry form */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+      <div className="glass-card p-5 mb-6">
         <h2 className="text-white font-semibold mb-3">Log a new expense</h2>
         <ExpenseForm />
       </div>
 
       {/* Per-category breakdown */}
       {Object.keys(totals.byCategory).length > 1 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+        <div className="glass-card p-5 mb-6">
           <h2 className="text-white font-semibold mb-3">By Category</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {Object.entries(totals.byCategory)
@@ -124,7 +124,7 @@ export default async function ExpensesPage({
                 const meta = CATEGORY_META[cat] ?? CATEGORY_META.other;
                 const pct = totals.total > 0 ? (amt / totals.total) * 100 : 0;
                 return (
-                  <div key={cat} className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-3">
+                  <div key={cat} className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3">
                     <p className="text-zinc-400 text-[10px] uppercase tracking-wide">
                       {meta.emoji} {meta.label}
                     </p>
@@ -138,7 +138,7 @@ export default async function ExpensesPage({
       )}
 
       {/* Entries table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {!expenses?.length ? (
           <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No expenses logged in this window.
@@ -146,7 +146,7 @@ export default async function ExpensesPage({
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Category</th>
                 <th className="px-4 py-3 text-left">Vehicle</th>
@@ -159,7 +159,7 @@ export default async function ExpensesPage({
               {expenses.map((e: any) => {
                 const meta = CATEGORY_META[e.category] ?? CATEGORY_META.other;
                 return (
-                  <tr key={e.id} className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40">
+                  <tr key={e.id} className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04]">
                     <td className="px-4 py-3 text-zinc-300 text-xs font-mono">{e.expense_date}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${meta.color}`}>

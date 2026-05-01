@@ -51,7 +51,7 @@ export default async function SolomonPage() {
       </div>
 
       {!current ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center">
+        <div className="glass-card p-10 text-center">
           <p className="text-zinc-400 text-sm">
             No analyses yet. Click "Run Analysis" to generate the first one.
           </p>
@@ -59,7 +59,7 @@ export default async function SolomonPage() {
       ) : (
         <div className="flex flex-col gap-5">
           {/* Header */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <div className="flex justify-between items-baseline gap-4 flex-wrap mb-3">
               <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold">
                 Executive Summary · last {current.window_days} days
@@ -94,13 +94,13 @@ export default async function SolomonPage() {
           </section>
 
           {/* Insights */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Insights</h2>
             <div className="flex flex-col gap-3">
               {((current.insights ?? []) as SolomonInsight[]).map((ins, i) => (
                 <div
                   key={i}
-                  className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4"
+                  className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4"
                 >
                   <div className="flex items-start gap-3 flex-wrap">
                     <span
@@ -136,14 +136,14 @@ export default async function SolomonPage() {
           </section>
 
           {/* Recommendations */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Recommendations</h2>
             <div className="flex flex-col gap-3">
               {((current.recommendations ?? []) as SolomonRecommendation[]).map(
                 (r, i) => (
                   <div
                     key={i}
-                    className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4"
+                    className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4"
                   >
                     <div className="flex items-start gap-3 flex-wrap">
                       <span
@@ -169,7 +169,7 @@ export default async function SolomonPage() {
 
           {/* History */}
           {reports.length > 1 && (
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <section className="glass-card p-6">
               <h2 className="text-white font-semibold mb-4">Past Reports</h2>
               <ul className="flex flex-col gap-1">
                 {reports.slice(1).map((r: any) => (
@@ -195,7 +195,7 @@ export default async function SolomonPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-zinc-800/40 rounded-lg px-4 py-3">
+    <div className="bg-white/[0.03] rounded-lg px-4 py-3">
       <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
         {label}
       </p>

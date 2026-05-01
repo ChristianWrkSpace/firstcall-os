@@ -171,7 +171,7 @@ export default function JobChecklist({ input }: { input: ChecklistInput }) {
   const allRequiredDone = requiredDone === requiredTotal;
 
   return (
-    <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <section className="glass-card p-5">
       <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-lg">{allRequiredDone ? "✅" : "📋"}</span>

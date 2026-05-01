@@ -199,7 +199,7 @@ export default function MoistureLog({
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-zinc-800 text-zinc-500 uppercase tracking-wide">
+                    <tr className="border-b border-white/[0.06] text-zinc-500 uppercase tracking-wide">
                       <th className="text-left py-1.5">Room</th>
                       <th className="text-left py-1.5">Material</th>
                       <th className="text-right py-1.5">Moisture %</th>
@@ -212,7 +212,7 @@ export default function MoistureLog({
                   </thead>
                   <tbody>
                     {byDate[date].map((r) => (
-                      <tr key={r.id} className="border-b border-zinc-800/40">
+                      <tr key={r.id} className="border-b border-white/[0.06]/40">
                         <td className="py-1.5 text-zinc-200">
                           {r.room}
                           {r.location_detail && (

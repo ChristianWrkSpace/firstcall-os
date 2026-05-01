@@ -43,17 +43,17 @@ export default async function InvoicesIndex({
       </div>
 
       {!invoices?.length ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
+        <div className="glass-card p-8 text-center">
           <p className="text-zinc-400 text-sm mb-2">No invoices yet for this job.</p>
           <p className="text-zinc-500 text-xs">
             Approve an estimate first, then generate an invoice from it.
           </p>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+        <div className="glass-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Invoice #</th>
                 <th className="px-5 py-3 text-left">Status</th>
                 <th className="px-5 py-3 text-left">Issued</th>
@@ -70,7 +70,7 @@ export default async function InvoicesIndex({
                 return (
                   <tr
                     key={inv.id}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40 transition-colors"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link

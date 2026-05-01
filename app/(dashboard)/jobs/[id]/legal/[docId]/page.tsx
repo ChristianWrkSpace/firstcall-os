@@ -79,7 +79,7 @@ export default async function LegalDocPage({
         >
           ← Back to job
         </Link>
-        <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-xl p-8">
+        <div className="mt-6 glass-card p-8">
           <h1 className="text-xl font-bold text-white">Document not found</h1>
           <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
             This document was discarded or never existed. If a legal document

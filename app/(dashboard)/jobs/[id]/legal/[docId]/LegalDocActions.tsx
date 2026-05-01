@@ -320,7 +320,7 @@ export default function LegalDocActions({
 
       {/* Sent / signed forms */}
       {!editing && (canMarkSent || canMarkSigned) && (
-        <div className="no-print flex flex-col gap-3 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <div className="no-print flex flex-col gap-3 mt-2 glass-card p-5">
           {canMarkSent && (
             <div className="flex flex-col gap-2">
               <label className="text-zinc-300 text-sm font-medium">
@@ -462,7 +462,7 @@ function ManualSendButton({
   }
 
   return (
-    <div className="no-print flex flex-col gap-2 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <div className="no-print flex flex-col gap-2 glass-card p-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <p className="text-zinc-300 text-sm font-medium">

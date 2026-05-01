@@ -56,7 +56,7 @@ export default async function SecuritySettingsPage() {
 
       {/* Existing factors */}
       {factors.length > 0 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+        <div className="glass-card p-5 mb-6">
           <h2 className="text-white font-semibold mb-3">Active Authenticators</h2>
           <ul className="flex flex-col gap-2">
             {factors.map((f) => (
@@ -67,7 +67,7 @@ export default async function SecuritySettingsPage() {
       )}
 
       {/* Enrollment */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div className="glass-card p-5">
         <h2 className="text-white font-semibold mb-1">Add an authenticator</h2>
         <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
           Use Google Authenticator, 1Password, Authy, or any TOTP-compatible app.
@@ -107,7 +107,7 @@ function FactorRow({
       ? "bg-green-500/15 text-green-400"
       : "bg-yellow-500/15 text-yellow-400";
   return (
-    <li className="flex items-center justify-between gap-3 px-3 py-2 bg-zinc-800/40 border border-zinc-700/50 rounded-lg">
+    <li className="flex items-center justify-between gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg">
       <div>
         <p className="text-white text-sm">{factor.friendlyName}</p>
         <p className="text-zinc-500 text-xs">

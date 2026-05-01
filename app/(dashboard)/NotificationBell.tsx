@@ -45,8 +45,8 @@ export default async function NotificationBell() {
         )}
       </summary>
 
-      <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+      <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] glass-card shadow-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
           <p className="text-white text-sm font-semibold">Pending approvals</p>
           {n > 0 && (
             <span className="text-blue-400 text-xs font-mono">
@@ -65,11 +65,11 @@ export default async function NotificationBell() {
             {list.map((it: any) => (
               <li
                 key={it.id}
-                className="border-b border-zinc-800/60 last:border-0"
+                className="border-b border-white/[0.06]/60 last:border-0"
               >
                 <Link
                   href={it.link ?? "/approvals"}
-                  className="block px-4 py-3 hover:bg-zinc-800/50 transition-colors"
+                  className="block px-4 py-3 hover:bg-white/[0.03] transition-colors"
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-lg shrink-0 leading-none mt-0.5">

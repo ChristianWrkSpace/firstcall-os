@@ -49,7 +49,7 @@ export default async function ProgressPage() {
       </div>
 
       {/* Overall progress */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+      <div className="glass-card p-6 mb-6">
         <div className="flex items-end justify-between mb-3 gap-3 flex-wrap">
           <div>
             <p className="text-zinc-400 text-xs uppercase tracking-wide">Overall Progress</p>
@@ -78,7 +78,7 @@ export default async function ProgressPage() {
           const meta = TRACK_META[track];
           const stats = trackProgress[track];
           return (
-            <div key={track} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+            <div key={track} className="glass-card p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-white text-sm font-semibold">
                   {meta.emoji} {meta.label}
@@ -104,7 +104,7 @@ export default async function ProgressPage() {
 
         return (
           <div key={track} className="mb-10">
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-zinc-800">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/[0.06]">
               <h2 className="text-xl font-semibold text-white">
                 {meta.emoji} {meta.label}
               </h2>
@@ -174,7 +174,7 @@ function StatChip({
   color: string;
 }) {
   return (
-    <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-3 py-2 text-center min-w-[70px]">
+    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-center min-w-[70px]">
       <p className={`text-xl font-bold ${color}`}>{count}</p>
       <p className="text-zinc-500 text-[10px] uppercase tracking-wide">{label}</p>
     </div>

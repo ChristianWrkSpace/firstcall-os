@@ -54,7 +54,7 @@ export default async function BackupsPage() {
       </div>
 
       {/* Layered protection summary */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+      <section className="glass-card p-6 mb-5">
         <h2 className="text-white font-semibold mb-3">Protection Layers</h2>
         <ul className="flex flex-col gap-3 text-sm">
           <li className="flex gap-3">
@@ -102,7 +102,7 @@ export default async function BackupsPage() {
       </section>
 
       {/* Status + manual trigger */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+      <section className="glass-card p-6 mb-5">
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
             <h2 className="text-white font-semibold">Cron Status</h2>
@@ -143,7 +143,7 @@ export default async function BackupsPage() {
       </section>
 
       {/* History */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <section className="glass-card p-6">
         <h2 className="text-white font-semibold mb-3">Recent Runs</h2>
         {!backups?.length ? (
           <p className="text-zinc-500 text-sm italic">
@@ -154,7 +154,7 @@ export default async function BackupsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                   <th className="text-left py-2">When</th>
                   <th className="text-left py-2">Source</th>
                   <th className="text-left py-2">Status</th>
@@ -168,7 +168,7 @@ export default async function BackupsPage() {
                 {backups.map((b: any) => (
                   <tr
                     key={b.id}
-                    className="border-b border-zinc-800/60 last:border-0"
+                    className="border-b border-white/[0.06]/60 last:border-0"
                   >
                     <td className="py-2.5 text-zinc-300">
                       {new Date(b.created_at).toLocaleString()}
@@ -211,7 +211,7 @@ export default async function BackupsPage() {
       </section>
 
       {/* Restore drill */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-5">
+      <section className="glass-card p-6 mt-5">
         <h2 className="text-white font-semibold mb-1">Restore Drill</h2>
         <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
           A backup you've never restored is a backup you don't have. The Verify
@@ -262,7 +262,7 @@ function Stat({
   note?: string;
 }) {
   return (
-    <div className="bg-zinc-800/40 rounded-lg px-4 py-3">
+    <div className="bg-white/[0.03] rounded-lg px-4 py-3">
       <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
         {label}
       </p>

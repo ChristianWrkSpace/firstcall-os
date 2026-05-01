@@ -79,14 +79,14 @@ export default async function SubsPage() {
       )}
 
       {/* Add sub */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+      <div className="glass-card p-5 mb-6">
         <h2 className="text-white font-semibold mb-3">Add a subcontractor</h2>
         <NewSubForm />
       </div>
 
       {/* Subs list */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto mb-6">
-        <div className="px-5 py-3 border-b border-zinc-800">
+      <div className="glass-card overflow-x-auto mb-6">
+        <div className="px-5 py-3 border-b border-white/[0.06]">
           <h2 className="text-white font-semibold">Active Subs</h2>
         </div>
         {!subs?.length ? (
@@ -96,7 +96,7 @@ export default async function SubsPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Trade</th>
                 <th className="px-4 py-3 text-left">Contact</th>
@@ -112,7 +112,7 @@ export default async function SubsPage() {
                 return (
                   <tr
                     key={s.id}
-                    className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/40"
+                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04]"
                   >
                     <td className="px-4 py-3">
                       <p className="text-white font-medium">{s.name}</p>
@@ -157,8 +157,8 @@ export default async function SubsPage() {
       </div>
 
       {/* Recent invoices */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
-        <div className="px-5 py-3 border-b border-zinc-800">
+      <div className="glass-card overflow-x-auto">
+        <div className="px-5 py-3 border-b border-white/[0.06]">
           <h2 className="text-white font-semibold">Recent Sub Invoices</h2>
         </div>
         {!recentInvoices?.length ? (
@@ -169,7 +169,7 @@ export default async function SubsPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Sub</th>
                 <th className="px-4 py-3 text-left">Job</th>
@@ -180,7 +180,7 @@ export default async function SubsPage() {
             </thead>
             <tbody>
               {recentInvoices.map((i: any) => (
-                <tr key={i.id} className="border-b border-zinc-800 last:border-0">
+                <tr key={i.id} className="border-b border-white/[0.06] last:border-0">
                   <td className="px-4 py-3 text-zinc-400 text-xs font-mono">{i.invoice_date}</td>
                   <td className="px-4 py-3 text-zinc-200 text-xs">
                     {i.subcontractors?.name ?? "—"}

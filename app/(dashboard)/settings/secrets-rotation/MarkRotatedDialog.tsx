@@ -45,7 +45,7 @@ export default function MarkRotatedDialog({
   }
 
   return (
-    <div className="flex flex-col gap-2 mt-2 bg-zinc-800/40 border border-zinc-700 rounded-lg p-3">
+    <div className="flex flex-col gap-2 mt-2 bg-white/[0.03] border border-zinc-700 rounded-lg p-3">
       <label className="text-zinc-400 text-[10px] uppercase tracking-wide">
         Notes (optional)
       </label>

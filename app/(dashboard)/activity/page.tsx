@@ -68,7 +68,7 @@ const COLOR_CLASSES: Record<string, string> = {
   amber: "bg-amber-500/10 border-amber-500/30 text-amber-300",
   red: "bg-red-500/10 border-red-500/30 text-red-300",
   purple: "bg-purple-500/10 border-purple-500/30 text-purple-300",
-  zinc: "bg-zinc-800/40 border-zinc-700 text-zinc-300",
+  zinc: "bg-white/[0.03] border-zinc-700 text-zinc-300",
 };
 
 const AGENT_FILTER_OPTIONS = [
@@ -156,7 +156,7 @@ export default async function ActivityPage({
 
       {/* Feed */}
       {items.length === 0 ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center">
+        <div className="glass-card p-10 text-center">
           <p className="text-zinc-400 text-sm">
             {agentFilter
               ? `No recent activity from ${agentFilter}.`

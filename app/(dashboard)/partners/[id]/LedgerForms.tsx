@@ -60,7 +60,7 @@ export function PayoutForm({ partnerId }: { partnerId: string }) {
     );
   }
   return (
-    <div className="bg-zinc-800/40 border border-zinc-700 rounded-lg p-4 flex flex-col gap-2">
+    <div className="bg-white/[0.03] border border-zinc-700 rounded-lg p-4 flex flex-col gap-2">
       <p className="text-zinc-300 text-xs font-medium">New cash payout (1099-tracked)</p>
       <div className="grid grid-cols-2 gap-2">
         <input
@@ -165,7 +165,7 @@ export function InvestmentForm({ partnerId }: { partnerId: string }) {
     );
   }
   return (
-    <div className="bg-zinc-800/40 border border-zinc-700 rounded-lg p-4 flex flex-col gap-2">
+    <div className="bg-white/[0.03] border border-zinc-700 rounded-lg p-4 flex flex-col gap-2">
       <p className="text-zinc-300 text-xs font-medium">New soft investment (relationship)</p>
       <div className="grid grid-cols-2 gap-2">
         <input

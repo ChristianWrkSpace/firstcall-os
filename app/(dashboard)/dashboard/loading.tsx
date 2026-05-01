@@ -9,13 +9,13 @@ export default function Loading() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 h-28"
+            className="glass-card p-5 h-28"
           />
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 h-64" />
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 h-64" />
+        <div className="glass-card p-6 h-64" />
+        <div className="glass-card p-6 h-64" />
       </div>
     </div>
   );

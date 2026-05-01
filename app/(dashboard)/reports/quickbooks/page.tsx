@@ -34,11 +34,11 @@ export default async function QuickBooksPage() {
         </p>
       </div>
 
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
+      <section className="glass-card p-6 mb-5">
         <QuickBooksExporter />
       </section>
 
-      <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <section className="glass-card p-6">
         <h2 className="text-white font-semibold mb-3">How to import in QBO</h2>
         <ol className="flex flex-col gap-3 text-sm text-zinc-300 list-decimal list-inside">
           <li>

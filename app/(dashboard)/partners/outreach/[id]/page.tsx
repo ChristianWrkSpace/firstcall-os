@@ -63,7 +63,7 @@ export default async function LeadDetail({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Lead info */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Lead Info</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <Field label="Contact" value={lead.contact_name} />
@@ -97,7 +97,7 @@ export default async function LeadDetail({
           </section>
 
           {/* Messages */}
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <section className="glass-card p-6">
             <h2 className="text-white font-semibold mb-4">Outreach Messages</h2>
             {!messages?.length ? (
               <p className="text-zinc-500 text-sm italic">
@@ -115,7 +115,7 @@ export default async function LeadDetail({
 
         {/* Right: actions */}
         <div className="flex flex-col gap-5">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <section className="glass-card p-5">
             <h2 className="text-white font-semibold mb-3">Actions</h2>
             <LeadActions
               leadId={lead.id}
