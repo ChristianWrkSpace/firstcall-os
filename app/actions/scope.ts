@@ -90,7 +90,96 @@ export async function recordJobVideo(args: {
   return { ok: true as const, videoId: data.id };
 }
 
-export async function analyzeJobPhotos(jobId: string) {
+/**
+ * Photo analysis modes. The default 'quick' mode handles 99% of jobs — it
+ * smart-selects 16 representative photos so even a 100-photo job analyzes
+ * in ~15-20s. 'deep' mode chunks every single photo through Argus and
+ * synthesizes the partial scopes into one — slower (~60-90s) and pricier
+ * (~$0.30-0.50) but covers everything for big claim-grade documentation.
+ */
+export type AnalyzeMode = "quick" | "deep";
+
+const QUICK_TARGET = 16;        // photos sent to one Argus call in quick mode
+const DEEP_BATCH_SIZE = 12;     // photos per parallel chunk in deep mode
+
+export interface AnalyzeResult {
+  ok?: true;
+  error?: string;
+  mode?: AnalyzeMode;
+  photosAnalyzed?: number;
+  photosTotal?: number;
+}
+
+/**
+ * Pick a representative subset of photos for quick scope analysis.
+ *
+ * Strategy: latest 6 (current state, what the tech most recently captured)
+ * + oldest 4 (initial baseline for before/after comparison) + 6 evenly
+ * stride-sampled from the middle (full timeline coverage). When total ≤
+ * target, just return all of them in upload order.
+ */
+function smartSelect<T>(photos: T[], target: number): T[] {
+  if (photos.length <= target) return photos;
+  const lastN = 6;
+  const firstN = 4;
+  const middleN = target - lastN - firstN;
+  const oldest = photos.slice(0, firstN);
+  const newest = photos.slice(-lastN);
+  const middle = photos.slice(firstN, photos.length - lastN);
+  const middleStrided: T[] = [];
+  if (middle.length > 0 && middleN > 0) {
+    const stride = middle.length / middleN;
+    for (let i = 0; i < middleN; i++) {
+      middleStrided.push(middle[Math.min(middle.length - 1, Math.floor(i * stride))]);
+    }
+  }
+  // Dedupe (in case strides overlap when middle is short) and preserve order
+  const seen = new Set<T>();
+  const out: T[] = [];
+  for (const p of [...oldest, ...middleStrided, ...newest]) {
+    if (!seen.has(p)) {
+      seen.add(p);
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+async function downloadAndResizePhotos(
+  admin: ReturnType<typeof createAdminClient>,
+  photos: Array<{ storage_path: string }>
+): Promise<ScopeImage[]> {
+  const sharp = (await import("sharp")).default;
+  const downloads = await Promise.all(
+    photos.map(async (p): Promise<ScopeImage | null> => {
+      try {
+        const { data: blob, error: dlErr } = await admin.storage
+          .from(BUCKET)
+          .download(p.storage_path);
+        if (dlErr || !blob) return null;
+        const buf = Buffer.from(await blob.arrayBuffer());
+        const normalized = await sharp(buf)
+          .rotate()
+          .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
+          .jpeg({ quality: 82 })
+          .toBuffer();
+        return {
+          mediaType: "image/jpeg",
+          data: normalized.toString("base64"),
+        };
+      } catch (err) {
+        console.warn("[analyzeJobPhotos] skipping bad photo:", p.storage_path, err);
+        return null;
+      }
+    })
+  );
+  return downloads.filter((i): i is ScopeImage => i !== null);
+}
+
+export async function analyzeJobPhotos(
+  jobId: string,
+  mode: AnalyzeMode = "quick"
+): Promise<AnalyzeResult> {
   const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
@@ -105,66 +194,15 @@ export async function analyzeJobPhotos(jobId: string) {
       .single();
     if (jobErr || !job) return { error: "Job not found." };
 
-    // If a scope already exists, this re-analysis is a "revised" signal —
-    // the user wasn't happy with what Argus produced last time.
     const wasRevision = !!job.scope_assessment;
 
     const { data: photos, error: photosErr } = await admin
       .from("job_photos")
-      .select("storage_path")
-      .eq("job_id", jobId);
+      .select("storage_path, created_at")
+      .eq("job_id", jobId)
+      .order("created_at", { ascending: true });
     if (photosErr) throw photosErr;
     if (!photos?.length) return { error: "No photos uploaded yet." };
-
-    // Cap images sent to the model. More images = more vision tokens + more
-    // model latency. 8 evenly-spaced is plenty for a scope assessment; if
-    // there are more (e.g. video frames + extra photos), pick a strided
-    // subset so we still cover the whole walk-through.
-    const MAX_IMAGES = 8;
-    let chosenPhotos = photos;
-    if (photos.length > MAX_IMAGES) {
-      const stride = photos.length / MAX_IMAGES;
-      chosenPhotos = Array.from({ length: MAX_IMAGES }, (_, i) =>
-        photos[Math.min(photos.length - 1, Math.floor(i * stride))]
-      );
-    }
-
-    // Download + Sharp-normalize all photos in parallel. Was sequential —
-    // for 8 photos at ~400ms each that's 3.2s of pure waiting on a single
-    // CPU core. Promise.all + per-photo failure isolation drops it to
-    // roughly the slowest single download (~600ms).
-    const sharp = (await import("sharp")).default;
-    const downloads = await Promise.all(
-      chosenPhotos.map(async (p): Promise<ScopeImage | null> => {
-        try {
-          const { data: blob, error: dlErr } = await admin.storage
-            .from(BUCKET)
-            .download(p.storage_path);
-          if (dlErr || !blob) return null;
-          const buf = Buffer.from(await blob.arrayBuffer());
-          // Resize to max 1024px long edge — plenty for vision scope, half
-          // the upload bytes vs 1568, ~30% lower vision token cost.
-          const normalized = await sharp(buf)
-            .rotate() // honor EXIF orientation
-            .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
-            .jpeg({ quality: 82 })
-            .toBuffer();
-          return {
-            mediaType: "image/jpeg",
-            data: normalized.toString("base64"),
-          };
-        } catch (err) {
-          console.warn("[analyzeJobPhotos] skipping bad photo:", p.storage_path, err);
-          return null;
-        }
-      })
-    );
-    const images: ScopeImage[] = downloads.filter(
-      (i): i is ScopeImage => i !== null
-    );
-    if (images.length === 0) {
-      return { error: "No usable photos — all downloads/decoding failed." };
-    }
 
     const jobContext = [
       `Damage type: ${job.type}`,
@@ -176,7 +214,44 @@ export async function analyzeJobPhotos(jobId: string) {
       .filter(Boolean)
       .join("\n");
 
-    const scope = await assessScope(images, jobContext, job.dispatch_inputs ?? {});
+    let scope: any;
+    let photosAnalyzed = 0;
+
+    if (mode === "deep" && photos.length > QUICK_TARGET) {
+      // ── DEEP MODE: every photo gets seen ─────────────────────────────
+      // Chunk into batches of DEEP_BATCH_SIZE, run Argus on each batch in
+      // parallel (gets us partial scopes), then synthesize one unified
+      // scope from the partials via a final Argus call. Costs ~3-5x quick
+      // mode but handles 50-100 photo claim packets honestly.
+      const chunks: Array<typeof photos> = [];
+      for (let i = 0; i < photos.length; i += DEEP_BATCH_SIZE) {
+        chunks.push(photos.slice(i, i + DEEP_BATCH_SIZE));
+      }
+      const partialScopes = await Promise.all(
+        chunks.map(async (chunk) => {
+          const images = await downloadAndResizePhotos(admin, chunk);
+          if (images.length === 0) return null;
+          return assessScope(images, jobContext, job.dispatch_inputs ?? {});
+        })
+      );
+      const validPartials = partialScopes.filter((s) => s !== null);
+      if (validPartials.length === 0) {
+        return { error: "Deep scan failed — no chunks produced a usable scope." };
+      }
+      // Lazy-import to keep cold-start small
+      const { synthesizeScopes } = await import("@/lib/argus");
+      scope = await synthesizeScopes(validPartials as any[], jobContext);
+      photosAnalyzed = photos.length;
+    } else {
+      // ── QUICK MODE: smart-selected 16 ────────────────────────────────
+      const chosenPhotos = smartSelect(photos, QUICK_TARGET);
+      const images = await downloadAndResizePhotos(admin, chosenPhotos);
+      if (images.length === 0) {
+        return { error: "No usable photos — all downloads/decoding failed." };
+      }
+      scope = await assessScope(images, jobContext, job.dispatch_inputs ?? {});
+      photosAnalyzed = images.length;
+    }
 
     const { error: updateErr } = await admin
       .from("jobs")
@@ -191,8 +266,6 @@ export async function analyzeJobPhotos(jobId: string) {
     // ~30s Ledger call survives the response/redirect on Vercel.
     after(() => autoDraftEstimate(jobId));
 
-    // Recursive feedback: if a scope already existed, this re-run means the
-    // user wasn't satisfied — log it so future Argus drafts learn.
     if (wasRevision) {
       after(() =>
         logAgentOutcome({
@@ -206,6 +279,8 @@ export async function analyzeJobPhotos(jobId: string) {
             previous_analyzed_at: job.scope_analyzed_at ?? null,
             had_dispatch_inputs:
               !!job.dispatch_inputs && Object.keys(job.dispatch_inputs).length > 0,
+            mode,
+            photosAnalyzed,
           },
           userId: user.id,
         })
@@ -213,7 +288,12 @@ export async function analyzeJobPhotos(jobId: string) {
     }
 
     revalidatePath(`/jobs/${jobId}`);
-    return { ok: true };
+    return {
+      ok: true,
+      mode,
+      photosAnalyzed,
+      photosTotal: photos.length,
+    };
   } catch (err: any) {
     console.error("[analyzeJobPhotos]", err);
     return { error: err.message ?? "Analysis failed." };

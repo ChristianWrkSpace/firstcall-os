@@ -249,3 +249,63 @@ Now analyze every frame/photo and produce the full structured scope.`,
   }
   return toolUse.input;
 }
+
+/**
+ * Merge N partial scope assessments (each from a different batch of
+ * photos on the same job) into one unified scope. Used by deep-scan
+ * mode after running Argus in parallel on chunks. Single text-only
+ * Sonnet call, no images.
+ *
+ * Strategy: feed Argus the partials as JSON and ask it to produce one
+ * unified scope using the same tool schema. The model handles
+ * deduplication of affected_areas, takes the MAX of equipment counts
+ * (no undercounting), unions containment_plan zones, picks the most
+ * comprehensive tech_playbook, and writes one cohesive summary.
+ */
+export async function synthesizeScopes(
+  partialScopes: any[],
+  jobContext: string
+): Promise<any> {
+  if (partialScopes.length === 0) {
+    throw new Error("synthesizeScopes called with no partials");
+  }
+  if (partialScopes.length === 1) return partialScopes[0];
+
+  const message = await anthropic.messages.create({
+    model: MODELS.BALANCED,
+    max_tokens: 3500,
+    tools: [SCOPE_TOOL],
+    tool_choice: { type: "tool", name: "assess_damage_scope" },
+    messages: [
+      {
+        role: "user",
+        content: `You are Argus. ${partialScopes.length} partial scope assessments below were generated from different photo batches of the SAME job. Merge them into ONE unified scope using the same tool.
+
+Rules when merging:
+- AFFECTED AREAS: dedupe by location. Same room mentioned twice = one entry, with the most thorough materials list and notes.
+- EQUIPMENT NEEDED: take the MAX of each count across partials (never undercount). Sum the 'other' lists with dedup.
+- CONTAINMENT PLAN: union all unique zones. If the same area appears twice, keep the more specific entry.
+- TECH PLAYBOOK: produce ONE coherent ordered playbook (not concatenated). 8-12 steps total.
+- MITIGATION STEPS: same — one coherent ordered list.
+- CONFIDENCE: take the LOWEST confidence across partials (honest aggregation).
+- CALCULATIONS: redo the math against the unified equipment counts and total sqft. Show your work.
+- SUMMARY: one cohesive paragraph reflecting the full job, not a list of partial summaries.
+- ADDITIONAL_PHOTOS_NEEDED: union of all gaps, deduped.
+
+Job context:
+${jobContext}
+
+Partial scopes (JSON):
+${JSON.stringify(partialScopes, null, 2)}
+
+Now produce the unified scope via the assess_damage_scope tool.`,
+      },
+    ],
+  });
+
+  const toolUse = message.content.find((b) => b.type === "tool_use");
+  if (!toolUse || toolUse.type !== "tool_use") {
+    throw new Error("Synthesis failed — no tool output.");
+  }
+  return toolUse.input;
+}

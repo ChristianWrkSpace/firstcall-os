@@ -304,6 +304,7 @@ export default async function JobDetailPage({
                   jobId={job.id}
                   hasPhotos={(photos?.length ?? 0) > 0}
                   hasScope={!!job.scope_assessment}
+                  photoCount={photos?.length ?? 0}
                 />
               </div>
             </div>
