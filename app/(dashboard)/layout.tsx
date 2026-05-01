@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/actions/auth";
-import { navForRole } from "@/lib/nav";
+import { navSectionsForRole, navForRole } from "@/lib/nav";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import Logo from "@/components/Logo";
 import MobileNav from "./MobileNav";
@@ -9,6 +8,7 @@ import CommandPalette from "./CommandPalette";
 import SearchTrigger from "./SearchTrigger";
 import NotificationBell from "./NotificationBell";
 import InstallPrompt from "./InstallPrompt";
+import SidebarNav from "./SidebarNav";
 
 export default async function DashboardLayout({
   children,
@@ -19,7 +19,8 @@ export default async function DashboardLayout({
   // No silent technician fallback — if auth fails here, send to login so
   // bugs surface as redirects rather than as a silently-downgraded nav.
   if (!me) redirect("/login");
-  const items = navForRole(me.role);
+  const sections = navSectionsForRole(me.role);
+  const items = navForRole(me.role); // flat list for the mobile drawer
 
   return (
     <div className="md:flex md:h-screen app-backdrop md:overflow-hidden">
@@ -50,19 +51,10 @@ export default async function DashboardLayout({
         {/* Search */}
         <SearchTrigger />
 
-        {/* Nav — filtered to the user's role */}
-        <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-white/55 hover:text-white hover:bg-white/[0.04] transition-colors text-sm"
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Nav — workflow-grouped sections, filtered to the user's role.
+            SidebarNav is a client component so it can highlight the active
+            route from usePathname(). */}
+        <SidebarNav sections={sections} />
 
         {/* Role indicator + sign out */}
         <div className="px-4 pb-3">
