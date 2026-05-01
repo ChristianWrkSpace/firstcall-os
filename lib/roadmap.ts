@@ -274,6 +274,43 @@ export const ROADMAP: RoadmapItem[] = [
       "Twilio phone number → WebSocket bridge → streaming Deepgram STT + Claude + ElevenLabs TTS. Sub-second latency. Interruption handling. After-hours only first.",
   },
   {
+    id: "ai-gateway-multi-provider",
+    title: "AI Gateway BYOK — Multi-Provider Routing (HIGH PRIORITY)",
+    track: "integrations",
+    status: "planned",
+    effort: "M",
+    description:
+      "Wire Vercel AI Gateway with Bring-Your-Own-Key for Anthropic, OpenAI, Gemini, DeepSeek. Per-task model tiering: FAST=Gemini Flash (or Haiku), BALANCED=DeepSeek-V3 (or Sonnet), SMART=Opus for vision/reasoning. Plumbing already in lib/ai.ts — gated behind AI_GATEWAY_ENABLED env var. Need: BYOK keys added in Vercel AI Gateway UI, then flip flag + re-tier model strings. Estimated 30-50% AI cost reduction + automatic provider fallbacks + observability dashboard.",
+  },
+  {
+    id: "adjuster-scoring",
+    title: "Adjuster Scoring Dashboard",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-04-30",
+    description:
+      "/reports/adjusters grades each insurance carrier A/B/C/F by avg DSO and collection rate. Per-carrier breakdown of jobs count, billed, collected, open balance, oldest unpaid. Surfaces the moonshot Phase D play — turn the system from tracker into decision engine for which carriers to prioritize.",
+    features: [
+      "Per-carrier aggregation across all sent (non-void) invoices",
+      "Avg DSO computed only over fully-paid invoices for fairness",
+      "A/B/C/F grading: A = ≤30d DSO + ≥95% collected, scaling down to F",
+      "Portfolio summary: total billed, collected, open balance, weighted DSO",
+      "Default sort: worst grades first (so problems surface)",
+      "Linked from /reports header",
+    ],
+  },
+  {
+    id: "tech-camera-capture",
+    title: "Native Camera Capture for Techs",
+    track: "core",
+    status: "done",
+    effort: "S",
+    shipped_at: "2026-04-30",
+    description:
+      "PhotoUploader now offers two buttons on mobile: '📷 Take Photo' (capture=\"environment\" opens rear camera directly) and 'Upload' (file picker / library multi-select). On desktop both behave like file pickers.",
+  },
+  {
     id: "ops-dashboard",
     title: "Operational Dashboard",
     track: "core",

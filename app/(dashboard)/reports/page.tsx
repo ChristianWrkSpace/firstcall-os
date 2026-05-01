@@ -209,12 +209,20 @@ export default async function ReportsPage({
           <p className="text-zinc-400 text-sm mt-0.5">
             Operational + financial KPIs over the last {windowDays} days.
           </p>
-          <Link
-            href="/reports/quickbooks"
-            className="inline-flex items-center gap-1.5 mt-2 text-blue-400 hover:text-blue-300 text-xs"
-          >
-            📤 QuickBooks Export →
-          </Link>
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <Link
+              href="/reports/adjusters"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
+              ⚖️ Adjuster Scoring →
+            </Link>
+            <Link
+              href="/reports/quickbooks"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
+              📤 QuickBooks Export →
+            </Link>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {windowOptions.map((opt) => (

@@ -5,6 +5,7 @@ import { assessScope, type ScopeImage, type DispatchInputs } from "@/lib/argus";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { autoDraftEstimate } from "@/lib/auto-triggers";
+import { logAgentOutcome } from "@/lib/agent-feedback";
 
 const BUCKET = "job-photos";
 
@@ -56,10 +57,14 @@ export async function analyzeJobPhotos(jobId: string) {
   try {
     const { data: job, error: jobErr } = await admin
       .from("jobs")
-      .select("type, description, site_address, site_city, site_state, site_zip, dispatch_inputs")
+      .select("type, description, site_address, site_city, site_state, site_zip, dispatch_inputs, scope_assessment, scope_analyzed_at")
       .eq("id", jobId)
       .single();
     if (jobErr || !job) return { error: "Job not found." };
+
+    // If a scope already exists, this re-analysis is a "revised" signal —
+    // the user wasn't happy with what Argus produced last time.
+    const wasRevision = !!job.scope_assessment;
 
     const { data: photos, error: photosErr } = await admin
       .from("job_photos")
@@ -114,6 +119,27 @@ export async function analyzeJobPhotos(jobId: string) {
     // Wire 1: Ledger drafts an estimate from the scope. Use after() so the
     // ~30s Ledger call survives the response/redirect on Vercel.
     after(() => autoDraftEstimate(jobId));
+
+    // Recursive feedback: if a scope already existed, this re-run means the
+    // user wasn't satisfied — log it so future Argus drafts learn.
+    if (wasRevision) {
+      after(() =>
+        logAgentOutcome({
+          agent: "argus",
+          task: "scope_assessment",
+          outcome: "revised",
+          jobId,
+          entityType: "job",
+          entityId: jobId,
+          delta: {
+            previous_analyzed_at: job.scope_analyzed_at ?? null,
+            had_dispatch_inputs:
+              !!job.dispatch_inputs && Object.keys(job.dispatch_inputs).length > 0,
+          },
+          userId: user.id,
+        })
+      );
+    }
 
     revalidatePath(`/jobs/${jobId}`);
     return { ok: true };

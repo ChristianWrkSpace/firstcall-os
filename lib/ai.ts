@@ -18,16 +18,21 @@ import Anthropic from "@anthropic-ai/sdk";
 const GATEWAY_KEY = process.env.AI_GATEWAY_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
-// Vercel AI Gateway's Anthropic-compatible endpoint. The gateway proxies the
-// Anthropic API surface so the SDK can talk to it unchanged.
-const GATEWAY_ANTHROPIC_BASE = "https://ai-gateway.vercel.sh/v1/anthropic";
+// Two-flag setup so we never accidentally route through the gateway when
+// it isn't ready. AI_GATEWAY_ENABLED must be explicitly "true" — having a
+// key alone isn't enough (the gateway 403s without a credit card on file).
+// When disabled, fall through to direct Anthropic.
+const GATEWAY_ENABLED =
+  process.env.AI_GATEWAY_ENABLED === "true" && !!GATEWAY_KEY;
 
 export const anthropic = new Anthropic({
-  apiKey: GATEWAY_KEY ?? ANTHROPIC_KEY,
-  ...(GATEWAY_KEY ? { baseURL: GATEWAY_ANTHROPIC_BASE } : {}),
+  apiKey: GATEWAY_ENABLED ? GATEWAY_KEY : ANTHROPIC_KEY,
+  ...(GATEWAY_ENABLED ? { baseURL: "https://ai-gateway.vercel.sh" } : {}),
 });
 
-export const AI_PROVIDER: "gateway" | "direct" = GATEWAY_KEY ? "gateway" : "direct";
+export const AI_PROVIDER: "gateway" | "direct" = GATEWAY_ENABLED ? "gateway" : "direct";
+
+const PROVIDER_PREFIX = GATEWAY_ENABLED ? "anthropic/" : "";
 
 /**
  * Tiered models. Pick by what the task actually needs.
@@ -44,9 +49,9 @@ export const AI_PROVIDER: "gateway" | "direct" = GATEWAY_KEY ? "gateway" : "dire
  *   (Solomon), anything where wrong answers are expensive.
  */
 export const MODELS = {
-  FAST: "claude-haiku-4-5",
-  BALANCED: "claude-sonnet-4-6",
-  SMART: "claude-opus-4-7",
+  FAST: `${PROVIDER_PREFIX}claude-haiku-4-5`,
+  BALANCED: `${PROVIDER_PREFIX}claude-sonnet-4-6`,
+  SMART: `${PROVIDER_PREFIX}claude-opus-4-7`,
 } as const;
 
 export type ModelTier = keyof typeof MODELS;

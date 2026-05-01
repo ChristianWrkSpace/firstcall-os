@@ -9,6 +9,7 @@
 // the same prompt can extend to gross-margin proper.
 
 import { anthropic, MODELS } from "./ai";
+import { feedbackPreamble } from "./agent-feedback";
 import type { SolomonAnalysisResult } from "./solomon-types";
 
 export interface JobAggregate {
@@ -37,6 +38,11 @@ export async function runSolomonAnalysis(
   agg: JobAggregate
 ): Promise<SolomonAnalysisResult> {
   const summary = JSON.stringify(agg, null, 2);
+
+  // Recursive self-learning: pull past corrections to FP&A reports — e.g.,
+  // recommendations the user marked as off-base or insights that turned out
+  // wrong. Solomon adjusts framing accordingly.
+  const preamble = await feedbackPreamble("solomon", "fpa_analysis", 5);
 
   const message = await anthropic.messages.create({
     model: MODELS.SMART,
@@ -103,7 +109,7 @@ export async function runSolomonAnalysis(
     messages: [
       {
         role: "user",
-        content: `You are Solomon, the FP&A analyst for First Call Mitigation — an Austin TX water/fire/mold restoration company.
+        content: preamble + `You are Solomon, the FP&A analyst for First Call Mitigation — an Austin TX water/fire/mold restoration company.
 
 Your job: read the aggregated financial summary below and surface MARGIN LEAKS, GEOGRAPHIC OPPORTUNITIES, BAD CARRIERS (slow pay), PRICING OUTLIERS, and SCALING SIGNALS.
 

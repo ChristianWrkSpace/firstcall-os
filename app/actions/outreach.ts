@@ -7,6 +7,8 @@ import {
   generateFollowUpEmail,
   type BusinessType,
 } from "@/lib/hunter";
+import { logAgentOutcome } from "@/lib/agent-feedback";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -150,6 +152,12 @@ export async function updateMessageDraft(
   if (!user) return { error: "Not authenticated." };
 
   const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("outreach_messages")
+    .select("draft_content, subject, channel")
+    .eq("id", messageId)
+    .maybeSingle();
+
   const { error } = await admin
     .from("outreach_messages")
     .update({
@@ -158,6 +166,34 @@ export async function updateMessageDraft(
     })
     .eq("id", messageId);
   if (error) return { error: error.message };
+
+  // Recursive feedback: human edited a Hunter draft. Capture the diff so
+  // future drafts of the same channel learn from it.
+  if (existing) {
+    const subjectChanged =
+      newSubject !== undefined && (existing.subject ?? "") !== newSubject;
+    const bodyChanged = (existing.draft_content ?? "") !== newContent;
+    if (subjectChanged || bodyChanged) {
+      const task =
+        existing.channel === "voicemail" ? "voicemail_script" : "cold_email";
+      after(() =>
+        logAgentOutcome({
+          agent: "hunter",
+          task,
+          outcome: "approved_with_edits",
+          entityType: "outreach_message",
+          entityId: messageId,
+          delta: {
+            subject_changed: subjectChanged,
+            body_chars_before: (existing.draft_content ?? "").length,
+            body_chars_after: newContent.length,
+          },
+          userId: user.id,
+        })
+      );
+    }
+  }
+
   revalidatePath(`/partners/outreach/${leadId}`);
   return { ok: true };
 }
@@ -167,10 +203,32 @@ export async function markMessageSent(messageId: string, leadId: string) {
   if (!user) return { error: "Not authenticated." };
 
   const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("outreach_messages")
+    .select("channel")
+    .eq("id", messageId)
+    .maybeSingle();
+
   await admin
     .from("outreach_messages")
     .update({ status: "sent", sent_at: new Date().toISOString() })
     .eq("id", messageId);
+
+  // Send-as-is is a positive signal — Hunter's draft was good enough to ship.
+  if (existing) {
+    const task =
+      existing.channel === "voicemail" ? "voicemail_script" : "cold_email";
+    after(() =>
+      logAgentOutcome({
+        agent: "hunter",
+        task,
+        outcome: "approved_unchanged",
+        entityType: "outreach_message",
+        entityId: messageId,
+        userId: user.id,
+      })
+    );
+  }
 
   // Bump lead status if still drafted
   const { data: lead } = await admin

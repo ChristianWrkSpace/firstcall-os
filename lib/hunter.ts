@@ -1,4 +1,5 @@
 import { anthropic, MODELS } from "./ai";
+import { feedbackPreamble } from "./agent-feedback";
 import { BUSINESS_TYPES, type BusinessType } from "./hunter-types";
 
 // Re-export for convenience so existing server-side imports keep working.
@@ -15,13 +16,14 @@ interface LeadContext {
 
 export async function generateColdEmail(lead: LeadContext) {
   const meta = BUSINESS_TYPES[lead.business_type];
+  const preamble = await feedbackPreamble("hunter", "cold_email", 5);
   const message = await anthropic.messages.create({
     model: MODELS.FAST,
     max_tokens: 600,
     messages: [
       {
         role: "user",
-        content: `You are Hunter, the B2B sales drafter for First Call Mitigation — an Austin TX water/fire/mold restoration company. IICRC-certified, 24/7 emergency, insurance-direct billing, founded by Christian Castro.
+        content: preamble + `You are Hunter, the B2B sales drafter for First Call Mitigation — an Austin TX water/fire/mold restoration company. IICRC-certified, 24/7 emergency, insurance-direct billing, founded by Christian Castro.
 
 Draft a SHORT, personalized cold email to a ${meta.label}. The angle: ${meta.pitch}
 
@@ -63,13 +65,14 @@ BODY:
 
 export async function generateVoicemailScript(lead: LeadContext) {
   const meta = BUSINESS_TYPES[lead.business_type];
+  const preamble = await feedbackPreamble("hunter", "voicemail_script", 5);
   const message = await anthropic.messages.create({
     model: MODELS.FAST,
     max_tokens: 400,
     messages: [
       {
         role: "user",
-        content: `You are Hunter for First Call Mitigation in Austin TX. Draft a 30-second voicemail script for a cold call to a ${meta.label}.
+        content: preamble + `You are Hunter for First Call Mitigation in Austin TX. Draft a 30-second voicemail script for a cold call to a ${meta.label}.
 
 Company: ${lead.company_name}
 ${lead.contact_name ? `Asking for: ${lead.contact_name}` : ""}
@@ -97,13 +100,14 @@ export async function generateFollowUpEmail(
   lead: LeadContext,
   previousMessage: string
 ) {
+  const preamble = await feedbackPreamble("hunter", "followup_email", 5);
   const message = await anthropic.messages.create({
     model: MODELS.FAST,
     max_tokens: 500,
     messages: [
       {
         role: "user",
-        content: `You are Hunter for First Call Mitigation in Austin TX. Draft a SHORT follow-up email referencing the previous touch.
+        content: preamble + `You are Hunter for First Call Mitigation in Austin TX. Draft a SHORT follow-up email referencing the previous touch.
 
 Company: ${lead.company_name}
 ${lead.contact_name ? `Contact: ${lead.contact_name}` : ""}

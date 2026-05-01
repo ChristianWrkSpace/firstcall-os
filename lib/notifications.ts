@@ -60,6 +60,15 @@ interface CtxBase {
 // resolve relative paths. PNG used here because some email clients don't render SVG.
 const EMAIL_LOGO_URL = "https://firstcall-os.vercel.app/logo-banner.png";
 
+// Where the customer lands when they click "Leave us a Google review" in
+// post-job emails. Override via GOOGLE_REVIEW_URL env var when you have the
+// canonical writereview link with the business's placeid (gets you straight
+// to the star-rating modal). Defaults to a search URL that surfaces the
+// business panel — works without a placeid but adds one click.
+const REVIEW_URL =
+  process.env.GOOGLE_REVIEW_URL ??
+  "https://www.google.com/search?q=First+Call+Mitigation+Austin+TX+reviews";
+
 function shell(body: string) {
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -164,6 +173,12 @@ export function buildNotificationEmail(
           <p>Final moisture readings confirm your property is dry to IICRC standards. The crew has removed all equipment and cleaned up the work area.</p>
           <p>You should receive a final report and a copy of the invoice in the next 24 hours. If your insurance carrier needs anything from us directly, we'll handle that — just let us know who your adjuster is if you haven't already.</p>
           <p>Thanks for trusting us with the work. We know this isn't the situation you wanted to be in, and we're glad we could help get things back to normal.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 8px 0;">
+            <tr><td>
+              <a href="${REVIEW_URL}" style="display:inline-block;padding:12px 22px;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:600;border-radius:6px;font-size:14px;">⭐ Leave us a Google review</a>
+            </td></tr>
+          </table>
+          <p style="font-size:13px;color:#52525b;">If you were happy with our work, a quick review on Google means the world to a small business like ours — it's the single biggest thing that helps the next neighbor find us in an emergency. Takes 30 seconds.</p>
           ${jobTag(ctx)}
         `),
       };
@@ -175,7 +190,12 @@ export function buildNotificationEmail(
           <h2 style="margin:0 0 12px 0;">Quick check-in, ${firstName}.</h2>
           <p>It's been a few days since we wrapped up. Just wanted to make sure everything is still dry and the property is back to feeling like home.</p>
           <p>If you've noticed anything — musty smells, soft spots in the floor, paint discoloration — reply to this email and we'll come take a look at no charge.</p>
-          <p>Also: if you were happy with our work, a quick review on Google means the world to a small business like ours.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0 8px 0;">
+            <tr><td>
+              <a href="${REVIEW_URL}" style="display:inline-block;padding:12px 22px;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:600;border-radius:6px;font-size:14px;">⭐ Leave us a Google review</a>
+            </td></tr>
+          </table>
+          <p style="font-size:13px;color:#52525b;">If you were happy with the work, a quick review helps the next neighbor find us in an emergency. Takes 30 seconds.</p>
           ${jobTag(ctx)}
         `),
       };

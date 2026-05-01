@@ -1,4 +1,5 @@
 import { anthropic, MODELS } from "./ai";
+import { feedbackPreamble } from "./agent-feedback";
 import type Anthropic from "@anthropic-ai/sdk";
 
 export const SCOPE_TOOL: Anthropic.Tool = {
@@ -165,6 +166,10 @@ export async function assessScope(
     ? `\n\nDISPATCHER INPUTS (use these directly, don't guess):\n${inputLines.join("\n")}`
     : `\n\n(No dispatcher inputs provided — note your assumptions in calculations.key_assumptions)`;
 
+  // Recursive self-learning: pull recent corrections to past scopes so Argus
+  // doesn't repeat mistakes (over/under-loading, missed assumptions, etc).
+  const preamble = await feedbackPreamble("argus", "scope_assessment", 5);
+
   const message = await anthropic.messages.create({
     model: MODELS.SMART,
     max_tokens: 4096,
@@ -176,7 +181,7 @@ export async function assessScope(
         content: [
           {
             type: "text",
-            text: `You are Argus, the AI scoping engineer for First Call Mitigation. Assess the following site photos following IICRC S500 (water) / S520 (mold) standards.
+            text: preamble + `You are Argus, the AI scoping engineer for First Call Mitigation. Assess the following site photos following IICRC S500 (water) / S520 (mold) standards.
 
 Your job: produce a TIGHT equipment list the tech will load on the truck. Don't overload (waste) and don't underload (return trips). Show your math in the calculations field so the tech can verify before rolling.
 

@@ -8,7 +8,12 @@ import { useRouter } from "next/navigation";
 const BUCKET = "job-photos";
 
 export default function PhotoUploader({ jobId }: { jobId: string }) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  // Two separate inputs so the tech gets a real CHOICE on mobile:
+  //   • cameraRef: capture="environment" opens the rear camera directly
+  //   • libraryRef: standard file picker, lets them pick from gallery
+  // On desktop, capture="environment" is ignored — both behave like a file picker.
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +53,8 @@ export default function PhotoUploader({ jobId }: { jobId: string }) {
 
     if (failures.length) setError(failures.join("\n"));
     setProgress(null);
-    if (inputRef.current) inputRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
+    if (libraryRef.current) libraryRef.current.value = "";
     router.refresh();
   }
 
@@ -56,30 +62,50 @@ export default function PhotoUploader({ jobId }: { jobId: string }) {
 
   return (
     <div className="flex flex-col gap-1.5">
+      {/* Direct-to-camera (mobile rear cam). Hidden — triggered by the Take Photo button. */}
       <input
-        ref={inputRef}
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => onPick(e.target.files)}
+      />
+      {/* Library / gallery picker (multi-select). */}
+      <input
+        ref={libraryRef}
         type="file"
         accept="image/*"
         multiple
         className="hidden"
         onChange={(e) => onPick(e.target.files)}
       />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={pending}
-        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
-      >
-        {pending ? (
-          <>
-            <Spinner /> Uploading {progress!.done}/{progress!.total}…
-          </>
-        ) : (
-          <>
-            <UploadIcon className="w-4 h-4" /> Upload Photos
-          </>
-        )}
-      </button>
+      {pending ? (
+        <button
+          type="button"
+          disabled
+          className="px-4 py-2 bg-zinc-800 border border-zinc-700 opacity-50 text-white text-sm rounded-lg flex items-center gap-2"
+        >
+          <Spinner /> Uploading {progress!.done}/{progress!.total}…
+        </button>
+      ) : (
+        <div className="flex gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => cameraRef.current?.click()}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+          >
+            📷 Take Photo
+          </button>
+          <button
+            type="button"
+            onClick={() => libraryRef.current?.click()}
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+          >
+            <UploadIcon className="w-4 h-4" /> Upload
+          </button>
+        </div>
+      )}
       {error && <p className="text-red-400 text-xs whitespace-pre-line">{error}</p>}
     </div>
   );
