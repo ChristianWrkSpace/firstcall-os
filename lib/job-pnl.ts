@@ -266,6 +266,12 @@ export async function computePortfolioPnl(opts: {
   const windowDays = Math.max(1, opts.windowDays);
   const since = new Date(Date.now() - windowDays * 86_400_000).toISOString();
 
+  // Use the later of the user's selected window and the data cutoff so
+  // pre-launch test rows don't poison the portfolio P&L.
+  const { getDataCutoff } = await import("./data-cutoff");
+  const cutoff = getDataCutoff();
+  const effectiveSince = cutoff && cutoff > since ? cutoff : since;
+
   let q = admin
     .from("jobs")
     .select(
@@ -276,7 +282,7 @@ export async function computePortfolioPnl(opts: {
        consumables_used(quantity, unit_cost),
        equipment_assignments(deployed_at, retrieved_at, equipment:equipment_id(daily_cost))`
     )
-    .gte("created_at", since)
+    .gte("created_at", effectiveSince)
     .order("created_at", { ascending: false });
 
   if (opts.jobType && opts.jobType !== "all") {

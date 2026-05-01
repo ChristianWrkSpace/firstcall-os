@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import { requireRoles } from "@/components/RoleGate";
 import NewSubForm from "./NewSubForm";
 
@@ -13,24 +14,34 @@ export default async function SubsPage() {
   const supabase = await createServerSupabaseClient();
 
   const yearStart = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
+  const cutoff = getDataCutoff();
+
+  let subsQuery = supabase
+    .from("subcontractors")
+    .select("id, name, trade, contact_name, phone, email, ein_or_ssn_last4, is_corporation, active, created_at")
+    .eq("active", true)
+    .order("name");
+  if (cutoff) subsQuery = subsQuery.gte("created_at", cutoff);
+
+  let ytdQuery = supabase
+    .from("sub_invoices")
+    .select("subcontractor_id, amount, created_at")
+    .gte("invoice_date", yearStart);
+  if (cutoff) ytdQuery = ytdQuery.gte("created_at", cutoff);
+
+  let recentQuery = supabase
+    .from("sub_invoices")
+    .select(
+      "id, invoice_number, invoice_date, amount, paid_at, description, created_at, jobs(job_number, id), subcontractors(name)"
+    )
+    .order("invoice_date", { ascending: false })
+    .limit(50);
+  if (cutoff) recentQuery = recentQuery.gte("created_at", cutoff);
 
   const [{ data: subs }, { data: ytdInvoices }, { data: recentInvoices }] = await Promise.all([
-    supabase
-      .from("subcontractors")
-      .select("id, name, trade, contact_name, phone, email, ein_or_ssn_last4, is_corporation, active")
-      .eq("active", true)
-      .order("name"),
-    supabase
-      .from("sub_invoices")
-      .select("subcontractor_id, amount")
-      .gte("invoice_date", yearStart),
-    supabase
-      .from("sub_invoices")
-      .select(
-        "id, invoice_number, invoice_date, amount, paid_at, description, jobs(job_number, id), subcontractors(name)"
-      )
-      .order("invoice_date", { ascending: false })
-      .limit(50),
+    subsQuery,
+    ytdQuery,
+    recentQuery,
   ]);
 
   // YTD totals per sub

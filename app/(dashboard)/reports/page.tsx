@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
 
@@ -16,7 +17,14 @@ export default async function ReportsPage({
   await requireRoles(["owner", "manager"]);
   const { window: w } = await searchParams;
   const windowDays = Math.min(Math.max(parseInt(w ?? "30"), 7), 365);
-  const since = NDAYS_AGO(windowDays);
+  const cutoff = getDataCutoff();
+  // Floor every "since" at the data cutoff so reports never aggregate
+  // pre-launch test rows even when the window extends back further.
+  const sinceWindow = NDAYS_AGO(windowDays);
+  const since = cutoff && cutoff > sinceWindow ? cutoff : sinceWindow;
+  const since30 = NDAYS_AGO(30);
+  const since30Effective = cutoff && cutoff > since30 ? cutoff : since30;
+  const allJobsFloor = cutoff ?? "1970-01-01T00:00:00Z";
 
   const supabase = await createServerSupabaseClient();
 
@@ -30,7 +38,8 @@ export default async function ReportsPage({
   ] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, status, type, created_at, updated_at, completed_at, site_zip"),
+      .select("id, status, type, created_at, updated_at, completed_at, site_zip")
+      .gte("created_at", allJobsFloor),
     supabase
       .from("jobs")
       .select("id, status, type, created_at, updated_at, completed_at, site_zip, customers(insurance_company)")
@@ -47,11 +56,12 @@ export default async function ReportsPage({
       .from("invoices")
       .select(
         "id, status, sent_at, paid_at, created_at, line_items:invoice_line_items(line_total), payments(amount)"
-      ),
+      )
+      .gte("created_at", allJobsFloor),
     supabase
       .from("payments")
       .select("amount, received_at")
-      .gte("received_at", NDAYS_AGO(30)),
+      .gte("received_at", since30Effective.slice(0, 10)),
   ]);
 
   // ─── Top KPIs ─────────────────────────────────────────────────────

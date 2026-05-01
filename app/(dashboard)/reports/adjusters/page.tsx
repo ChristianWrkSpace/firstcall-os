@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
 
@@ -43,11 +44,12 @@ const GRADE_COLORS: Record<Grade, string> = {
 export default async function AdjusterScoringPage() {
   await requireRoles(["owner", "manager"]);
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
 
   // Pull every sent (or further) invoice with its job → customer → carrier.
   // We exclude voided invoices entirely. Drafts (no sent_at) don't count
   // toward DSO or grades — they're scope, not commitment.
-  const { data: invoices } = await supabase
+  let invQuery = supabase
     .from("invoices")
     .select(
       `id,
@@ -58,6 +60,8 @@ export default async function AdjusterScoringPage() {
        payments(amount, created_at)`
     )
     .neq("status", "void");
+  if (cutoff) invQuery = invQuery.gte("created_at", cutoff);
+  const { data: invoices } = await invQuery;
 
   const carriers = new Map<string, {
     invoices: Array<{

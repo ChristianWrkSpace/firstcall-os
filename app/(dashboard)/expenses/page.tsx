@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import { requireRoles } from "@/components/RoleGate";
 import ExpenseForm from "./ExpenseForm";
 import DeleteButton from "./DeleteButton";
@@ -28,11 +29,14 @@ export default async function ExpensesPage({
   const since = new Date(Date.now() - windowDays * 86_400_000).toISOString().slice(0, 10);
 
   const supabase = await createServerSupabaseClient();
-  const { data: expenses } = await supabase
+  const cutoff = getDataCutoff();
+  let expQuery = supabase
     .from("vehicle_expenses")
-    .select("id, expense_date, category, amount, vehicle_id, notes")
+    .select("id, expense_date, category, amount, vehicle_id, notes, created_at")
     .gte("expense_date", since)
     .order("expense_date", { ascending: false });
+  if (cutoff) expQuery = expQuery.gte("created_at", cutoff);
+  const { data: expenses } = await expQuery;
 
   const totals = (expenses ?? []).reduce(
     (acc, e: any) => {

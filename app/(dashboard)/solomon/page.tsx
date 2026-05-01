@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getCurrentUser } from "@/lib/auth-helpers";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import { redirect } from "next/navigation";
 import RunAnalysisButton from "./RunAnalysisButton";
 import {
@@ -25,13 +26,16 @@ export default async function SolomonPage() {
   }
 
   const supabase = await createServerSupabaseClient();
-  const { data: latest } = await supabase
+  const cutoff = getDataCutoff();
+  let reportsQuery = supabase
     .from("solomon_reports")
     .select(
       "id, created_at, window_days, job_count, invoice_count, total_billed, total_collected, insights, recommendations, raw_summary, generated_by, profiles:profiles!generated_by(name)"
     )
     .order("created_at", { ascending: false })
     .limit(5);
+  if (cutoff) reportsQuery = reportsQuery.gte("created_at", cutoff);
+  const { data: latest } = await reportsQuery;
 
   const reports = latest ?? [];
   const current = reports[0];

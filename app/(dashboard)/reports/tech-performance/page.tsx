@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import { requireRoles } from "@/components/RoleGate";
 
 const fmt = (n: number) =>
@@ -27,16 +28,18 @@ export default async function TechPerformancePage({
   const since = new Date(Date.now() - windowDays * 86_400_000).toISOString().slice(0, 10);
 
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
 
-  // Pull labor entries with profile name + the job they're on (with job's invoices)
-  const { data: labor } = await supabase
+  let laborQuery = supabase
     .from("tech_labor_entries")
     .select(
-      `id, hours, hourly_rate, work_date, profile_id,
+      `id, hours, hourly_rate, work_date, profile_id, created_at,
        profiles(name),
        jobs(id, type, invoices(status, sent_at, line_items:invoice_line_items(line_total)))`
     )
     .gte("work_date", since);
+  if (cutoff) laborQuery = laborQuery.gte("created_at", cutoff);
+  const { data: labor } = await laborQuery;
 
   // Aggregate per tech
   const map = new Map<string, {

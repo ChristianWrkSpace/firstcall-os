@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
 
@@ -95,13 +96,16 @@ export default async function ActivityPage({
   const limit = Math.min(Math.max(parseInt(sp.limit ?? "100"), 25), 500);
 
   const supabase = await createServerSupabaseClient();
-  const { data: rows } = await supabase
+  const cutoff = getDataCutoff();
+  let rowsQuery = supabase
     .from("audit_logs")
     .select(
       "id, created_at, user_id, user_name, action, entity_type, entity_id, details"
     )
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (cutoff) rowsQuery = rowsQuery.gte("created_at", cutoff);
+  const { data: rows } = await rowsQuery;
 
   const all = (rows ?? []) as AuditRow[];
   const items = agentFilter
