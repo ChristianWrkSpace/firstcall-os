@@ -16,8 +16,8 @@
  *   • Foundation:  #0E1012 → #1A1C1E (deep slate)
  *   • Surface:     rgba(255,255,255,0.03–0.06) with backdrop-blur-2xl
  *   • Edge:        rgba(255,255,255,0.06–0.10) hairline borders
- *   • Healing Blue:    #4A90E2 / #3B82F6 — primary actions
- *   • Safety Teal:     #2DD4BF — agent-active glow + processing pulse
+ *   • Healing Blue:    #6B8AD9 / #3B82F6 — primary actions
+ *   • Safety Teal:     #5FBDB0 — agent-active glow + processing pulse
  *   • Intervention:    #F59E0B amber — human-in-loop hand-off cards
  *   • Type:        Geist UI inherited from layout
  *
@@ -88,7 +88,7 @@ const STATUS_DOT: Record<string, string> = {
 // ─── The Shell ───────────────────────────────────────────────────────────
 export default function CommandCenterShell({ data }: { data: ShellData }) {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#0E1012] text-[#F4F6F7]">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0E1012] text-white/[0.92]">
       {/* Ambient backdrop — slow gradient sweep + grain for depth */}
       <BackdropAtmosphere />
 
@@ -146,7 +146,7 @@ function ShellHeader({
   return (
     <header className="flex items-center justify-between gap-4 flex-wrap">
       <div className="flex items-center gap-3">
-        <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-[#4A90E2] to-[#2DD4BF] flex items-center justify-center shadow-[0_0_24px_rgba(45,212,191,0.25)]">
+        <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] flex items-center justify-center shadow-[0_0_24px_rgba(95,189,176,0.25)]">
           <span className="text-white font-bold tracking-tight">FC</span>
           <span className="absolute -inset-px rounded-xl ring-1 ring-white/20 pointer-events-none" />
         </div>
@@ -164,7 +164,7 @@ function ShellHeader({
         className="flex items-center gap-4 px-4 py-2"
         accent={allHealthy ? "teal" : "amber"}
       >
-        <PulseDot color={allHealthy ? "#2DD4BF" : "#F59E0B"} />
+        <PulseDot color={allHealthy ? "#5FBDB0" : "#F59E0B"} />
         <div className="text-xs flex items-center gap-4">
           <Stat label="Triggers 24h" value={systemPulse.triggersLast24h} />
           <Sep />
@@ -234,7 +234,7 @@ function CommandBar() {
       }}
       className={`relative rounded-2xl border backdrop-blur-2xl transition-all duration-300
         ${dragOver
-          ? "border-[#2DD4BF]/60 bg-[#2DD4BF]/5 shadow-[0_0_40px_rgba(45,212,191,0.25)]"
+          ? "border-[#5FBDB0]/60 bg-[#5FBDB0]/5 shadow-[0_0_40px_rgba(95,189,176,0.25)]"
           : "border-white/[0.07] bg-white/[0.025]"}
       `}
     >
@@ -259,7 +259,7 @@ function CommandBar() {
             aria-label="Voice"
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-colors
               ${recording
-                ? "bg-[#2DD4BF]/15 text-[#2DD4BF] ring-1 ring-[#2DD4BF]/40"
+                ? "bg-[#5FBDB0]/15 text-[#5FBDB0] ring-1 ring-[#5FBDB0]/40"
                 : "text-white/50 hover:text-white/90 hover:bg-white/5"}
             `}
           >
@@ -275,7 +275,7 @@ function CommandBar() {
           <button
             type="button"
             disabled={!text.trim() && !recording}
-            className="ml-1 h-8 px-3 rounded-xl bg-gradient-to-br from-[#4A90E2] to-[#2DD4BF] text-white text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_18px_rgba(74,144,226,0.25)] hover:shadow-[0_0_22px_rgba(45,212,191,0.35)] transition-shadow"
+            className="ml-1 h-8 px-3 rounded-xl bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_18px_rgba(107,138,217,0.25)] hover:shadow-[0_0_22px_rgba(95,189,176,0.35)] transition-shadow"
           >
             Dispatch →
           </button>
@@ -350,25 +350,22 @@ function WorkflowRow({
       style={{ animationDelay: `${animateInDelayMs}ms` }}
     >
       {isActive && (
-        <span className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-[#2DD4BF]/25 animate-pulse-soft" />
+        <span className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-[#5FBDB0]/25 animate-pulse-soft" />
       )}
       <div className="flex items-start gap-3">
         <div
           className={`relative h-9 w-9 rounded-lg flex items-center justify-center text-base shrink-0
             ${isDone
               ? "bg-emerald-400/10 text-emerald-300 ring-1 ring-emerald-400/20"
-              : "bg-[#2DD4BF]/10 text-[#7FE8DA] ring-1 ring-[#2DD4BF]/20"}
+              : "bg-[#5FBDB0]/10 text-[#A8DCD3] ring-1 ring-[#5FBDB0]/20"}
           `}
         >
           <span>{workflow.icon}</span>
-          {isActive && (
-            <span className="absolute -inset-1 rounded-lg ring-1 ring-[#2DD4BF]/30 animate-ping-slow pointer-events-none" />
-          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <p className="text-sm font-semibold tracking-tight">
-              <span className="text-[#7FE8DA]">{workflow.agent}</span>
+              <span className="text-[#A8DCD3]">{workflow.agent}</span>
               <span className="text-white/50 font-normal"> · {workflow.intent}</span>
             </p>
             <p className="text-[11px] text-white/40 font-mono">
@@ -389,7 +386,7 @@ function ProgressBar({ progress, active }: { progress: number; active: boolean }
       <div
         className={`h-full rounded-full transition-all duration-700 ${
           active
-            ? "bg-gradient-to-r from-[#4A90E2] to-[#2DD4BF] animate-shimmer-bg"
+            ? "bg-gradient-to-r from-[#6B8AD9] to-[#5FBDB0] animate-shimmer-bg"
             : "bg-emerald-400/70"
         }`}
         style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
@@ -501,7 +498,7 @@ function MetricTile({
     accent === "blue"
       ? "ring-blue-400/15"
       : accent === "teal"
-        ? "ring-[#2DD4BF]/20"
+        ? "ring-[#5FBDB0]/20"
         : accent === "emerald"
           ? "ring-emerald-400/20"
           : "ring-violet-400/20";
@@ -509,7 +506,7 @@ function MetricTile({
     accent === "blue"
       ? "text-blue-200"
       : accent === "teal"
-        ? "text-[#7FE8DA]"
+        ? "text-[#A8DCD3]"
         : accent === "emerald"
           ? "text-emerald-300"
           : "text-violet-200";
@@ -576,7 +573,7 @@ function Glass({
 }) {
   const ring =
     accent === "teal"
-      ? "ring-[#2DD4BF]/15"
+      ? "ring-[#5FBDB0]/15"
       : accent === "amber"
         ? "ring-amber-400/20"
         : "ring-white/[0.04]";
@@ -624,7 +621,7 @@ function CountChip({
   const c =
     tone === "amber"
       ? "bg-amber-400/10 text-amber-300 ring-amber-400/20"
-      : "bg-[#2DD4BF]/10 text-[#7FE8DA] ring-[#2DD4BF]/20";
+      : "bg-[#5FBDB0]/10 text-[#A8DCD3] ring-[#5FBDB0]/20";
   return (
     <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ring-1 text-[10px] uppercase tracking-wide ${c}`}>
       <span className="font-mono text-xs">{count}</span>
@@ -658,7 +655,7 @@ function BackdropAtmosphere() {
         className="absolute inset-0 pointer-events-none opacity-60"
         style={{
           background:
-            "radial-gradient(circle at 18% 12%, rgba(74,144,226,0.18) 0%, transparent 38%), radial-gradient(circle at 82% 88%, rgba(45,212,191,0.14) 0%, transparent 42%)",
+            "radial-gradient(circle at 18% 12%, rgba(107,138,217,0.18) 0%, transparent 38%), radial-gradient(circle at 82% 88%, rgba(95,189,176,0.14) 0%, transparent 42%)",
         }}
       />
       {/* Animated drift layer */}
@@ -667,7 +664,7 @@ function BackdropAtmosphere() {
         className="absolute inset-0 pointer-events-none opacity-40 animate-drift"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, rgba(74,144,226,0.06) 0%, transparent 60%)",
+            "radial-gradient(circle at 50% 50%, rgba(107,138,217,0.06) 0%, transparent 60%)",
         }}
       />
       {/* Fine noise to break up the gradient (CSS-only via SVG data URI) */}
@@ -714,8 +711,8 @@ function MicIcon() {
 function PulseMicIcon() {
   return (
     <span className="relative inline-flex h-4 w-4 items-center justify-center">
-      <span className="absolute inset-0 rounded-full bg-[#2DD4BF]/40 animate-ping-slow" />
-      <span className="relative h-2 w-2 rounded-full bg-[#2DD4BF]" />
+      <span className="absolute inset-0 rounded-full bg-[#5FBDB0]/40 animate-ping-slow" />
+      <span className="relative h-2 w-2 rounded-full bg-[#5FBDB0]" />
     </span>
   );
 }
@@ -757,16 +754,16 @@ function ShellStyles() {
       .animate-ping-slow { animation: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
 
       @keyframes pulse-soft {
-        0%, 100% { opacity: 0.35; box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.18); }
-        50%      { opacity: 0.85; box-shadow: 0 0 0 6px rgba(45, 212, 191, 0); }
+        0%, 100% { opacity: 0.20; }
+        50%      { opacity: 0.55; }
       }
-      .animate-pulse-soft { animation: pulse-soft 2.4s ease-in-out infinite; }
+      .animate-pulse-soft { animation: pulse-soft 3.2s ease-in-out infinite; }
 
       @keyframes pulse-amber {
-        0%, 100% { opacity: 0.30; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.18); }
-        50%      { opacity: 0.80; box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+        0%, 100% { opacity: 0.25; }
+        50%      { opacity: 0.65; }
       }
-      .animate-pulse-amber { animation: pulse-amber 2.8s ease-in-out infinite; }
+      .animate-pulse-amber { animation: pulse-amber 3.6s ease-in-out infinite; }
 
       @keyframes shimmer-bg {
         0%   { background-position: -200% 0; }
@@ -778,9 +775,9 @@ function ShellStyles() {
       }
 
       @keyframes shimmer-border {
-        0%   { box-shadow: 0 0 0 1px rgba(45,212,191,0.20); }
-        50%  { box-shadow: 0 0 0 2px rgba(45,212,191,0.45); }
-        100% { box-shadow: 0 0 0 1px rgba(45,212,191,0.20); }
+        0%   { box-shadow: 0 0 0 1px rgba(95,189,176,0.20); }
+        50%  { box-shadow: 0 0 0 2px rgba(95,189,176,0.45); }
+        100% { box-shadow: 0 0 0 1px rgba(95,189,176,0.20); }
       }
       .animate-shimmer-border { animation: shimmer-border 1.6s ease-in-out infinite; border-radius: 1rem; }
 
