@@ -44,6 +44,16 @@ export interface ShellData {
     failedSends: number;
     backupAgeHours: number;
   };
+  compute?: ComputeStats;
+}
+
+export interface ComputeStats {
+  mtdSpendUsd: number;
+  todaySpendUsd: number;
+  invocationsToday: number;
+  byTier: { fast: number; balanced: number; smart: number; unknown: number };
+  topAgentByCost: { agent: string; cost: number } | null;
+  lastInvocations: Array<{ model: string; cost: number; minutesAgo: number }>;
 }
 
 export interface AgentWorkflow {
@@ -117,6 +127,13 @@ export default function CommandCenterShell({ data }: { data: ShellData }) {
           <section className="md:col-span-4">
             <TodayMetrics metrics={data.todayMetrics} />
           </section>
+
+          {/* Compute — AI cost + invocation health */}
+          {data.compute && (
+            <section className="md:col-span-12">
+              <ComputePanel compute={data.compute} />
+            </section>
+          )}
 
           {/* Job pulse — full width below */}
           <section className="md:col-span-12">
@@ -516,6 +533,154 @@ function MetricTile({
       <p className={`text-xl font-semibold tracking-tight mt-1 ${text}`}>{value}</p>
     </div>
   );
+}
+
+// ─── Compute Panel — AI cost + tier mix + recent invocations ───────────
+function ComputePanel({ compute }: { compute: ComputeStats }) {
+  const tierTotal =
+    compute.byTier.fast +
+    compute.byTier.balanced +
+    compute.byTier.smart +
+    compute.byTier.unknown;
+  const pct = (n: number) => (tierTotal > 0 ? (n / tierTotal) * 100 : 0);
+
+  return (
+    <Glass className="p-5" subtle>
+      <PanelHeader
+        title="Compute"
+        sub="AI spend + agent invocations"
+        right={
+          <span className="text-[10px] uppercase tracking-wide text-white/40">
+            {compute.invocationsToday} calls today
+          </span>
+        }
+      />
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-4">
+        {/* Big number — MTD spend */}
+        <div className="md:col-span-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-white/40">
+            Month-to-date
+          </p>
+          <p className="text-3xl font-semibold tracking-tight mt-1 text-white/95 font-mono">
+            ${compute.mtdSpendUsd.toFixed(2)}
+          </p>
+          <p className="text-[11px] text-white/45 mt-1">
+            ${compute.todaySpendUsd.toFixed(2)} today
+          </p>
+          {compute.topAgentByCost && (
+            <p className="text-[11px] text-[#A8DCD3] mt-3">
+              Top: <span className="font-medium">{compute.topAgentByCost.agent}</span>{" "}
+              <span className="text-white/45 font-mono">
+                ${compute.topAgentByCost.cost.toFixed(2)}
+              </span>
+            </p>
+          )}
+        </div>
+
+        {/* Tier mix bars */}
+        <div className="md:col-span-5 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-white/40 mb-3">
+            Spend by Tier
+          </p>
+          <TierBar
+            label="Smart (Opus)"
+            cost={compute.byTier.smart}
+            pct={pct(compute.byTier.smart)}
+            color="bg-violet-400/70"
+          />
+          <TierBar
+            label="Balanced (Sonnet/DeepSeek)"
+            cost={compute.byTier.balanced}
+            pct={pct(compute.byTier.balanced)}
+            color="bg-[#6B8AD9]/80"
+          />
+          <TierBar
+            label="Fast (Haiku/Flash/Mini)"
+            cost={compute.byTier.fast}
+            pct={pct(compute.byTier.fast)}
+            color="bg-[#5FBDB0]/80"
+          />
+          {compute.byTier.unknown > 0 && (
+            <TierBar
+              label="Other / unknown model"
+              cost={compute.byTier.unknown}
+              pct={pct(compute.byTier.unknown)}
+              color="bg-zinc-500/60"
+            />
+          )}
+        </div>
+
+        {/* Last 5 invocations */}
+        <div className="md:col-span-4 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-white/40 mb-3">
+            Last calls
+          </p>
+          {compute.lastInvocations.length === 0 ? (
+            <p className="text-xs text-white/40 italic">
+              No agent calls yet — once an agent fires, you&apos;ll see it here.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-1.5">
+              {compute.lastInvocations.map((c, i) => (
+                <li
+                  key={i}
+                  className="flex items-center justify-between gap-2 text-xs"
+                >
+                  <span className="text-white/55 truncate font-mono text-[11px]">
+                    {prettyModel(c.model)}
+                  </span>
+                  <span className="text-white/40 font-mono shrink-0 text-[10px]">
+                    {c.minutesAgo}m
+                  </span>
+                  <span className="text-[#A8DCD3] font-mono shrink-0 text-[11px]">
+                    ${c.cost.toFixed(4)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </Glass>
+  );
+}
+
+function TierBar({
+  label,
+  cost,
+  pct,
+  color,
+}: {
+  label: string;
+  cost: number;
+  pct: number;
+  color: string;
+}) {
+  return (
+    <div className="mb-2.5 last:mb-0">
+      <div className="flex items-baseline justify-between text-[11px] mb-1">
+        <span className="text-white/65">{label}</span>
+        <span className="text-white/85 font-mono">${cost.toFixed(2)}</span>
+      </div>
+      <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${color}`}
+          style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function prettyModel(m: string): string {
+  return m
+    .replace("anthropic/", "")
+    .replace("openai/", "")
+    .replace("google/", "")
+    .replace("deepseek/", "")
+    .replace("claude-", "")
+    .replace("gpt-", "gpt ");
 }
 
 // ─── Job Pulse — full width strip ───────────────────────────────────────

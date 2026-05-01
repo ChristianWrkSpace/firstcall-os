@@ -2,7 +2,17 @@ import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-se
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { STATUS_COLORS } from "@/lib/constants";
+import { Glass, PageBackdrop } from "@/components/ui/Glass";
+
+// Status palette tuned for the Glass theme (softer than the legacy STATUS_COLORS)
+const GLASS_STATUS: Record<string, string> = {
+  lead:           "bg-[#6B8AD9]/15 text-[#A6B8E7] ring-[#6B8AD9]/25",
+  inspection:     "bg-yellow-400/10 text-yellow-300 ring-yellow-400/20",
+  mitigation:     "bg-orange-400/10 text-orange-300 ring-orange-400/20",
+  drying:         "bg-purple-400/10 text-purple-300 ring-purple-400/20",
+  reconstruction: "bg-indigo-400/10 text-indigo-300 ring-indigo-400/20",
+  completed:      "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+};
 
 // "My Day" — field tech home screen.
 // Shows the jobs assigned to YOU, sorted by today first.
@@ -76,56 +86,59 @@ export default async function MyDayPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl">
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold text-white">
-          Hey {me.name?.split(" ")[0] ?? "there"} 👋
-        </h1>
-        <p className="text-zinc-400 text-sm mt-1">
-          {todayJobs.length === 0 && tomorrowJobs.length === 0 && laterJobs.length === 0
-            ? "Nothing on the schedule."
-            : `${todayJobs.length} today · ${tomorrowJobs.length} tomorrow · ${laterJobs.length} upcoming`}
-        </p>
-      </div>
-
-      {todayJobs.length > 0 && (
-        <Section title={`Today · ${dateLabel(today)}`} accent="blue">
-          {todayJobs.map((j: any) => (
-            <JobCard key={j.id} job={j} />
-          ))}
-        </Section>
-      )}
-      {tomorrowJobs.length > 0 && (
-        <Section title={`Tomorrow · ${dateLabel(tomorrow)}`}>
-          {tomorrowJobs.map((j: any) => (
-            <JobCard key={j.id} job={j} />
-          ))}
-        </Section>
-      )}
-      {laterJobs.length > 0 && (
-        <Section title="Upcoming">
-          {laterJobs.map((j: any) => (
-            <JobCard key={j.id} job={j} />
-          ))}
-        </Section>
-      )}
-      {unscheduledJobs.length > 0 && (
-        <Section title="Unscheduled — assigned to you">
-          {unscheduledJobs.map((j: any) => (
-            <JobCard key={j.id} job={j} />
-          ))}
-        </Section>
-      )}
-
-      {active.length === 0 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center">
-          <p className="text-zinc-300 text-base">✓ Nothing assigned to you right now.</p>
-          <p className="text-zinc-500 text-sm mt-2">
-            Office will assign jobs as they come in.
+    <PageBackdrop>
+      <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        <div className="mb-6">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">My Day</p>
+          <h1 className="text-2xl font-semibold tracking-tight mt-1 text-white/95">
+            Hey {me.name?.split(" ")[0] ?? "there"} 👋
+          </h1>
+          <p className="text-white/45 text-sm mt-1">
+            {todayJobs.length === 0 && tomorrowJobs.length === 0 && laterJobs.length === 0
+              ? "Nothing on the schedule."
+              : `${todayJobs.length} today · ${tomorrowJobs.length} tomorrow · ${laterJobs.length} upcoming`}
           </p>
         </div>
-      )}
-    </div>
+
+        {todayJobs.length > 0 && (
+          <Section title={`Today · ${dateLabel(today)}`} accent="teal">
+            {todayJobs.map((j: any) => (
+              <JobCard key={j.id} job={j} />
+            ))}
+          </Section>
+        )}
+        {tomorrowJobs.length > 0 && (
+          <Section title={`Tomorrow · ${dateLabel(tomorrow)}`}>
+            {tomorrowJobs.map((j: any) => (
+              <JobCard key={j.id} job={j} />
+            ))}
+          </Section>
+        )}
+        {laterJobs.length > 0 && (
+          <Section title="Upcoming">
+            {laterJobs.map((j: any) => (
+              <JobCard key={j.id} job={j} />
+            ))}
+          </Section>
+        )}
+        {unscheduledJobs.length > 0 && (
+          <Section title="Unscheduled — assigned to you">
+            {unscheduledJobs.map((j: any) => (
+              <JobCard key={j.id} job={j} />
+            ))}
+          </Section>
+        )}
+
+        {active.length === 0 && (
+          <Glass className="p-10 text-center">
+            <p className="text-white/85 text-base">✓ Nothing assigned to you right now.</p>
+            <p className="text-white/45 text-sm mt-2">
+              Office will assign jobs as they come in.
+            </p>
+          </Glass>
+        )}
+      </div>
+    </PageBackdrop>
   );
 }
 
@@ -135,19 +148,19 @@ function Section({
   children,
 }: {
   title: string;
-  accent?: "blue";
+  accent?: "teal";
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-5">
+    <section className="mb-6">
       <p
-        className={`text-xs uppercase tracking-wide font-semibold mb-2 ${
-          accent === "blue" ? "text-blue-400" : "text-zinc-500"
+        className={`text-[10px] uppercase tracking-[0.18em] font-semibold mb-2.5 ${
+          accent === "teal" ? "text-[#A8DCD3]" : "text-white/40"
         }`}
       >
         {title}
       </p>
-      <div className="flex flex-col gap-2">{children}</div>
+      <div className="flex flex-col gap-2.5">{children}</div>
     </section>
   );
 }
@@ -172,36 +185,35 @@ function JobCard({ job }: { job: any }) {
   const mapsUrl = fullAddress
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
     : null;
+  const statusClass = GLASS_STATUS[job.status] ?? "bg-white/5 text-white/60 ring-white/10";
   return (
-    <article className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <Glass className="p-4" subtle>
       <Link
         href={`/jobs/${job.id}`}
-        className="block hover:opacity-90 transition-opacity"
+        className="block hover:opacity-95 transition-opacity"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-white font-mono text-sm">{job.job_number}</span>
-              <span
-                className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ${STATUS_COLORS[job.status] ?? ""}`}
-              >
+              <span className="text-white/55 font-mono text-xs">{job.job_number}</span>
+              <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ring-1 ${statusClass}`}>
                 {job.status}
               </span>
             </div>
-            <p className="text-white text-base mt-1.5 font-medium">
+            <p className="text-white/95 text-base mt-1.5 font-semibold tracking-tight">
               {customer?.name ?? "(no customer)"}
             </p>
-            <p className="text-zinc-400 text-sm mt-0.5">
+            <p className="text-white/55 text-sm mt-0.5">
               {[job.site_address, job.site_city].filter(Boolean).join(", ") ||
                 "Address TBD"}
             </p>
-            <p className="text-zinc-500 text-xs mt-1.5 capitalize">
+            <p className="text-white/40 text-xs mt-1.5 capitalize">
               {job.type} damage
             </p>
           </div>
           {time && (
             <div className="text-right shrink-0">
-              <p className="text-blue-400 text-base font-semibold whitespace-nowrap">
+              <p className="text-[#A8DCD3] text-base font-semibold whitespace-nowrap font-mono">
                 {time}
               </p>
             </div>
@@ -209,42 +221,42 @@ function JobCard({ job }: { job: any }) {
         </div>
       </Link>
 
-      {/* Quick actions — explicit per-job. 48pt minimum tap targets for the field. */}
-      <div className="mt-3 pt-3 border-t border-zinc-800 grid grid-cols-3 gap-2">
+      {/* Quick actions — 48pt minimum tap targets for the field */}
+      <div className="mt-3 pt-3 border-t border-white/[0.06] grid grid-cols-3 gap-2">
         {mapsUrl ? (
           <a
             href={mapsUrl}
             target="_blank"
             rel="noopener"
-            className="flex items-center justify-center gap-1.5 py-3 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-100 text-sm font-medium rounded-lg min-h-[48px]"
+            className="flex items-center justify-center gap-1.5 py-3 bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] text-white/85 text-sm font-medium rounded-lg min-h-[48px] border border-white/[0.06] transition-colors"
           >
             🧭 <span>Navigate</span>
           </a>
         ) : (
-          <span className="flex items-center justify-center py-3 bg-zinc-800/50 text-zinc-500 text-xs rounded-lg min-h-[48px]">
+          <span className="flex items-center justify-center py-3 bg-white/[0.02] text-white/30 text-xs rounded-lg min-h-[48px] border border-white/[0.04]">
             No address
           </span>
         )}
         {customer?.phone ? (
           <a
             href={`tel:${customer.phone}`}
-            className="flex items-center justify-center gap-1.5 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm font-medium rounded-lg min-h-[48px]"
+            className="flex items-center justify-center gap-1.5 py-3 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium rounded-lg min-h-[48px] shadow-[0_0_18px_rgba(95,189,176,0.25)] active:opacity-90 transition-opacity"
           >
             📞 <span>Call</span>
           </a>
         ) : (
-          <span className="flex items-center justify-center py-3 bg-zinc-800/50 text-zinc-500 text-xs rounded-lg min-h-[48px]">
+          <span className="flex items-center justify-center py-3 bg-white/[0.02] text-white/30 text-xs rounded-lg min-h-[48px] border border-white/[0.04]">
             No phone
           </span>
         )}
         <Link
           href={`/jobs/${job.id}`}
-          className="flex items-center justify-center gap-1.5 py-3 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-100 text-sm font-medium rounded-lg min-h-[48px]"
+          className="flex items-center justify-center gap-1.5 py-3 bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] text-white/85 text-sm font-medium rounded-lg min-h-[48px] border border-white/[0.06] transition-colors"
         >
           📸 <span>Open</span>
         </Link>
       </div>
-    </article>
+    </Glass>
   );
 }
 

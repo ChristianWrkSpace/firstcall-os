@@ -470,6 +470,40 @@ export const ROADMAP: RoadmapItem[] = [
     ],
   },
   {
+    id: "command-center",
+    title: "Command Center — Industrial Glassmorphism Shell",
+    track: "core",
+    status: "done",
+    effort: "L",
+    shipped_at: "2026-04-30",
+    description:
+      "/command-center — official operational dashboard with Bento grid, Active Agent Workflows panel, Hand-off stack (amber-pulsed for human-in-loop), Today metrics, Job Pulse strip, and Compute panel showing AI spend MTD + by tier + last invocations. Healing Blue + Safety Teal palette, glass surfaces, Living UI animations (rise-in / pulse-soft / shimmer-bg / drift). Owners/managers/office land here on sign-in; old /dashboard kept as 'classic' fallback.",
+    features: [
+      "components/ui/Glass — extracted Glass + PageBackdrop + PanelHeader + CountChip primitives for the rest of the app",
+      "Real-data loader (lib/command-center-data.ts) — pulls from pending_approvals, agent_outcomes, jobs, calls, invoices, audit_logs, backups_log, agent_invocations",
+      "Sign-in + root + protected-prefix routing all updated to /command-center",
+      "Self-mounted CSS keyframes — zero new deps, no globals.css edits",
+      "/my-day re-themed with Glass primitives as proof of pattern",
+    ],
+  },
+  {
+    id: "ai-cost-tracking",
+    title: "AI Cost & Compute Tracking",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-04-30",
+    description:
+      "Migration 027 agent_invocations table + lib/ai.ts auto-wraps anthropic.messages.create to log every call (model, tokens in/out, cost USD, duration, task, job_id) without modifying any agent file. Pricing table covers Anthropic + gateway-prefixed OpenAI/Gemini/DeepSeek tiers. Compute panel on Command Center shows MTD spend + by tier (fast/balanced/smart) + top agent + last 5 calls.",
+    features: [
+      "agent_invocations table + RLS",
+      "lib/ai-cost.ts: per-model pricing table + tierFor() classifier",
+      "Anthropic SDK wrapped at the chokepoint — fire-and-forget logging never blocks the request",
+      "Compute panel: 3-up Bento (MTD big number, tier mix bars, last calls)",
+      "Honest about gateway-prefixed model strings — strips 'anthropic/' for pricing lookup",
+    ],
+  },
+  {
     id: "self-audit-codex",
     title: "Turing — Self-Audit Meta-Agent",
     agent: "Turing",

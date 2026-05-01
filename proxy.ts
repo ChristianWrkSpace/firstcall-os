@@ -3,15 +3,25 @@ import { createServerClient } from "@supabase/ssr";
 
 const protectedPrefixes = [
   "/dashboard",
+  "/command-center",
   "/jobs",
   "/customers",
   "/calls",
   "/equipment",
+  "/expenses",
+  "/subs",
   "/schedule",
   "/reports",
   "/ar",
   "/partners",
   "/settings",
+  "/turing",
+  "/solomon",
+  "/activity",
+  "/approvals",
+  "/progress",
+  "/help",
+  "/my-day",
 ];
 
 // Security headers applied to every response.
@@ -109,12 +119,12 @@ export async function proxy(req: NextRequest) {
   }
 
   if (path === "/login" && user) {
-    return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", req.url)));
+    return applySecurityHeaders(NextResponse.redirect(new URL("/command-center", req.url)));
   }
 
   if (path === "/") {
     return applySecurityHeaders(
-      NextResponse.redirect(new URL(user ? "/dashboard" : "/login", req.url))
+      NextResponse.redirect(new URL(user ? "/command-center" : "/login", req.url))
     );
   }
 

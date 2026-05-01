@@ -26,8 +26,10 @@ export async function signIn(
   }
 
   // Route by role: technicians land on My Day (their assigned jobs);
-  // everyone else (owner / manager / office) goes to the operational Dashboard.
-  let redirectTo = "/dashboard";
+  // everyone else (owner / manager / office) goes to the Command Center,
+  // the new official operational dashboard. Old /dashboard route stays
+  // mounted as the "classic" view for fallback / comparison.
+  let redirectTo = "/command-center";
   try {
     const admin = createAdminClient();
     const { data: profile } = await admin
@@ -39,7 +41,7 @@ export async function signIn(
       redirectTo = "/my-day";
     }
   } catch {
-    // Fall through to /dashboard if profile lookup fails — never block login.
+    // Fall through to /command-center if profile lookup fails — never block login.
   }
 
   redirect(redirectTo);

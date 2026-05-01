@@ -25,10 +25,83 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const GATEWAY_ENABLED =
   process.env.AI_GATEWAY_ENABLED === "true" && !!GATEWAY_KEY;
 
-export const anthropic = new Anthropic({
+const _anthropic = new Anthropic({
   apiKey: GATEWAY_ENABLED ? GATEWAY_KEY : ANTHROPIC_KEY,
   ...(GATEWAY_ENABLED ? { baseURL: "https://ai-gateway.vercel.sh" } : {}),
 });
+
+// Wrap messages.create so every call auto-logs to agent_invocations with
+// model + tokens + estimated cost. Existing call sites stay unchanged —
+// they import `anthropic` and call `.messages.create(...)` exactly as before.
+//
+// Logging is fire-and-forget — failures NEVER block the user-facing response.
+const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
+(_anthropic.messages as any).create = async function (
+  params: any,
+  options?: any
+) {
+  const t0 = Date.now();
+  const model = params?.model ?? "unknown";
+  // Optional context tags via custom headers — they're no-ops on the API
+  // and we strip them before they cause schema-validation issues. Both the
+  // direct Anthropic API and Vercel AI Gateway ignore unknown x-* headers.
+  const ctxAgent = params?._agent ?? null;
+  const ctxTask = params?._task ?? null;
+  const ctxJobId = params?._job_id ?? null;
+  if (params?._agent) delete params._agent;
+  if (params?._task) delete params._task;
+  if (params?._job_id) delete params._job_id;
+
+  try {
+    const result = await _originalCreate(params, options);
+    const tIn = (result as any)?.usage?.input_tokens ?? 0;
+    const tOut = (result as any)?.usage?.output_tokens ?? 0;
+    // Lazy-import to avoid pulling Supabase into edge contexts that don't need it
+    Promise.resolve().then(async () => {
+      try {
+        const [{ priceCall }, { createAdminClient }] = await Promise.all([
+          import("./ai-cost"),
+          import("./supabase-server"),
+        ]);
+        const admin = createAdminClient();
+        await admin.from("agent_invocations").insert({
+          model,
+          agent: ctxAgent,
+          task: ctxTask,
+          job_id: ctxJobId,
+          tokens_in: tIn,
+          tokens_out: tOut,
+          cost_usd: priceCall(model, tIn, tOut),
+          duration_ms: Date.now() - t0,
+        });
+      } catch {
+        // Logging must never break a request
+      }
+    });
+    return result;
+  } catch (err: any) {
+    Promise.resolve().then(async () => {
+      try {
+        const { createAdminClient } = await import("./supabase-server");
+        const admin = createAdminClient();
+        await admin.from("agent_invocations").insert({
+          model,
+          agent: ctxAgent,
+          task: ctxTask,
+          job_id: ctxJobId,
+          tokens_in: 0,
+          tokens_out: 0,
+          cost_usd: 0,
+          duration_ms: Date.now() - t0,
+          error: String(err?.message ?? err).slice(0, 500),
+        });
+      } catch {}
+    });
+    throw err;
+  }
+};
+
+export const anthropic = _anthropic;
 
 export const AI_PROVIDER: "gateway" | "direct" = GATEWAY_ENABLED ? "gateway" : "direct";
 

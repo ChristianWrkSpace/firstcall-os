@@ -18,7 +18,8 @@ const ALL_ROLES: readonly Role[] = ["owner", "manager", "office", "technician"] 
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/my-day", label: "My Day", icon: "☀️" }, // everyone — landing page for techs
-  { href: "/dashboard", label: "Dashboard", icon: "▦", roles: STAFF },
+  { href: "/command-center", label: "Command Center", icon: "◉", roles: STAFF },
+  { href: "/dashboard", label: "Dashboard (classic)", icon: "▦", roles: STAFF },
   { href: "/schedule", label: "Schedule", icon: "▥" }, // everyone — techs check their day
   { href: "/jobs", label: "Jobs", icon: "◈" }, // everyone — techs do field work
   { href: "/customers", label: "Customers", icon: "◉" }, // everyone — contact info
