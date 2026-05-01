@@ -3,6 +3,7 @@
 
 import { createServerSupabaseClient } from "./supabase-server";
 import { tierFor } from "./ai-cost";
+import { getDataCutoff } from "./data-cutoff";
 
 // Mirror of CommandCenterShell.ShellData (kept loose to stay decoupled)
 export interface ShellData {
@@ -92,6 +93,12 @@ export async function loadCommandCenterData(operator: {
   role: string;
 }): Promise<ShellData> {
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
+  // Most queries below already restrict to "since today/last hour" so the
+  // cutoff doesn't change them. The two that need it are the active-jobs
+  // list and the pending approvals queue — both can surface pre-launch
+  // test rows otherwise.
+  const sinceForCutoff = cutoff ?? "1970-01-01T00:00:00Z";
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -119,6 +126,7 @@ export async function loadCommandCenterData(operator: {
       .from("pending_approvals")
       .select("id, kind, entity_type, entity_id, title, detail, created_at, status")
       .eq("status", "pending")
+      .gte("created_at", sinceForCutoff)
       .order("created_at", { ascending: false })
       .limit(20),
     supabase
@@ -131,6 +139,7 @@ export async function loadCommandCenterData(operator: {
       .from("jobs")
       .select("id, job_number, status, site_city, updated_at, created_at, customers(name)")
       .in("status", ["lead", "inspection", "mitigation", "drying", "reconstruction"])
+      .gte("created_at", sinceForCutoff)
       .order("updated_at", { ascending: false })
       .limit(8),
     supabase

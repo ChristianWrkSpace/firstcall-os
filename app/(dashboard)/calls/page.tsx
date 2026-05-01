@@ -1,14 +1,18 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 
 export default async function CallsPage() {
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
 
-  const { data: calls } = await supabase
+  let callsQuery = supabase
     .from("calls")
     .select("*, jobs(job_number, type)")
     .order("created_at", { ascending: false })
     .limit(50);
+  if (cutoff) callsQuery = callsQuery.gte("created_at", cutoff);
+  const { data: calls } = await callsQuery;
 
   return (
     <div className="p-4 md:p-8">

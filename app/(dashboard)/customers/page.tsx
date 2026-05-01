@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 
 export default async function CustomersPage({
@@ -8,6 +9,7 @@ export default async function CustomersPage({
 }) {
   const { q } = await searchParams;
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
 
   let query = supabase
     .from("customers")
@@ -15,6 +17,8 @@ export default async function CustomersPage({
       "*, jobs:jobs!customer_id(id, status)"
     )
     .order("created_at", { ascending: false });
+
+  if (cutoff) query = query.gte("created_at", cutoff);
 
   if (q) {
     const like = `%${q}%`;

@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
 
@@ -17,14 +18,17 @@ const fmt = (n: number) =>
 export default async function ARDashboard() {
   await requireRoles(["owner", "manager", "office"]);
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
 
-  const { data: invoices } = await supabase
+  let invoicesQuery = supabase
     .from("invoices")
     .select(
       "*, line_items:invoice_line_items(line_total), payments(amount), jobs(job_number, customers(name, insurance_company))"
     )
     .not("status", "in", "(void,paid)")
     .order("sent_at", { ascending: true, nullsFirst: false });
+  if (cutoff) invoicesQuery = invoicesQuery.gte("created_at", cutoff);
+  const { data: invoices } = await invoicesQuery;
 
   const enriched = (invoices ?? []).map((inv: any) => {
     const total = (inv.line_items ?? []).reduce(

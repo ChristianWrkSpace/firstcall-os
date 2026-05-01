@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { BUSINESS_TYPES } from "@/lib/hunter-types";
 
@@ -16,10 +17,13 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function OutreachPipeline() {
   const supabase = await createServerSupabaseClient();
-  const { data: leads } = await supabase
+  const cutoff = getDataCutoff();
+  let leadsQuery = supabase
     .from("outreach_leads")
     .select("*")
     .order("created_at", { ascending: false });
+  if (cutoff) leadsQuery = leadsQuery.gte("created_at", cutoff);
+  const { data: leads } = await leadsQuery;
 
   // Status counts
   const counts: Record<string, number> = {};

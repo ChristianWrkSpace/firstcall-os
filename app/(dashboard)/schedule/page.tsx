@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { STATUS_COLORS } from "@/lib/constants";
 
@@ -41,27 +42,34 @@ export default async function SchedulePage({
   const numDays = Math.min(Math.max(parseInt(days ?? "7"), 1), 30);
   const endDate = addDays(startDate, numDays);
 
-  // Fetch all scheduled jobs in window + unscheduled active jobs separately
-  const [{ data: scheduledJobs }, { data: unscheduledJobs }] = await Promise.all([
-    supabase
-      .from("jobs")
-      .select(
-        "id, job_number, status, type, scheduled_at, site_address, site_city, customers(name), assignments:job_assignments(id, profiles(id, name))"
-      )
-      .gte("scheduled_at", startDate.toISOString())
-      .lt("scheduled_at", endDate.toISOString())
-      .not("status", "in", "(completed,cancelled)")
-      .order("scheduled_at", { ascending: true }),
+  const cutoff = getDataCutoff();
 
-    supabase
-      .from("jobs")
-      .select(
-        "id, job_number, status, type, site_address, site_city, customers(name), assignments:job_assignments(id, profiles(id, name))"
-      )
-      .is("scheduled_at", null)
-      .not("status", "in", "(completed,cancelled)")
-      .order("created_at", { ascending: false })
-      .limit(50),
+  // Fetch all scheduled jobs in window + unscheduled active jobs separately
+  let scheduledQuery = supabase
+    .from("jobs")
+    .select(
+      "id, job_number, status, type, scheduled_at, site_address, site_city, customers(name), assignments:job_assignments(id, profiles(id, name))"
+    )
+    .gte("scheduled_at", startDate.toISOString())
+    .lt("scheduled_at", endDate.toISOString())
+    .not("status", "in", "(completed,cancelled)")
+    .order("scheduled_at", { ascending: true });
+  if (cutoff) scheduledQuery = scheduledQuery.gte("created_at", cutoff);
+
+  let unscheduledQuery = supabase
+    .from("jobs")
+    .select(
+      "id, job_number, status, type, site_address, site_city, customers(name), assignments:job_assignments(id, profiles(id, name))"
+    )
+    .is("scheduled_at", null)
+    .not("status", "in", "(completed,cancelled)")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (cutoff) unscheduledQuery = unscheduledQuery.gte("created_at", cutoff);
+
+  const [{ data: scheduledJobs }, { data: unscheduledJobs }] = await Promise.all([
+    scheduledQuery,
+    unscheduledQuery,
   ]);
 
   // Group scheduled jobs by day

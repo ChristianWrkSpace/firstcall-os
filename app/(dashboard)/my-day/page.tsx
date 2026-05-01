@@ -1,5 +1,6 @@
 import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
 import { getCurrentUser } from "@/lib/auth-helpers";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Glass, PageBackdrop } from "@/components/ui/Glass";
@@ -25,27 +26,32 @@ export default async function MyDayPage() {
   if (!me) redirect("/login");
 
   const admin = createAdminClient();
+  const cutoff = getDataCutoff();
+
+  let leadQuery = admin
+    .from("jobs")
+    .select(
+      "id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, customers(name, phone), created_at"
+    )
+    .eq("lead_tech_id", me.id);
+  if (cutoff) leadQuery = leadQuery.gte("created_at", cutoff);
 
   // Find every job_assignment row pointing at me, plus jobs where I'm lead_tech_id.
   const [{ data: assigned }, { data: leadOnly }] = await Promise.all([
     admin
       .from("job_assignments")
       .select(
-        "job_id, jobs(id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, customers(name, phone))"
+        "job_id, jobs(id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, created_at, customers(name, phone))"
       )
       .eq("profile_id", me.id),
-    admin
-      .from("jobs")
-      .select(
-        "id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, customers(name, phone)"
-      )
-      .eq("lead_tech_id", me.id),
+    leadQuery,
   ]);
 
-  // Merge & dedupe
+  // Merge & dedupe — also drop jobs older than the data cutoff (assignments
+  // pulled via the join can predate it).
   const byId = new Map<string, any>();
   for (const a of (assigned ?? []) as any[]) {
-    if (a.jobs) byId.set(a.jobs.id, a.jobs);
+    if (a.jobs && (!cutoff || a.jobs.created_at >= cutoff)) byId.set(a.jobs.id, a.jobs);
   }
   for (const j of (leadOnly ?? []) as any[]) {
     byId.set(j.id, j);

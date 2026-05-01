@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { PARTNER_TYPE_LABEL, type PartnerType } from "@/lib/partner-types";
 import { requireRoles } from "@/components/RoleGate";
@@ -9,13 +10,20 @@ const fmt = (n: number) =>
 export default async function PartnersPage() {
   await requireRoles(["owner", "manager", "office"]);
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
+
+  let partnersQuery = supabase.from("partners").select("*").order("created_at", { ascending: false });
+  if (cutoff) partnersQuery = partnersQuery.gte("created_at", cutoff);
+
+  let jobsQuery = supabase
+    .from("jobs")
+    .select("id, referred_by_id, invoices(line_items:invoice_line_items(line_total))")
+    .not("referred_by_id", "is", null);
+  if (cutoff) jobsQuery = jobsQuery.gte("created_at", cutoff);
 
   const [{ data: partners }, { data: jobs }, { data: payouts }, { data: investments }] = await Promise.all([
-    supabase.from("partners").select("*").order("created_at", { ascending: false }),
-    supabase
-      .from("jobs")
-      .select("id, referred_by_id, invoices(line_items:invoice_line_items(line_total))")
-      .not("referred_by_id", "is", null),
+    partnersQuery,
+    jobsQuery,
     supabase.from("partner_payouts").select("partner_id, amount"),
     supabase.from("partner_investments").select("partner_id, amount"),
   ]);

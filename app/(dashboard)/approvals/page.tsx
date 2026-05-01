@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { DismissButton, ApplySuggestionButton } from "./ApprovalActions";
 import { KIND_EMOJI } from "../NotificationBell";
@@ -15,18 +16,27 @@ const KIND_LABEL: Record<string, string> = {
 
 export default async function ApprovalsPage() {
   const supabase = await createServerSupabaseClient();
-  const { data: pending } = await supabase
+  const cutoff = getDataCutoff();
+
+  let pendingQuery = supabase
     .from("pending_approvals")
     .select("id, kind, job_id, entity_type, entity_id, title, detail, link, source, status, created_at, metadata")
     .in("status", ["pending"])
     .order("created_at", { ascending: false });
+  if (cutoff) pendingQuery = pendingQuery.gte("created_at", cutoff);
 
-  const { data: recent } = await supabase
+  let recentQuery = supabase
     .from("pending_approvals")
     .select("id, kind, title, status, created_at, resolved_at")
     .in("status", ["approved", "rejected"])
     .order("resolved_at", { ascending: false })
     .limit(10);
+  if (cutoff) recentQuery = recentQuery.gte("created_at", cutoff);
+
+  const [{ data: pending }, { data: recent }] = await Promise.all([
+    pendingQuery,
+    recentQuery,
+  ]);
 
   const items = pending ?? [];
 

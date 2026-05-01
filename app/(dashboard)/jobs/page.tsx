@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { STATUS_COLORS } from "@/lib/constants";
+import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 
 const ACTIVE_STATUSES = [
@@ -37,9 +38,12 @@ export default async function JobsPage({
   ) as Filter;
 
   const supabase = await createServerSupabaseClient();
+  const cutoff = getDataCutoff();
 
   // Counts for tabs (cheap status-only fetch)
-  const { data: statusRows } = await supabase.from("jobs").select("status");
+  let statusQuery = supabase.from("jobs").select("status");
+  if (cutoff) statusQuery = statusQuery.gte("created_at", cutoff);
+  const { data: statusRows } = await statusQuery;
   const counts = {
     active: 0,
     completed: 0,
@@ -59,6 +63,8 @@ export default async function JobsPage({
       "*, customers(name, phone), invoices(id, status, sent_at, line_items:invoice_line_items(line_total), payments(amount))"
     )
     .order("created_at", { ascending: false });
+
+  if (cutoff) query = query.gte("created_at", cutoff);
 
   if (filter === "active") query = query.in("status", ACTIVE_STATUSES);
   else if (filter === "completed") query = query.in("status", COMPLETED_STATUSES);
