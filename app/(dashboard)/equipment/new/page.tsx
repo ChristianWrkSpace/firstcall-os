@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createEquipment } from "@/app/actions/equipment";
 import { EQUIPMENT_TYPES } from "@/lib/equipment-types";
+import { EQUIPMENT_MANUFACTURERS } from "@/lib/restoration-catalog";
 import Link from "next/link";
 
 const INPUT =
@@ -47,9 +48,16 @@ export default function NewEquipmentPage() {
               <label className={LABEL}>Manufacturer</label>
               <input
                 name="manufacturer"
+                list="equipment-manufacturers"
+                autoComplete="off"
                 className={INPUT}
-                placeholder="Drieaz, Phoenix, BlueDri…"
+                placeholder="Pick or type — e.g. Phoenix"
               />
+              <datalist id="equipment-manufacturers">
+                {EQUIPMENT_MANUFACTURERS.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className={LABEL}>Model</label>

@@ -5,6 +5,7 @@ import { createJob } from "@/app/actions/jobs";
 import { JOB_TYPES, PAYMENT_ROUTES, type PaymentRoute } from "@/lib/constants";
 import Link from "next/link";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { INSURANCE_CARRIERS } from "@/lib/restoration-catalog";
 
 const INPUT = "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm";
 const LABEL = "text-zinc-300 text-sm font-medium";
@@ -144,7 +145,18 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex flex-col gap-1.5">
                 <label className={LABEL}>Insurance Company</label>
-                <input name="insurance_company" className={INPUT} placeholder="State Farm" />
+                <input
+                  name="insurance_company"
+                  list="insurance-carriers"
+                  autoComplete="off"
+                  className={INPUT}
+                  placeholder="Pick or type — e.g. State Farm"
+                />
+                <datalist id="insurance-carriers">
+                  {INSURANCE_CARRIERS.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className={LABEL}>Policy #</label>

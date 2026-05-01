@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   logTechLabor,
@@ -8,6 +8,7 @@ import {
   deleteTechLabor,
   deleteConsumable,
 } from "@/app/actions/job-costs";
+import { CONSUMABLES_CATALOG, findConsumable } from "@/lib/restoration-catalog";
 
 const INPUT =
   "px-2.5 py-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-600 text-xs";
@@ -221,6 +222,21 @@ function ConsumablesSection({
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const [pendingDelete, startDelete] = useTransition();
+  const unitCostRef = useRef<HTMLInputElement>(null);
+  const [unitLabel, setUnitLabel] = useState<string>("");
+
+  // When the item field gets a known catalog value, auto-fill the unit cost
+  // and surface the unit label (gal / box / each / etc).
+  function onItemChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const match = findConsumable(e.target.value);
+    if (match && unitCostRef.current && unitCostRef.current.value === "") {
+      unitCostRef.current.value = String(match.defaultUnitCost);
+    }
+    if (match && unitCostRef.current && Number(unitCostRef.current.value) === 0) {
+      unitCostRef.current.value = String(match.defaultUnitCost);
+    }
+    setUnitLabel(match?.unit ?? "");
+  }
 
   function onDelete(id: string) {
     if (!confirm("Delete this consumable entry?")) return;
@@ -251,11 +267,22 @@ function ConsumablesSection({
           <input type="hidden" name="job_id" value={jobId} />
           <input
             name="item"
+            list="consumables-catalog"
             type="text"
-            placeholder="e.g. Antimicrobial gal"
+            placeholder="Pick or type — e.g. Antimicrobial"
             required
-            className={`${INPUT} flex-1 min-w-[140px]`}
+            autoComplete="off"
+            onChange={onItemChange}
+            className={`${INPUT} flex-1 min-w-[180px]`}
           />
+          {/* Datalist sourced from the catalog. Browser shows native dropdown. */}
+          <datalist id="consumables-catalog">
+            {CONSUMABLES_CATALOG.map((c) => (
+              <option key={c.name} value={c.name}>
+                {c.category} · ${c.defaultUnitCost.toFixed(2)}/{c.unit}
+              </option>
+            ))}
+          </datalist>
           <input
             name="quantity"
             type="number"
@@ -265,15 +292,23 @@ function ConsumablesSection({
             required
             className={`${INPUT} w-16`}
           />
-          <input
-            name="unit_cost"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="$/unit"
-            required
-            className={`${INPUT} w-20`}
-          />
+          <div className="relative">
+            <input
+              ref={unitCostRef}
+              name="unit_cost"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="$/unit"
+              required
+              className={`${INPUT} w-24 ${unitLabel ? "pr-10" : ""}`}
+            />
+            {unitLabel && (
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 text-[10px] pointer-events-none">
+                /{unitLabel}
+              </span>
+            )}
+          </div>
           <button
             type="submit"
             disabled={pending}
@@ -284,6 +319,9 @@ function ConsumablesSection({
           {state?.error && (
             <p className="text-red-400 text-[11px] basis-full">{state.error}</p>
           )}
+          <p className="text-zinc-600 text-[10px] basis-full">
+            Pick from {CONSUMABLES_CATALOG.length} catalog items (auto-fills cost) or type your own.
+          </p>
         </form>
       )}
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateEquipment, deleteEquipment } from "@/app/actions/equipment";
+import { EQUIPMENT_MANUFACTURERS } from "@/lib/restoration-catalog";
 
 const INPUT =
   "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
@@ -119,9 +120,16 @@ export default function EditForm({
           <label className={LABEL}>Manufacturer</label>
           <input
             name="manufacturer"
+            list="equipment-manufacturers-edit"
+            autoComplete="off"
             defaultValue={defaults.manufacturer}
             className={INPUT}
           />
+          <datalist id="equipment-manufacturers-edit">
+            {EQUIPMENT_MANUFACTURERS.map((m) => (
+              <option key={m} value={m} />
+            ))}
+          </datalist>
         </div>
         <div className="flex flex-col gap-1">
           <label className={LABEL}>Model</label>
