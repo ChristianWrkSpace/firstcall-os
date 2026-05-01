@@ -217,6 +217,12 @@ export default async function ReportsPage({
               ⚖️ Adjuster Scoring →
             </Link>
             <Link
+              href="/reports/job-economics"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
+              💰 Job Economics →
+            </Link>
+            <Link
               href="/reports/quickbooks"
               className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
             >

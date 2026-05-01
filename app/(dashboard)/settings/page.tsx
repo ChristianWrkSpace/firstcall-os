@@ -60,6 +60,14 @@ export default async function SettingsPage() {
       emoji: "🗂",
       visible: me.role === "owner" || me.role === "manager",
     },
+    {
+      href: "/settings/system-health",
+      title: "System Health",
+      description:
+        "30-second health check: agent activity, failed sends, audits, backups, recursive feedback.",
+      emoji: "❤️‍🩹",
+      visible: me.role === "owner" || me.role === "manager",
+    },
   ];
 
   return (
