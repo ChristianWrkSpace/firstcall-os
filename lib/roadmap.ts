@@ -1107,6 +1107,55 @@ export const ROADMAP: RoadmapItem[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════
+  // TURING SELF-AUDIT FOLLOW-UPS — PLANNED (deferred 2026-05-04)
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    id: "outcomes-coverage",
+    title: "Agent Outcomes — Full Coverage",
+    track: "production",
+    status: "planned",
+    effort: "M",
+    description:
+      "Wire estimate generation (Ledger) + approval-queue resolutions (approve/edit/reject) into agent_outcomes so prompt_quality and cost_efficiency aren't drawn from <3 samples per agent. Surfaced by Turing 2026-05-04 audit (HIGH: outcome telemetry covers only 3 of ~16 agent actions in last 7d — audit signal effectively blind).",
+  },
+  {
+    id: "agent-preconditions",
+    title: "Agent Preconditions (refuse-if-missing)",
+    track: "core",
+    status: "planned",
+    effort: "M",
+    description:
+      "Every agent declares required inputs; runner short-circuits to 'skipped: missing X' if absent — no tokens spent, no hallucinated output. Worked example: Argus must have dispatch_inputs before scope_assessment (Turing 2026-05-04 flagged Argus reasoning with had_dispatch_inputs=false and stale previous_analyzed_at). Add freshness guard (skip if previous_analyzed_at <24h and inputs unchanged) and input-hash idempotency at the same time.",
+  },
+  {
+    id: "approvals-aging-digest",
+    title: "Approvals Aging Digest + Failed-Send Auto-Escalation",
+    track: "core",
+    status: "planned",
+    effort: "S",
+    description:
+      "Daily 'approvals older than 48h' digest to operator. Auto-escalate any legal-doc send that fails once. Surfaced by Turing 2026-05-04 audit (HIGH: 5 pending approvals vs 3 logged outcomes in 7d, queue growing faster than draining; 1/1 legal-doc send failure unsurfaced).",
+  },
+  {
+    id: "agent-timeout-token-cap",
+    title: "Per-Call Timeout + Per-Task Token Cap",
+    track: "production",
+    status: "planned",
+    effort: "S",
+    description:
+      "Wrap every anthropic.messages.create call in lib/ai.ts with an AbortController timeout (30s default, override per task) and a max_tokens ceiling tuned per task. A hung Anthropic call should not hold a request open indefinitely. Closes Law 3 (Bounded Cost) gap from the Five Laws audit (2026-05-04). Logs timeout as outcome=timeout in agent_invocations so it shows up in cost dashboards.",
+  },
+  {
+    id: "agent-daily-spend-cap",
+    title: "Per-Day AI Spend Cap + Kill-Switch",
+    track: "production",
+    status: "planned",
+    effort: "S",
+    description:
+      "Pre-invocation check against agent_invocations: sum today's USD spend; if over cap, refuse the call with a clear error. Configurable cap in cost_basis_settings (e.g. $50/day default). Owner-only override flag. Closes Law 3 (Bounded Cost) gap from the Five Laws audit (2026-05-04). Stops runaway loops — the #1 production failure mode for AI systems.",
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
   // IDEAS
   // ═══════════════════════════════════════════════════════════════════
   {

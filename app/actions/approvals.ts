@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
+import { logAgentOutcome, kindToAgentTask } from "@/lib/agent-feedback";
 
 export async function listPendingApprovals(limit: number = 25) {
   const supabase = await createServerSupabaseClient();
@@ -98,6 +99,24 @@ export async function dismissApproval(approvalId: string, deleteUnderlying: bool
     },
   });
 
+  // Outcome telemetry — closes the Turing 2026-05-04 gap (3/16 coverage).
+  // Dismissing an approval is a "rejected" signal for the underlying agent.
+  const at = kindToAgentTask(row.kind);
+  if (at) {
+    after(() =>
+      logAgentOutcome({
+        agent: at.agent,
+        task: at.task,
+        outcome: "rejected",
+        jobId: row.job_id ?? null,
+        entityType: row.entity_type ?? null,
+        entityId: row.entity_id ?? null,
+        userId: user.id,
+        delta: { via: "approval.dismissed", deleted_underlying: underlyingDeleted },
+      })
+    );
+  }
+
   revalidatePath("/approvals");
   if (row.job_id) revalidatePath(`/jobs/${row.job_id}`);
   if (refusedReason) {
@@ -167,6 +186,22 @@ export async function applySuggestion(approvalId: string) {
     entity_id: approvalId,
     details: { new_status: newStatus, job_id: row.job_id },
   });
+
+  // Outcome telemetry — applying a status suggestion is "approved_unchanged"
+  // for the agent that proposed it (Echo).
+  const at = kindToAgentTask(row.kind);
+  if (at) {
+    after(() =>
+      logAgentOutcome({
+        agent: at.agent,
+        task: at.task,
+        outcome: "approved_unchanged",
+        jobId: row.job_id ?? null,
+        userId: user.id,
+        delta: { via: "approval.suggestion_applied", new_status: newStatus },
+      })
+    );
+  }
 
   revalidatePath("/approvals");
   revalidatePath(`/jobs/${row.job_id}`);

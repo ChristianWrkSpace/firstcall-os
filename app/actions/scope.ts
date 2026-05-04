@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { autoDraftEstimate } from "@/lib/auto-triggers";
 import { logAgentOutcome } from "@/lib/agent-feedback";
+import { requireInputs, PreconditionError } from "@/lib/agent-preconditions";
 
 const BUCKET = "job-photos";
 
@@ -193,6 +194,29 @@ export async function analyzeJobPhotos(
       .eq("id", jobId)
       .single();
     if (jobErr || !job) return { error: "Job not found." };
+
+    // Law 1 — Bounded Inputs. Argus must have ceiling_height before scoping
+    // (sqft × ceiling = airflow + dehu sizing). Water jobs additionally
+    // require water_source_secured (changes mitigation plan radically).
+    // Surfaced by Turing 2026-05-04: had_dispatch_inputs=false produced a
+    // revised scope with stale previous_analyzed_at.
+    try {
+      const required = ["dispatch_inputs.ceiling_height_ft"];
+      if (job.type === "water") {
+        required.push("dispatch_inputs.water_source_secured");
+      }
+      requireInputs(
+        "argus.scope_assessment",
+        job,
+        required,
+        "Fill the Dispatch Inputs panel on the job before re-running scope analysis."
+      );
+    } catch (err) {
+      if (err instanceof PreconditionError) {
+        return { error: err.message };
+      }
+      throw err;
+    }
 
     const wasRevision = !!job.scope_assessment;
 

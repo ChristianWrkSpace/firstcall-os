@@ -217,16 +217,28 @@ export async function approveEstimate(estimateId: string, jobId: string) {
   // Auto-resolve any pending_approvals on this estimate (the office just acted on it)
   after(() => resolveApprovalsForEntity("estimate", estimateId, user.id, "estimate approved"));
 
-  // Recursive feedback: an approved estimate is a positive signal for Ledger.
+  // Detect manual edits via is_ai_drafted=false on any line item. Honest about
+  // the partial signal: catches added/replaced lines, misses qty/price tweaks
+  // on AI-drafted lines (no updated_at column to compare). Better than nothing.
+  const { data: lines } = await admin
+    .from("estimate_line_items")
+    .select("is_ai_drafted")
+    .eq("estimate_id", estimateId);
+  const manualLineCount = (lines ?? []).filter((l: any) => l.is_ai_drafted === false).length;
+  const wasEdited = manualLineCount > 0;
+
+  // Recursive feedback: approval is a positive signal for Ledger; flag edits
+  // separately so the prompt evolves toward less-corrected drafts.
   after(() =>
     logAgentOutcome({
       agent: "ledger",
       task: "estimate_draft",
-      outcome: "approved_unchanged",
+      outcome: wasEdited ? "approved_with_edits" : "approved_unchanged",
       jobId,
       entityType: "estimate",
       entityId: estimateId,
       userId: user.id,
+      delta: wasEdited ? { manual_line_count: manualLineCount } : null,
     })
   );
 

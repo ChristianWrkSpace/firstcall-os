@@ -18,6 +18,40 @@ import Anthropic from "@anthropic-ai/sdk";
 const GATEWAY_KEY = process.env.AI_GATEWAY_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
+// Law 3 — Bounded Cost: per-day USD kill-switch.
+// Reads sum(cost_usd) from agent_invocations for today. If over cap,
+// next call is refused with a clear error. Cap is configurable via env.
+// Set AI_KILL_SWITCH_OFF=true in Vercel env to disable (Owner override).
+const DAILY_CAP_USD = Number(process.env.AI_DAILY_SPEND_CAP_USD ?? 50);
+const KILL_SWITCH_OFF = process.env.AI_KILL_SWITCH_OFF === "true";
+
+// Cached daily spend total — TTL 60s. Bounded blast radius per instance.
+let _spendCache: { total: number; expiresAt: number } | null = null;
+
+async function todaysSpendUsd(): Promise<number> {
+  if (_spendCache && _spendCache.expiresAt > Date.now()) return _spendCache.total;
+  try {
+    const { createAdminClient } = await import("./supabase-server");
+    const admin = createAdminClient();
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await admin
+      .from("agent_invocations")
+      .select("cost_usd")
+      .gte("created_at", `${today}T00:00:00Z`);
+    if (error) throw error;
+    const total = (data ?? []).reduce(
+      (sum: number, row: any) => sum + Number(row.cost_usd ?? 0),
+      0
+    );
+    _spendCache = { total, expiresAt: Date.now() + 60_000 };
+    return total;
+  } catch {
+    // Fail open on transient DB hiccup — better to allow than to block all AI.
+    // Cache last-known value if we have one, else 0.
+    return _spendCache?.total ?? 0;
+  }
+}
+
 // Two-flag setup so we never accidentally route through the gateway when
 // it isn't ready. AI_GATEWAY_ENABLED must be explicitly "true" — having a
 // key alone isn't enough (the gateway 403s without a credit card on file).
@@ -48,6 +82,11 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
   const ctxAgent = params?._agent ?? null;
   const ctxTask = params?._task ?? null;
   const ctxJobId = params?._job_id ?? null;
+  // Law 3 — Bounded Cost: per-call timeout (default 60s) and max_tokens
+  // ceiling. Override per-call via `_timeout_ms` (e.g. vision/thinking
+  // calls that legitimately need longer). SDK default is 10 minutes — too
+  // long for a hung connection.
+  const ctxTimeoutMs = typeof params?._timeout_ms === "number" ? params._timeout_ms : 60_000;
   // Strip ANY `_*` private context field so future call sites can't leak
   // unknown tags into the upstream API (Anthropic/Gateway both 400 on
   // unknown body params). Belt-and-suspenders over the explicit deletes
@@ -57,10 +96,46 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
     for (const k of Object.keys(params)) {
       if (k.startsWith("_")) delete params[k];
     }
+    // Default a sane max_tokens ceiling so unbounded outputs can't run away.
+    // Call sites that need more should pass max_tokens explicitly.
+    if (params.max_tokens == null) {
+      params.max_tokens = 4096;
+    }
+  }
+
+  // Law 3 — kill-switch check. Refuse the call if today's spend has hit
+  // the cap. This is the single most important guard against runaway loops.
+  if (!KILL_SWITCH_OFF) {
+    const spent = await todaysSpendUsd();
+    if (spent >= DAILY_CAP_USD) {
+      const err = new Error(
+        `AI daily spend cap reached: $${spent.toFixed(2)} >= $${DAILY_CAP_USD.toFixed(2)}. ` +
+          `Raise AI_DAILY_SPEND_CAP_USD or set AI_KILL_SWITCH_OFF=true to override.`
+      );
+      // Log the refusal so the kill-switch is visible in spend dashboards.
+      Promise.resolve().then(async () => {
+        try {
+          const { createAdminClient } = await import("./supabase-server");
+          const admin = createAdminClient();
+          await admin.from("agent_invocations").insert({
+            model,
+            agent: ctxAgent,
+            task: ctxTask,
+            job_id: ctxJobId,
+            tokens_in: 0,
+            tokens_out: 0,
+            cost_usd: 0,
+            duration_ms: Date.now() - t0,
+            error: "kill_switch: daily_cap_reached",
+          });
+        } catch {}
+      });
+      throw err;
+    }
   }
 
   try {
-    const result = await _originalCreate(params, options);
+    const result = await _originalCreate(params, { ...(options ?? {}), timeout: ctxTimeoutMs });
     const tIn = (result as any)?.usage?.input_tokens ?? 0;
     const tOut = (result as any)?.usage?.output_tokens ?? 0;
     // Lazy-import to avoid pulling Supabase into edge contexts that don't need it
