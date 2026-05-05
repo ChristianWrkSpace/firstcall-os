@@ -1184,13 +1184,46 @@ export const ROADMAP: RoadmapItem[] = [
     effort: "S",
     shipped_at: "2026-05-04",
     description:
-      "Pre-invocation check sums today's cost_usd from agent_invocations. If today's spend ≥ AI_DAILY_SPEND_CAP_USD (default $50), the next call throws with a clear error. Owner override via AI_KILL_SWITCH_OFF=true env var. 60-second per-instance cache so the check adds <1ms to cached calls. Stops runaway loops — the #1 production failure mode for AI systems.",
+      "Pre-invocation check sums today's cost_usd from agent_invocations. If today's spend ≥ AI_DAILY_SPEND_CAP_USD (default $50, set to $5 in prod), the next call throws with a clear error. Owner override via AI_KILL_SWITCH_OFF=true env var. 60-second per-instance cache so the check adds <1ms to cached calls. Stops runaway loops — the #1 production failure mode for AI systems.",
     features: [
-      "Configurable cap via AI_DAILY_SPEND_CAP_USD (default $50)",
+      "Configurable cap via AI_DAILY_SPEND_CAP_USD (default $50, prod set to $5)",
       "Owner override via AI_KILL_SWITCH_OFF=true",
       "60s cache per Vercel instance — bounded blast radius even on cache miss",
       "Refusals logged as error='kill_switch: daily_cap_reached' in agent_invocations",
       "Fail-open on transient DB errors (don't block all AI on a Supabase hiccup)",
+      "First-trip-per-day email alert to OPERATOR_EMAIL (added 2026-05-04)",
+    ],
+  },
+  {
+    id: "ai-call-tagging",
+    title: "Tag Every messages.create Call Site (Law 5 hygiene)",
+    track: "production",
+    status: "done",
+    effort: "S",
+    shipped_at: "2026-05-04",
+    description:
+      "Closes the 20-of-25 untagged-calls gap from the 2026-05-04 coverage audit. Every anthropic.messages.create call site now passes _agent + _task private fields. The wrapper in lib/ai.ts strips them before send (zero behavior change) and logs them to agent_invocations so the cost dashboard, Turing audit, and outcome telemetry attribute correctly.",
+    features: [
+      "12 call sites tagged: argus (2), ledger, esquire (dynamic per doc-type), solomon, hunter (3), extract, turing, athena conversation, voice intake",
+      "Echo was already tagged (echo / qa) — left untouched",
+      "Pure metadata — wrapper strips _* fields before API send",
+      "Verifiable via npx tsx scripts/coverage-audit.ts (untagged should drop to 0 after next agent runs)",
+    ],
+  },
+  {
+    id: "preconditions-extended",
+    title: "Preconditions on Ledger, Esquire, Solomon (Law 1 — Bounded Inputs)",
+    track: "core",
+    status: "done",
+    effort: "S",
+    shipped_at: "2026-05-04",
+    description:
+      "Extends the requireInputs() pattern from Argus to the rest of the agent fleet at the action layer. Each agent declares its minimum inputs; missing inputs surface as a clear UI error instead of a hallucinated draft. Behavior-changing — users will see refusals where they didn't before, but the refusals point to the exact field to fill.",
+    features: [
+      "Ledger: scope_assessment + dispatch_inputs.ceiling_height_ft + customer_name (replaces old inline scope check)",
+      "Esquire: customer.name + job.job_number + job.type (per-doc-type checks like demand_letter→invoiceId remain in place)",
+      "Solomon: tightens existing job_count>0 to also require ≥1 invoice in window (FP&A on $0 of financial data is just narrative)",
+      "All errors carry actionable hints pointing the operator to the missing field",
     ],
   },
 
