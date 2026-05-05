@@ -8,6 +8,7 @@ import { after } from "next/server";
 import { autoCreateInvoiceDraft } from "@/lib/auto-triggers";
 import { resolveApprovalsForEntity } from "@/lib/auto-actions";
 import { logAgentOutcome } from "@/lib/agent-feedback";
+import { requireInputs, PreconditionError } from "@/lib/agent-preconditions";
 
 async function requireUser() {
   const supabase = await createServerSupabaseClient();
@@ -30,11 +31,28 @@ export async function generateEstimateForJob(jobId: string) {
     .eq("id", jobId)
     .single();
   if (jobErr || !job) return { error: "Job not found." };
-  if (!job.scope_assessment) {
-    return { error: "Run Argus scope analysis first — Ledger needs a scope to estimate from." };
-  }
 
   const customer = job.customers as any;
+
+  // Law 1 — Bounded Inputs. Ledger needs scope (from Argus), ceiling_height
+  // (sqft × ceiling = airflow + dehu sizing math), and a customer name for
+  // the estimate header. Refuse-if-missing rather than draft a bad estimate.
+  try {
+    requireInputs(
+      "ledger.estimate_draft",
+      {
+        scope_assessment: job.scope_assessment,
+        ceiling_height_ft: job.dispatch_inputs?.ceiling_height_ft,
+        customer_name: customer?.name,
+      },
+      ["scope_assessment", "ceiling_height_ft", "customer_name"],
+      "Run Argus scope analysis, fill the Dispatch Inputs panel (ceiling height), and confirm the customer name before drafting an estimate."
+    );
+  } catch (err) {
+    if (err instanceof PreconditionError) return { error: err.message };
+    throw err;
+  }
+
   const jobContext = [
     `Damage type: ${job.type}`,
     job.description ? `Caller description: ${job.description}` : null,

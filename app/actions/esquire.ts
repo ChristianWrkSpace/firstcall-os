@@ -15,6 +15,7 @@ import type { LegalDocType } from "@/lib/esquire-types";
 import { autoSendLegalDocToCustomer } from "@/lib/auto-send-legal-doc";
 import { resolveApprovalsForEntity } from "@/lib/auto-actions";
 import { logAgentOutcome } from "@/lib/agent-feedback";
+import { requireInputs, PreconditionError } from "@/lib/agent-preconditions";
 
 /**
  * Manual override — send (or re-send) the doc to the customer right now,
@@ -80,6 +81,26 @@ export async function generateLegalDoc(input: GenerateInput) {
   if (!job) return { error: "Job not found." };
 
   const customer = (job as any).customers ?? {};
+
+  // Law 1 — Bounded Inputs. Every legal doc references the customer by name,
+  // the job number, and the damage type. Without these, Esquire would fill in
+  // placeholders that won't survive a real legal review. Refuse upfront.
+  try {
+    requireInputs(
+      "esquire.legal_doc_draft",
+      {
+        customer_name: customer.name,
+        job_number: job.job_number,
+        job_type: job.type,
+      },
+      ["customer_name", "job_number", "job_type"],
+      "Confirm the customer name, job number, and damage type before drafting a legal document."
+    );
+  } catch (err) {
+    if (err instanceof PreconditionError) return { error: err.message };
+    throw err;
+  }
+
   const opts: GenerateOptions = {
     job: {
       job_number: job.job_number,

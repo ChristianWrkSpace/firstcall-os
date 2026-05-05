@@ -209,8 +209,17 @@ export async function runSolomonReport(windowDays: number = 90) {
     window_days: windowDays,
   };
 
+  // Law 1 — Bounded Inputs. Solomon is FP&A — needs financial signal, not
+  // just job activity. ≥1 job AND ≥1 invoice in the window. Without an
+  // invoice, the analysis is hallucinated narrative on top of no $ data.
   if (job_count === 0) {
     return { error: "No jobs in the selected window — nothing to analyze." };
+  }
+  if (invoicesArr.length === 0) {
+    return {
+      error:
+        "No invoices in the selected window — Solomon is FP&A and needs financial data. Try a longer window, or send a few estimates first.",
+    };
   }
 
   let result;
