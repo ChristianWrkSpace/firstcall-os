@@ -137,6 +137,7 @@ export async function generateEstimate(
     max_tokens: 4096,
     tools: [ESTIMATE_TOOL],
     tool_choice: { type: "tool", name: "generate_water_mitigation_estimate" },
+    ...({ _agent: "ledger", _task: "estimate_draft" } as any),
     messages: [
       {
         role: "user",

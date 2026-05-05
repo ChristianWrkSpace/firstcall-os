@@ -214,6 +214,7 @@ export async function assessScope(
     max_tokens: 3000,
     tools: [SCOPE_TOOL],
     tool_choice: { type: "tool", name: "assess_damage_scope" },
+    ...({ _agent: "argus", _task: "scope_assessment" } as any),
     messages: [
       {
         role: "user",
@@ -276,6 +277,7 @@ export async function synthesizeScopes(
     max_tokens: 3500,
     tools: [SCOPE_TOOL],
     tool_choice: { type: "tool", name: "assess_damage_scope" },
+    ...({ _agent: "argus", _task: "scope_synthesis" } as any),
     messages: [
       {
         role: "user",

@@ -20,6 +20,7 @@ export async function generateColdEmail(lead: LeadContext) {
   const message = await anthropic.messages.create({
     model: MODELS.FAST,
     max_tokens: 600,
+    ...({ _agent: "hunter", _task: "cold_email_draft" } as any),
     messages: [
       {
         role: "user",
@@ -69,6 +70,7 @@ export async function generateVoicemailScript(lead: LeadContext) {
   const message = await anthropic.messages.create({
     model: MODELS.FAST,
     max_tokens: 400,
+    ...({ _agent: "hunter", _task: "voicemail_draft" } as any),
     messages: [
       {
         role: "user",
@@ -104,6 +106,7 @@ export async function generateFollowUpEmail(
   const message = await anthropic.messages.create({
     model: MODELS.FAST,
     max_tokens: 500,
+    ...({ _agent: "hunter", _task: "follow_up_draft" } as any),
     messages: [
       {
         role: "user",

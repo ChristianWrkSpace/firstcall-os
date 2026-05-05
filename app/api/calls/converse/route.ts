@@ -133,7 +133,8 @@ export async function POST(req: NextRequest) {
       max_tokens: 120,
       system: ATHENA_SYSTEM,
       messages,
-    });
+      ...({ _agent: "athena", _task: "conversation" } as any),
+    } as any);
 
     const aiText = completion.content
       .filter((b) => b.type === "text")

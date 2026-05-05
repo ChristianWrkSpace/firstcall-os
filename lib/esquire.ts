@@ -85,7 +85,8 @@ async function callClaude(prompt: string, maxTokens = 2000, task?: string) {
     max_tokens: maxTokens,
     thinking: { type: "adaptive" },
     messages: [{ role: "user", content: preamble + prompt }],
-  });
+    ...({ _agent: "esquire", _task: task ? `${task}_draft` : "legal_doc_draft" } as any),
+  } as any);
   return message.content
     .filter((b) => b.type === "text")
     .map((b: any) => b.text)

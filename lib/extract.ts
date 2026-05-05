@@ -70,6 +70,7 @@ export async function extractFromTranscript(transcript: string) {
     max_tokens: 2048,
     tools: [EXTRACT_TOOL],
     tool_choice: { type: "tool", name: "extract_call_data" },
+    ...({ _agent: "extract", _task: "intake_extraction" } as any),
     messages: [
       {
         role: "user",

@@ -50,6 +50,7 @@ export async function runSolomonAnalysis(
     // NOTE: cannot enable thinking when tool_choice forces a specific tool.
     // The structured tool_use already gives us reliable output shape;
     // adaptive reasoning happens implicitly inside the tool call.
+    ...({ _agent: "solomon", _task: "fpa_analysis" } as any),
     tools: [
       {
         name: "report_findings",

@@ -192,6 +192,7 @@ export async function runTuringAudit(windowDays: number = 14): Promise<TuringRep
     max_tokens: 4000,
     tools: [REPORT_TOOL],
     tool_choice: { type: "tool", name: "report_findings" },
+    ...({ _agent: "turing", _task: "self_audit" } as any),
     messages: [
       {
         role: "user",

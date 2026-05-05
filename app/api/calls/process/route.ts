@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 2048,
       tools: [EXTRACT_TOOL],
       tool_choice: { type: "tool", name: "extract_call_data" },
+      ...({ _agent: "extract", _task: "call_intake_voice" } as any),
       messages: [
         {
           role: "user",
