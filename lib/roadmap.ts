@@ -1269,6 +1269,58 @@ export const ROADMAP: RoadmapItem[] = [
       "All errors carry actionable hints pointing the operator to the missing field",
     ],
   },
+  {
+    id: "unit-price-book",
+    title: "Unit Price Book + Pricing Confidence Panel",
+    agent: "Ledger",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-05-05",
+    description:
+      "Anchors Ledger to a reviewed Xactimate-code → unit-price book so estimate pricing stops drifting between runs. Every estimate now shows what % of the total came from the book vs what was AI-guessed, so the office knows exactly which prices to scrutinize before sending. Trust-but-verify: a line is tagged 'book' only if the LLM's price actually matches the book.",
+    features: [
+      "unit_price_book table + scripts/seed-price-book.ts CSV importer (idempotent re-seed)",
+      "Ledger prompt receives the price book and is told to use book prices verbatim",
+      "Per-line book/guess badge in LineItemsTable",
+      "Pricing Confidence panel on the estimate page with $ split + % anchored",
+      "/settings/price-book read-only viewer with seed instructions",
+    ],
+  },
+  {
+    id: "provider-spend-visibility",
+    title: "Per-Provider Spend on Command Center + Cost Report CLI",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-05-05",
+    description:
+      "Surfaces gateway-routed spend across Anthropic / Google / DeepSeek / OpenAI on the Command Center Compute panel. Includes a standalone agent-cost-report.ts CLI that prints per-agent rollup, tier mix, provider mix, cost-per-outcome, daily trend, and headline efficiency signals. Also fixed an Argus retry bug — vision calls were burning 3 × 60s = 180s on every timeout.",
+    features: [
+      "providerFor() helper + ComputeStats.byProvider rollup",
+      "ProviderMix sub-panel on Command Center (auto-hides when only one provider active)",
+      "Pricing table expanded for Gemini 2.5 / 2.0, DeepSeek v3/r1/chat, GPT-4.1",
+      "scripts/agent-cost-report.ts: full read-only spend audit",
+      "lib/ai.ts: _max_retries support; Argus now passes 150s timeout + 1 retry",
+    ],
+  },
+  {
+    id: "ai-routing",
+    title: "Per-Agent Model Override + Cross-Provider Fallback",
+    track: "core",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-05-05",
+    description:
+      "Lets any agent be routed onto Gemini or DeepSeek without a redeploy (env var: MODEL_<AGENT>=...) and auto-retries on a different provider when the primary fails with a retryable error (timeout / 5xx / rate-limit). Defaults to no-op so existing behavior is unchanged until you opt in. Fallback only fires when AI_GATEWAY_ENABLED=true. Successful fallbacks log error='fallback_used: primary=...' so the dashboard can flag fallback frequency.",
+    features: [
+      "lib/agent-models.ts: PER_AGENT_MODEL static map + MODEL_<AGENT> env-var resolution",
+      "FALLBACK_CHAIN with cross-provider entries of similar capability (e.g. Sonnet → Gemini 2.5 Pro → DeepSeek v3)",
+      "lib/ai.ts wrapper: candidate-chain loop with isRetryableError() filter (skips 400/401/403/404)",
+      "/settings/ai-routing: live view of active overrides, source (env vs static), and full fallback chains",
+      "First override live in production: MODEL_HUNTER=deepseek/deepseek-v3 (~5–15× cheaper than Haiku for cold-email drafts)",
+    ],
+  },
 
   // ═══════════════════════════════════════════════════════════════════
   // IDEAS

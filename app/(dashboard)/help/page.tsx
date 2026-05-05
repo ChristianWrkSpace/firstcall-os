@@ -456,6 +456,67 @@ export default function HelpPage() {
         </ol>
       </section>
 
+      {/* What's new — recent shipped work, in plain English */}
+      <section className="mb-8 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
+        <p className="text-emerald-300 text-xs uppercase tracking-wide font-semibold mb-2">
+          What's new — May 5, 2026
+        </p>
+        <h2 className="text-xl font-bold text-white mb-3">
+          Pricing got more honest, AI got more flexible
+        </h2>
+        <ul className="flex flex-col gap-3 text-sm text-zinc-300 leading-relaxed">
+          <li>
+            <strong className="text-white">📒 Estimates stop drifting.</strong>{" "}
+            Ledger now uses a reviewed Xactimate price book as the source of truth.
+            Every line gets tagged{" "}
+            <span className="text-green-400 font-semibold">book</span> (price came
+            from your reviewed list) or{" "}
+            <span className="text-yellow-400 font-semibold">guess</span> (AI invented
+            it). A panel at the top of every estimate tells you exactly how much of
+            the total is anchored vs guessed — so you know which lines to scrutinize
+            before clicking send.{" "}
+            <Link
+              href="/settings/price-book"
+              className="text-blue-400 hover:underline"
+            >
+              Manage the book →
+            </Link>
+          </li>
+          <li>
+            <strong className="text-white">🛰 The Command Center sees every AI provider.</strong>{" "}
+            The Compute panel now splits spend by provider (Anthropic / Google /
+            DeepSeek), not just by tier. So when calls start routing through
+            Gemini or DeepSeek, you'll see it instantly.
+          </li>
+          <li>
+            <strong className="text-white">⚡ Any agent can be swapped to a cheaper model — no redeploy.</strong>{" "}
+            Set an env var like{" "}
+            <code className="text-blue-300 bg-blue-500/10 px-1 rounded text-xs">
+              MODEL_HUNTER=deepseek/deepseek-v3
+            </code>{" "}
+            and Hunter routes through DeepSeek (5–15× cheaper for cold-email
+            drafts). Already live for Hunter today.{" "}
+            <Link
+              href="/settings/ai-routing"
+              className="text-blue-400 hover:underline"
+            >
+              See routing →
+            </Link>
+          </li>
+          <li>
+            <strong className="text-white">🛟 If a provider has an outage, calls auto-fail-over.</strong>{" "}
+            When the primary model fails with a network or server error, the system
+            silently retries on a different provider. The agent doing the work
+            doesn't even know it happened.
+          </li>
+          <li>
+            <strong className="text-white">🩹 Argus vision calls don't hang anymore.</strong>{" "}
+            Fixed a retry bug where photo-scope assessments were timing out at 3
+            minutes instead of 60 seconds. Vision calls now complete reliably.
+          </li>
+        </ul>
+      </section>
+
       {/* How it fits together */}
       <Section title="How everything fits together">
         <p className="text-zinc-300 leading-relaxed">
