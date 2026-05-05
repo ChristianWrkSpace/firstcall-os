@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { modelForAgent, fallbacksFor } from "./agent-models";
 
 /**
  * AI plumbing for FirstCall OS — model-agnostic via Vercel AI Gateway.
@@ -74,12 +75,31 @@ const _anthropic = new Anthropic({
 //
 // Logging is fire-and-forget — failures NEVER block the user-facing response.
 const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
+
+// Recognize errors that are worth retrying with a fallback model. 4xx
+// (except 429) usually means our request is wrong — fallback won't help
+// and would just double the cost. 5xx + network + timeout + rate-limit
+// are the categories where a different provider can save the call.
+function isRetryableError(err: any): boolean {
+  if (!err) return false;
+  const status = Number(err?.status ?? err?.statusCode ?? 0);
+  if (status === 429) return true;
+  if (status >= 500 && status < 600) return true;
+  const name = String(err?.name ?? "");
+  if (name.includes("Timeout") || name.includes("Connection") || name.includes("APIConnection")) {
+    return true;
+  }
+  const message = String(err?.message ?? "");
+  if (/timed out|timeout|ECONNRESET|ECONNREFUSED|ETIMEDOUT|fetch failed|socket hang up/i.test(message)) {
+    return true;
+  }
+  return false;
+}
+
 (_anthropic.messages as any).create = async function (
   params: any,
   options?: any
 ) {
-  const t0 = Date.now();
-  const model = params?.model ?? "unknown";
   // Optional context tags via custom headers — they're no-ops on the API
   // and we strip them before they cause schema-validation issues. Both the
   // direct Anthropic API and Vercel AI Gateway ignore unknown x-* headers.
@@ -97,9 +117,37 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
   // override. Default 2 stays safe for short calls that benefit from retries.
   const ctxMaxRetries =
     typeof params?._max_retries === "number" ? params._max_retries : undefined;
+  // Cross-provider fallback. Pass `_fallback_models: []` to opt out; pass
+  // an explicit list to override the auto-derived chain. Auto-derivation
+  // only fires when AI Gateway is on (direct Anthropic SDK can't route
+  // to other providers).
+  const explicitFallbacks: string[] | null = Array.isArray(params?._fallback_models)
+    ? params._fallback_models
+    : null;
+
+  // Resolve per-agent override BEFORE stripping. After this line,
+  // params.model may differ from what the agent originally requested.
+  if (ctxAgent && params?.model) {
+    params.model = modelForAgent(ctxAgent, params.model);
+  }
+  const primaryModel = params?.model ?? "unknown";
+
+  // Build the candidate chain: primary first, then fallbacks. Skip
+  // fallbacks in direct-Anthropic mode because the SDK client is pointed
+  // at api.anthropic.com and cross-provider models would 404.
+  const candidates: string[] = [primaryModel];
+  if (GATEWAY_ENABLED) {
+    const fallbackList = explicitFallbacks ?? fallbacksFor(primaryModel);
+    for (const m of fallbackList) {
+      if (m && m !== primaryModel && !candidates.includes(m)) {
+        candidates.push(m);
+      }
+    }
+  }
+
   // Strip ANY `_*` private context field so future call sites can't leak
   // unknown tags into the upstream API (Anthropic/Gateway both 400 on
-  // unknown body params). Belt-and-suspenders over the explicit deletes
+  // unknown body params). Belt-and-suspenders over the explicit captures
   // above; the explicit captures still grab the tags we care about for
   // logging.
   if (params && typeof params === "object") {
@@ -123,19 +171,20 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
           `Raise AI_DAILY_SPEND_CAP_USD or set AI_KILL_SWITCH_OFF=true to override.`
       );
       // Log the refusal so the kill-switch is visible in spend dashboards.
+      const killT0 = Date.now();
       Promise.resolve().then(async () => {
         try {
           const { createAdminClient } = await import("./supabase-server");
           const admin = createAdminClient();
           await admin.from("agent_invocations").insert({
-            model,
+            model: primaryModel,
             agent: ctxAgent,
             task: ctxTask,
             job_id: ctxJobId,
             tokens_in: 0,
             tokens_out: 0,
             cost_usd: 0,
-            duration_ms: Date.now() - t0,
+            duration_ms: Date.now() - killT0,
             error: "kill_switch: daily_cap_reached",
           });
         } catch {}
@@ -177,57 +226,77 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
     }
   }
 
-  try {
-    const result = await _originalCreate(params, {
-      ...(options ?? {}),
-      timeout: ctxTimeoutMs,
-      ...(ctxMaxRetries !== undefined ? { maxRetries: ctxMaxRetries } : {}),
-    });
-    const tIn = (result as any)?.usage?.input_tokens ?? 0;
-    const tOut = (result as any)?.usage?.output_tokens ?? 0;
-    // Lazy-import to avoid pulling Supabase into edge contexts that don't need it
-    Promise.resolve().then(async () => {
-      try {
-        const [{ priceCall }, { createAdminClient }] = await Promise.all([
-          import("./ai-cost"),
-          import("./supabase-server"),
-        ]);
-        const admin = createAdminClient();
-        await admin.from("agent_invocations").insert({
-          model,
-          agent: ctxAgent,
-          task: ctxTask,
-          job_id: ctxJobId,
-          tokens_in: tIn,
-          tokens_out: tOut,
-          cost_usd: priceCall(model, tIn, tOut),
-          duration_ms: Date.now() - t0,
-        });
-      } catch {
-        // Logging must never break a request
-      }
-    });
-    return result;
-  } catch (err: any) {
-    Promise.resolve().then(async () => {
-      try {
-        const { createAdminClient } = await import("./supabase-server");
-        const admin = createAdminClient();
-        await admin.from("agent_invocations").insert({
-          model,
-          agent: ctxAgent,
-          task: ctxTask,
-          job_id: ctxJobId,
-          tokens_in: 0,
-          tokens_out: 0,
-          cost_usd: 0,
-          duration_ms: Date.now() - t0,
-          error: String(err?.message ?? err).slice(0, 500),
-        });
-      } catch {}
-    });
-    throw err;
+  // Fallback loop. Try each candidate model in turn. Every attempt logs
+  // its own row to agent_invocations so the dashboard sees fallback usage:
+  // a job that hit Anthropic 5xx then succeeded on Gemini shows two rows
+  // (one error, one success), making fallback frequency observable.
+  let lastError: any = null;
+  for (let i = 0; i < candidates.length; i++) {
+    const attemptModel = candidates[i];
+    const attemptT0 = Date.now();
+    params.model = attemptModel;
+    try {
+      const result = await _originalCreate(params, {
+        ...(options ?? {}),
+        timeout: ctxTimeoutMs,
+        ...(ctxMaxRetries !== undefined ? { maxRetries: ctxMaxRetries } : {}),
+      });
+      const tIn = (result as any)?.usage?.input_tokens ?? 0;
+      const tOut = (result as any)?.usage?.output_tokens ?? 0;
+      const wasFallback = i > 0;
+      Promise.resolve().then(async () => {
+        try {
+          const [{ priceCall }, { createAdminClient }] = await Promise.all([
+            import("./ai-cost"),
+            import("./supabase-server"),
+          ]);
+          const admin = createAdminClient();
+          await admin.from("agent_invocations").insert({
+            model: attemptModel,
+            agent: ctxAgent,
+            task: ctxTask,
+            job_id: ctxJobId,
+            tokens_in: tIn,
+            tokens_out: tOut,
+            cost_usd: priceCall(attemptModel, tIn, tOut),
+            duration_ms: Date.now() - attemptT0,
+            // Annotate fallback successes so the dashboard can flag them.
+            // Stored in `error` column (no separate "fallback" column yet);
+            // dashboards that filter on error must also exclude this prefix.
+            error: wasFallback ? `fallback_used: primary=${primaryModel}` : null,
+          });
+        } catch {
+          // Logging must never break a request
+        }
+      });
+      return result;
+    } catch (err: any) {
+      lastError = err;
+      const willRetry = i < candidates.length - 1 && isRetryableError(err);
+      Promise.resolve().then(async () => {
+        try {
+          const { createAdminClient } = await import("./supabase-server");
+          const admin = createAdminClient();
+          await admin.from("agent_invocations").insert({
+            model: attemptModel,
+            agent: ctxAgent,
+            task: ctxTask,
+            job_id: ctxJobId,
+            tokens_in: 0,
+            tokens_out: 0,
+            cost_usd: 0,
+            duration_ms: Date.now() - attemptT0,
+            error: String(err?.message ?? err).slice(0, 500),
+          });
+        } catch {}
+      });
+      if (!willRetry) throw err;
+      // Otherwise loop continues with next candidate model.
+    }
   }
+  // Should be unreachable — loop returns on success or throws on final
+  // failure. Defensive throw in case the loop body is restructured.
+  throw lastError ?? new Error("AI call failed after exhausting fallback chain.");
 };
 
 export const anthropic = _anthropic;

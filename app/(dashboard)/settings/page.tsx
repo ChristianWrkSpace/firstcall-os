@@ -85,6 +85,14 @@ export default async function SettingsPage() {
       visible: me.role === "owner" || me.role === "manager",
     },
     {
+      href: "/settings/ai-routing",
+      title: "AI Routing",
+      description:
+        "Per-agent model overrides + cross-provider fallback chains. Swap any agent onto Gemini/DeepSeek without a redeploy.",
+      emoji: "🛰",
+      visible: me.role === "owner" || me.role === "manager",
+    },
+    {
       href: "/settings/security",
       title: "Security (2FA)",
       description:
