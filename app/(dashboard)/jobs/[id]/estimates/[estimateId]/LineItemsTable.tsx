@@ -19,6 +19,7 @@ interface LineItem {
   line_total: number;
   notes: string | null;
   is_ai_drafted: boolean;
+  pricing_source: "book" | "guessed" | null;
 }
 
 const UNITS = ["EA", "SF", "LF", "DA", "HR", "CY", "GAL"];
@@ -288,7 +289,10 @@ function LineRow({
       </td>
       <td className="px-4 py-2.5 text-zinc-400 text-xs uppercase">{item.unit}</td>
       <td className="px-4 py-2.5 text-right text-zinc-300 font-mono text-xs">
-        ${Number(item.unit_price).toFixed(2)}
+        <div className="flex items-center justify-end gap-1.5">
+          <PricingSourceBadge source={item.pricing_source} />
+          <span>${Number(item.unit_price).toFixed(2)}</span>
+        </div>
       </td>
       <td className="px-4 py-2.5 text-right text-white font-mono text-xs font-semibold">
         ${Number(item.line_total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -396,3 +400,30 @@ function AddLineItemRow({
 
 const INPUT_INLINE =
   "w-full px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-600 text-xs";
+
+// At-a-glance source of the unit_price. 'book' = anchored to reviewed price
+// book → operator can scan past it. 'guessed' = LLM invented; needs review.
+// null = human-authored line; trust the operator's own choice.
+function PricingSourceBadge({ source }: { source: "book" | "guessed" | null }) {
+  if (source === "book") {
+    return (
+      <span
+        title="Anchored to reviewed price book"
+        className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide bg-green-500/15 text-green-400 border border-green-500/20"
+      >
+        book
+      </span>
+    );
+  }
+  if (source === "guessed") {
+    return (
+      <span
+        title="AI-invented price — code not in book. Verify before sending."
+        className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
+      >
+        guess
+      </span>
+    );
+  }
+  return null;
+}

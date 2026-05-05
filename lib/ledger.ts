@@ -1,5 +1,7 @@
 import { anthropic, MODELS } from "./ai";
 import { feedbackPreamble } from "./agent-feedback";
+import { formatPriceBookForPrompt } from "./price-book";
+import type { PriceBookEntry } from "./price-book-types";
 import type Anthropic from "@anthropic-ai/sdk";
 
 // Common Xactimate codes for water mitigation. Reference for Claude.
@@ -122,7 +124,8 @@ const ESTIMATE_TOOL: Anthropic.Tool = {
 
 export async function generateEstimate(
   jobContext: string,
-  scope: any
+  scope: any,
+  priceBook: Map<string, PriceBookEntry> = new Map()
 ): Promise<EstimateOutput> {
   const codeReference = COMMON_XACTIMATE_CODES.map(
     (c) => `  ${c.code} (${c.unit}) — ${c.description}`
@@ -131,6 +134,11 @@ export async function generateEstimate(
   // Recursive self-learning: pull recent rejected/edited estimates so Ledger
   // learns from prior corrections without retraining.
   const preamble = await feedbackPreamble("ledger", "estimate_draft", 5);
+
+  // Anchor unit prices to the reviewed price book whenever the code is in it.
+  // When the book is empty (early days) this returns "" and the model falls
+  // back to its prior behavior — no behavior change for unseeded users.
+  const priceBookBlock = formatPriceBookForPrompt(priceBook);
 
   const message = await anthropic.messages.create({
     model: MODELS.BALANCED,
@@ -143,12 +151,19 @@ export async function generateEstimate(
         role: "user",
         content: preamble + `You are Ledger, the AI estimator for First Call Mitigation in Austin TX.
 
-Generate a complete Xactimate-style estimate from the scope below. Every line item the carrier would expect to see — extraction, equipment setup/removal, daily drying, demolition (flood cuts, baseboards, insulation removal), antimicrobial, cleaning. Use realistic 2026 Austin TX market pricing.
+Generate a complete Xactimate-style estimate from the scope below. Every line item the carrier would expect to see — extraction, equipment setup/removal, daily drying, demolition (flood cuts, baseboards, insulation removal), antimicrobial, cleaning.
+
+PRICING RULES (read carefully):
+1. If a Xactimate code appears in the PRICE BOOK below, use that unit_price EXACTLY. Do not adjust it. The book is the reviewed ground truth.
+2. Only invent unit_price for codes NOT in the book — use realistic 2026 Austin TX market rates and call it out in 'assumptions' so the estimator knows to verify.
+3. Prefer codes that are in the book over codes that aren't, when both are reasonable choices for the work.
 
 GOAL: produce an estimate the office can review in 5 minutes and send. Don't overlook things ("missing items" cost us money). Don't pad either ("padded estimates" get pushback from adjusters).
 
-REFERENCE — common Xactimate codes:
+REFERENCE — common Xactimate codes (descriptions only; prices come from the price book if present):
 ${codeReference}
+
+${priceBookBlock || "PRICE BOOK: (empty — no anchored prices yet; flag your invented prices in 'assumptions')"}
 
 JOB CONTEXT:
 ${jobContext}

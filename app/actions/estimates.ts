@@ -2,6 +2,7 @@
 
 import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
 import { generateEstimate } from "@/lib/ledger";
+import { loadPriceBook } from "@/lib/price-book";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -67,9 +68,14 @@ export async function generateEstimateForJob(jobId: string) {
     .filter(Boolean)
     .join("\n");
 
+  // Load the price book once up front. Ledger uses it as the unit_price
+  // ground truth; we use it again below to tag each line as 'book' or
+  // 'guessed' so the office can see at-a-glance which prices to scrutinize.
+  const priceBook = await loadPriceBook();
+
   let estimate;
   try {
-    estimate = await generateEstimate(jobContext, job.scope_assessment);
+    estimate = await generateEstimate(jobContext, job.scope_assessment, priceBook);
   } catch (err: any) {
     return { error: err.message ?? "Estimate generation failed." };
   }
@@ -101,19 +107,31 @@ export async function generateEstimateForJob(jobId: string) {
     .single();
   if (estErr || !newEst) return { error: estErr?.message ?? "Failed to create estimate." };
 
-  // Insert line items
-  const lineRows = estimate.line_items.map((li, idx) => ({
-    estimate_id: newEst.id,
-    sort_order: idx,
-    category: li.category ?? null,
-    xactimate_code: li.xactimate_code ?? null,
-    description: li.description,
-    quantity: li.quantity,
-    unit: li.unit,
-    unit_price: li.unit_price,
-    notes: li.notes ?? null,
-    is_ai_drafted: true,
-  }));
+  // Insert line items. Tag each line with pricing_source so the operator can
+  // tell book-anchored prices from LLM guesses on the estimate page. A line
+  // is 'book' iff its xactimate_code matches a book entry AND the unit_price
+  // it actually persisted matches the book price (Ledger is instructed to use
+  // the book verbatim, but trust-but-verify — if it deviated, treat as guess).
+  const lineRows = estimate.line_items.map((li, idx) => {
+    const code = li.xactimate_code ?? null;
+    const bookEntry = code ? priceBook.get(code) : undefined;
+    const matchesBook =
+      !!bookEntry && Math.abs(Number(bookEntry.unit_price) - Number(li.unit_price)) < 0.01;
+    const pricing_source: "book" | "guessed" = matchesBook ? "book" : "guessed";
+    return {
+      estimate_id: newEst.id,
+      sort_order: idx,
+      category: li.category ?? null,
+      xactimate_code: code,
+      description: li.description,
+      quantity: li.quantity,
+      unit: li.unit,
+      unit_price: li.unit_price,
+      notes: li.notes ?? null,
+      is_ai_drafted: true,
+      pricing_source,
+    };
+  });
 
   if (lineRows.length > 0) {
     const { error: linesErr } = await admin

@@ -77,6 +77,14 @@ export default async function SettingsPage() {
       visible: me.role === "owner" || me.role === "manager",
     },
     {
+      href: "/settings/price-book",
+      title: "Unit Price Book",
+      description:
+        "Reviewed Xactimate code → unit price ground truth. Anchors Ledger so AI estimates stop drifting on every run.",
+      emoji: "📒",
+      visible: me.role === "owner" || me.role === "manager",
+    },
+    {
       href: "/settings/security",
       title: "Security (2FA)",
       description:

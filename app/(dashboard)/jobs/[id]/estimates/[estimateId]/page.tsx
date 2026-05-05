@@ -48,6 +48,27 @@ export default async function EstimateDetailPage({
   const meta = estimate.generation_meta ?? {};
   const isLocked = estimate.status === "approved" || estimate.status === "sent";
 
+  // Pricing confidence breakdown — how much of the total is anchored to the
+  // reviewed price book vs how much is the LLM's best guess. The operator
+  // should scrutinize the 'guessed' subtotal before approving.
+  let bookCount = 0;
+  let guessedCount = 0;
+  let bookSubtotal = 0;
+  let guessedSubtotal = 0;
+  for (const li of items as any[]) {
+    const source = li.pricing_source as "book" | "guessed" | null;
+    const lineTotal = Number(li.line_total ?? 0);
+    if (source === "book") {
+      bookCount++;
+      bookSubtotal += lineTotal;
+    } else if (source === "guessed") {
+      guessedCount++;
+      guessedSubtotal += lineTotal;
+    }
+  }
+  const taggedCount = bookCount + guessedCount;
+  const bookPctOfTotal = total > 0 ? (bookSubtotal / total) * 100 : 0;
+
   // Group line items by category
   const byCategory: Record<string, any[]> = {};
   for (const li of items) {
@@ -115,6 +136,56 @@ export default async function EstimateDetailPage({
             <section className="glass-card p-5">
               <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Summary</p>
               <p className="text-zinc-200 text-sm leading-relaxed">{meta.summary}</p>
+            </section>
+          )}
+
+          {taggedCount > 0 && (
+            <section className="glass-card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-zinc-500 text-xs uppercase tracking-wide">
+                  Pricing Confidence
+                </p>
+                <Link
+                  href="/settings/price-book"
+                  className="text-blue-400 hover:underline text-xs"
+                >
+                  Manage price book →
+                </Link>
+              </div>
+              <div className="flex h-2 rounded overflow-hidden bg-zinc-800 mb-3">
+                <div
+                  className="bg-green-500/70"
+                  style={{ width: `${bookPctOfTotal}%` }}
+                  title={`Book: $${bookSubtotal.toFixed(2)}`}
+                />
+                <div
+                  className="bg-yellow-500/70"
+                  style={{ width: `${100 - bookPctOfTotal}%` }}
+                  title={`Guessed: $${guessedSubtotal.toFixed(2)}`}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <p className="text-green-400 font-semibold">
+                    {bookCount} {bookCount === 1 ? "line" : "lines"} from book
+                  </p>
+                  <p className="text-zinc-400 font-mono">
+                    ${bookSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {" "}
+                    <span className="text-zinc-500">({bookPctOfTotal.toFixed(0)}% of total)</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-yellow-400 font-semibold">
+                    {guessedCount} AI {guessedCount === 1 ? "guess" : "guesses"}
+                  </p>
+                  <p className="text-zinc-400 font-mono">
+                    ${guessedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {" "}
+                    <span className="text-zinc-500">— verify before sending</span>
+                  </p>
+                </div>
+              </div>
             </section>
           )}
 
