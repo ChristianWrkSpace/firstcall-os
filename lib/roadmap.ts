@@ -1,7 +1,7 @@
 // FirstCall OS — Project Roadmap (Source of Truth)
 // Update this file as work ships. Be honest about effort + status.
 // "Done" = shipped + working. NOT "shipped but needs hardening."
-// Last reviewed: 2026-04-30
+// Last reviewed: 2026-05-04
 
 export type Status = "done" | "in_progress" | "planned" | "idea";
 export type Effort = "S" | "M" | "L" | "XL";
@@ -1107,52 +1107,91 @@ export const ROADMAP: RoadmapItem[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // TURING SELF-AUDIT FOLLOW-UPS — PLANNED (deferred 2026-05-04)
+  // FIVE LAWS DURABILITY PASS — shipped 2026-05-04 (commit c649037)
+  // Closes the gaps Turing's 2026-05-04 self-audit surfaced.
   // ═══════════════════════════════════════════════════════════════════
   {
     id: "outcomes-coverage",
-    title: "Agent Outcomes — Full Coverage",
+    title: "Agent Outcomes — Full Coverage (Law 5)",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-05-04",
     description:
-      "Wire estimate generation (Ledger) + approval-queue resolutions (approve/edit/reject) into agent_outcomes so prompt_quality and cost_efficiency aren't drawn from <3 samples per agent. Surfaced by Turing 2026-05-04 audit (HIGH: outcome telemetry covers only 3 of ~16 agent actions in last 7d — audit signal effectively blind).",
+      "Closed the 3/16 outcome telemetry gap Turing flagged. dismissApproval now logs 'rejected' via kindToAgentTask mapper; applySuggestion logs 'approved_unchanged'; approveEstimate detects manual line items and logs 'approved_with_edits'. Every approval kind in migration 020 now flows to agent_outcomes.",
+    features: [
+      "kindToAgentTask() centralizes approval-kind → (agent, task) mapping",
+      "approval.dismissed writes outcome=rejected for all 7 kinds",
+      "approval.suggestion_applied writes outcome=approved_unchanged",
+      "approveEstimate compares is_ai_drafted=false on line items → outcome=approved_with_edits",
+      "Honest about partial signal: catches added/replaced lines, misses qty/price tweaks (no updated_at column)",
+    ],
   },
   {
     id: "agent-preconditions",
-    title: "Agent Preconditions (refuse-if-missing)",
+    title: "Agent Preconditions — refuse-if-missing (Law 1)",
     track: "core",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-05-04",
     description:
-      "Every agent declares required inputs; runner short-circuits to 'skipped: missing X' if absent — no tokens spent, no hallucinated output. Worked example: Argus must have dispatch_inputs before scope_assessment (Turing 2026-05-04 flagged Argus reasoning with had_dispatch_inputs=false and stale previous_analyzed_at). Add freshness guard (skip if previous_analyzed_at <24h and inputs unchanged) and input-hash idempotency at the same time.",
+      "lib/agent-preconditions.ts ships requireInputs() + isFresh() + PreconditionError. Argus refuses scope_assessment without dispatch_inputs.ceiling_height_ft (and water_source_secured for water jobs). No tokens spent, clear UI message points to Dispatch Inputs panel. Worked example for the rest of the agent fleet — easy to extend.",
+    features: [
+      "requireInputs() supports dot-paths (dispatch_inputs.ceiling_height_ft)",
+      "Empty string / [] / {} treated as missing; false / 0 are valid values",
+      "PreconditionError carries agent name + missing field array for UI",
+      "isFresh() helper for skip-if-recent guards (foundation for input-hash idempotency)",
+      "Argus integrated; pattern documented for Ledger / Esquire / Solomon next",
+    ],
   },
   {
     id: "approvals-aging-digest",
-    title: "Approvals Aging Digest + Failed-Send Auto-Escalation",
+    title: "Approvals Aging Digest + Failed-Send Surfacing",
     track: "core",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-05-04",
     description:
-      "Daily 'approvals older than 48h' digest to operator. Auto-escalate any legal-doc send that fails once. Surfaced by Turing 2026-05-04 audit (HIGH: 5 pending approvals vs 3 logged outcomes in 7d, queue growing faster than draining; 1/1 legal-doc send failure unsurfaced).",
+      "Daily cron at 14:30 UTC runs runApprovalsDigest(): finds pending_approvals >48h old + any legal-doc send marked failed/skipped in last 14d. Emails OPERATOR_EMAIL if anything to report; always logs heartbeat to /activity. Closes the 1/1 legal-doc send failure gap and the queue-growth signal Turing flagged.",
+    features: [
+      "lib/approvals-digest.ts with runApprovalsDigest() — branded HTML email",
+      "/api/cron/approvals-digest route + vercel.json entry (14:30 UTC daily)",
+      "Heartbeat logged as approvals_digest action regardless of email send",
+      "Email skipped if OPERATOR_EMAIL not set (graceful degradation)",
+    ],
   },
   {
     id: "agent-timeout-token-cap",
-    title: "Per-Call Timeout + Per-Task Token Cap",
+    title: "Per-Call Timeout + max_tokens Default (Law 3)",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-05-04",
     description:
-      "Wrap every anthropic.messages.create call in lib/ai.ts with an AbortController timeout (30s default, override per task) and a max_tokens ceiling tuned per task. A hung Anthropic call should not hold a request open indefinitely. Closes Law 3 (Bounded Cost) gap from the Five Laws audit (2026-05-04). Logs timeout as outcome=timeout in agent_invocations so it shows up in cost dashboards.",
+      "Every anthropic.messages.create call now wrapped with 60s timeout (override via _timeout_ms) and max_tokens=4096 default if unset. Replaces SDK's 10-minute default that lets hung connections drag forever. Anthropic SDK throws on timeout; existing error handler logs to agent_invocations.",
+    features: [
+      "Default timeout 60s (vs SDK's 600s)",
+      "Per-call override via _timeout_ms private field — stripped before API send",
+      "max_tokens=4096 default applied in wrapper if call site omits",
+      "Timeouts surface as error rows in agent_invocations cost dashboard",
+    ],
   },
   {
     id: "agent-daily-spend-cap",
-    title: "Per-Day AI Spend Cap + Kill-Switch",
+    title: "Per-Day AI Spend Cap + Kill-Switch (Law 3)",
     track: "production",
-    status: "planned",
+    status: "done",
     effort: "S",
+    shipped_at: "2026-05-04",
     description:
-      "Pre-invocation check against agent_invocations: sum today's USD spend; if over cap, refuse the call with a clear error. Configurable cap in cost_basis_settings (e.g. $50/day default). Owner-only override flag. Closes Law 3 (Bounded Cost) gap from the Five Laws audit (2026-05-04). Stops runaway loops — the #1 production failure mode for AI systems.",
+      "Pre-invocation check sums today's cost_usd from agent_invocations. If today's spend ≥ AI_DAILY_SPEND_CAP_USD (default $50), the next call throws with a clear error. Owner override via AI_KILL_SWITCH_OFF=true env var. 60-second per-instance cache so the check adds <1ms to cached calls. Stops runaway loops — the #1 production failure mode for AI systems.",
+    features: [
+      "Configurable cap via AI_DAILY_SPEND_CAP_USD (default $50)",
+      "Owner override via AI_KILL_SWITCH_OFF=true",
+      "60s cache per Vercel instance — bounded blast radius even on cache miss",
+      "Refusals logged as error='kill_switch: daily_cap_reached' in agent_invocations",
+      "Fail-open on transient DB errors (don't block all AI on a Supabase hiccup)",
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════════
