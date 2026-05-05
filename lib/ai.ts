@@ -28,6 +28,10 @@ const KILL_SWITCH_OFF = process.env.AI_KILL_SWITCH_OFF === "true";
 // Cached daily spend total — TTL 60s. Bounded blast radius per instance.
 let _spendCache: { total: number; expiresAt: number } | null = null;
 
+// One-email-per-day-per-instance dedupe for the kill-switch alert. Reset at
+// midnight UTC because we compare against the YYYY-MM-DD date string.
+let _killSwitchAlertedDate: string | null = null;
+
 async function todaysSpendUsd(): Promise<number> {
   if (_spendCache && _spendCache.expiresAt > Date.now()) return _spendCache.total;
   try {
@@ -130,6 +134,39 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
           });
         } catch {}
       });
+
+      // Email alert on FIRST trip per day per instance. Without this, you
+      // find out the cap fired by reading the audit log next morning. With
+      // it, you know within a minute. Per-instance dedupe is sufficient —
+      // worst case a few emails on day-of-trip from concurrent cold starts.
+      const today = new Date().toISOString().slice(0, 10);
+      if (_killSwitchAlertedDate !== today) {
+        _killSwitchAlertedDate = today;
+        Promise.resolve().then(async () => {
+          try {
+            const opsEmail = process.env.OPERATOR_EMAIL?.trim();
+            if (!opsEmail) return;
+            const { sendEmail } = await import("./resend");
+            await sendEmail({
+              to: opsEmail,
+              subject: `[FirstCall OS] AI kill-switch tripped — daily cap $${DAILY_CAP_USD} reached`,
+              html: `
+                <div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px;padding:24px;color:#111;">
+                  <h2 style="margin:0 0 8px;color:#b91c1c;">⛔ AI kill-switch tripped</h2>
+                  <p style="margin:0 0 16px;">Today's spend reached <strong>$${spent.toFixed(2)}</strong> — at or above the configured cap of <strong>$${DAILY_CAP_USD.toFixed(2)}</strong>. All AI calls will refuse until midnight UTC or until the cap is raised.</p>
+                  <p style="margin:0 0 8px;"><strong>To override now:</strong></p>
+                  <ul style="margin:0 0 16px;padding-left:20px;">
+                    <li>Raise <code>AI_DAILY_SPEND_CAP_USD</code> in Vercel env</li>
+                    <li>Or set <code>AI_KILL_SWITCH_OFF=true</code> to bypass entirely</li>
+                  </ul>
+                  <p style="color:#9ca3af;font-size:12px;margin-top:24px;">Logged at /activity as <code>kill_switch: daily_cap_reached</code>. One alert per day per instance — subsequent trips today are silenced.</p>
+                </div>
+              `,
+            });
+          } catch {} // Email failure must not break anything
+        });
+      }
+
       throw err;
     }
   }
