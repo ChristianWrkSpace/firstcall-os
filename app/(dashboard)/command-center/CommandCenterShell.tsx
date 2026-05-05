@@ -52,6 +52,13 @@ export interface ComputeStats {
   todaySpendUsd: number;
   invocationsToday: number;
   byTier: { fast: number; balanced: number; smart: number; unknown: number };
+  byProvider: {
+    anthropic: { cost: number; calls: number };
+    google: { cost: number; calls: number };
+    deepseek: { cost: number; calls: number };
+    openai: { cost: number; calls: number };
+    unknown: { cost: number; calls: number };
+  };
   topAgentByCost: { agent: string; cost: number } | null;
   lastInvocations: Array<{ model: string; cost: number; minutesAgo: number }>;
 }
@@ -777,7 +784,63 @@ function ComputePanel({ compute }: { compute: ComputeStats }) {
           )}
         </div>
       </div>
+
+      {/* Provider mix — surfaces gateway-routed spend across Anthropic /
+          Google / DeepSeek / OpenAI. Hidden when only one provider is in use
+          so the panel stays clean for the common single-provider case. */}
+      <ProviderMix byProvider={compute.byProvider} />
     </Glass>
+  );
+}
+
+function ProviderMix({
+  byProvider,
+}: {
+  byProvider: ComputeStats["byProvider"];
+}) {
+  const rows = [
+    { key: "anthropic", label: "Anthropic", color: "bg-orange-400/70", ...byProvider.anthropic },
+    { key: "google",    label: "Google",    color: "bg-blue-400/70",   ...byProvider.google    },
+    { key: "deepseek",  label: "DeepSeek",  color: "bg-purple-400/70", ...byProvider.deepseek  },
+    { key: "openai",    label: "OpenAI",    color: "bg-emerald-400/70",...byProvider.openai    },
+    { key: "unknown",   label: "Unknown",   color: "bg-zinc-500/60",   ...byProvider.unknown   },
+  ].filter((r) => r.calls > 0);
+
+  if (rows.length <= 1) return null;
+
+  const total = rows.reduce((s, r) => s + r.cost, 0);
+  return (
+    <div className="mt-4 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-white/40">
+          Spend by Provider
+        </p>
+        <p className="text-[10px] text-white/40">
+          Vercel AI Gateway routing
+        </p>
+      </div>
+      <div className="flex h-1.5 rounded-full overflow-hidden bg-white/[0.04] mb-3">
+        {rows.map((r) => (
+          <div
+            key={r.key}
+            className={r.color}
+            style={{ width: `${total > 0 ? (r.cost / total) * 100 : 0}%` }}
+            title={`${r.label}: $${r.cost.toFixed(2)} / ${r.calls} calls`}
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
+        {rows.map((r) => (
+          <div key={r.key} className="flex items-baseline justify-between gap-2">
+            <span className="text-white/65">{r.label}</span>
+            <span className="text-white/85 font-mono">
+              ${r.cost.toFixed(2)}
+              <span className="text-white/40 ml-1">({r.calls})</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

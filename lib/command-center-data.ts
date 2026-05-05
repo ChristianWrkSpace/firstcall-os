@@ -2,7 +2,7 @@
 // ShellData shape that the MOCK provided — drop-in.
 
 import { createServerSupabaseClient } from "./supabase-server";
-import { tierFor } from "./ai-cost";
+import { tierFor, providerFor } from "./ai-cost";
 import { getDataCutoff } from "./data-cutoff";
 
 // Mirror of CommandCenterShell.ShellData (kept loose to stay decoupled)
@@ -60,6 +60,16 @@ export interface ComputeStats {
   todaySpendUsd: number;
   invocationsToday: number;
   byTier: { fast: number; balanced: number; smart: number; unknown: number };
+  // Provider split — every gateway-routed call is attributed to its provider
+  // (anthropic / google / deepseek / openai). Reads as zero when only direct
+  // Anthropic is in use; non-zero when the gateway routes elsewhere.
+  byProvider: {
+    anthropic: { cost: number; calls: number };
+    google: { cost: number; calls: number };
+    deepseek: { cost: number; calls: number };
+    openai: { cost: number; calls: number };
+    unknown: { cost: number; calls: number };
+  };
   topAgentByCost: { agent: string; cost: number } | null;
   lastInvocations: Array<{
     model: string;
@@ -291,13 +301,24 @@ export async function loadCommandCenterData(operator: {
   const last5 = invocationsLast5 ?? [];
 
   const byTier = { fast: 0, balanced: 0, smart: 0, unknown: 0 };
+  const byProvider = {
+    anthropic: { cost: 0, calls: 0 },
+    google:    { cost: 0, calls: 0 },
+    deepseek:  { cost: 0, calls: 0 },
+    openai:    { cost: 0, calls: 0 },
+    unknown:   { cost: 0, calls: 0 },
+  };
   const byAgent = new Map<string, number>();
 
   for (const inv of mtd as any[]) {
+    const cost = Number(inv.cost_usd ?? 0);
     const tier = tierFor(inv.model);
-    byTier[tier] += Number(inv.cost_usd ?? 0);
+    byTier[tier] += cost;
+    const provider = providerFor(inv.model);
+    byProvider[provider].cost += cost;
+    byProvider[provider].calls++;
     if (inv.agent) {
-      byAgent.set(inv.agent, (byAgent.get(inv.agent) ?? 0) + Number(inv.cost_usd ?? 0));
+      byAgent.set(inv.agent, (byAgent.get(inv.agent) ?? 0) + cost);
     }
   }
   const mtdSpendUsd = byTier.fast + byTier.balanced + byTier.smart + byTier.unknown;
@@ -323,6 +344,13 @@ export async function loadCommandCenterData(operator: {
       balanced: Math.round(byTier.balanced * 100) / 100,
       smart: Math.round(byTier.smart * 100) / 100,
       unknown: Math.round(byTier.unknown * 100) / 100,
+    },
+    byProvider: {
+      anthropic: { cost: Math.round(byProvider.anthropic.cost * 100) / 100, calls: byProvider.anthropic.calls },
+      google:    { cost: Math.round(byProvider.google.cost    * 100) / 100, calls: byProvider.google.calls    },
+      deepseek:  { cost: Math.round(byProvider.deepseek.cost  * 100) / 100, calls: byProvider.deepseek.calls  },
+      openai:    { cost: Math.round(byProvider.openai.cost    * 100) / 100, calls: byProvider.openai.calls    },
+      unknown:   { cost: Math.round(byProvider.unknown.cost   * 100) / 100, calls: byProvider.unknown.calls   },
     },
     topAgentByCost: topAgentByCost
       ? {

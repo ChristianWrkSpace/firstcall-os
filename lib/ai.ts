@@ -91,6 +91,12 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
   // calls that legitimately need longer). SDK default is 10 minutes — too
   // long for a hung connection.
   const ctxTimeoutMs = typeof params?._timeout_ms === "number" ? params._timeout_ms : 60_000;
+  // SDK default maxRetries=2 means a 60s timeout → 180s real wait (initial +
+  // 2 retries). For vision/long-context calls where the FIRST attempt is most
+  // of the work, a single retry is plenty — pass `_max_retries: 0` or 1 to
+  // override. Default 2 stays safe for short calls that benefit from retries.
+  const ctxMaxRetries =
+    typeof params?._max_retries === "number" ? params._max_retries : undefined;
   // Strip ANY `_*` private context field so future call sites can't leak
   // unknown tags into the upstream API (Anthropic/Gateway both 400 on
   // unknown body params). Belt-and-suspenders over the explicit deletes
@@ -172,7 +178,11 @@ const _originalCreate = _anthropic.messages.create.bind(_anthropic.messages);
   }
 
   try {
-    const result = await _originalCreate(params, { ...(options ?? {}), timeout: ctxTimeoutMs });
+    const result = await _originalCreate(params, {
+      ...(options ?? {}),
+      timeout: ctxTimeoutMs,
+      ...(ctxMaxRetries !== undefined ? { maxRetries: ctxMaxRetries } : {}),
+    });
     const tIn = (result as any)?.usage?.input_tokens ?? 0;
     const tOut = (result as any)?.usage?.output_tokens ?? 0;
     // Lazy-import to avoid pulling Supabase into edge contexts that don't need it

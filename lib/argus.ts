@@ -214,7 +214,10 @@ export async function assessScope(
     max_tokens: 3000,
     tools: [SCOPE_TOOL],
     tool_choice: { type: "tool", name: "assess_damage_scope" },
-    ...({ _agent: "argus", _task: "scope_assessment" } as any),
+    // Vision calls take 30-60s on multi-image inputs. Give the first attempt
+    // 150s and allow exactly one retry — default would be 60s × 3 = 180s
+    // worst-case wait but every attempt timing out at 60s on a real workload.
+    ...({ _agent: "argus", _task: "scope_assessment", _timeout_ms: 150_000, _max_retries: 1 } as any),
     messages: [
       {
         role: "user",
@@ -277,7 +280,7 @@ export async function synthesizeScopes(
     max_tokens: 3500,
     tools: [SCOPE_TOOL],
     tool_choice: { type: "tool", name: "assess_damage_scope" },
-    ...({ _agent: "argus", _task: "scope_synthesis" } as any),
+    ...({ _agent: "argus", _task: "scope_synthesis", _timeout_ms: 120_000, _max_retries: 1 } as any),
     messages: [
       {
         role: "user",
