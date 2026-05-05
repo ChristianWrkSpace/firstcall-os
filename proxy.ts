@@ -45,6 +45,9 @@ const CSP_DIRECTIVES = [
   "font-src 'self' data: https://fonts.gstatic.com",
   // Images: own + data: (base64) + Supabase storage signed URLs + photo galleries
   "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com",
+  // Media (video/audio): blob: for client-side video preview + frame extraction
+  // (URL.createObjectURL on phone-recorded videos), plus Supabase signed URLs.
+  "media-src 'self' blob: https://*.supabase.co",
   // Connections: Supabase (auth + REST + realtime), Photon (address autocomplete),
   // Deepgram (transcription), Stripe (checkout), Vercel (analytics)
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://photon.komoot.io https://api.deepgram.com https://*.stripe.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",

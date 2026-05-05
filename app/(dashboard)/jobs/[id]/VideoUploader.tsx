@@ -209,7 +209,17 @@ export default function VideoUploader({ jobId }: { jobId: string }) {
           </button>
         </div>
       )}
-      {error && <p className="text-red-400 text-xs whitespace-pre-line">{error}</p>}
+      {error && (
+        <div className="px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <p className="text-red-400 text-sm font-medium whitespace-pre-line">
+            ⚠ Video upload failed
+          </p>
+          <p className="text-red-300/80 text-xs mt-1 whitespace-pre-line">{error}</p>
+          <p className="text-red-300/60 text-[11px] mt-1.5">
+            Common causes: video over 50MB (Supabase default file size limit) or weak network. Try a shorter clip or switch to wifi.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
