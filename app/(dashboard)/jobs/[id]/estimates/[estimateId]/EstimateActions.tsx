@@ -7,6 +7,7 @@ import {
   rejectEstimate,
   deleteEstimate,
 } from "@/app/actions/estimates";
+import { exportEstimateAsXactimateCsv } from "@/app/actions/xactimate";
 
 export default function EstimateActions({
   estimateId,
@@ -63,6 +64,26 @@ export default function EstimateActions({
     startTransition(async () => {
       const res = await deleteEstimate(estimateId, jobId);
       if (res?.error) setError(res.error);
+    });
+  }
+
+  function handleXactimateExport() {
+    setError(null);
+    startTransition(async () => {
+      const res = await exportEstimateAsXactimateCsv(estimateId);
+      if (!("ok" in res)) {
+        setError(res.error);
+        return;
+      }
+      const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = res.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     });
   }
 
@@ -135,6 +156,16 @@ export default function EstimateActions({
           🖨 Print / Export
         </a>
       )}
+
+      <button
+        onClick={handleXactimateExport}
+        disabled={pending}
+        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 text-sm rounded-lg transition-colors"
+        title="CSV with Xactimate-style columns for adjuster review or manual re-key. Direct .esx import requires a Verisk vendor relationship."
+      >
+        📊 Xactimate CSV
+      </button>
+
 
       {status !== "sent" && (
         <button

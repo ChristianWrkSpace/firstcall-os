@@ -92,6 +92,14 @@ export default async function SettingsPage() {
       emoji: "🛰️",
       visible: me.role === "owner" || me.role === "manager",
     },
+    {
+      href: "/settings/security-self-audit",
+      title: "Pen-Test Engagement Packet",
+      description:
+        "OWASP Top 10 posture + architecture + auth model + high-risk surfaces. Print and hand to a pen-test firm at kickoff.",
+      emoji: "🔐",
+      visible: me.role === "owner",
+    },
   ];
 
   return (

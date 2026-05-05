@@ -275,12 +275,21 @@ export const ROADMAP: RoadmapItem[] = [
   },
   {
     id: "ai-gateway-multi-provider",
-    title: "AI Gateway BYOK — Multi-Provider Routing (HIGH PRIORITY)",
+    title: "AI Gateway BYOK — Multi-Provider Routing",
     track: "integrations",
-    status: "planned",
+    status: "done",
     effort: "M",
+    shipped_at: "2026-05-05",
     description:
-      "Wire Vercel AI Gateway with Bring-Your-Own-Key for Anthropic, OpenAI, Gemini, DeepSeek. Per-task model tiering: FAST=Gemini Flash (or Haiku), BALANCED=DeepSeek-V3 (or Sonnet), SMART=Opus for vision/reasoning. Plumbing already in lib/ai.ts — gated behind AI_GATEWAY_ENABLED env var. Need: BYOK keys added in Vercel AI Gateway UI, then flip flag + re-tier model strings. Estimated 30-50% AI cost reduction + automatic provider fallbacks + observability dashboard.",
+      "Vercel AI Gateway live in production. BYOK provider keys for Anthropic + Google Gemini + DeepSeek added (OpenAI skipped — redundant with DeepSeek as cost-tier). $10 Vercel Gateway credits topped up. AI_GATEWAY_ENABLED=true in production; existing plumbing in lib/ai.ts now routes through https://ai-gateway.vercel.sh. Cost dashboard handles gateway-prefixed model strings. Future cost-tiering (FAST=Gemini Flash, BALANCED=DeepSeek-V3) is now a config change, not new code.",
+    features: [
+      "3 BYOK provider keys live: Anthropic, Google, DeepSeek",
+      "$10 Vercel Gateway credits funding routing layer",
+      "AI_GATEWAY_ENABLED=true in production (deployed 2026-05-05)",
+      "lib/ai-cost.ts already prices cross-provider models",
+      "tierFor() classifier handles non-Anthropic models",
+      "Future tier swap is a model-string change in MODELS object",
+    ],
   },
   {
     id: "adjuster-scoring",
@@ -985,13 +994,31 @@ export const ROADMAP: RoadmapItem[] = [
     ],
   },
   {
+    id: "security-self-audit",
+    title: "Pen-Test Engagement Prep Packet",
+    track: "security",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-05-05",
+    description:
+      "/settings/security-self-audit — owner-only printable packet to hand a pen-test firm at engagement kickoff. Walks them through system overview, tech stack, auth model, RLS posture, API surface, high-risk endpoints, storage buckets, env-var inventory (names only), OWASP Top 10 self-assessment, and engagement scope (in/out). Saves billable hours; firm walks in already knowing the architecture.",
+    features: [
+      "11 structured sections covering everything a pen-test kickoff asks about",
+      "Owner-only access (single-user-tier sensitive data)",
+      "Print-friendly layout — Cmd+P to PDF",
+      "Cross-links to /settings/pii-inventory + /settings/secrets-rotation + /settings/incident-response",
+      "Honest about what's NOT in scope (Vercel, Supabase platform, third-party providers)",
+      "Env vars listed by name only — values never displayed",
+    ],
+  },
+  {
     id: "pen-test",
-    title: "Penetration Test",
+    title: "Third-Party Penetration Test",
     track: "security",
     status: "planned",
     effort: "M",
     description:
-      "Third-party assessment before sensitive customer data lives in production. Annual cadence after that. OWASP Top 10 + Supabase-specific attack vectors.",
+      "Hire a firm and run a real engagement against the production system. Prep packet at /settings/security-self-audit makes kickoff fast — print and hand it over. Estimated $3-8k for a small/mid firm; ~2 week engagement. Annual cadence after first run. Required reading before sensitive customer data scales OR before pitching to other restoration shops.",
   },
   {
     id: "incident-response",
@@ -1018,12 +1045,28 @@ export const ROADMAP: RoadmapItem[] = [
   // ═══════════════════════════════════════════════════════════════════
   {
     id: "xactimate",
-    title: "Xactimate Sync",
+    title: "Xactimate-Style CSV Export",
     track: "integrations",
-    status: "planned",
+    status: "done",
+    effort: "M",
+    shipped_at: "2026-05-05",
+    description:
+      "Practical export-only path. CSV with Xactimate-style columns (selector code, description, qty, unit, unit price, line total) for adjuster review or manual re-key. NOT direct .esx XML import — that requires a Verisk vendor relationship which is months of business-development work. The CSV covers the 80% case: an adjuster opens it in Excel and matches it against their Xactimate workspace. Direct sync remains a future ask if a high-volume relationship requires it.",
+    features: [
+      "lib/xactimate-csv.ts: RFC 4180-compliant CSV generator with Xactimate-style header preamble + line-item table",
+      "app/actions/xactimate.ts: server action exportEstimateAsXactimateCsv (owner/manager only, audit-logged)",
+      "📊 Xactimate CSV button on every estimate detail page",
+      "Honest UI tooltip: \"CSV with Xactimate-style columns... Direct .esx import requires a Verisk vendor relationship\"",
+    ],
+  },
+  {
+    id: "xactimate-direct-sync",
+    title: "Xactimate Direct Sync (.esx XML)",
+    track: "integrations",
+    status: "idea",
     effort: "XL",
     description:
-      "Direct sync to actual Xactimate (not just generating their format). Push estimates, pull adjuster comments. Industry-standard requirement for insurance work.",
+      "Bidirectional sync via Verisk's vendor-only .esx XML format. Push estimates directly into Xactimate, pull adjuster comments back. Blocked on Verisk vendor relationship — months of business-development work. Pursue only when a high-volume adjuster has explicitly told you they'd give you faster approvals if you sent direct from Xactimate.",
   },
   {
     id: "quickbooks",
