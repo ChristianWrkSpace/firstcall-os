@@ -1,158 +1,194 @@
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { loadCommandCenterData, type ShellData } from "@/lib/command-center-data";
 import { redirect } from "next/navigation";
-import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
-import { PanelHeader, CountChip, PulseDot } from "@/components/ui/glass-v2";
-import { Badge, statusVariant } from "@/components/ui/badge";
-import { SlideUp } from "@/components/ui/motion-primitives";
 
 export const dynamic = "force-dynamic";
 
-export default async function CommandCenterPageNew() {
+const fmtUsd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+
+export default async function EchoCanvasPage() {
   const me = await getCurrentUser();
   if (!me) redirect("/login");
+  const data: ShellData = await loadCommandCenterData({ name: me.name?.split(" ")[0] ?? "there", role: me.role });
 
-  const data: ShellData = await loadCommandCenterData({
-    name: me.name?.split(" ")[0] ?? "there",
-    role: me.role.charAt(0).toUpperCase() + me.role.slice(1),
-  });
-
-  const fmtUsd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+  const totalActive = data.agentWorkflows.filter(w => w.state === "processing").length;
+  const blocked = data.agentWorkflows.filter(w => w.state === "blocked").length;
+  const openJobs = data.jobPulse.length;
+  const pendingApprovals = data.handoffs.length;
 
   return (
-    <SlideUp>
-      {/* Header */}
-      <div className="mb-6">
-        <PanelHeader
-          title={`Good ${new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, ${data.operator.name}. ${data.operator.role}`}
-          sub="Command Center"
-          emoji="🖥️"
-          right={<CountChip count={data.agentWorkflows.length} tone="teal" />}
-        />
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-bg-deep)" }}>
+      {/* Ambient atmosphere */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
+        <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(107,138,217,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(95,189,176,0.05) 0%, transparent 50%)" }} />
+        <svg className="absolute inset-0 w-full h-full opacity-[0.015]"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
       </div>
 
-      {/* System Pulse */}
-      <BentoGrid className="mb-6">
-        <BentoCard span={3} accent="teal">
-          <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">Triggers 24h</p>
-          <p className="text-2xl font-bold text-[color:var(--color-text-primary)]">{data.systemPulse.triggersLast24h}</p>
-        </BentoCard>
-        <BentoCard span={3} accent="amber">
-          <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">Approvals</p>
-          <p className="text-2xl font-bold text-[#F59E0B]">{data.systemPulse.pendingApprovals}</p>
-        </BentoCard>
-        <BentoCard span={3}>
-          <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">Failed Sends</p>
-          <p className="text-2xl font-bold text-[color:var(--color-text-primary)]">{data.systemPulse.failedSends}</p>
-        </BentoCard>
-        <BentoCard span={3}>
-          <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">Backup</p>
-          <p className="text-2xl font-bold text-[color:var(--color-text-primary)]">{data.systemPulse.backupAgeHours}h</p>
-        </BentoCard>
-      </BentoGrid>
-
-      {/* Today Metrics */}
-      <BentoGrid className="mb-6">
-        <BentoCard span={3} accent="blue">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-1">Calls</p>
-          <p className="text-3xl font-bold text-[color:var(--color-text-primary)]">{data.todayMetrics.callsTaken}</p>
-        </BentoCard>
-        <BentoCard span={3} accent="blue">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-1">Jobs Created</p>
-          <p className="text-3xl font-bold text-[color:var(--color-text-primary)]">{data.todayMetrics.jobsCreated}</p>
-        </BentoCard>
-        <BentoCard span={3} accent="teal">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-1">Revenue</p>
-          <p className="text-3xl font-bold text-[#5FBDB0]">{fmtUsd.format(data.todayMetrics.revenueTouched)}</p>
-        </BentoCard>
-        <BentoCard span={3} accent="blue">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-1">Agent Actions</p>
-          <p className="text-3xl font-bold text-[color:var(--color-text-primary)]">{data.todayMetrics.agentActions}</p>
-        </BentoCard>
-      </BentoGrid>
-
-      {/* Agent Workflows */}
-      <PanelHeader title="Active Agent Workflows" emoji="⚡" right={<CountChip count={data.agentWorkflows.length} tone="teal" />} />
-      <BentoGrid className="mb-6">
-        {data.agentWorkflows.slice(0, 4).map((wf, i) => (
-          <BentoCard key={wf.id || i} span={3} accent={wf.state === "blocked" ? "amber" : wf.state === "complete" ? "teal" : "blue"}>
-            <div className="flex items-center gap-2 mb-2">
-              <PulseDot tone={wf.state === "complete" ? "teal" : wf.state === "blocked" ? "amber" : "blue"} />
-              <span className="text-sm font-medium text-[color:var(--color-text-primary)]">{wf.agent} · {wf.intent}</span>
-            </div>
-            <p className="text-xs text-[color:var(--color-text-secondary)] mb-3">{wf.target}</p>
-            <div className="h-1 rounded-full bg-[color:var(--color-surface)] mb-2">
-              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${wf.progress}%`, backgroundColor: wf.state === "complete" ? "#5FBDB0" : "#6B8AD9" }} />
-            </div>
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-[color:var(--color-text-muted)]">{wf.progress}%</span>
-              <Badge variant={wf.state === "complete" ? "positive" : wf.state === "blocked" ? "caution" : "primary"}>{wf.state}</Badge>
-            </div>
-          </BentoCard>
-        ))}
-      </BentoGrid>
-
-      {/* Hand-off Stack */}
-      <PanelHeader title="Hand-off" sub={data.handoffs.length > 0 ? `${data.handoffs.length} pending` : "Clear"} emoji="⚠️" right={<CountChip count={data.handoffs.length} tone={data.handoffs.length > 0 ? "amber" : "neutral"} />} />
-      {data.handoffs.length === 0 ? (
-        <p className="text-sm text-[color:var(--color-text-muted)] mb-6">All clear. No pending hand-offs.</p>
-      ) : (
-        <div className="space-y-3 mb-6">
-          {data.handoffs.map((h) => (
-            <div key={h.id} className="rounded-xl p-4 border border-[color:var(--color-edge)]" style={{ backgroundColor: "var(--color-surface)", backdropFilter: "blur(24px)" }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[color:var(--color-text-primary)]">{h.title}</p>
-                  <p className="text-xs text-[color:var(--color-text-secondary)] mt-1">{h.detail}</p>
-                </div>
-                <Badge variant={h.severity === "high" ? "danger" : h.severity === "med" ? "caution" : "neutral"}>{h.severity}</Badge>
-              </div>
-              <div className="flex items-center gap-3 mt-3 text-[10px] text-[color:var(--color-text-muted)]">
-                <span>{h.agent}</span>
-                <span>·</span>
-                <span>{h.ageMinutes}m ago</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Compute Panel */}
-      <PanelHeader title="Compute" sub={fmtUsd.format(data.compute.mtdSpendUsd) + " MTD"} emoji="📊" />
-      <BentoGrid>
-        <BentoCard span={4} accent="blue">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-2">Today</p>
-          <p className="text-2xl font-bold text-[color:var(--color-text-primary)]">{fmtUsd.format(data.compute.todaySpendUsd)}</p>
-          <p className="text-xs text-[color:var(--color-text-muted)] mt-1">{data.compute.invocationsToday} calls</p>
-        </BentoCard>
-        <BentoCard span={4}>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-2">By Tier</p>
-          <div className="space-y-2">
-            {(["fast", "balanced", "smart"] as const).map(tier => {
-              const val = data.compute.byTier[tier];
-              const total = data.compute.byTier.fast + data.compute.byTier.balanced + data.compute.byTier.smart + data.compute.byTier.unknown || 1;
-              return (
-                <div key={tier} className="flex items-center gap-2">
-                  <span className="w-12 text-[10px] uppercase text-[color:var(--color-text-muted)]">{tier}</span>
-                  <div className="flex-1 h-1.5 rounded-full bg-[color:var(--color-surface)]">
-                    <div className="h-full rounded-full" style={{ width: `${(val / total) * 100}%`, backgroundColor: tier === "smart" ? "#6B8AD9" : tier === "balanced" ? "#5FBDB0" : "#F59E0B" }} />
-                  </div>
-                  <span className="text-[10px] tabular-nums text-[color:var(--color-text-secondary)]">{fmtUsd.format(val)}</span>
-                </div>
-              );
-            })}
+      {/* ─── COMMAND BAR ────────────────────────────────────────── */}
+      <div className="relative z-20 px-6 pt-6 pb-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 p-4 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(28px)" }}>
+            <span className="text-lg">⚡</span>
+            <input
+              type="text"
+              placeholder="What do you need? Create a job, check AR, find a customer, run a report..."
+              className="flex-1 bg-transparent border-none outline-none text-base placeholder:text-[color:var(--color-text-muted)] text-[color:var(--color-text-primary)]"
+              autoFocus
+            />
+            <kbd className="hidden md:inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-medium text-[color:var(--color-text-muted)] bg-[color:var(--color-surface-strong)] border border-[color:var(--color-edge)]">⌘K</kbd>
           </div>
-        </BentoCard>
-        <BentoCard span={4}>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)] mb-2">Last Invocations</p>
-          {data.compute.lastInvocations.slice(0, 4).map((inv, i) => (
-            <div key={i} className="flex items-center justify-between py-1.5 border-b border-[color:var(--color-edge)]/50 last:border-0">
-              <span className="text-xs text-[color:var(--color-text-secondary)]">{inv.model}</span>
-              <span className="text-[10px] tabular-nums text-[color:var(--color-text-muted)]">{fmtUsd.format(inv.cost)} · {inv.minutesAgo}m ago</span>
+          <div className="flex items-center gap-3 mt-3 flex-wrap">
+            {["New job", "Check AR", "Find customer", "Today's schedule", "Pending approvals", "Run report"].map(cmd => (
+              <button key={cmd} className="px-3 py-1.5 rounded-full text-xs transition-all hover:scale-105" style={{ backgroundColor: "var(--color-surface)", color: "var(--color-text-secondary)", border: "1px solid var(--color-edge)", backdropFilter: "blur(12px)" }}>
+                {cmd}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ─── SPATIAL CANVAS ─────────────────────────────────────── */}
+      <div className="relative z-10 flex-1 overflow-y-auto px-6 pb-12">
+        <div className="max-w-6xl mx-auto space-y-8">
+
+          {/* Row 1: Agent Pulse + Urgent */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Live Agents */}
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#5FBDB0] animate-ping-ambient" />
+                  <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">Live Agents</p>
+                </div>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: totalActive > 0 ? "rgba(95,189,176,0.1)" : "var(--color-surface-strong)", color: totalActive > 0 ? "#5FBDB0" : "var(--color-text-muted)" }}>
+                  {totalActive} active
+                </span>
+              </div>
+              <div className="space-y-3">
+                {data.agentWorkflows.length === 0 ? (
+                  <p className="text-sm text-[color:var(--color-text-muted)]">All agents idle. System is quiet.</p>
+                ) : (
+                  data.agentWorkflows.slice(0, 3).map((wf, i) => (
+                    <div key={wf.id || i} className="flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.01] cursor-pointer" style={{ backgroundColor: wf.state === "blocked" ? "rgba(245,158,11,0.05)" : "var(--color-surface-strong)" }}>
+                      <span className="text-lg">{wf.icon || "🤖"}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[color:var(--color-text-primary)] truncate">{wf.agent} · {wf.intent}</p>
+                        <p className="text-xs text-[color:var(--color-text-muted)] truncate">{wf.target}</p>
+                      </div>
+                      <div className="w-16 h-1 rounded-full bg-[color:var(--color-surface)]">
+                        <div className="h-full rounded-full transition-all" style={{ width: `${wf.progress}%`, backgroundColor: wf.state === "complete" ? "#5FBDB0" : wf.state === "blocked" ? "#F59E0B" : "#6B8AD9" }} />
+                      </div>
+                      <span className="text-[10px] font-medium" style={{ color: wf.state === "complete" ? "#5FBDB0" : wf.state === "blocked" ? "#F59E0B" : "#6B8AD9" }}>
+                        {wf.progress}%
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          ))}
-        </BentoCard>
-      </BentoGrid>
-    </SlideUp>
+
+            {/* Urgent Attention */}
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(245,158,11,0.04)" : "var(--color-surface)", borderColor: pendingApprovals > 0 ? "rgba(245,158,11,0.15)" : "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⚠️</span>
+                  <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">Needs Attention</p>
+                </div>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(245,158,11,0.1)" : "var(--color-surface-strong)", color: pendingApprovals > 0 ? "#F59E0B" : "var(--color-text-muted)" }}>
+                  {pendingApprovals} pending
+                </span>
+              </div>
+              {pendingApprovals === 0 ? (
+                <p className="text-sm text-[color:var(--color-text-secondary)]">Nothing needs your approval right now. 🎉</p>
+              ) : (
+                <div className="space-y-2">
+                  {data.handoffs.map(h => (
+                    <div key={h.id} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:scale-[1.01] transition-all" style={{ backgroundColor: "var(--color-surface-strong)" }}>
+                      <span className="text-lg">{h.severity === "high" ? "🔴" : h.severity === "med" ? "🟡" : "⚪"}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[color:var(--color-text-primary)]">{h.title}</p>
+                        <p className="text-xs text-[color:var(--color-text-muted)]">{h.detail} · {h.ageMinutes}m ago</p>
+                      </div>
+                      <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-all hover:scale-105" style={{ backgroundColor: "var(--color-primary)" }}>
+                        Review
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 2: Pulse Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Triggers 24h", value: data.systemPulse.triggersLast24h, tone: "teal" as const },
+              { label: "Open Jobs", value: openJobs, tone: "blue" as const },
+              { label: "MTD AI Spend", value: fmtUsd.format(data.compute.mtdSpendUsd), tone: "amber" as const },
+              { label: "Backup Age", value: `${data.systemPulse.backupAgeHours}h`, tone: "neutral" as const },
+            ].map((m, i) => (
+              <div key={i} className="rounded-2xl p-4 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(20px)" }}>
+                <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">{m.label}</p>
+                <p className="text-2xl font-bold tabular-nums" style={{ color: m.tone === "teal" ? "#5FBDB0" : m.tone === "amber" ? "#F59E0B" : m.tone === "blue" ? "#6B8AD9" : "var(--color-text-primary)" }}>
+                  {m.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Row 3: Job Pulse + Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Active Jobs */}
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">📋 Active Jobs</p>
+                <span className="text-[10px] text-[color:var(--color-text-muted)]">{openJobs} jobs</span>
+              </div>
+              <div className="space-y-2">
+                {data.jobPulse.slice(0, 5).map(job => (
+                  <div key={job.id} className="flex items-center gap-3 p-3 rounded-xl hover:scale-[1.01] transition-all cursor-pointer" style={{ backgroundColor: "var(--color-surface-strong)" }}>
+                    <span className="text-sm font-mono text-[color:var(--color-text-muted)] tabular-nums">{job.number}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[color:var(--color-text-primary)] truncate">{job.customer}</p>
+                      <p className="text-xs text-[color:var(--color-text-muted)] truncate">{job.site} · last touch {job.lastTouchMin}m ago</p>
+                    </div>
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--color-surface)", color: "var(--color-text-secondary)", border: "1px solid var(--color-edge)" }}>
+                      {job.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+              <p className="text-sm font-semibold text-[color:var(--color-text-primary)] mb-4">⚡ Quick Actions</p>
+              <div className="space-y-2">
+                {[
+                  { label: "Log a call", emoji: "📞", href: "/calls/new" },
+                  { label: "Create job", emoji: "➕", href: "/jobs/new" },
+                  { label: "Take photos", emoji: "📸", href: "/my-day" },
+                  { label: "Run AR report", emoji: "💰", href: "/reports/ar" },
+                  { label: "Check schedule", emoji: "📅", href: "/schedule" },
+                ].map(action => (
+                  <a key={action.label} href={action.href} className="flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.02] block" style={{ backgroundColor: "var(--color-surface-strong)" }}>
+                    <span className="text-base">{action.emoji}</span>
+                    <span className="text-sm text-[color:var(--color-text-primary)]">{action.label}</span>
+                    <span className="ml-auto text-xs text-[color:var(--color-text-muted)]">→</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center pt-4">
+            <p className="text-[10px] text-[color:var(--color-text-muted)]">
+              {data.operator.name} · {data.operator.role} · {data.compute.invocationsToday} AI calls today · {fmtUsd.format(data.compute.todaySpendUsd)} spent
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
