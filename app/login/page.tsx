@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { motion } from "motion/react";
 import { signIn } from "@/app/actions/auth";
 import Link from "next/link";
 import Logo from "@/components/Logo";
@@ -9,19 +10,52 @@ export default function LoginPage() {
   const [state, action, pending] = useActionState(signIn, undefined);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-      <div className="w-full max-w-sm px-8 py-10 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-xl">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: "var(--color-bg-base)" }}>
+      {/* Ambient atmosphere */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 50% 20%, rgba(107,138,217,0.12) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(95,189,176,0.08) 0%, transparent 40%)",
+          }}
+        />
+        <svg className="absolute inset-0 w-full h-full opacity-[0.02]" aria-hidden="true">
+          <filter id="noise-login">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noise-login)" />
+        </svg>
+      </div>
+
+      {/* Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-full max-w-sm px-8 py-10 rounded-2xl border"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          borderColor: "var(--color-edge)",
+          backdropFilter: "blur(24px)",
+          boxShadow: "0 8px 32px -12px rgba(0,0,0,0.6), 0 0 48px -16px rgba(107,138,217,0.08)",
+        }}
+      >
         <div className="mb-8">
           <div className="flex justify-center mb-6">
             <Logo variant="banner" size={44} priority />
           </div>
-          <h1 className="text-2xl font-bold text-white text-center">Sign in</h1>
-          <p className="text-zinc-400 text-sm mt-1 text-center">Austin, TX</p>
+          <h1 className="text-2xl font-bold text-center" style={{ color: "var(--color-text-primary)" }}>
+            Sign in
+          </h1>
+          <p className="text-sm mt-1 text-center" style={{ color: "var(--color-text-muted)" }}>
+            Austin, TX
+          </p>
         </div>
 
         <form action={action} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-zinc-300 text-sm font-medium" htmlFor="email">
+            <label className="text-sm font-medium" style={{ color: "var(--color-text-secondary)" }} htmlFor="email">
               Email
             </label>
             <input
@@ -30,19 +64,25 @@ export default function LoginPage() {
               type="email"
               autoComplete="email"
               required
-              className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 rounded-xl text-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]/50 focus:border-transparent"
+              style={{
+                backgroundColor: "var(--color-surface-strong)",
+                border: "1px solid var(--color-edge)",
+                color: "var(--color-text-primary)",
+              }}
               placeholder="you@firstcallmitigation.com"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-zinc-300 text-sm font-medium" htmlFor="password">
+              <label className="text-sm font-medium" style={{ color: "var(--color-text-secondary)" }} htmlFor="password">
                 Password
               </label>
               <Link
                 href="/forgot-password"
-                className="text-blue-400 hover:text-blue-300 text-xs"
+                className="text-xs hover:underline transition-colors"
+                style={{ color: "var(--color-primary)" }}
               >
                 Forgot?
               </Link>
@@ -53,26 +93,37 @@ export default function LoginPage() {
               type="password"
               autoComplete="current-password"
               required
-              className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 rounded-xl text-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]/50 focus:border-transparent"
+              style={{
+                backgroundColor: "var(--color-surface-strong)",
+                border: "1px solid var(--color-edge)",
+                color: "var(--color-text-primary)",
+              }}
               placeholder="••••••••"
             />
           </div>
 
           {state?.error && (
-            <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+            <div className="text-sm rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "var(--color-danger)" }}>
               {state.error}
-            </p>
+            </div>
           )}
 
-          <button
+          <motion.button
+            whileHover={{ scale: pending ? 1 : 1.02 }}
+            whileTap={{ scale: pending ? 1 : 0.98 }}
             type="submit"
             disabled={pending}
-            className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm transition-colors mt-1"
+            className="w-full py-2.5 rounded-xl text-white font-medium text-sm transition-colors mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: "var(--color-primary)",
+              boxShadow: "0 4px 16px -4px rgba(107,138,217,0.3)",
+            }}
           >
             {pending ? "Signing in…" : "Sign in"}
-          </button>
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
