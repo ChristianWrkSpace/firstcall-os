@@ -1,16 +1,14 @@
 // Command Center
 import { redirect } from "next/navigation";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import { getCurrentUser } from "@/lib/auth-helpers";
-import { loadCommandCenterData } from "@/lib/command-center-data";
-import CommandCenterShell from "./CommandCenterShell";
 
-const CommandCenterNew = dynamic(
+const CommandCenterNew = dynamicImport(
   () => import("./page-new"),
-  { ssr: false, loading: () => <CommandCenterShellFallback /> }
+  { ssr: false, loading: () => <CommandCenterFallback /> }
 );
 
-function CommandCenterShellFallback() {
+function CommandCenterFallback() {
   return (
     <div className="p-8">
       <div className="animate-pulse space-y-6">
@@ -30,6 +28,5 @@ export const dynamic = "force-dynamic";
 export default async function CommandCenterPage() {
   const me = await getCurrentUser();
   if (!me) redirect("/login");
-
   return <CommandCenterNew />;
 }
