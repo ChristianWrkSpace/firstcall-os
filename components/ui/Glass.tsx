@@ -12,6 +12,7 @@
 //   • Body text:   text-white/[0.92]
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 /**
  * Tenebrism light levels — the one law that governs every surface.
@@ -246,6 +247,199 @@ export function PanelHeader({
         {sub && <p className="text-[11px] text-white/40 mt-0.5">{sub}</p>}
       </div>
       {right}
+    </div>
+  );
+}
+
+/**
+ * PageTitle — the one header every surface opens with. Eyebrow (the section the
+ * dock points at), title, optional subtitle/count, and a right-aligned action
+ * slot. Standardizing this is most of what makes the app feel like one app.
+ */
+export function PageTitle({
+  eyebrow,
+  title,
+  subtitle,
+  right,
+}: {
+  eyebrow?: string;
+  title: string;
+  subtitle?: ReactNode;
+  right?: ReactNode;
+}) {
+  return (
+    <div className="flex items-end justify-between gap-3 flex-wrap mb-5">
+      <div className="min-w-0">
+        {eyebrow && (
+          <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">{eyebrow}</p>
+        )}
+        <h1 className="text-2xl font-semibold tracking-tight text-white/95 mt-0.5">{title}</h1>
+        {subtitle && <p className="text-white/45 text-sm mt-1">{subtitle}</p>}
+      </div>
+      {right}
+    </div>
+  );
+}
+
+/**
+ * PageShell — backdrop + the standard column + the standard header in one wrap.
+ * Replaces the per-page `<PageBackdrop><div className="p-4 md:p-8 max-w-…">`
+ * boilerplate so every surface shares the exact same frame.
+ *   width: "narrow" (max-w-3xl) | "default" (4xl) | "wide" (5xl) | "full".
+ */
+export function PageShell({
+  eyebrow,
+  title,
+  subtitle,
+  action,
+  width = "default",
+  children,
+}: {
+  eyebrow?: string;
+  title?: string;
+  subtitle?: ReactNode;
+  action?: ReactNode;
+  width?: "narrow" | "default" | "wide" | "full";
+  children: ReactNode;
+}) {
+  const maxW =
+    width === "narrow"
+      ? "max-w-3xl"
+      : width === "wide"
+        ? "max-w-5xl"
+        : width === "full"
+          ? "max-w-7xl"
+          : "max-w-4xl";
+  return (
+    <PageBackdrop>
+      <div className={`p-4 md:p-8 ${maxW} mx-auto`}>
+        {title && (
+          <PageTitle eyebrow={eyebrow} title={title} subtitle={subtitle} right={action} />
+        )}
+        {children}
+      </div>
+    </PageBackdrop>
+  );
+}
+
+/**
+ * Band — a named "act" in a page. A quiet uppercase label over a hairline that
+ * groups a run of sections into one movement. This is the vertebrae: it turns a
+ * flat stack of equal-weight panels into a spine you can read top-to-bottom.
+ */
+export function Band({
+  label,
+  hint,
+  right,
+  children,
+  className = "",
+}: {
+  label: string;
+  hint?: string;
+  right?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={className}>
+      <div className="flex items-baseline justify-between gap-3 mb-2.5 mt-1">
+        <div className="flex items-baseline gap-2 min-w-0">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-white/35 font-medium">
+            {label}
+          </span>
+          {hint && <span className="text-white/25 text-[11px] truncate">{hint}</span>}
+        </div>
+        {right}
+      </div>
+      <div className="flex flex-col gap-3">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * GlassRow — the canonical list row. Every list in the app (jobs, estimates,
+ * invoices, approvals, A/R, customers, partners…) is the same object: optional
+ * leading glyph, a title block, a right-aligned trailing block, and a chevron
+ * that lifts on hover. `href` makes it a Link; otherwise a div.
+ */
+export function GlassRow({
+  href,
+  leading,
+  title,
+  meta,
+  sub,
+  trailing,
+  accent = "neutral",
+  index,
+  className = "",
+}: {
+  href?: string;
+  leading?: ReactNode;
+  title: ReactNode;
+  meta?: ReactNode;
+  sub?: ReactNode;
+  trailing?: ReactNode;
+  accent?: "neutral" | "teal" | "amber" | "blue";
+  index?: number;
+  className?: string;
+}) {
+  const accentEdge =
+    accent === "teal"
+      ? "hover:border-[#5FBDB0]/25"
+      : accent === "amber"
+        ? "hover:border-amber-400/25"
+        : accent === "blue"
+          ? "hover:border-[#6B8AD9]/25"
+          : "hover:border-white/[0.08]";
+  const cls = `group rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.045] ${accentEdge} transition-all px-4 py-3.5 ${index != null ? "animate-rise-in" : ""} ${className}`;
+  const style = index != null ? { animationDelay: `${Math.min(index, 12) * 35}ms` } : undefined;
+
+  const inner = (
+    <div className="flex items-center gap-4">
+      {leading && <div className="shrink-0">{leading}</div>}
+      <div className="min-w-0 flex-1">
+        {meta && <div className="flex items-center gap-2.5 flex-wrap">{meta}</div>}
+        <div className="text-white/95 text-sm font-semibold tracking-tight mt-1 truncate">
+          {title}
+        </div>
+        {sub && <div className="text-white/40 text-xs mt-0.5 truncate">{sub}</div>}
+      </div>
+      {trailing && (
+        <div className="shrink-0 text-right flex flex-col items-end gap-1">{trailing}</div>
+      )}
+      <span className="text-white/20 group-hover:text-white/50 transition-colors shrink-0">→</span>
+    </div>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={cls} style={style}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <div className={cls} style={style}>
+      {inner}
+    </div>
+  );
+}
+
+/** EmptyState — the one way the app says "nothing here yet". */
+export function EmptyState({
+  icon,
+  title,
+  children,
+}: {
+  icon?: ReactNode;
+  title: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-16 text-center">
+      {icon && <div className="text-2xl mb-2 opacity-60">{icon}</div>}
+      <p className="text-white/55 text-sm">{title}</p>
+      {children && <div className="text-white/40 text-sm mt-1.5">{children}</div>}
     </div>
   );
 }
