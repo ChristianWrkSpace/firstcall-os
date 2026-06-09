@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import { requireRoles } from "@/components/RoleGate";
 import NewSubForm from "./NewSubForm";
+import MarkPaidButton from "./MarkPaidButton";
 
 const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -174,8 +175,8 @@ export default async function SubsPage() {
         </div>
         {!recentInvoices?.length ? (
           <p className="px-5 py-10 text-center text-ink-3 text-sm italic">
-            No sub invoices logged yet. Log them from a job's P&L section
-            (coming next) or via API.
+            No sub invoices logged yet. Open a job → The Money → Sub Invoices
+            to log one against that job.
           </p>
         ) : (
           <table className="w-full text-sm">
@@ -218,7 +219,10 @@ export default async function SubsPage() {
                     {i.paid_at ? (
                       <span className="text-pine">✓ paid</span>
                     ) : (
-                      <span className="text-honey">unpaid</span>
+                      <span className="inline-flex items-center gap-2">
+                        <span className="text-honey">unpaid</span>
+                        <MarkPaidButton invoiceId={i.id} />
+                      </span>
                     )}
                   </td>
                 </tr>

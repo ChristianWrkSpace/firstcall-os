@@ -79,11 +79,14 @@ export async function markSubInvoicePaid(invoiceId: string) {
   const me = await getCurrentUser();
   if (!me) return { error: "Not authenticated." };
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data, error } = await admin
     .from("sub_invoices")
     .update({ paid_at: new Date().toISOString() })
-    .eq("id", invoiceId);
+    .eq("id", invoiceId)
+    .select("job_id")
+    .single();
   if (error) return { error: error.message };
   revalidatePath("/subs");
+  if (data?.job_id) revalidatePath(`/jobs/${data.job_id}`);
   return { ok: true };
 }

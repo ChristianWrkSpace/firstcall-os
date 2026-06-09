@@ -70,6 +70,12 @@ export default async function JobPnlCard({ jobId }: { jobId: string }) {
             sub={`${pnl.equipmentDays.toFixed(1)} equip-days`}
             value={-pnl.equipmentCost}
           />
+          {pnl.subsCost > 0 && (
+            <Line
+              label="− Subcontractors"
+              value={-pnl.subsCost}
+            />
+          )}
           <Line
             label="− Van allocation"
             value={-pnl.vanCost}
@@ -106,7 +112,7 @@ export default async function JobPnlCard({ jobId }: { jobId: string }) {
       </div>
 
       {pnl.totalCogs === pnl.vanCost && pnl.revenueBilled > 0 && (
-        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3 text-xs text-yellow-200">
+        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3 text-xs text-honey">
           ⚠ COGS = van allocation only. Log labor + consumables on this job
           for an honest gross profit number.
         </div>

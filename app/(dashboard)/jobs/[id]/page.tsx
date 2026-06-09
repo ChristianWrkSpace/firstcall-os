@@ -28,6 +28,7 @@ import DeployEquipmentPicker from "./DeployEquipmentPicker";
 import JobActivityTimeline from "./JobActivityTimeline";
 import JobPnlCard from "./JobPnlCard";
 import JobCostEntries from "./JobCostEntries";
+import SubInvoices from "./SubInvoices";
 import EditableCustomerCard from "./EditableCustomerCard";
 import EditableJobDetailsCard from "./EditableJobDetails";
 import OpenActOnHash from "./OpenActOnHash";
@@ -120,6 +121,8 @@ export default async function JobDetailPage({
     { data: availableEquipment },
     { data: laborEntries },
     { data: consumableEntries },
+    { data: activeSubs },
+    { data: subInvoices },
   ] = await Promise.all([
     supabase
       .from("jobs")
@@ -203,6 +206,16 @@ export default async function JobDetailPage({
       .select("id, item, quantity, unit_cost")
       .eq("job_id", id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("subcontractors")
+      .select("id, name, trade")
+      .eq("active", true)
+      .order("name"),
+    supabase
+      .from("sub_invoices")
+      .select("id, invoice_number, invoice_date, amount, paid_at, description, subcontractors(name)")
+      .eq("job_id", id)
+      .order("invoice_date", { ascending: false }),
   ]);
 
   const costBasis = await getCostBasis();
@@ -488,6 +501,24 @@ export default async function JobDetailPage({
                   profiles: Array.isArray(e.profiles) ? e.profiles[0] : e.profiles,
                 }))}
                 consumableEntries={consumableEntries ?? []}
+              />
+            </div>
+            <div className="mt-5">
+              <div className="mb-3">
+                <SectionHeader
+                  title="Sub Invoices"
+                  emoji="🔧"
+                  size="sm"
+                  hint="Outside companies billed to this job — counts against P&L and feeds 1099-NEC tracking."
+                />
+              </div>
+              <SubInvoices
+                jobId={job.id}
+                subs={(activeSubs ?? []) as any}
+                invoices={(subInvoices ?? []).map((s: any) => ({
+                  ...s,
+                  subcontractors: Array.isArray(s.subcontractors) ? s.subcontractors[0] : s.subcontractors,
+                }))}
               />
             </div>
           </div>

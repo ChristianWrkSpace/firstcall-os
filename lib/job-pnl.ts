@@ -27,6 +27,7 @@ export interface JobPnl {
   consumablesCost: number;
   equipmentCost: number;
   equipmentDays: number;
+  subsCost: number;
   vanCost: number;
 
   // Subtotals
@@ -53,6 +54,7 @@ export interface PortfolioPnl {
     laborCost: number;
     consumablesCost: number;
     equipmentCost: number;
+    subsCost: number;
     vanCost: number;
     totalCogs: number;
     grossProfit: number;
@@ -114,6 +116,7 @@ export async function computeJobPnl(
     { data: labor },
     { data: consumables },
     { data: assignments },
+    { data: subInvoices },
   ] = await Promise.all([
     admin
       .from("jobs")
@@ -136,10 +139,14 @@ export async function computeJobPnl(
       .from("equipment_assignments")
       .select("deployed_at, retrieved_at, equipment:equipment_id(daily_cost)")
       .eq("job_id", jobId),
+    admin
+      .from("sub_invoices")
+      .select("amount")
+      .eq("job_id", jobId),
   ]);
 
   if (!job) return null;
-  return assembleJobPnl(job, labor ?? [], consumables ?? [], assignments ?? [], cb, 0);
+  return assembleJobPnl(job, labor ?? [], consumables ?? [], assignments ?? [], subInvoices ?? [], cb, 0);
 }
 
 /**
@@ -158,6 +165,7 @@ function assembleJobPnl(
     retrieved_at: string | null;
     equipment: any;
   }>,
+  subInvoices: Array<{ amount: any }>,
   cb: CostBasis,
   overheadAllocated: number
 ): JobPnl {
@@ -214,8 +222,14 @@ function assembleJobPnl(
     equipmentCost += days * daily;
   }
 
+  // ── Subcontractor invoices billed to this job ───────────────────────
+  let subsCost = 0;
+  for (const s of subInvoices) {
+    subsCost += Number(s.amount ?? 0);
+  }
+
   const vanCost = cb.van_cost_per_job;
-  const totalCogs = laborCost + consumablesCost + equipmentCost + vanCost;
+  const totalCogs = laborCost + consumablesCost + equipmentCost + subsCost + vanCost;
   const grossProfit = revenueBilled - totalCogs;
   const grossMarginPct =
     revenueBilled > 0 ? grossProfit / revenueBilled : null;
@@ -239,6 +253,7 @@ function assembleJobPnl(
     consumablesCost: round(consumablesCost),
     equipmentCost: round(equipmentCost),
     equipmentDays: round(equipmentDays),
+    subsCost: round(subsCost),
     vanCost,
     totalCogs: round(totalCogs),
     grossProfit: round(grossProfit),
@@ -280,7 +295,8 @@ export async function computePortfolioPnl(opts: {
        invoices(status, sent_at, line_items:invoice_line_items(line_total), payments(amount)),
        tech_labor_entries(hours, hourly_rate),
        consumables_used(quantity, unit_cost),
-       equipment_assignments(deployed_at, retrieved_at, equipment:equipment_id(daily_cost))`
+       equipment_assignments(deployed_at, retrieved_at, equipment:equipment_id(daily_cost)),
+       sub_invoices(amount)`
     )
     .gte("created_at", effectiveSince)
     .order("created_at", { ascending: false });
@@ -316,6 +332,7 @@ export async function computePortfolioPnl(opts: {
       j.tech_labor_entries ?? [],
       j.consumables_used ?? [],
       j.equipment_assignments ?? [],
+      j.sub_invoices ?? [],
       cb,
       overheadAllocated
     );
@@ -330,6 +347,7 @@ export async function computePortfolioPnl(opts: {
       laborCost: t.laborCost + p.laborCost,
       consumablesCost: t.consumablesCost + p.consumablesCost,
       equipmentCost: t.equipmentCost + p.equipmentCost,
+      subsCost: t.subsCost + p.subsCost,
       vanCost: t.vanCost + p.vanCost,
       totalCogs: t.totalCogs + p.totalCogs,
       grossProfit: t.grossProfit + p.grossProfit,
@@ -343,6 +361,7 @@ export async function computePortfolioPnl(opts: {
       laborCost: 0,
       consumablesCost: 0,
       equipmentCost: 0,
+      subsCost: 0,
       vanCost: 0,
       totalCogs: 0,
       grossProfit: 0,
