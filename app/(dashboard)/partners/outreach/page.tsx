@@ -2,17 +2,20 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { BUSINESS_TYPES } from "@/lib/hunter-types";
+import { PageShell, GlassRow, EmptyState } from "@/components/ui/Glass";
 
-const STATUS_COLORS: Record<string, string> = {
-  new:           "bg-blue-500/15 text-blue-400",
-  researching:   "bg-zinc-700 text-zinc-300",
-  drafted:       "bg-purple-500/15 text-purple-400",
-  sent:          "bg-blue-500/15 text-blue-400",
-  followed_up:   "bg-yellow-500/15 text-yellow-400",
-  replied:       "bg-green-500/15 text-green-400",
-  converted:     "bg-green-500/15 text-green-400",
-  no_response:   "bg-zinc-800 text-zinc-500",
-  disqualified:  "bg-red-500/15 text-red-400",
+// Outreach-lead status pills in the glass palette. Converted = the win state,
+// so it earns the rationed teal; followed-up is amber (awaiting a human reply).
+const LEAD_STATUS_GLASS: Record<string, string> = {
+  new:          "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
+  researching:  "bg-white/5 text-white/60 ring-white/10",
+  drafted:      "bg-purple-400/10 text-purple-300 ring-purple-400/20",
+  sent:         "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
+  followed_up:  "bg-amber-400/10 text-amber-300 ring-amber-400/20",
+  replied:      "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+  converted:    "bg-[#5FBDB0]/12 text-[#A8DCD3] ring-[#5FBDB0]/25",
+  no_response:  "bg-white/5 text-white/35 ring-white/10",
+  disqualified: "bg-red-400/10 text-red-300 ring-red-400/20",
 };
 
 export default async function OutreachPipeline() {
@@ -32,29 +35,28 @@ export default async function OutreachPipeline() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <div>
+    <PageShell
+      eyebrow="Growth"
+      title="B2B Outreach Pipeline"
+      subtitle="Hunter drafts personalized cold outreach for hotels, plumbers, property managers in Austin."
+      action={
+        <div className="flex items-center gap-2">
           <Link
             href="/partners"
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
           >
             ← Partners
           </Link>
-          <h1 className="text-2xl font-bold text-white mt-1">B2B Outreach Pipeline</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
-            Hunter drafts personalized cold outreach for hotels, plumbers, property
-            managers in Austin.
-          </p>
+          <Link
+            href="/partners/outreach/new"
+            className="px-4 py-1.5 rounded-lg bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:opacity-95 transition-opacity"
+          >
+            + Add Lead
+          </Link>
         </div>
-        <Link
-          href="/partners/outreach/new"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          + Add Lead
-        </Link>
-      </div>
-
+      }
+      width="wide"
+    >
       {/* Pipeline counts */}
       <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2 mb-6">
         {[
@@ -70,14 +72,12 @@ export default async function OutreachPipeline() {
         ].map(([key, label]) => (
           <div
             key={key}
-            className="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5"
+            className="rounded-xl bg-white/[0.025] border border-white/[0.05] ring-1 ring-white/[0.04] p-2.5"
           >
-            <p className="text-zinc-500 text-[10px] uppercase tracking-wide truncate">
-              {label}
-            </p>
+            <p className="text-white/40 text-[10px] uppercase tracking-wide truncate">{label}</p>
             <p
-              className={`text-2xl font-bold mt-0.5 ${
-                (counts[key] ?? 0) > 0 ? "text-white" : "text-zinc-700"
+              className={`text-2xl font-bold mt-0.5 font-mono ${
+                (counts[key] ?? 0) > 0 ? "text-white/95" : "text-white/20"
               }`}
             >
               {counts[key] ?? 0}
@@ -86,65 +86,47 @@ export default async function OutreachPipeline() {
         ))}
       </div>
 
-      <div className="glass-card overflow-x-auto">
-        {!leads?.length ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
-            No leads yet.{" "}
-            <Link href="/partners/outreach/new" className="text-blue-400 hover:underline">
-              Add your first lead →
-            </Link>
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 text-left">Company</th>
-                <th className="px-5 py-3 text-left">Type</th>
-                <th className="px-5 py-3 text-left">Contact</th>
-                <th className="px-5 py-3 text-left">Status</th>
-                <th className="px-5 py-3 text-left">Added</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.map((l: any) => (
-                <tr
-                  key={l.id}
-                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+      {!leads?.length ? (
+        <EmptyState icon="🎯" title="No leads yet.">
+          <Link href="/partners/outreach/new" className="text-[#A6B8E7] hover:text-white transition-colors">
+            Add your first lead →
+          </Link>
+        </EmptyState>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {leads.map((l: any, i: number) => (
+            <GlassRow
+              key={l.id}
+              href={`/partners/outreach/${l.id}`}
+              index={i}
+              meta={
+                <span
+                  className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${LEAD_STATUS_GLASS[l.status] ?? LEAD_STATUS_GLASS.researching}`}
                 >
-                  <td className="px-5 py-3">
-                    <Link
-                      href={`/partners/outreach/${l.id}`}
-                      className="text-blue-400 hover:underline font-medium"
-                    >
-                      {l.company_name}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3 text-zinc-400 text-xs">
-                    {BUSINESS_TYPES[l.business_type as keyof typeof BUSINESS_TYPES]?.label ??
-                      l.business_type}
-                  </td>
-                  <td className="px-5 py-3 text-zinc-300 text-xs">
-                    {l.contact_name ?? "—"}
-                    {l.contact_email && (
-                      <span className="text-zinc-500"> · {l.contact_email}</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[l.status] ?? ""}`}
-                    >
-                      {l.status.replace("_", " ")}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-zinc-500 text-xs">
-                    {new Date(l.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
+                  {l.status.replace("_", " ")}
+                </span>
+              }
+              title={l.company_name}
+              sub={
+                [
+                  BUSINESS_TYPES[l.business_type as keyof typeof BUSINESS_TYPES]?.label ??
+                    l.business_type,
+                  l.contact_name
+                    ? `${l.contact_name}${l.contact_email ? ` · ${l.contact_email}` : ""}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join("  ·  ")
+              }
+              trailing={
+                <span className="text-white/30 text-[11px] font-mono">
+                  {new Date(l.created_at).toLocaleDateString()}
+                </span>
+              }
+            />
+          ))}
+        </div>
+      )}
+    </PageShell>
   );
 }
