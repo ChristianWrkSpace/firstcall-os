@@ -1,14 +1,19 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
+import { PageShell, GlassRow, EmptyState } from "@/components/ui/Glass";
 
-const STATUS_COLORS: Record<string, string> = {
-  draft:    "bg-zinc-700 text-zinc-300",
-  approved: "bg-green-500/15 text-green-400",
-  sent:     "bg-blue-500/15 text-blue-400",
-  rejected: "bg-red-500/15 text-red-400",
-  revised:  "bg-yellow-500/15 text-yellow-400",
+// Estimate-status pills in the glass palette.
+const ESTIMATE_STATUS_GLASS: Record<string, string> = {
+  draft:    "bg-white/5 text-white/60 ring-white/10",
+  approved: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+  sent:     "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
+  rejected: "bg-red-400/10 text-red-300 ring-red-400/20",
+  revised:  "bg-amber-400/10 text-amber-300 ring-amber-400/20",
 };
+
+const fmt = (n: number) =>
+  `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default async function EstimatesIndex({
   params,
@@ -18,11 +23,14 @@ export default async function EstimatesIndex({
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const { data: estimates } = await supabase
-    .from("estimates")
-    .select("*, line_items:estimate_line_items(line_total)")
-    .eq("job_id", id)
-    .order("version", { ascending: false });
+  const [{ data: estimates }, { data: job }] = await Promise.all([
+    supabase
+      .from("estimates")
+      .select("*, line_items:estimate_line_items(line_total)")
+      .eq("job_id", id)
+      .order("version", { ascending: false }),
+    supabase.from("jobs").select("job_number").eq("id", id).single(),
+  ]);
 
   // If exactly one estimate exists, jump straight to it for convenience
   if (estimates && estimates.length === 1) {
@@ -30,78 +38,56 @@ export default async function EstimatesIndex({
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6">
+    <PageShell
+      eyebrow="Pricing"
+      title="Estimates"
+      subtitle={`${estimates?.length ?? 0} for job ${job?.job_number ?? ""}`}
+      action={
         <Link
           href={`/jobs/${id}`}
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
         >
-          ← Back to Job
+          ← Back to job
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Estimates</h1>
-      </div>
-
+      }
+      width="wide"
+    >
       {!estimates?.length ? (
-        <div className="glass-card p-8 text-center">
-          <p className="text-zinc-400 text-sm mb-3">No estimates yet for this job.</p>
-          <p className="text-zinc-500 text-xs">
-            Generate one from the job detail page after running Argus scope analysis.
-          </p>
-        </div>
+        <EmptyState icon="🧮" title="No estimates yet for this job.">
+          Generate one from the job detail page after running Argus scope analysis.
+        </EmptyState>
       ) : (
-        <div className="glass-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 text-left">Version</th>
-                <th className="px-5 py-3 text-left">Status</th>
-                <th className="px-5 py-3 text-right">Line Items</th>
-                <th className="px-5 py-3 text-right">Total</th>
-                <th className="px-5 py-3 text-left">Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {estimates.map((est: any) => {
-                const total = (est.line_items ?? []).reduce(
-                  (sum: number, li: any) => sum + Number(li.line_total ?? 0),
-                  0
-                );
-                return (
-                  <tr
-                    key={est.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+        <div className="flex flex-col gap-2">
+          {estimates.map((est: any, i: number) => {
+            const total = (est.line_items ?? []).reduce(
+              (sum: number, li: any) => sum + Number(li.line_total ?? 0),
+              0
+            );
+            return (
+              <GlassRow
+                key={est.id}
+                href={`/jobs/${id}/estimates/${est.id}`}
+                index={i}
+                accent="blue"
+                meta={
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${ESTIMATE_STATUS_GLASS[est.status] ?? ESTIMATE_STATUS_GLASS.draft}`}
                   >
-                    <td className="px-5 py-3">
-                      <Link
-                        href={`/jobs/${id}/estimates/${est.id}`}
-                        className="text-blue-400 hover:underline font-mono"
-                      >
-                        v{est.version}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[est.status] ?? ""}`}
-                      >
-                        {est.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-right text-zinc-300 font-mono text-xs">
-                      {(est.line_items ?? []).length}
-                    </td>
-                    <td className="px-5 py-3 text-right text-white font-mono">
-                      ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-500 text-xs">
-                      {new Date(est.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    {est.status}
+                  </span>
+                }
+                title={
+                  <span>
+                    <span className="text-[#A6B8E7] font-mono">v{est.version}</span> Estimate
+                  </span>
+                }
+                sub={`${(est.line_items ?? []).length} line items · created ${new Date(est.created_at).toLocaleDateString()}`}
+                trailing={<span className="text-white/95 font-mono font-semibold">{fmt(total)}</span>}
+              />
+            );
+          })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

@@ -1,15 +1,20 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PageShell, GlassRow, EmptyState } from "@/components/ui/Glass";
 
-const STATUS_COLORS: Record<string, string> = {
-  draft:   "bg-zinc-700 text-zinc-300",
-  sent:    "bg-blue-500/15 text-blue-400",
-  partial: "bg-yellow-500/15 text-yellow-400",
-  paid:    "bg-green-500/15 text-green-400",
-  overdue: "bg-red-500/15 text-red-400",
-  void:    "bg-zinc-800 text-zinc-500",
+// Invoice-status pills in the glass palette (mirrors the A/R dashboard).
+const INVOICE_STATUS_GLASS: Record<string, string> = {
+  draft:   "bg-white/5 text-white/60 ring-white/10",
+  sent:    "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
+  partial: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
+  paid:    "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+  overdue: "bg-red-400/10 text-red-300 ring-red-400/20",
+  void:    "bg-white/5 text-white/35 ring-white/10",
 };
+
+const fmt = (n: number) =>
+  `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default async function InvoicesIndex({
   params,
@@ -19,11 +24,14 @@ export default async function InvoicesIndex({
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const { data: invoices } = await supabase
-    .from("invoices")
-    .select("*, line_items:invoice_line_items(line_total)")
-    .eq("job_id", id)
-    .order("created_at", { ascending: false });
+  const [{ data: invoices }, { data: job }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("*, line_items:invoice_line_items(line_total)")
+      .eq("job_id", id)
+      .order("created_at", { ascending: false }),
+    supabase.from("jobs").select("job_number").eq("id", id).single(),
+  ]);
 
   // Single invoice → jump straight to detail
   if (invoices && invoices.length === 1) {
@@ -31,78 +39,52 @@ export default async function InvoicesIndex({
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6">
+    <PageShell
+      eyebrow="Billing"
+      title="Invoices"
+      subtitle={`${invoices?.length ?? 0} for job ${job?.job_number ?? ""}`}
+      action={
         <Link
           href={`/jobs/${id}`}
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
         >
-          ← Back to Job
+          ← Back to job
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Invoices</h1>
-      </div>
-
+      }
+      width="wide"
+    >
       {!invoices?.length ? (
-        <div className="glass-card p-8 text-center">
-          <p className="text-zinc-400 text-sm mb-2">No invoices yet for this job.</p>
-          <p className="text-zinc-500 text-xs">
-            Approve an estimate first, then generate an invoice from it.
-          </p>
-        </div>
+        <EmptyState icon="💵" title="No invoices yet for this job.">
+          Approve an estimate first, then generate an invoice from it.
+        </EmptyState>
       ) : (
-        <div className="glass-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 text-left">Invoice #</th>
-                <th className="px-5 py-3 text-left">Status</th>
-                <th className="px-5 py-3 text-left">Issued</th>
-                <th className="px-5 py-3 text-left">Due</th>
-                <th className="px-5 py-3 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((inv: any) => {
-                const total = (inv.line_items ?? []).reduce(
-                  (s: number, li: any) => s + Number(li.line_total ?? 0),
-                  0
-                );
-                return (
-                  <tr
-                    key={inv.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+        <div className="flex flex-col gap-2">
+          {invoices.map((inv: any, i: number) => {
+            const total = (inv.line_items ?? []).reduce(
+              (s: number, li: any) => s + Number(li.line_total ?? 0),
+              0
+            );
+            return (
+              <GlassRow
+                key={inv.id}
+                href={`/jobs/${id}/invoices/${inv.id}`}
+                index={i}
+                accent="blue"
+                meta={
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${INVOICE_STATUS_GLASS[inv.status] ?? INVOICE_STATUS_GLASS.draft}`}
                   >
-                    <td className="px-5 py-3">
-                      <Link
-                        href={`/jobs/${id}/invoices/${inv.id}`}
-                        className="text-blue-400 hover:underline font-mono text-xs"
-                      >
-                        {inv.invoice_number}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[inv.status] ?? ""}`}
-                      >
-                        {inv.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
-                      {new Date(inv.issue_date ?? inv.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
-                      {inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}
-                    </td>
-                    <td className="px-5 py-3 text-right text-white font-mono">
-                      ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    {inv.status}
+                  </span>
+                }
+                title={<span className="font-mono text-[#A6B8E7]">{inv.invoice_number}</span>}
+                sub={`Issued ${new Date(inv.issue_date ?? inv.created_at).toLocaleDateString()}${inv.due_date ? ` · due ${new Date(inv.due_date).toLocaleDateString()}` : ""}`}
+                trailing={<span className="text-white/95 font-mono font-semibold">{fmt(total)}</span>}
+              />
+            );
+          })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

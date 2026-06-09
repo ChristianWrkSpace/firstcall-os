@@ -5,15 +5,20 @@ import InvoiceLineTable from "./InvoiceLineTable";
 import InvoiceActions from "./InvoiceActions";
 import PaymentsPanel from "./PaymentsPanel";
 import RemindersPanel from "./RemindersPanel";
+import { Glass, PageBackdrop } from "@/components/ui/Glass";
 
-const STATUS_COLORS: Record<string, string> = {
-  draft:   "bg-zinc-700 text-zinc-300",
-  sent:    "bg-blue-500/15 text-blue-400",
-  partial: "bg-yellow-500/15 text-yellow-400",
-  paid:    "bg-green-500/15 text-green-400",
-  overdue: "bg-red-500/15 text-red-400",
-  void:    "bg-zinc-800 text-zinc-500",
+// Invoice-status pills in the glass palette (mirrors the A/R dashboard).
+const INVOICE_STATUS_GLASS: Record<string, string> = {
+  draft:   "bg-white/5 text-white/60 ring-white/10",
+  sent:    "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
+  partial: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
+  paid:    "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+  overdue: "bg-red-400/10 text-red-300 ring-red-400/20",
+  void:    "bg-white/5 text-white/35 ring-white/10",
 };
+
+const fmt = (n: number) =>
+  `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default async function InvoiceDetail({
   params,
@@ -79,133 +84,135 @@ export default async function InvoiceDetail({
     : null;
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <Link
-            href={`/jobs/${jobId}`}
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
-          >
-            ← Back to Job
-          </Link>
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-white font-mono">
-              {invoice.invoice_number}
-            </h1>
-            <span
-              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[invoice.status] ?? ""}`}
+    <PageBackdrop>
+      <div className="p-4 md:p-8 max-w-6xl mx-auto">
+        <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <Link
+              href={`/jobs/${jobId}`}
+              className="text-white/40 hover:text-white text-sm transition-colors"
             >
-              {invoice.status}
-            </span>
-            {daysOutstanding !== null && invoice.status !== "paid" && invoice.status !== "void" && (
+              ← Back to job
+            </Link>
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <h1 className="text-2xl font-semibold tracking-tight text-white/95 font-mono">
+                {invoice.invoice_number}
+              </h1>
               <span
-                className={`text-xs ${daysOutstanding > 60 ? "text-red-400" : daysOutstanding > 30 ? "text-yellow-400" : "text-zinc-400"}`}
+                className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ring-1 ${INVOICE_STATUS_GLASS[invoice.status] ?? INVOICE_STATUS_GLASS.draft}`}
               >
-                {daysOutstanding}d outstanding
+                {invoice.status}
               </span>
+              {daysOutstanding !== null && invoice.status !== "paid" && invoice.status !== "void" && (
+                <span
+                  className={`text-xs font-mono ${daysOutstanding > 60 ? "text-red-400" : daysOutstanding > 30 ? "text-amber-300" : "text-white/40"}`}
+                >
+                  {daysOutstanding}d outstanding
+                </span>
+              )}
+            </div>
+            {(job as any) && (
+              <p className="text-white/45 text-sm mt-1">
+                <Link
+                  href={`/jobs/${jobId}`}
+                  className="text-[#A6B8E7] hover:text-white font-mono transition-colors"
+                >
+                  {(job as any).job_number}
+                </Link>
+                {" · "}
+                {(job as any).customers?.name ?? "—"}
+                {(job as any).customers?.insurance_company &&
+                  ` · ${(job as any).customers.insurance_company}`}
+              </p>
             )}
           </div>
-          {(job as any) && (
-            <p className="text-zinc-400 text-sm mt-1">
-              <Link
-                href={`/jobs/${jobId}`}
-                className="text-blue-400 hover:underline font-mono"
-              >
-                {(job as any).job_number}
-              </Link>
-              {" · "}
-              {(job as any).customers?.name ?? "—"}
-              {(job as any).customers?.insurance_company &&
-                ` · ${(job as any).customers.insurance_company}`}
+          <div className="text-right">
+            <p className="text-white/40 text-[10px] uppercase tracking-[0.15em]">Balance Due</p>
+            <p className={`text-3xl font-bold font-mono ${balance > 0 ? "text-white/95" : "text-emerald-300"}`}>
+              {fmt(balance)}
             </p>
-          )}
+            {paid > 0 && (
+              <p className="text-white/40 text-xs mt-0.5">
+                {fmt(paid)} paid of {fmt(total)}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-zinc-500 text-xs uppercase tracking-wide">Balance Due</p>
-          <p className={`text-3xl font-bold font-mono ${balance > 0 ? "text-white" : "text-green-400"}`}>
-            ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-          {paid > 0 && (
-            <p className="text-zinc-500 text-xs mt-0.5">
-              ${paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} paid
-              {" of "}
-              ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          )}
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        <div className="lg:col-span-3 flex flex-col gap-5">
-          <section className="glass-card overflow-hidden">
-            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-              <h2 className="text-white font-semibold">Line Items</h2>
-              <p className="text-zinc-500 text-xs">{items.length} items · ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            </div>
-            <InvoiceLineTable
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+          <div className="lg:col-span-3 flex flex-col gap-5">
+            <Glass className="overflow-hidden">
+              <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+                <h2 className="text-white/90 font-semibold">Line Items</h2>
+                <p className="text-white/40 text-xs">
+                  {items.length} items · {fmt(total)}
+                </p>
+              </div>
+              <InvoiceLineTable
+                invoiceId={invoiceId}
+                jobId={jobId}
+                itemsByCategory={byCategory}
+                total={total}
+                locked={locked}
+              />
+            </Glass>
+
+            <PaymentsPanel
               invoiceId={invoiceId}
               jobId={jobId}
-              itemsByCategory={byCategory}
-              total={total}
-              locked={locked}
+              payments={payments ?? []}
+              balance={balance}
+              invoiceLocked={invoice.status === "void"}
             />
-          </section>
 
-          <PaymentsPanel
-            invoiceId={invoiceId}
-            jobId={jobId}
-            payments={payments ?? []}
-            balance={balance}
-            invoiceLocked={invoice.status === "void"}
-          />
+            {(reminders ?? []).length > 0 && (
+              <RemindersPanel reminders={reminders ?? []} />
+            )}
+          </div>
 
-          {(reminders ?? []).length > 0 && (
-            <RemindersPanel reminders={reminders ?? []} />
-          )}
-        </div>
+          <div className="flex flex-col gap-5">
+            <Glass className="p-5">
+              <h2 className="text-white/90 font-semibold mb-3">Actions</h2>
+              <InvoiceActions
+                invoiceId={invoiceId}
+                jobId={jobId}
+                status={invoice.status}
+                defaultRecipient={invoice.sent_to ?? ""}
+                hasBeenSent={!!invoice.sent_at}
+              />
+            </Glass>
 
-        <div className="flex flex-col gap-5">
-          <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Actions</h2>
-            <InvoiceActions
-              invoiceId={invoiceId}
-              jobId={jobId}
-              status={invoice.status}
-              defaultRecipient={invoice.sent_to ?? ""}
-              hasBeenSent={!!invoice.sent_at}
-            />
-          </section>
-
-          <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Meta</h2>
-            <dl className="text-sm space-y-2">
-              <Meta label="Issued" value={new Date(invoice.issue_date ?? invoice.created_at).toLocaleDateString()} />
-              {invoice.due_date && (
-                <Meta label="Due" value={new Date(invoice.due_date).toLocaleDateString()} />
-              )}
-              {invoice.sent_at && (
-                <Meta label="Sent" value={new Date(invoice.sent_at).toLocaleString()} />
-              )}
-              {invoice.sent_to && <Meta label="Sent to" value={invoice.sent_to} />}
-              {invoice.paid_at && (
-                <Meta label="Paid" value={new Date(invoice.paid_at).toLocaleString()} />
-              )}
-              {(invoice as any).creator?.name && (
-                <Meta label="Created by" value={(invoice as any).creator.name} />
-              )}
-            </dl>
-          </section>
+            <Glass className="p-5">
+              <h2 className="text-white/90 font-semibold mb-3">Meta</h2>
+              <dl className="text-sm space-y-2">
+                <Meta label="Issued" value={new Date(invoice.issue_date ?? invoice.created_at).toLocaleDateString()} />
+                {invoice.due_date && (
+                  <Meta label="Due" value={new Date(invoice.due_date).toLocaleDateString()} />
+                )}
+                {invoice.sent_at && (
+                  <Meta label="Sent" value={new Date(invoice.sent_at).toLocaleString()} />
+                )}
+                {invoice.sent_to && <Meta label="Sent to" value={invoice.sent_to} />}
+                {invoice.paid_at && (
+                  <Meta label="Paid" value={new Date(invoice.paid_at).toLocaleString()} />
+                )}
+                {(invoice as any).creator?.name && (
+                  <Meta label="Created by" value={(invoice as any).creator.name} />
+                )}
+              </dl>
+            </Glass>
+          </div>
         </div>
       </div>
-    </div>
+    </PageBackdrop>
   );
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <dt className="text-zinc-500 text-xs uppercase tracking-wide">{label}</dt>
-      <dd className="text-zinc-200 text-xs">{value}</dd>
+      <dt className="text-white/40 text-xs uppercase tracking-wide">{label}</dt>
+      <dd className="text-white/70 text-xs">{value}</dd>
     </div>
   );
 }
