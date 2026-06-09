@@ -16,18 +16,14 @@ export default async function NotificationBell() {
   // inline so the office doesn't have to click through to see what's
   // pending. Keeps the data slim — no body, no metadata.
   const supabase = await createServerSupabaseClient();
-  const [{ count }, { data: items }] = await Promise.all([
-    supabase
-      .from("pending_approvals")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "pending"),
-    supabase
-      .from("pending_approvals")
-      .select("id, kind, title, link, created_at")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
-      .limit(5),
-  ]);
+  // One round-trip: `count: "exact"` returns the total pending count alongside
+  // the 5 latest rows, so the layout doesn't pay two DB hits on every nav.
+  const { data: items, count } = await supabase
+    .from("pending_approvals")
+    .select("id, kind, title, link, created_at", { count: "exact" })
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(5);
 
   const n = count ?? 0;
   const list = items ?? [];

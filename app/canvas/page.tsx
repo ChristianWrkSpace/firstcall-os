@@ -21,13 +21,12 @@ export default async function EchoCanvasPage() {
       {/* Ambient atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(107,138,217,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(95,189,176,0.05) 0%, transparent 50%)" }} />
-        <svg className="absolute inset-0 w-full h-full opacity-[0.015]"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
       </div>
 
       {/* ─── COMMAND BAR ────────────────────────────────────────── */}
       <div className="relative z-20 px-6 pt-6 pb-4">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 p-4 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(28px)" }}>
+          <div className="flex items-center gap-3 p-4 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(14px)" }}>
             <span className="text-lg">⚡</span>
             <input
               type="text"
@@ -39,7 +38,7 @@ export default async function EchoCanvasPage() {
           </div>
           <div className="flex items-center gap-3 mt-3 flex-wrap">
             {["New job", "Check AR", "Find customer", "Today's schedule", "Pending approvals", "Run report"].map(cmd => (
-              <button key={cmd} className="px-3 py-1.5 rounded-full text-xs transition-all hover:scale-105" style={{ backgroundColor: "var(--color-surface)", color: "var(--color-text-secondary)", border: "1px solid var(--color-edge)", backdropFilter: "blur(12px)" }}>
+              <button key={cmd} className="px-3 py-1.5 rounded-full text-xs transition-all hover:scale-105" style={{ backgroundColor: "var(--color-surface)", color: "var(--color-text-secondary)", border: "1px solid var(--color-edge)", backdropFilter: "blur(8px)" }}>
                 {cmd}
               </button>
             ))}
@@ -54,7 +53,7 @@ export default async function EchoCanvasPage() {
           {/* Row 1: Agent Pulse + Urgent */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Live Agents */}
-            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(14px)" }}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-[#5FBDB0] animate-ping-ambient" />
@@ -88,7 +87,7 @@ export default async function EchoCanvasPage() {
             </div>
 
             {/* Urgent Attention */}
-            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(245,158,11,0.04)" : "var(--color-surface)", borderColor: pendingApprovals > 0 ? "rgba(245,158,11,0.15)" : "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(245,158,11,0.04)" : "var(--color-surface)", borderColor: pendingApprovals > 0 ? "rgba(245,158,11,0.15)" : "var(--color-edge)", backdropFilter: "blur(14px)" }}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">⚠️</span>
@@ -127,7 +126,7 @@ export default async function EchoCanvasPage() {
               { label: "MTD AI Spend", value: fmtUsd.format(data.compute.mtdSpendUsd), tone: "amber" as const },
               { label: "Backup Age", value: `${data.systemPulse.backupAgeHours}h`, tone: "neutral" as const },
             ].map((m, i) => (
-              <div key={i} className="rounded-2xl p-4 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(20px)" }}>
+              <div key={i} className="rounded-2xl p-4 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(12px)" }}>
                 <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">{m.label}</p>
                 <p className="text-2xl font-bold tabular-nums" style={{ color: m.tone === "teal" ? "#5FBDB0" : m.tone === "amber" ? "#F59E0B" : m.tone === "blue" ? "#6B8AD9" : "var(--color-text-primary)" }}>
                   {m.value}
@@ -139,7 +138,7 @@ export default async function EchoCanvasPage() {
           {/* Row 3: Job Pulse + Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Active Jobs */}
-            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(14px)" }}>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">📋 Active Jobs</p>
                 <span className="text-[10px] text-[color:var(--color-text-muted)]">{openJobs} jobs</span>
@@ -161,7 +160,7 @@ export default async function EchoCanvasPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(24px)" }}>
+            <div className="rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(14px)" }}>
               <p className="text-sm font-semibold text-[color:var(--color-text-primary)] mb-4">⚡ Quick Actions</p>
               <div className="space-y-2">
                 {[

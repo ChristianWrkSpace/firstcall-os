@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createServerSupabaseClient, createAdminClient } from "./supabase-server";
 import { hasPermission, type Permission, type Role } from "./permissions";
 
@@ -11,8 +12,11 @@ export interface AuthedUser {
 /**
  * Get the current authenticated user with their profile + role.
  * Returns null if not authenticated.
+ *
+ * Wrapped in React.cache so the layout, page, and NotificationBell share one
+ * auth + profile lookup per request instead of each paying both round-trips.
  */
-export async function getCurrentUser(): Promise<AuthedUser | null> {
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<AuthedUser | null> {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -39,7 +43,7 @@ export async function getCurrentUser(): Promise<AuthedUser | null> {
     name: profile.name,
     role: (profile.role as Role) ?? "technician",
   };
-}
+});
 
 /**
  * Require an authenticated user with a specific permission.

@@ -1,11 +1,7 @@
-// /dashboard is now a permanent redirect to /command-center.
-// The old "classic" dashboard is preserved as _legacy_page.tsx.bak in
-// this directory if anyone needs to look at the original implementation.
-
+// /dashboard forwards straight to /canvas (the canonical home) — previously
+// it hopped through /command-center, costing an extra redirect round-trip.
 import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
 export default function DashboardLegacyRedirect() {
-  redirect("/command-center");
+  redirect("/canvas");
 }

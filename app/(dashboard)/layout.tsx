@@ -20,11 +20,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="md:flex md:h-screen app-backdrop md:overflow-hidden">
       <CommandPalette />
       <MobileNav items={items} />
-      <div className="hidden md:block fixed top-4 right-5 z-30 pointer-events-none opacity-90">
-        <Logo variant="mark" size={32} />
-      </div>
       <NotificationBell />
-      <aside className="hidden md:flex w-56 flex-col shrink-0" style={{ backgroundColor: "var(--color-surface)", backdropFilter: "blur(24px)", borderRight: "1px solid var(--color-edge)" }}>
+      <aside className="hidden md:flex w-56 flex-col shrink-0" style={{ backgroundColor: "var(--color-surface)", backdropFilter: "blur(14px)", borderRight: "1px solid var(--color-edge)" }}>
         <div className="flex flex-col gap-1 px-4 py-5" style={{ borderBottom: "1px solid var(--color-edge)" }}>
           <Logo variant="banner" size={32} priority />
           <p className="text-[color:var(--color-text-muted)] text-[10px] uppercase tracking-[0.18em] mt-1.5">FirstCall OS</p>

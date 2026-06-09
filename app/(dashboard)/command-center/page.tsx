@@ -1,11 +1,7 @@
+// /command-center and /canvas were byte-identical copies of the same surface.
+// /canvas is the canonical home — this route now just forwards to it.
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth-helpers";
-import CommandCenterNew from "./page-new";
 
-export const dynamic = "force-dynamic";
-
-export default async function CommandCenterPage() {
-  const me = await getCurrentUser();
-  if (!me) redirect("/login");
-  return <CommandCenterNew />;
+export default function CommandCenterRedirect() {
+  redirect("/canvas");
 }

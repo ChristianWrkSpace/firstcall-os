@@ -20,7 +20,7 @@ export default async function CanvasLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-bg-deep)" }}>
-      <header className="relative z-30 shrink-0 flex items-center justify-between px-6 py-3" style={{ borderBottom: "1px solid var(--color-edge)", backgroundColor: "rgba(14,16,18,0.7)", backdropFilter: "blur(20px)" }}>
+      <header className="relative z-30 shrink-0 flex items-center justify-between px-6 py-3" style={{ borderBottom: "1px solid var(--color-edge)", backgroundColor: "rgba(14,16,18,0.7)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center gap-3">
           <Logo variant="mark" size={24} />
           <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)]">FirstCall OS</span>
