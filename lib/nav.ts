@@ -111,6 +111,27 @@ export function navForRole(role: Role | string | null | undefined): NavItem[] {
   return navSectionsForRole(role).flatMap((s) => s.items);
 }
 
+/**
+ * The command-first dock. The 20-item rail is dead — instead we surface only
+ * the 3–4 primary *verbs* a role lives in; the full long tail is reached by
+ * intent through the ⌘K command palette (fed by navForRole). Subtraction is
+ * the work: fewer glyphs in the dark, the rest summoned.
+ */
+const DOCK_ITEMS: readonly NavItem[] = [
+  { href: "/command-center", label: "Command Center", icon: "◉", roles: STAFF },
+  { href: "/my-day",         label: "My Day",         icon: "☀️", roles: ["technician"] as const },
+  { href: "/jobs",           label: "Jobs",           icon: "◈" },
+  { href: "/approvals",      label: "Approvals",      icon: "✓", roles: STAFF },
+  { href: "/schedule",       label: "Schedule",       icon: "▥" },
+] as const;
+
+export function dockForRole(role: Role | string | null | undefined): NavItem[] {
+  if (!role) return [];
+  return DOCK_ITEMS.filter(
+    (item) => !item.roles || (item.roles as readonly string[]).includes(role)
+  );
+}
+
 // Legacy alias — some older imports use NAV_ITEMS as a flat list.
 // Compute it once at module load from the canonical NAV_SECTIONS so we
 // only have one source of truth.
