@@ -44,12 +44,12 @@ export default async function EquipmentDetailPage({
       <div className="mb-8">
         <Link
           href="/equipment"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Equipment
         </Link>
         <div className="flex items-center gap-3 mt-2 flex-wrap">
-          <h1 className="text-2xl font-bold text-white font-mono">
+          <h1 className="text-2xl font-bold text-ink font-mono">
             {equipment.serial_number}
           </h1>
           <span
@@ -59,16 +59,16 @@ export default async function EquipmentDetailPage({
           >
             {equipment.status}
           </span>
-          <span className="text-zinc-400 text-sm">
+          <span className="text-ink-2 text-sm">
             {equipmentTypeLabel(equipment.type)}
           </span>
         </div>
         {currentJob && (
-          <p className="text-zinc-400 text-sm mt-1">
+          <p className="text-ink-2 text-sm mt-1">
             Currently deployed to{" "}
             <Link
               href={`/jobs/${currentJob.id}`}
-              className="text-blue-400 hover:underline font-mono"
+              className="text-info hover:underline font-mono"
             >
               {currentJob.job_number}
             </Link>{" "}
@@ -99,15 +99,15 @@ export default async function EquipmentDetailPage({
           </section>
 
           <section className="glass-card p-6">
-            <h2 className="text-white font-semibold mb-4">Assignment History</h2>
+            <h2 className="text-ink font-semibold mb-4">Assignment History</h2>
             {!assignments?.length ? (
-              <p className="text-zinc-500 text-sm italic">
+              <p className="text-ink-3 text-sm italic">
                 Not yet deployed to any jobs.
               </p>
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                  <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                     <th className="text-left py-2">Job</th>
                     <th className="text-left py-2">Deployed</th>
                     <th className="text-left py-2">Retrieved</th>
@@ -123,38 +123,38 @@ export default async function EquipmentDetailPage({
                     return (
                       <tr
                         key={a.id}
-                        className="border-b border-white/[0.06]/60 last:border-0"
+                        className="border-b border-edge2/60 last:border-0"
                       >
                         <td className="py-2.5">
                           <Link
                             href={`/jobs/${a.job_id}`}
-                            className="text-blue-400 hover:underline font-mono text-xs"
+                            className="text-info hover:underline font-mono text-xs"
                           >
                             {a.jobs?.job_number ?? "—"}
                           </Link>
-                          <p className="text-zinc-500 text-xs">
+                          <p className="text-ink-3 text-xs">
                             {a.jobs?.customers?.name ?? "—"}
                           </p>
                         </td>
-                        <td className="py-2.5 text-zinc-300 text-xs">
+                        <td className="py-2.5 text-ink-2 text-xs">
                           {new Date(a.deployed_at).toLocaleDateString()}
                           {a.deployer?.name && (
-                            <p className="text-zinc-500">by {a.deployer.name}</p>
+                            <p className="text-ink-3">by {a.deployer.name}</p>
                           )}
                         </td>
-                        <td className="py-2.5 text-zinc-300 text-xs">
+                        <td className="py-2.5 text-ink-2 text-xs">
                           {a.retrieved_at ? (
                             <>
                               {new Date(a.retrieved_at).toLocaleDateString()}
                               {a.retriever?.name && (
-                                <p className="text-zinc-500">by {a.retriever.name}</p>
+                                <p className="text-ink-3">by {a.retriever.name}</p>
                               )}
                             </>
                           ) : (
-                            <span className="text-blue-400 italic">currently deployed</span>
+                            <span className="text-info italic">currently deployed</span>
                           )}
                         </td>
-                        <td className="py-2.5 text-right text-zinc-300 font-mono text-xs">
+                        <td className="py-2.5 text-right text-ink-2 font-mono text-xs">
                           {hours !== null ? hours.toFixed(0) : "—"}
                         </td>
                       </tr>
@@ -169,7 +169,7 @@ export default async function EquipmentDetailPage({
         {/* Right: Actions */}
         <div className="flex flex-col gap-5">
           <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Actions</h2>
+            <h2 className="text-ink font-semibold mb-3">Actions</h2>
             <StatusActions
               equipmentId={equipment.id}
               status={equipment.status}

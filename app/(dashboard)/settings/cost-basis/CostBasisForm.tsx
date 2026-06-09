@@ -5,8 +5,8 @@ import { updateCostBasis } from "@/app/actions/cost-basis";
 import type { CostBasis } from "@/lib/job-pnl";
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-mono";
-const LABEL = "text-zinc-300 text-sm font-medium";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm font-mono";
+const LABEL = "text-ink-2 text-sm font-medium";
 
 export default function CostBasisForm({ initial }: { initial: CostBasis }) {
   const [state, action, pending] = useActionState(updateCostBasis, undefined);
@@ -46,12 +46,12 @@ export default function CostBasisForm({ initial }: { initial: CostBasis }) {
       />
 
       {state?.error && (
-        <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+        <p className="text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p className="text-green-400 text-sm bg-green-400/10 border border-green-400/20 rounded-lg px-3 py-2">
+        <p className="text-pine text-sm bg-green-400/10 border border-green-400/20 rounded-lg px-3 py-2">
           ✓ Saved. New numbers apply to all P&L computations.
         </p>
       )}
@@ -59,7 +59,7 @@ export default function CostBasisForm({ initial }: { initial: CostBasis }) {
       <button
         type="submit"
         disabled={pending}
-        className="self-start px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+        className="self-start px-5 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
       >
         {pending ? "Saving…" : "Save Cost Basis"}
       </button>
@@ -87,7 +87,7 @@ function Field({
       </label>
       <div className="relative">
         {prefix && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3 text-sm">
             {prefix}
           </span>
         )}
@@ -102,7 +102,7 @@ function Field({
           className={`${INPUT} ${prefix ? "pl-7" : ""} ${suffix ? "pr-16" : ""}`}
         />
         {suffix && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 text-xs">
             {suffix}
           </span>
         )}

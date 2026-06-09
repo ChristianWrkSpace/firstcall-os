@@ -121,10 +121,10 @@ export default async function SettingsPage() {
   return (
     <div className="p-4 md:p-8 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
-          Signed in as <span className="text-zinc-200">{me.name}</span> ·{" "}
-          <span className="text-blue-400 capitalize">
+        <h1 className="text-2xl font-bold text-ink">Settings</h1>
+        <p className="text-ink-2 text-sm mt-0.5">
+          Signed in as <span className="text-ink">{me.name}</span> ·{" "}
+          <span className="text-info capitalize">
             {ROLE_META[me.role as Role]?.label ?? me.role}
           </span>
         </p>
@@ -137,11 +137,11 @@ export default async function SettingsPage() {
             <Link
               key={c.href}
               href={c.href}
-              className="glass-card p-5 hover:border-zinc-700 transition-colors"
+              className="glass-card p-5 hover:border-edge2 transition-colors"
             >
               <div className="text-2xl mb-2">{c.emoji}</div>
-              <h2 className="text-white font-semibold">{c.title}</h2>
-              <p className="text-zinc-500 text-sm mt-1 leading-snug">
+              <h2 className="text-ink font-semibold">{c.title}</h2>
+              <p className="text-ink-3 text-sm mt-1 leading-snug">
                 {c.description}
               </p>
             </Link>

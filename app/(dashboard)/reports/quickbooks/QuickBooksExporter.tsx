@@ -51,27 +51,27 @@ export default function QuickBooksExporter() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-zinc-400 text-xs">From</label>
+          <label className="text-ink-2 text-xs">From</label>
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm"
+            className="px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-zinc-400 text-xs">To</label>
+          <label className="text-ink-2 text-xs">To</label>
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm"
+            className="px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm"
           />
         </div>
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+        <p className="text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
@@ -122,15 +122,15 @@ function ExportCard({
   onClick: () => void;
 }) {
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 flex flex-col">
-      <p className="text-white font-semibold">{title}</p>
-      <p className="text-zinc-400 text-xs mt-1 leading-snug">{description}</p>
-      <p className="text-zinc-600 text-[10px] mt-3 font-mono">{file}</p>
-      <p className="text-zinc-600 text-[10px] mt-0.5">→ {target}</p>
+    <div className="bg-tint border border-edge2 rounded-lg p-4 flex flex-col">
+      <p className="text-ink font-semibold">{title}</p>
+      <p className="text-ink-2 text-xs mt-1 leading-snug">{description}</p>
+      <p className="text-ink-3 text-[10px] mt-3 font-mono">{file}</p>
+      <p className="text-ink-3 text-[10px] mt-0.5">→ {target}</p>
       <button
         onClick={onClick}
         disabled={busy}
-        className="mt-3 px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg"
+        className="mt-3 px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-lg"
       >
         {busy ? "Exporting…" : "⬇ Download CSV"}
       </button>

@@ -77,8 +77,8 @@ export default function SessionsPanel({
 
   return (
     <section className="glass-card p-5 mt-6">
-      <h2 className="text-white font-semibold mb-1">Sessions</h2>
-      <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
+      <h2 className="text-ink font-semibold mb-1">Sessions</h2>
+      <p className="text-ink-3 text-xs mb-4 leading-relaxed">
         Suspect your password leaked? Sign out everywhere and rotate it.
       </p>
 
@@ -86,18 +86,18 @@ export default function SessionsPanel({
         type="button"
         onClick={signOutOthers}
         disabled={pending}
-        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+        className="px-4 py-2 bg-shade hover:bg-shade border border-edge2 disabled:opacity-50 text-ink text-sm font-medium rounded-lg"
       >
         {pending ? "Signing out…" : "🚪 Sign out everywhere except here"}
       </button>
-      {msg && <p className="text-zinc-300 text-xs mt-2">{msg}</p>}
+      {msg && <p className="text-ink-2 text-xs mt-2">{msg}</p>}
 
       {ownerView && (
-        <div className="mt-6 pt-6 border-t border-zinc-800">
-          <h3 className="text-white text-sm font-semibold mb-2">
+        <div className="mt-6 pt-6 border-t border-edge2">
+          <h3 className="text-ink text-sm font-semibold mb-2">
             All Org Users (Owner-only)
           </h3>
-          <p className="text-zinc-500 text-xs mb-3 leading-relaxed">
+          <p className="text-ink-3 text-xs mb-3 leading-relaxed">
             Last sign-in per user. Force sign-out a compromised or
             departed account from every device.
           </p>
@@ -105,24 +105,24 @@ export default function SessionsPanel({
             {users.map((u) => (
               <li
                 key={u.id}
-                className="flex items-center justify-between gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg"
+                className="flex items-center justify-between gap-3 px-3 py-2 bg-tint border border-edge2 rounded-lg"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-white text-sm font-medium truncate">{u.name}</p>
-                    <span className="text-zinc-500 text-xs capitalize">{u.role}</span>
+                    <p className="text-ink text-sm font-medium truncate">{u.name}</p>
+                    <span className="text-ink-3 text-xs capitalize">{u.role}</span>
                     {!u.active && (
-                      <span className="text-yellow-400 text-[10px] uppercase tracking-wide">
+                      <span className="text-honey text-[10px] uppercase tracking-wide">
                         deactivated
                       </span>
                     )}
                     {u.id === currentUserId && (
-                      <span className="text-blue-400 text-[10px] uppercase tracking-wide">
+                      <span className="text-info text-[10px] uppercase tracking-wide">
                         you
                       </span>
                     )}
                   </div>
-                  <p className="text-zinc-500 text-xs truncate">
+                  <p className="text-ink-3 text-xs truncate">
                     {u.email} · last sign-in {fmtAgo(u.lastSignInAt)}
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export default function SessionsPanel({
                     type="button"
                     onClick={() => forceOut(u.id, u.name)}
                     disabled={pending}
-                    className="text-zinc-500 hover:text-red-400 text-xs disabled:opacity-50 shrink-0"
+                    className="text-ink-3 hover:text-red-700 text-xs disabled:opacity-50 shrink-0"
                   >
                     Force sign-out
                   </button>

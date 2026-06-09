@@ -26,11 +26,11 @@ export default function GenerateInvoiceButton({
       <button
         onClick={onClick}
         disabled={pending}
-        className="px-3 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+        className="px-3 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-ink text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
       >
         {pending ? "Creating…" : "💰 Generate Invoice"}
       </button>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </div>
   );
 }

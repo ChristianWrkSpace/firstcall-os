@@ -75,13 +75,13 @@ export default function EsquirePanel({
               <li key={d.id}>
                 <Link
                   href={`/jobs/${jobId}/legal/${d.id}`}
-                  className="flex items-center justify-between gap-2 px-3 py-2 bg-white/[0.03] hover:bg-zinc-800 rounded-lg transition-colors"
+                  className="flex items-center justify-between gap-2 px-3 py-2 bg-tint hover:bg-shade rounded-lg transition-colors"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-zinc-200 text-xs font-medium truncate">
+                    <p className="text-ink text-xs font-medium truncate">
                       {meta?.short ?? d.doc_type}
                     </p>
-                    <p className="text-zinc-500 text-[10px] truncate">
+                    <p className="text-ink-3 text-[10px] truncate">
                       {new Date(d.created_at).toLocaleDateString()}
                       {d.sent_at && ` · sent`}
                       {d.signed_at && ` · signed`}
@@ -102,13 +102,13 @@ export default function EsquirePanel({
       {!pickerOpen ? (
         <button
           onClick={() => setPickerOpen(true)}
-          className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg"
+          className="w-full px-3 py-2 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg"
         >
           ⚖️ Generate Legal Document
         </button>
       ) : (
-        <div className="flex flex-col gap-2 bg-zinc-800/30 rounded-lg p-3">
-          <p className="text-zinc-400 text-[10px] uppercase tracking-wide">
+        <div className="flex flex-col gap-2 bg-shade rounded-lg p-3">
+          <p className="text-ink-2 text-[10px] uppercase tracking-wide">
             Pick a template
           </p>
           {LEGAL_DOC_TYPES.map((t) => (
@@ -116,8 +116,8 @@ export default function EsquirePanel({
               key={t.value}
               className={`flex gap-2 px-2.5 py-2 rounded border cursor-pointer transition-colors ${
                 chosen === t.value
-                  ? "border-blue-500 bg-blue-500/5"
-                  : "border-zinc-700 hover:border-zinc-600"
+                  ? "border-info bg-blue-500/5"
+                  : "border-edge2 hover:border-edge2"
               }`}
             >
               <input
@@ -128,8 +128,8 @@ export default function EsquirePanel({
                 className="mt-0.5"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-white text-xs font-medium">{t.short}</p>
-                <p className="text-zinc-500 text-[10px] mt-0.5 leading-tight">
+                <p className="text-ink text-xs font-medium">{t.short}</p>
+                <p className="text-ink-3 text-[10px] mt-0.5 leading-tight">
                   {t.whenToUse}
                 </p>
               </div>
@@ -138,16 +138,16 @@ export default function EsquirePanel({
 
           {chosen === "demand_letter" && (
             <div className="flex flex-col gap-1 mt-1">
-              <label className="text-zinc-400 text-[10px]">Overdue invoice</label>
+              <label className="text-ink-2 text-[10px]">Overdue invoice</label>
               {overdueInvoices.length === 0 ? (
-                <p className="text-amber-300 text-[10px]">
+                <p className="text-honey text-[10px]">
                   No sent/partial invoices on this job. Send an invoice first.
                 </p>
               ) : (
                 <select
                   value={invoiceId}
                   onChange={(e) => setInvoiceId(e.target.value)}
-                  className="px-2 py-1.5 rounded bg-zinc-800 border border-zinc-700 text-white text-xs"
+                  className="px-2 py-1.5 rounded bg-shade border border-edge2 text-ink text-xs"
                 >
                   <option value="">Pick one…</option>
                   {overdueInvoices.map((i) => (
@@ -162,7 +162,7 @@ export default function EsquirePanel({
 
           {chosen === "notice_of_appraisal" && (
             <div className="flex flex-col gap-1 mt-1">
-              <label className="text-zinc-400 text-[10px]">
+              <label className="text-ink-2 text-[10px]">
                 Dispute summary (optional — what's the carrier's position?)
               </label>
               <textarea
@@ -170,12 +170,12 @@ export default function EsquirePanel({
                 onChange={(e) => setDisputeSummary(e.target.value)}
                 rows={2}
                 placeholder="Carrier offered $X; documented scope is $Y; gap is for…"
-                className="px-2 py-1.5 rounded bg-zinc-800 border border-zinc-700 text-white text-xs resize-none"
+                className="px-2 py-1.5 rounded bg-shade border border-edge2 text-ink text-xs resize-none"
               />
             </div>
           )}
 
-          {error && <p className="text-red-400 text-[10px]">{error}</p>}
+          {error && <p className="text-red-700 text-[10px]">{error}</p>}
 
           <div className="flex gap-2 mt-1">
             <button
@@ -185,7 +185,7 @@ export default function EsquirePanel({
                 !chosen ||
                 (chosen === "demand_letter" && !invoiceId)
               }
-              className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded"
+              className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded"
             >
               {pending ? "Drafting…" : "Generate Draft"}
             </button>
@@ -195,7 +195,7 @@ export default function EsquirePanel({
                 setChosen(null);
                 setError(null);
               }}
-              className="px-3 py-1.5 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-xs rounded"
+              className="px-3 py-1.5 border border-edge2 text-ink-2 hover:bg-shade text-xs rounded"
             >
               Cancel
             </button>

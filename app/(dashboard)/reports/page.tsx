@@ -215,32 +215,32 @@ export default async function ReportsPage({
     <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Reports</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-ink">Reports</h1>
+          <p className="text-ink-2 text-sm mt-0.5">
             Operational + financial KPIs over the last {windowDays} days.
           </p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <Link
               href="/reports/adjusters"
-              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+              className="inline-flex items-center gap-1.5 text-info hover:text-info-deep text-xs"
             >
               ⚖️ Adjuster Scoring →
             </Link>
             <Link
               href="/reports/job-economics"
-              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+              className="inline-flex items-center gap-1.5 text-info hover:text-info-deep text-xs"
             >
               💰 Job Economics →
             </Link>
             <Link
               href="/reports/tech-performance"
-              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+              className="inline-flex items-center gap-1.5 text-info hover:text-info-deep text-xs"
             >
               👷 Tech Performance →
             </Link>
             <Link
               href="/reports/quickbooks"
-              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+              className="inline-flex items-center gap-1.5 text-info hover:text-info-deep text-xs"
             >
               📤 QuickBooks Export →
             </Link>
@@ -253,8 +253,8 @@ export default async function ReportsPage({
               href={`/reports?window=${opt.d}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 windowDays === opt.d
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                  ? "bg-cta text-white"
+                  : "bg-shade text-ink-2 hover:bg-shade hover:text-ink"
               }`}
             >
               {opt.label}
@@ -349,8 +349,8 @@ export default async function ReportsPage({
                 key={zip}
                 className="flex items-center justify-between py-1.5 text-sm"
               >
-                <span className="text-zinc-200 font-mono">{zip}</span>
-                <span className="text-zinc-400 text-xs">
+                <span className="text-ink font-mono">{zip}</span>
+                <span className="text-ink-2 text-xs">
                   {count} {count === 1 ? "job" : "jobs"}
                 </span>
               </div>
@@ -368,8 +368,8 @@ export default async function ReportsPage({
                 key={carrier}
                 className="flex items-center justify-between py-1.5 text-sm"
               >
-                <span className="text-zinc-200 truncate pr-2">{carrier}</span>
-                <span className="text-zinc-400 text-xs whitespace-nowrap">
+                <span className="text-ink truncate pr-2">{carrier}</span>
+                <span className="text-ink-2 text-xs whitespace-nowrap">
                   {count} {count === 1 ? "job" : "jobs"}
                 </span>
               </div>
@@ -379,10 +379,10 @@ export default async function ReportsPage({
 
         {/* Completion */}
         <Section title="Completed Jobs" subtitle={`Last ${windowDays}d`}>
-          <p className="text-3xl font-bold text-white font-mono">
+          <p className="text-3xl font-bold text-ink font-mono">
             {jobsCompletedInWindow}
           </p>
-          <p className="text-zinc-500 text-xs mt-1">
+          <p className="text-ink-3 text-xs mt-1">
             of {jobsCreated} created in window ·{" "}
             {jobsCreated > 0
               ? Math.round((jobsCompletedInWindow / jobsCreated) * 100)
@@ -393,17 +393,17 @@ export default async function ReportsPage({
       </div>
 
       {/* Honesty footer */}
-      <div className="mt-8 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">
+      <div className="mt-8 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-1">
           Notes on the numbers
         </p>
         <p>
-          "Avg Cycle" uses <code className="text-zinc-300">created_at</code> →{" "}
-          <code className="text-zinc-300">updated_at</code> on jobs that reached
+          "Avg Cycle" uses <code className="text-ink-2">created_at</code> →{" "}
+          <code className="text-ink-2">updated_at</code> on jobs that reached
           mitigation+, which is a rough proxy. Once we track explicit status-change
           timestamps it'll get more precise. "Billed" / "Collected" only count
           invoices/payments after the Abacus migration ran. AR aging detail lives at{" "}
-          <Link href="/ar" className="text-blue-400 hover:underline">
+          <Link href="/ar" className="text-info hover:underline">
             /ar
           </Link>
           .
@@ -426,18 +426,18 @@ function KPI({
 }) {
   const accentColor = accent
     ? {
-        blue: "text-blue-400",
-        green: "text-green-400",
-        amber: "text-amber-400",
-        red: "text-red-400",
+        blue: "text-info",
+        green: "text-pine",
+        amber: "text-honey",
+        red: "text-red-700",
       }[accent]
-    : "text-white";
+    : "text-ink";
   return (
     <div className="glass-card p-4">
-      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
+      <p className="text-ink-3 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-3xl font-bold mt-1 ${accentColor}`}>{value}</p>
       {secondary && (
-        <p className="text-zinc-500 text-xs mt-1">{secondary}</p>
+        <p className="text-ink-3 text-xs mt-1">{secondary}</p>
       )}
     </div>
   );
@@ -455,8 +455,8 @@ function Section({
   return (
     <section className="glass-card p-5">
       <div className="mb-3">
-        <h3 className="text-white font-semibold text-sm">{title}</h3>
-        {subtitle && <p className="text-zinc-500 text-xs">{subtitle}</p>}
+        <h3 className="text-ink font-semibold text-sm">{title}</h3>
+        {subtitle && <p className="text-ink-3 text-xs">{subtitle}</p>}
       </div>
       <div>{children}</div>
     </section>
@@ -475,12 +475,12 @@ function BarRow({
   return (
     <div className="py-1.5">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-zinc-300 text-sm capitalize">{label}</span>
-        <span className="text-zinc-400 text-xs font-mono">
+        <span className="text-ink-2 text-sm capitalize">{label}</span>
+        <span className="text-ink-2 text-xs font-mono">
           {count} · {pct}%
         </span>
       </div>
-      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-shade rounded-full overflow-hidden">
         <div
           className="h-full bg-blue-500 transition-all"
           style={{ width: `${pct}%` }}
@@ -491,5 +491,5 @@ function BarRow({
 }
 
 function Empty() {
-  return <p className="text-zinc-600 text-xs italic">No data in this window.</p>;
+  return <p className="text-ink-3 text-xs italic">No data in this window.</p>;
 }

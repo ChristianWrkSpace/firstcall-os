@@ -8,17 +8,17 @@ const CATEGORY_META: Record<
   string,
   { label: string; color: string; emoji: string }
 > = {
-  prompt_quality:    { label: "Prompt Quality",    color: "bg-purple-500/15 text-purple-300 border-purple-500/30", emoji: "✍️" },
-  process_friction:  { label: "Process Friction",  color: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30", emoji: "🐌" },
-  cost_efficiency:   { label: "Cost Efficiency",   color: "bg-orange-500/15 text-orange-300 border-orange-500/30", emoji: "💸" },
-  data_gap:          { label: "Data Gap",          color: "bg-blue-500/15 text-blue-300 border-blue-500/30",       emoji: "📉" },
-  wins:              { label: "Wins",              color: "bg-green-500/15 text-green-300 border-green-500/30",   emoji: "✅" },
+  prompt_quality:    { label: "Prompt Quality",    color: "bg-violet-500/10 text-violet-700 border-purple-500/30", emoji: "✍️" },
+  process_friction:  { label: "Process Friction",  color: "bg-honey/10 text-honey border-yellow-500/30", emoji: "🐌" },
+  cost_efficiency:   { label: "Cost Efficiency",   color: "bg-orange-500/10 text-orange-700 border-orange-500/30", emoji: "💸" },
+  data_gap:          { label: "Data Gap",          color: "bg-info/10 text-info border-info/30",       emoji: "📉" },
+  wins:              { label: "Wins",              color: "bg-pine/10 text-pine border-green-500/30",   emoji: "✅" },
 };
 
 const SEV_COLOR: Record<string, string> = {
-  high: "text-red-400 border-red-500/40",
-  med: "text-yellow-400 border-yellow-500/30",
-  low: "text-zinc-400 border-zinc-700",
+  high: "text-red-700 border-red-500/40",
+  med: "text-honey border-yellow-500/30",
+  low: "text-ink-2 border-edge2",
 };
 
 const WINDOWS = [7, 14, 30, 90];
@@ -43,8 +43,8 @@ export default function TuringRunner() {
     <div className="glass-card p-5">
       <div className="flex items-end justify-between gap-3 flex-wrap mb-5">
         <div>
-          <p className="text-white text-sm font-semibold">Run audit</p>
-          <p className="text-zinc-500 text-xs">
+          <p className="text-ink text-sm font-semibold">Run audit</p>
+          <p className="text-ink-3 text-xs">
             Pulls outcomes + health for the chosen window, asks Opus to produce
             5–8 prioritized insights. Takes ~20 seconds.
           </p>
@@ -57,8 +57,8 @@ export default function TuringRunner() {
               onClick={() => setWindowDays(d)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 windowDays === d
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                  ? "bg-cta text-white"
+                  : "bg-shade text-ink-2 hover:bg-shade hover:text-ink"
               }`}
             >
               {d}d
@@ -71,13 +71,13 @@ export default function TuringRunner() {
         type="button"
         onClick={run}
         disabled={pending}
-        className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg"
+        className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-ink text-sm font-semibold rounded-lg"
       >
         {pending ? "🧠 Auditing…" : "🧠 Run Turing Audit"}
       </button>
 
       {error && (
-        <p className="mt-3 text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded px-3 py-2">
+        <p className="mt-3 text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded px-3 py-2">
           {error}
         </p>
       )}
@@ -85,12 +85,12 @@ export default function TuringRunner() {
       {report && (
         <div className="mt-6 flex flex-col gap-4">
           {/* Summary */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
-            <p className="text-zinc-300 text-xs uppercase tracking-wide font-semibold mb-2">
+          <div className="bg-tint border border-edge2 rounded-lg p-4">
+            <p className="text-ink-2 text-xs uppercase tracking-wide font-semibold mb-2">
               Executive Summary
             </p>
-            <p className="text-white text-sm leading-relaxed">{report.summary}</p>
-            <p className="text-zinc-500 text-[10px] mt-2 font-mono">
+            <p className="text-ink text-sm leading-relaxed">{report.summary}</p>
+            <p className="text-ink-3 text-[10px] mt-2 font-mono">
               Window: {report.data_window_days}d · Generated{" "}
               {new Date(report.generated_at).toLocaleString()} · {report.insights.length} insights
             </p>
@@ -98,7 +98,7 @@ export default function TuringRunner() {
 
           {/* Insights */}
           {report.insights.length === 0 ? (
-            <p className="text-zinc-500 text-sm italic">No insights returned.</p>
+            <p className="text-ink-3 text-sm italic">No insights returned.</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {report.insights
@@ -126,16 +126,16 @@ export default function TuringRunner() {
                         >
                           {ins.severity}
                         </span>
-                        <span className="text-zinc-500 text-xs ml-auto">
+                        <span className="text-ink-3 text-xs ml-auto">
                           {ins.agent}
                         </span>
                       </div>
-                      <p className="text-zinc-200 text-sm leading-relaxed mb-2">
-                        <span className="text-zinc-400">Observed: </span>
+                      <p className="text-ink text-sm leading-relaxed mb-2">
+                        <span className="text-ink-2">Observed: </span>
                         {ins.observation}
                       </p>
-                      <p className="text-white text-sm leading-relaxed">
-                        <span className="text-zinc-400">→ Recommend: </span>
+                      <p className="text-ink text-sm leading-relaxed">
+                        <span className="text-ink-2">→ Recommend: </span>
                         {ins.recommendation}
                       </p>
                     </li>

@@ -7,8 +7,8 @@ import Link from "next/link";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { INSURANCE_CARRIERS } from "@/lib/restoration-catalog";
 
-const INPUT = "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm";
-const LABEL = "text-zinc-300 text-sm font-medium";
+const INPUT = "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta focus:border-transparent text-sm";
+const LABEL = "text-ink-2 text-sm font-medium";
 
 export interface PartnerOption {
   id: string;
@@ -26,16 +26,16 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
   return (
     <div className="p-4 md:p-8 max-w-2xl">
       <div className="mb-6">
-        <Link href="/jobs" className="text-zinc-500 hover:text-white text-sm transition-colors">
+        <Link href="/jobs" className="text-ink-3 hover:text-ink text-sm transition-colors">
           ← Jobs
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">New Job</h1>
+        <h1 className="text-2xl font-bold text-ink mt-2">New Job</h1>
       </div>
 
       <form action={action} className="flex flex-col gap-5">
         {/* Customer */}
         <section className="glass-card p-6">
-          <h2 className="text-white font-semibold mb-4">Customer</h2>
+          <h2 className="text-ink font-semibold mb-4">Customer</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 flex flex-col gap-1.5">
               <label className={LABEL}>Name *</label>
@@ -54,8 +54,8 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
 
         {/* Referral source */}
         <section className="glass-card p-6">
-          <h2 className="text-white font-semibold mb-1">Referred by</h2>
-          <p className="text-zinc-500 text-xs mb-3">
+          <h2 className="text-ink font-semibold mb-1">Referred by</h2>
+          <p className="text-ink-3 text-xs mb-3">
             Did a partner send this lead our way? Pick them so revenue rolls into their ROI.
           </p>
           <select
@@ -72,9 +72,9 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
             ))}
           </select>
           {partners.length === 0 && (
-            <p className="text-zinc-600 text-[10px] mt-2 italic">
+            <p className="text-ink-3 text-[10px] mt-2 italic">
               No partners yet. Add them via{" "}
-              <Link href="/partners/outreach" className="text-blue-400 hover:underline">
+              <Link href="/partners/outreach" className="text-info hover:underline">
                 Outreach Pipeline
               </Link>{" "}
               and convert leads when they refer.
@@ -84,8 +84,8 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
 
         {/* Payment Route */}
         <section className="glass-card p-6">
-          <h2 className="text-white font-semibold mb-1">Payment Route</h2>
-          <p className="text-zinc-500 text-xs mb-4">
+          <h2 className="text-ink font-semibold mb-1">Payment Route</h2>
+          <p className="text-ink-3 text-xs mb-4">
             How is this job being paid? Drives what the customer sees on their portal.
           </p>
           <div className="flex flex-col gap-2">
@@ -94,8 +94,8 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
                 key={r.value}
                 className={`flex gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-colors ${
                   route === r.value
-                    ? "border-blue-500 bg-blue-500/5"
-                    : "border-zinc-700 hover:border-zinc-600"
+                    ? "border-info bg-blue-500/5"
+                    : "border-edge2 hover:border-edge2"
                 }`}
               >
                 <input
@@ -107,8 +107,8 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
                   className="mt-1"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium">{r.label}</p>
-                  <p className="text-zinc-500 text-xs mt-0.5">{r.description}</p>
+                  <p className="text-ink text-sm font-medium">{r.label}</p>
+                  <p className="text-ink-3 text-xs mt-0.5">{r.description}</p>
                 </div>
               </label>
             ))}
@@ -118,7 +118,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
             <div className="mt-4 flex flex-col gap-1.5">
               <label className={LABEL}>Deductible Amount *</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3 text-sm">
                   $
                 </span>
                 <input
@@ -131,7 +131,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
                   placeholder="1000.00"
                 />
               </div>
-              <p className="text-zinc-500 text-xs">
+              <p className="text-ink-3 text-xs">
                 The customer's portal will charge this amount only.
               </p>
             </div>
@@ -141,7 +141,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         {/* Insurance — only when relevant */}
         {showInsurance && (
           <section className="glass-card p-6">
-            <h2 className="text-white font-semibold mb-4">Insurance</h2>
+            <h2 className="text-ink font-semibold mb-4">Insurance</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex flex-col gap-1.5">
                 <label className={LABEL}>Insurance Company</label>
@@ -172,7 +172,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
 
         {/* Job Details */}
         <section className="glass-card p-6">
-          <h2 className="text-white font-semibold mb-4">Job Details</h2>
+          <h2 className="text-ink font-semibold mb-4">Job Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className={LABEL}>Type *</label>
@@ -198,7 +198,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         </section>
 
         {state?.error && (
-          <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+          <p className="text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
             {state.error}
           </p>
         )}
@@ -206,14 +206,14 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         <div className="flex gap-3">
           <Link
             href="/jobs"
-            className="px-4 py-2 border border-zinc-700 text-zinc-300 rounded-lg text-sm hover:bg-zinc-800 transition-colors"
+            className="px-4 py-2 border border-edge2 text-ink-2 rounded-lg text-sm hover:bg-shade transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={pending}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-6 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
           >
             {pending ? "Creating…" : "Create Job"}
           </button>

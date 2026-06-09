@@ -3,12 +3,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
-  draft:   "bg-zinc-700 text-zinc-300",
-  sent:    "bg-blue-500/15 text-blue-400",
-  partial: "bg-yellow-500/15 text-yellow-400",
-  paid:    "bg-green-500/15 text-green-400",
-  overdue: "bg-red-500/15 text-red-400",
-  void:    "bg-zinc-800 text-zinc-500",
+  draft:   "bg-shade text-ink-2",
+  sent:    "bg-info/10 text-info",
+  partial: "bg-honey/10 text-honey",
+  paid:    "bg-pine/10 text-pine",
+  overdue: "bg-red-600/10 text-red-700",
+  void:    "bg-shade text-ink-3",
 };
 
 export default async function InvoicesIndex({
@@ -35,17 +35,17 @@ export default async function InvoicesIndex({
       <div className="mb-6">
         <Link
           href={`/jobs/${id}`}
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Back to Job
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Invoices</h1>
+        <h1 className="text-2xl font-bold text-ink mt-2">Invoices</h1>
       </div>
 
       {!invoices?.length ? (
         <div className="glass-card p-8 text-center">
-          <p className="text-zinc-400 text-sm mb-2">No invoices yet for this job.</p>
-          <p className="text-zinc-500 text-xs">
+          <p className="text-ink-2 text-sm mb-2">No invoices yet for this job.</p>
+          <p className="text-ink-3 text-xs">
             Approve an estimate first, then generate an invoice from it.
           </p>
         </div>
@@ -53,7 +53,7 @@ export default async function InvoicesIndex({
         <div className="glass-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Invoice #</th>
                 <th className="px-5 py-3 text-left">Status</th>
                 <th className="px-5 py-3 text-left">Issued</th>
@@ -70,12 +70,12 @@ export default async function InvoicesIndex({
                 return (
                   <tr
                     key={inv.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link
                         href={`/jobs/${id}/invoices/${inv.id}`}
-                        className="text-blue-400 hover:underline font-mono text-xs"
+                        className="text-info hover:underline font-mono text-xs"
                       >
                         {inv.invoice_number}
                       </Link>
@@ -87,13 +87,13 @@ export default async function InvoicesIndex({
                         {inv.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
+                    <td className="px-5 py-3 text-ink-2 text-xs">
                       {new Date(inv.issue_date ?? inv.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
+                    <td className="px-5 py-3 text-ink-2 text-xs">
                       {inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}
                     </td>
-                    <td className="px-5 py-3 text-right text-white font-mono">
+                    <td className="px-5 py-3 text-right text-ink font-mono">
                       ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>

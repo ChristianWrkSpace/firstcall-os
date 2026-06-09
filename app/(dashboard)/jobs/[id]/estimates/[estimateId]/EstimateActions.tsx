@@ -101,7 +101,7 @@ export default function EstimateActions({
           <button
             onClick={handleReject}
             disabled={pending}
-            className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-2 bg-shade hover:bg-shade disabled:opacity-50 text-ink-2 text-sm rounded-lg transition-colors"
           >
             Reject
           </button>
@@ -112,33 +112,33 @@ export default function EstimateActions({
         <button
           onClick={() => setShowSendForm(true)}
           disabled={pending}
-          className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
           ✉ Mark as Sent
         </button>
       )}
 
       {showSendForm && (
-        <div className="bg-zinc-800/60 border border-zinc-700 rounded-lg p-3 flex flex-col gap-2">
-          <label className="text-zinc-400 text-xs uppercase tracking-wide">Sent to</label>
+        <div className="bg-shade border border-edge2 rounded-lg p-3 flex flex-col gap-2">
+          <label className="text-ink-2 text-xs uppercase tracking-wide">Sent to</label>
           <input
             type="text"
             value={sentTo}
             onChange={(e) => setSentTo(e.target.value)}
             placeholder="adjuster@statefarm.com"
-            className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="px-3 py-2 rounded-lg bg-card border border-edge2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-cta"
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setShowSendForm(false)}
-              className="px-3 py-1.5 text-zinc-400 hover:text-white text-xs"
+              className="px-3 py-1.5 text-ink-2 hover:text-ink text-xs"
             >
               Cancel
             </button>
             <button
               onClick={handleSend}
               disabled={pending}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg"
+              className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-lg"
             >
               {pending ? "Saving…" : "Mark Sent"}
             </button>
@@ -151,7 +151,7 @@ export default function EstimateActions({
           href={`/jobs/${jobId}/estimates/${estimateId}/print`}
           target="_blank"
           rel="noopener"
-          className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors text-center"
+          className="px-3 py-2 bg-shade hover:bg-shade text-ink-2 text-sm rounded-lg transition-colors text-center"
         >
           🖨 Print / Export
         </a>
@@ -160,7 +160,7 @@ export default function EstimateActions({
       <button
         onClick={handleXactimateExport}
         disabled={pending}
-        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 text-sm rounded-lg transition-colors"
+        className="px-3 py-2 bg-shade hover:bg-shade disabled:opacity-50 text-ink-2 text-sm rounded-lg transition-colors"
         title="CSV with Xactimate-style columns for adjuster review or manual re-key. Direct .esx import requires a Verisk vendor relationship."
       >
         📊 Xactimate CSV
@@ -171,13 +171,13 @@ export default function EstimateActions({
         <button
           onClick={handleDelete}
           disabled={pending}
-          className="px-3 py-2 bg-zinc-800 hover:bg-red-600/20 text-red-400 text-sm rounded-lg transition-colors mt-2"
+          className="px-3 py-2 bg-shade hover:bg-red-600/20 text-red-700 text-sm rounded-lg transition-colors mt-2"
         >
           Delete Estimate
         </button>
       )}
 
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+      {error && <p className="text-red-700 text-xs mt-2">{error}</p>}
     </div>
   );
 }

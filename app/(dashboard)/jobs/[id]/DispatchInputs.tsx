@@ -49,16 +49,16 @@ export default function DispatchInputsForm({
   })();
 
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 mb-4">
+    <div className="bg-tint border border-edge2 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h3 className="text-white text-sm font-semibold">Dispatch Inputs</h3>
-          <p className="text-zinc-400 text-xs mt-0.5">{summary}</p>
+          <h3 className="text-ink text-sm font-semibold">Dispatch Inputs</h3>
+          <p className="text-ink-2 text-xs mt-0.5">{summary}</p>
         </div>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+          className="text-info hover:text-info-deep text-xs font-medium"
         >
           {open ? "Cancel" : "Edit"}
         </button>
@@ -158,7 +158,7 @@ export default function DispatchInputsForm({
               type="button"
               onClick={save}
               disabled={pending}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {pending ? "Saving…" : "Save Inputs"}
             </button>
@@ -167,19 +167,19 @@ export default function DispatchInputsForm({
       )}
 
       {savedAt && !open && (
-        <p className="text-green-400 text-xs mt-2">✓ Saved — next analysis will use these values</p>
+        <p className="text-pine text-xs mt-2">✓ Saved — next analysis will use these values</p>
       )}
     </div>
   );
 }
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
+  "w-full px-3 py-2 rounded-lg bg-card border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-zinc-400 text-xs uppercase tracking-wide">{label}</label>
+      <label className="text-ink-2 text-xs uppercase tracking-wide">{label}</label>
       {children}
     </div>
   );

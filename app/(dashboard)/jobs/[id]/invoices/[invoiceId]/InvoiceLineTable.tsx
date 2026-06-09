@@ -60,8 +60,8 @@ export default function InvoiceLineTable({
   return (
     <div>
       <table className="w-full text-sm">
-        <thead className="bg-white/[0.03]">
-          <tr className="text-zinc-500 text-xs uppercase tracking-wide">
+        <thead className="bg-tint">
+          <tr className="text-ink-3 text-xs uppercase tracking-wide">
             <th className="px-4 py-2 text-left">Code</th>
             <th className="px-4 py-2 text-left">Description</th>
             <th className="px-4 py-2 text-right w-20">Qty</th>
@@ -82,11 +82,11 @@ export default function InvoiceLineTable({
               locked={locked}
             />
           ))}
-          <tr className="border-t-2 border-zinc-700 bg-zinc-800/30">
-            <td colSpan={5} className="px-4 py-3 text-right text-white font-semibold">
+          <tr className="border-t-2 border-edge2 bg-shade">
+            <td colSpan={5} className="px-4 py-3 text-right text-ink font-semibold">
               Total
             </td>
-            <td className="px-4 py-3 text-right text-white font-mono font-bold text-lg">
+            <td className="px-4 py-3 text-right text-ink font-mono font-bold text-lg">
               ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
             {!locked && <td></td>}
@@ -95,12 +95,12 @@ export default function InvoiceLineTable({
       </table>
 
       {!locked && (
-        <div className="border-t border-zinc-800 px-4 py-3">
+        <div className="border-t border-edge2 px-4 py-3">
           {!adding ? (
             <button
               type="button"
               onClick={() => setAdding(true)}
-              className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+              className="text-info hover:text-info-deep text-xs font-medium"
             >
               + Add line item
             </button>
@@ -115,7 +115,7 @@ export default function InvoiceLineTable({
       )}
 
       {locked && (
-        <div className="border-t border-zinc-800 px-4 py-3 text-zinc-500 text-xs italic">
+        <div className="border-t border-edge2 px-4 py-3 text-ink-3 text-xs italic">
           Invoice is no longer in draft — line items locked.
         </div>
       )}
@@ -141,7 +141,7 @@ function Category({
       <tr>
         <td
           colSpan={locked ? 6 : 7}
-          className="px-4 py-2 text-zinc-400 text-xs uppercase tracking-wide font-semibold bg-zinc-800/20"
+          className="px-4 py-2 text-ink-2 text-xs uppercase tracking-wide font-semibold bg-shade"
         >
           {name}
         </td>
@@ -212,11 +212,11 @@ function Row({
         <td className="px-4 py-2"><input type="number" step="0.01" value={qty} onChange={(e) => setQty(e.target.value)} className={`${INPUT} text-right`} /></td>
         <td className="px-4 py-2"><select value={unit} onChange={(e) => setUnit(e.target.value)} className={INPUT}>{UNITS.map((u) => <option key={u} value={u}>{u}</option>)}</select></td>
         <td className="px-4 py-2"><input type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} className={`${INPUT} text-right`} /></td>
-        <td className="px-4 py-2 text-right text-zinc-300 font-mono">${(Number(qty) * Number(price)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td className="px-4 py-2 text-right text-ink-2 font-mono">${(Number(qty) * Number(price)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
         <td className="px-2 py-2">
           <div className="flex flex-col gap-1">
-            <button onClick={save} disabled={pending} className="text-green-400 hover:text-green-300 text-xs">save</button>
-            <button onClick={() => setEditing(false)} className="text-zinc-500 hover:text-zinc-300 text-xs">cancel</button>
+            <button onClick={save} disabled={pending} className="text-pine hover:text-pine text-xs">save</button>
+            <button onClick={() => setEditing(false)} className="text-ink-3 hover:text-ink-2 text-xs">cancel</button>
           </div>
         </td>
       </tr>
@@ -224,21 +224,21 @@ function Row({
   }
 
   return (
-    <tr className="border-b border-white/[0.06]/40 hover:bg-zinc-800/20 transition-colors group">
-      <td className="px-4 py-2.5 text-zinc-400 text-xs font-mono">{item.xactimate_code ?? "—"}</td>
-      <td className="px-4 py-2.5 text-zinc-200">
+    <tr className="border-b border-edge2/40 hover:bg-shade/20 transition-colors group">
+      <td className="px-4 py-2.5 text-ink-2 text-xs font-mono">{item.xactimate_code ?? "—"}</td>
+      <td className="px-4 py-2.5 text-ink">
         {item.description}
-        {item.notes && <p className="text-zinc-500 text-xs italic mt-0.5">{item.notes}</p>}
+        {item.notes && <p className="text-ink-3 text-xs italic mt-0.5">{item.notes}</p>}
       </td>
-      <td className="px-4 py-2.5 text-right text-zinc-300 font-mono text-xs">{Number(item.quantity).toFixed(2)}</td>
-      <td className="px-4 py-2.5 text-zinc-400 text-xs uppercase">{item.unit}</td>
-      <td className="px-4 py-2.5 text-right text-zinc-300 font-mono text-xs">${Number(item.unit_price).toFixed(2)}</td>
-      <td className="px-4 py-2.5 text-right text-white font-mono text-xs font-semibold">${Number(item.line_total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td className="px-4 py-2.5 text-right text-ink-2 font-mono text-xs">{Number(item.quantity).toFixed(2)}</td>
+      <td className="px-4 py-2.5 text-ink-2 text-xs uppercase">{item.unit}</td>
+      <td className="px-4 py-2.5 text-right text-ink-2 font-mono text-xs">${Number(item.unit_price).toFixed(2)}</td>
+      <td className="px-4 py-2.5 text-right text-ink font-mono text-xs font-semibold">${Number(item.line_total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       {!locked && (
         <td className="px-2 py-2.5">
           <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => setEditing(true)} className="text-blue-400 hover:text-blue-300 text-xs">edit</button>
-            <button onClick={remove} disabled={pending} className="text-red-400 hover:text-red-300 text-xs">del</button>
+            <button onClick={() => setEditing(true)} className="text-info hover:text-info-deep text-xs">edit</button>
+            <button onClick={remove} disabled={pending} className="text-red-700 hover:text-red-700 text-xs">del</button>
           </div>
         </td>
       )}
@@ -281,13 +281,13 @@ function AddLineRow({
         </select>
         <input name="unit_price" type="number" step="0.01" defaultValue="0" placeholder="0.00" className={`${INPUT} col-span-3 text-right`} />
         <div className="col-span-5 flex justify-end items-center gap-2">
-          <button type="button" onClick={onClose} className="text-zinc-500 hover:text-zinc-300 text-xs">cancel</button>
-          <button type="submit" disabled={pending} className="px-3 py-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs rounded">{pending ? "adding…" : "add"}</button>
+          <button type="button" onClick={onClose} className="text-ink-3 hover:text-ink-2 text-xs">cancel</button>
+          <button type="submit" disabled={pending} className="px-3 py-1 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs rounded">{pending ? "adding…" : "add"}</button>
         </div>
       </div>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </form>
   );
 }
 
-const INPUT = "w-full px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-600 text-xs";
+const INPUT = "w-full px-2 py-1 rounded bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-1 focus:ring-cta text-xs";

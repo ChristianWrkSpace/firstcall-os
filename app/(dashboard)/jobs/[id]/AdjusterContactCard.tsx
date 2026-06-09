@@ -71,36 +71,36 @@ export default function AdjusterContactCard({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="bg-white/[0.03] rounded-lg p-3 flex flex-col gap-1.5 text-xs">
+      <div className="bg-tint rounded-lg p-3 flex flex-col gap-1.5 text-xs">
         <div className="flex justify-between gap-2">
-          <span className="text-zinc-500">Carrier</span>
-          <span className="text-zinc-200 font-medium">{carrier}</span>
+          <span className="text-ink-3">Carrier</span>
+          <span className="text-ink font-medium">{carrier}</span>
         </div>
         <div className="flex justify-between gap-2">
-          <span className="text-zinc-500">Policy #</span>
-          <span className="text-zinc-200 font-mono">{policy}</span>
+          <span className="text-ink-3">Policy #</span>
+          <span className="text-ink font-mono">{policy}</span>
         </div>
         <div className="flex justify-between gap-2">
-          <span className="text-zinc-500">Claim #</span>
-          <span className="text-zinc-200 font-mono">{claim}</span>
+          <span className="text-ink-3">Claim #</span>
+          <span className="text-ink font-mono">{claim}</span>
         </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
         <a
           href={mailto}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg text-center"
+          className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg text-center"
         >
           📧 Draft email to adjuster
         </a>
         <button
           onClick={copyClaimInfo}
-          className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-lg"
+          className="px-3 py-1.5 bg-shade hover:bg-shade text-ink-2 text-xs rounded-lg"
         >
           {copied ? "✓ Copied" : "📋 Copy info"}
         </button>
       </div>
-      <p className="text-zinc-600 text-[10px]">
+      <p className="text-ink-3 text-[10px]">
         Opens your default mail client with carrier, policy, claim, and the
         adjuster-portal link pre-filled.
       </p>

@@ -11,8 +11,8 @@ export default async function IncidentResponsePage() {
   if (me.role !== "owner" && me.role !== "manager") {
     return (
       <div className="p-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-white">Incident Response</h1>
-        <p className="text-zinc-400 text-sm mt-2">
+        <h1 className="text-2xl font-bold text-ink">Incident Response</h1>
+        <p className="text-ink-2 text-sm mt-2">
           Owner / manager only.
         </p>
       </div>
@@ -24,14 +24,14 @@ export default async function IncidentResponsePage() {
       <div className="mb-6">
         <Link
           href="/settings"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">
+        <h1 className="text-2xl font-bold text-ink mt-2">
           🚨 Incident Response Runbook
         </h1>
-        <p className="text-zinc-400 text-sm mt-1">
+        <p className="text-ink-2 text-sm mt-1">
           Read this before something happens, not during. Update quarterly.
         </p>
       </div>
@@ -54,13 +54,13 @@ export default async function IncidentResponsePage() {
         <Numbered
           steps={[
             <span key="1">
-              <strong className="text-white">Confirm the leak.</strong> Where
+              <strong className="text-ink">Confirm the leak.</strong> Where
               was it exposed (chat, email, GitHub, screenshot, support ticket)?
               Capture timestamps and audience.
             </span>,
             <span key="2">
-              <strong className="text-white">Rotate immediately.</strong>
-              <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-zinc-400 text-xs">
+              <strong className="text-ink">Rotate immediately.</strong>
+              <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-ink-2 text-xs">
                 <li>
                   Anthropic — console.anthropic.com → API Keys → revoke + new
                   key, update Vercel env (production + preview), redeploy.
@@ -83,19 +83,19 @@ export default async function IncidentResponsePage() {
               </ul>
             </span>,
             <span key="3">
-              <strong className="text-white">Audit the blast radius.</strong>{" "}
+              <strong className="text-ink">Audit the blast radius.</strong>{" "}
               Pull provider usage logs for the leaked-key time window. Look for
               unfamiliar IPs, unexpected models, requests outside business
               hours.
             </span>,
             <span key="4">
-              <strong className="text-white">Document.</strong> Write a one-page
+              <strong className="text-ink">Document.</strong> Write a one-page
               postmortem: how the key was exposed, time-to-rotate, observed
               abuse (if any), prevention. Add to /settings/audit log via a
               manual entry.
             </span>,
             <span key="5">
-              <strong className="text-white">Fix the root cause.</strong> If a
+              <strong className="text-ink">Fix the root cause.</strong> If a
               dev typed the key into a prompt — write a project rule. If a
               repo got pushed publicly — add the secret to GitHub Secret
               Scanning bypass + rotate.
@@ -115,32 +115,32 @@ export default async function IncidentResponsePage() {
         <Numbered
           steps={[
             <span key="1">
-              <strong className="text-white">Contain.</strong> Revoke
+              <strong className="text-ink">Contain.</strong> Revoke
               compromised access, kill active sessions, lock impacted Supabase
               tables to admin-only RLS until resolved.
             </span>,
             <span key="2">
-              <strong className="text-white">Quantify.</strong> What records
+              <strong className="text-ink">Quantify.</strong> What records
               touched? Whose PII? Use audit_logs + Supabase query logs for the
               window. Build a list of affected customer emails.
             </span>,
             <span key="3">
-              <strong className="text-white">Notify counsel.</strong> Loop in
+              <strong className="text-ink">Notify counsel.</strong> Loop in
               an attorney before customer notification — wording matters and
               triggers liability.
             </span>,
             <span key="4">
-              <strong className="text-white">Notify affected customers.</strong>{" "}
+              <strong className="text-ink">Notify affected customers.</strong>{" "}
               Use Resend transactional email (not marketing). Required content:
               what happened, what data, what we did, what they should do, contact
               for questions.
             </span>,
             <span key="5">
-              <strong className="text-white">Notify the TX AG if ≥250 affected.</strong>{" "}
+              <strong className="text-ink">Notify the TX AG if ≥250 affected.</strong>{" "}
               Use the OAG online form: oag.my.salesforce-sites.com/databreach.
             </span>,
             <span key="6">
-              <strong className="text-white">Postmortem within 14 days.</strong>{" "}
+              <strong className="text-ink">Postmortem within 14 days.</strong>{" "}
               Root cause, control changes, monitoring upgrades.
             </span>,
           ]}
@@ -152,9 +152,9 @@ export default async function IncidentResponsePage() {
         <Numbered
           steps={[
             <span key="1">
-              <strong className="text-white">Read the vendor's incident page.</strong>{" "}
+              <strong className="text-ink">Read the vendor's incident page.</strong>{" "}
               Don't act on rumors.
-              <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-zinc-400 text-xs">
+              <ul className="list-disc list-inside ml-4 mt-1 flex flex-col gap-1 text-ink-2 text-xs">
                 <li>Supabase: status.supabase.com</li>
                 <li>Anthropic: status.anthropic.com</li>
                 <li>Vercel: vercel-status.com</li>
@@ -162,16 +162,16 @@ export default async function IncidentResponsePage() {
               </ul>
             </span>,
             <span key="2">
-              <strong className="text-white">Rotate keys for the affected vendor</strong>{" "}
+              <strong className="text-ink">Rotate keys for the affected vendor</strong>{" "}
               even if they say "rotation not required" — defense in depth.
             </span>,
             <span key="3">
-              <strong className="text-white">Pause writes if data integrity is in question.</strong>{" "}
+              <strong className="text-ink">Pause writes if data integrity is in question.</strong>{" "}
               Toggle the affected agent (Hunter / Esquire / Solomon) off in
               this app, or shut down the cron. Communicate the pause internally.
             </span>,
             <span key="4">
-              <strong className="text-white">Wait for vendor postmortem,</strong>{" "}
+              <strong className="text-ink">Wait for vendor postmortem,</strong>{" "}
               then update this runbook with anything we learned.
             </span>,
           ]}
@@ -192,9 +192,9 @@ export default async function IncidentResponsePage() {
             ["Texas AG (breach reporting)", "—", "(800) 252-8011", "—"],
           ]}
         />
-        <p className="text-zinc-600 text-[10px] mt-3 italic">
+        <p className="text-ink-3 text-[10px] mt-3 italic">
           Edit{" "}
-          <code className="text-blue-300">
+          <code className="text-info">
             app/(dashboard)/settings/incident-response/page.tsx
           </code>{" "}
           to populate your real contacts. Keep this off-system in a fireproof
@@ -203,17 +203,17 @@ export default async function IncidentResponsePage() {
       </Section>
 
       <Section title="Drill Cadence">
-        <ul className="list-disc list-inside flex flex-col gap-1 text-sm text-zinc-300">
+        <ul className="list-disc list-inside flex flex-col gap-1 text-sm text-ink-2">
           <li>
-            <strong className="text-white">Quarterly:</strong> rotate one
+            <strong className="text-ink">Quarterly:</strong> rotate one
             non-critical key end-to-end and verify the redeploy works (~30 min).
           </li>
           <li>
-            <strong className="text-white">Annually:</strong> tabletop exercise
+            <strong className="text-ink">Annually:</strong> tabletop exercise
             walking through the breach playbook with counsel present.
           </li>
           <li>
-            <strong className="text-white">Annually:</strong> third-party pen
+            <strong className="text-ink">Annually:</strong> third-party pen
             test (separate roadmap item).
           </li>
         </ul>
@@ -231,7 +231,7 @@ function Section({
 }) {
   return (
     <section className="glass-card p-6 mb-5">
-      <h2 className="text-white font-semibold mb-3">{title}</h2>
+      <h2 className="text-ink font-semibold mb-3">{title}</h2>
       {children}
     </section>
   );
@@ -239,10 +239,10 @@ function Section({
 
 function Numbered({ steps }: { steps: React.ReactNode[] }) {
   return (
-    <ol className="flex flex-col gap-3 text-sm text-zinc-300">
+    <ol className="flex flex-col gap-3 text-sm text-ink-2">
       {steps.map((s, i) => (
         <li key={i} className="flex gap-3">
-          <span className="text-blue-400 font-mono text-xs mt-0.5 shrink-0">
+          <span className="text-info font-mono text-xs mt-0.5 shrink-0">
             {i + 1}.
           </span>
           <div className="flex-1">{s}</div>
@@ -263,7 +263,7 @@ function Table({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+          <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
             {columns.map((c) => (
               <th key={c} className="text-left py-2 pr-3">
                 {c}
@@ -273,9 +273,9 @@ function Table({
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-b border-white/[0.06]/60 last:border-0">
+            <tr key={i} className="border-b border-edge2/60 last:border-0">
               {r.map((cell, j) => (
-                <td key={j} className="py-2.5 pr-3 text-zinc-300 align-top">
+                <td key={j} className="py-2.5 pr-3 text-ink-2 align-top">
                   {cell}
                 </td>
               ))}

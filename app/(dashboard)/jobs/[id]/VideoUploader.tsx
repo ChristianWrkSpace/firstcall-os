@@ -180,13 +180,13 @@ export default function VideoUploader({ jobId }: { jobId: string }) {
         onChange={(e) => onPick(e.target.files)}
       />
       {pending ? (
-        <div className="flex flex-col gap-1.5 px-4 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg">
-          <div className="flex items-center gap-2 text-white/85 text-sm">
+        <div className="flex flex-col gap-1.5 px-4 py-2 bg-tint border border-edge2 rounded-lg">
+          <div className="flex items-center gap-2 text-ink/85 text-sm">
             <Spinner /> {progress.phase}
           </div>
-          <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+          <div className="h-1 bg-tint rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#6B8AD9] to-[#5FBDB0] transition-all duration-300"
+              className="h-full bg-gradient-to-r from-[#E08A63] to-[#C4663F] transition-all duration-300"
               style={{ width: `${progress.pct}%` }}
             />
           </div>
@@ -196,26 +196,26 @@ export default function VideoUploader({ jobId }: { jobId: string }) {
           <button
             type="button"
             onClick={() => cameraRef.current?.click()}
-            className="px-4 py-2 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(95,189,176,0.25)] active:opacity-90 transition-opacity flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-br from-[#E08A63] to-[#C4663F] text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(217,119,87,0.25)] active:opacity-90 transition-opacity flex items-center gap-2"
           >
             🎥 Record Video
           </button>
           <button
             type="button"
             onClick={() => libraryRef.current?.click()}
-            className="px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-tint hover:bg-shade border border-edge2 text-ink text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             📁 Upload
           </button>
         </div>
       )}
       {error && (
-        <div className="px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-red-400 text-sm font-medium whitespace-pre-line">
+        <div className="px-3 py-2 bg-red-600/10 border border-red-500/30 rounded-lg">
+          <p className="text-red-700 text-sm font-medium whitespace-pre-line">
             ⚠ Video upload failed
           </p>
-          <p className="text-red-300/80 text-xs mt-1 whitespace-pre-line">{error}</p>
-          <p className="text-red-300/60 text-[11px] mt-1.5">
+          <p className="text-red-700/80 text-xs mt-1 whitespace-pre-line">{error}</p>
+          <p className="text-red-700/60 text-[11px] mt-1.5">
             Common causes: video over 50MB (Supabase default file size limit) or weak network. Try a shorter clip or switch to wifi.
           </p>
         </div>

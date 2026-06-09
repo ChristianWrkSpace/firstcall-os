@@ -6,8 +6,8 @@ import { BUSINESS_TYPES } from "@/lib/hunter-types";
 import Link from "next/link";
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm";
-const LABEL = "text-zinc-300 text-sm font-medium";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta focus:border-transparent text-sm";
+const LABEL = "text-ink-2 text-sm font-medium";
 
 export default function NewLeadPage() {
   const [state, action, pending] = useActionState(createLead, undefined);
@@ -17,16 +17,16 @@ export default function NewLeadPage() {
       <div className="mb-6">
         <Link
           href="/partners/outreach"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Outreach Pipeline
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Add Lead</h1>
+        <h1 className="text-2xl font-bold text-ink mt-2">Add Lead</h1>
       </div>
 
       <form action={action} className="flex flex-col gap-5">
         <section className="glass-card p-6">
-          <h2 className="text-white font-semibold mb-4">Company</h2>
+          <h2 className="text-ink font-semibold mb-4">Company</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2 flex flex-col gap-1.5">
               <label className={LABEL}>Company Name *</label>
@@ -63,7 +63,7 @@ export default function NewLeadPage() {
         </section>
 
         <section className="glass-card p-6">
-          <h2 className="text-white font-semibold mb-4">Contact</h2>
+          <h2 className="text-ink font-semibold mb-4">Contact</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className={LABEL}>Contact Name</label>
@@ -115,7 +115,7 @@ export default function NewLeadPage() {
         </section>
 
         {state?.error && (
-          <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+          <p className="text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
             {state.error}
           </p>
         )}
@@ -123,14 +123,14 @@ export default function NewLeadPage() {
         <div className="flex gap-3">
           <Link
             href="/partners/outreach"
-            className="px-4 py-2 border border-zinc-700 text-zinc-300 rounded-lg text-sm hover:bg-zinc-800 transition-colors"
+            className="px-4 py-2 border border-edge2 text-ink-2 rounded-lg text-sm hover:bg-shade transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={pending}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-6 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
           >
             {pending ? "Adding…" : "Add Lead"}
           </button>

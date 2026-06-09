@@ -150,8 +150,8 @@ export default function DocumentsVault({
     <>
       <div className="flex flex-col gap-4">
         {/* Required docs checklist */}
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
-          <p className="text-zinc-400 text-xs uppercase tracking-wide font-semibold mb-2">
+        <div className="bg-tint border border-edge2 rounded-lg p-4">
+          <p className="text-ink-2 text-xs uppercase tracking-wide font-semibold mb-2">
             Required for Mitigation Work
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -160,10 +160,10 @@ export default function DocumentsVault({
                 key={r.type}
                 className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${
                   r.signed
-                    ? "bg-green-500/10 text-green-300 border border-green-500/20"
+                    ? "bg-pine/10 text-pine border border-green-500/20"
                     : r.uploaded
-                      ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20"
-                      : "bg-red-500/5 text-red-400 border border-red-500/20"
+                      ? "bg-honey/10 text-honey border border-yellow-500/20"
+                      : "bg-red-500/5 text-red-700 border border-red-500/20"
                 }`}
               >
                 <span className="text-base leading-none">
@@ -171,13 +171,13 @@ export default function DocumentsVault({
                 </span>
                 <span>{r.meta.label}</span>
                 {r.uploaded && !r.signed && (
-                  <span className="text-[10px] text-yellow-400 ml-auto">unsigned</span>
+                  <span className="text-[10px] text-honey ml-auto">unsigned</span>
                 )}
               </div>
             ))}
           </div>
           {missingRequired.length > 0 && (
-            <p className="text-zinc-500 text-[10px] mt-2 italic">
+            <p className="text-ink-3 text-[10px] mt-2 italic">
               {missingRequired.filter((r) => !r.uploaded).length} missing ·{" "}
               {missingRequired.filter((r) => r.uploaded && !r.signed).length} unsigned
             </p>
@@ -188,13 +188,13 @@ export default function DocumentsVault({
         <div className="flex flex-col gap-2">
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="text-zinc-400 text-xs uppercase tracking-wide mb-1 block">
+              <label className="text-ink-2 text-xs uppercase tracking-wide mb-1 block">
                 Upload as
               </label>
               <select
                 value={pendingType}
                 onChange={(e) => setPendingType(e.target.value as DocType)}
-                className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-cta"
               >
                 {CATEGORY_ORDER.map((cat) => (
                   <optgroup key={cat} label={cat}>
@@ -231,10 +231,10 @@ export default function DocumentsVault({
             disabled={uploading}
             className={`px-4 py-6 rounded-lg border-2 border-dashed transition-colors text-sm flex flex-col items-center justify-center gap-1 ${
               dragOver
-                ? "bg-blue-500/10 border-blue-500/50 text-blue-300"
+                ? "bg-info/10 border-info/50 text-info"
                 : uploading
-                  ? "bg-zinc-800 border-zinc-700 text-zinc-500"
-                  : "bg-zinc-800/30 border-zinc-700 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/60"
+                  ? "bg-shade border-edge2 text-ink-3"
+                  : "bg-shade border-edge2 text-ink-2 hover:border-edge2 hover:bg-shade/60"
             }`}
           >
             {uploading ? (
@@ -246,14 +246,14 @@ export default function DocumentsVault({
               <>
                 <span className="text-2xl">📎</span>
                 <span>Click to choose files or drag &amp; drop</span>
-                <span className="text-zinc-500 text-xs">
+                <span className="text-ink-3 text-xs">
                   PDFs, images, docs — any size
                 </span>
               </>
             )}
           </button>
           {error && (
-            <p className="text-red-400 text-xs whitespace-pre-line">{error}</p>
+            <p className="text-red-700 text-xs whitespace-pre-line">{error}</p>
           )}
         </div>
 
@@ -265,7 +265,7 @@ export default function DocumentsVault({
               if (docs.length === 0) return null;
               return (
                 <div key={cat}>
-                  <p className="text-zinc-400 text-xs uppercase tracking-wide font-semibold mb-2">
+                  <p className="text-ink-2 text-xs uppercase tracking-wide font-semibold mb-2">
                     {cat}
                   </p>
                   <div className="flex flex-col gap-2">
@@ -285,7 +285,7 @@ export default function DocumentsVault({
             })}
           </div>
         ) : (
-          <p className="text-zinc-500 text-sm italic text-center py-3">
+          <p className="text-ink-3 text-sm italic text-center py-3">
             No documents yet. Upload AOB, Direction to Pay, and customer authorization first.
           </p>
         )}
@@ -369,36 +369,36 @@ function DocRow({
   }
 
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3 hover:bg-zinc-800/60 transition-colors">
+    <div className="bg-tint border border-edge2 rounded-lg p-3 hover:bg-shade/60 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2 min-w-0 flex-1">
           <span className="text-xl leading-none mt-0.5">{meta.emoji}</span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-white text-sm font-medium truncate">
+              <p className="text-ink text-sm font-medium truncate">
                 {doc.filename}
               </p>
               {meta.trackSignature && (
                 doc.signed ? (
-                  <span className="px-2 py-0.5 bg-green-500/15 text-green-400 text-[10px] rounded font-semibold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 bg-pine/10 text-pine text-[10px] rounded font-semibold uppercase tracking-wider">
                     ✓ Signed
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 bg-yellow-500/15 text-yellow-400 text-[10px] rounded font-semibold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 bg-honey/10 text-honey text-[10px] rounded font-semibold uppercase tracking-wider">
                     Unsigned
                   </span>
                 )
               )}
             </div>
-            <p className="text-zinc-500 text-xs mt-0.5">
+            <p className="text-ink-3 text-xs mt-0.5">
               {meta.label} · {formatBytes(doc.size_bytes)} ·{" "}
               {new Date(doc.created_at).toLocaleDateString()}
               {doc.signed && doc.signed_by_name && (
-                <> · signed by <span className="text-green-400">{doc.signed_by_name}</span></>
+                <> · signed by <span className="text-pine">{doc.signed_by_name}</span></>
               )}
             </p>
             {doc.notes && (
-              <p className="text-zinc-400 text-xs italic mt-1">{doc.notes}</p>
+              <p className="text-ink-2 text-xs italic mt-1">{doc.notes}</p>
             )}
           </div>
         </div>
@@ -406,7 +406,7 @@ function DocRow({
           {previewType && (
             <button
               onClick={handlePreview}
-              className="text-zinc-400 hover:text-blue-400 text-xs px-2 py-1"
+              className="text-ink-2 hover:text-info-deep text-xs px-2 py-1"
               title="Preview"
             >
               👁 view
@@ -414,14 +414,14 @@ function DocRow({
           )}
           <button
             onClick={handleDownload}
-            className="text-zinc-400 hover:text-blue-400 text-xs px-2 py-1"
+            className="text-ink-2 hover:text-info-deep text-xs px-2 py-1"
             title="Download"
           >
             ⬇ dl
           </button>
           <button
             onClick={handleShare}
-            className="text-zinc-400 hover:text-blue-400 text-xs px-2 py-1"
+            className="text-ink-2 hover:text-info-deep text-xs px-2 py-1"
             title="Generate 7-day shareable link"
           >
             {shareCopied ? "✓ copied" : "🔗 share"}
@@ -429,7 +429,7 @@ function DocRow({
           <button
             onClick={handleDelete}
             disabled={pending}
-            className="text-zinc-500 hover:text-red-400 text-xs px-2 py-1"
+            className="text-ink-3 hover:text-red-700 text-xs px-2 py-1"
             title="Delete"
           >
             ✕
@@ -439,12 +439,12 @@ function DocRow({
 
       {/* Signature row */}
       {meta.trackSignature && (
-        <div className="mt-2 pt-2 border-t border-zinc-700/40">
+        <div className="mt-2 pt-2 border-t border-edge2/40">
           {doc.signed ? (
             <button
               onClick={handleUnsign}
               disabled={pending}
-              className="text-zinc-500 hover:text-red-400 text-[10px]"
+              className="text-ink-3 hover:text-red-700 text-[10px]"
             >
               Unmark signed
             </button>
@@ -455,7 +455,7 @@ function DocRow({
                 value={signerName}
                 onChange={(e) => setSignerName(e.target.value)}
                 placeholder="Signer's name"
-                className="flex-1 px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-600"
+                className="flex-1 px-2 py-1 bg-card border border-edge2 rounded text-ink text-xs focus:outline-none focus:ring-1 focus:ring-cta"
                 autoFocus
               />
               <button
@@ -470,7 +470,7 @@ function DocRow({
                   setSigning(false);
                   setSignerName("");
                 }}
-                className="text-zinc-500 hover:text-zinc-300 text-xs"
+                className="text-ink-3 hover:text-ink-2 text-xs"
               >
                 cancel
               </button>
@@ -478,7 +478,7 @@ function DocRow({
           ) : (
             <button
               onClick={() => setSigning(true)}
-              className="text-blue-400 hover:text-blue-300 text-[10px] font-medium"
+              className="text-info hover:text-info-deep text-[10px] font-medium"
             >
               ✍ Mark as signed
             </button>
@@ -487,7 +487,7 @@ function DocRow({
       )}
 
       {shareUrl && shareCopied && (
-        <p className="mt-2 text-green-400 text-[10px]">
+        <p className="mt-2 text-pine text-[10px]">
           ✓ 7-day shareable link copied to clipboard
         </p>
       )}
@@ -521,13 +521,13 @@ function PreviewModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-zinc-900 rounded-xl p-3 max-w-5xl w-full max-h-[90vh] flex flex-col cursor-default"
+        className="bg-card rounded-xl p-3 max-w-5xl w-full max-h-[90vh] flex flex-col cursor-default"
       >
-        <div className="flex items-center justify-between px-2 pb-2 border-b border-white/[0.06]">
-          <p className="text-white text-sm truncate">{filename}</p>
+        <div className="flex items-center justify-between px-2 pb-2 border-b border-edge2">
+          <p className="text-ink text-sm truncate">{filename}</p>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white text-lg px-2"
+            className="text-ink-2 hover:text-ink text-lg px-2"
           >
             ✕
           </button>
@@ -542,7 +542,7 @@ function PreviewModal({
               className="max-w-full max-h-[80vh] mx-auto"
             />
           ) : (
-            <p className="text-zinc-500 text-sm text-center py-10">
+            <p className="text-ink-3 text-sm text-center py-10">
               Can't preview this file type. Use Download instead.
             </p>
           )}

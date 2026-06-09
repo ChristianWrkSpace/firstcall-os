@@ -11,7 +11,7 @@ export function AiBadge({
     <span
       className={cn(
         "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium tracking-[0.15em] uppercase",
-        "bg-[#6B8AD9]/10 text-[#6B8AD9] border border-[#6B8AD9]/20",
+        "bg-[#5B82B8]/10 text-[#5B82B8] border border-[#5B82B8]/20",
         className
       )}
       title="AI-generated"
@@ -31,7 +31,7 @@ export function ConfidenceMeter({
   level: "high" | "medium" | "low";
   className?: string;
 }) {
-  const color = level === "high" ? "#5FBDB0" : level === "medium" ? "#F59E0B" : "#EF4444";
+  const color = level === "high" ? "#D97757" : level === "medium" ? "#F59E0B" : "#EF4444";
   const pct = level === "high" ? 92 : level === "medium" ? 65 : 38;
 
   return (
@@ -59,7 +59,7 @@ export function InlineSuggestion({
   onDismiss: () => void;
 }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl bg-[#6B8AD9]/5 border border-[#6B8AD9]/15">
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-[#5B82B8]/5 border border-[#5B82B8]/15">
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
           <AiBadge />
@@ -70,7 +70,7 @@ export function InlineSuggestion({
       <div className="flex gap-1.5 shrink-0">
         <button
           onClick={onAccept}
-          className="px-2.5 py-1 text-[10px] font-medium rounded-lg bg-[#6B8AD9]/15 text-[#6B8AD9] hover:bg-[#6B8AD9]/25 transition-colors"
+          className="px-2.5 py-1 text-[10px] font-medium rounded-lg bg-[#5B82B8]/15 text-[#5B82B8] hover:bg-[#5B82B8]/25 transition-colors"
         >
           Apply
         </button>
@@ -103,13 +103,13 @@ export function AgentPulse({
         <span
           className={cn(
             "inline-flex h-2 w-2 rounded-full",
-            active ? "bg-[#5FBDB0]" : "bg-[color:var(--color-text-muted)]"
+            active ? "bg-[#D97757]" : "bg-[color:var(--color-text-muted)]"
           )}
         />
       </span>
       <span className={cn(
         "text-[10px] tracking-[0.15em] uppercase font-medium",
-        active ? "text-[#5FBDB0]" : "text-[color:var(--color-text-muted)]"
+        active ? "text-[#D97757]" : "text-[color:var(--color-text-muted)]"
       )}>
         {label}
       </span>

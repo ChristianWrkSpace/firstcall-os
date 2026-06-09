@@ -175,14 +175,14 @@ export default function JobChecklist({ input }: { input: ChecklistInput }) {
       <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-lg">{allRequiredDone ? "✅" : "📋"}</span>
-          <h2 className="text-white font-semibold">Job Checklist</h2>
+          <h2 className="text-ink font-semibold">Job Checklist</h2>
         </div>
-        <span className="text-zinc-400 text-xs font-mono">
+        <span className="text-ink-2 text-xs font-mono">
           {requiredDone} of {requiredTotal} required
         </span>
       </div>
 
-      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-4">
+      <div className="h-1.5 bg-shade rounded-full overflow-hidden mb-4">
         <div
           className={`h-full transition-all duration-500 ${
             allRequiredDone ? "bg-green-500" : "bg-blue-500"
@@ -199,7 +199,7 @@ export default function JobChecklist({ input }: { input: ChecklistInput }) {
 
       {optional.length > 0 && (
         <details className="mt-4 group">
-          <summary className="cursor-pointer text-zinc-500 text-xs hover:text-zinc-300 transition-colors select-none">
+          <summary className="cursor-pointer text-ink-3 text-xs hover:text-ink-2 transition-colors select-none">
             Optional / contextual ({optional.filter((s) => s.done).length}/
             {optional.length})
           </summary>
@@ -216,17 +216,17 @@ export default function JobChecklist({ input }: { input: ChecklistInput }) {
 
 function Item({ step }: { step: Step }) {
   const labelClass = step.done
-    ? "text-zinc-400"
+    ? "text-ink-2"
     : step.required
-      ? "text-white"
-      : "text-zinc-300";
+      ? "text-ink"
+      : "text-ink-2";
 
   const indicator = step.done ? (
-    <span className="w-5 h-5 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center shrink-0 mt-0.5">
+    <span className="w-5 h-5 rounded-full bg-pine/10 border border-green-500/40 flex items-center justify-center shrink-0 mt-0.5">
       <svg
         viewBox="0 0 20 20"
         fill="none"
-        className="w-3 h-3 text-green-400"
+        className="w-3 h-3 text-pine"
         aria-hidden
       >
         <path
@@ -239,7 +239,7 @@ function Item({ step }: { step: Step }) {
       </svg>
     </span>
   ) : (
-    <span className="w-5 h-5 rounded-full border border-zinc-600 shrink-0 mt-0.5" />
+    <span className="w-5 h-5 rounded-full border border-edge2 shrink-0 mt-0.5" />
   );
 
   const inner = (
@@ -248,7 +248,7 @@ function Item({ step }: { step: Step }) {
       <span className="flex-1 min-w-0">
         <span className={`text-sm ${labelClass}`}>{step.label}</span>
         {!step.done && (
-          <span className="block text-zinc-500 text-xs mt-0.5 leading-relaxed">
+          <span className="block text-ink-3 text-xs mt-0.5 leading-relaxed">
             {step.hint}
           </span>
         )}
@@ -261,7 +261,7 @@ function Item({ step }: { step: Step }) {
       <li>
         <a
           href={`#${step.anchor}`}
-          className="flex items-start gap-2.5 px-2 py-1.5 -mx-2 rounded-lg hover:bg-zinc-800/60 transition-colors"
+          className="flex items-start gap-2.5 px-2 py-1.5 -mx-2 rounded-lg hover:bg-shade/60 transition-colors"
         >
           {inner}
         </a>

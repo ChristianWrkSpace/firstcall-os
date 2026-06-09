@@ -6,15 +6,15 @@ import LeadActions from "./LeadActions";
 import MessageView from "./MessageView";
 
 const STATUS_COLORS: Record<string, string> = {
-  new:           "bg-blue-500/15 text-blue-400",
-  researching:   "bg-zinc-700 text-zinc-300",
-  drafted:       "bg-purple-500/15 text-purple-400",
-  sent:          "bg-blue-500/15 text-blue-400",
-  followed_up:   "bg-yellow-500/15 text-yellow-400",
-  replied:       "bg-green-500/15 text-green-400",
-  converted:     "bg-green-500/15 text-green-400",
-  no_response:   "bg-zinc-800 text-zinc-500",
-  disqualified:  "bg-red-500/15 text-red-400",
+  new:           "bg-info/10 text-info",
+  researching:   "bg-shade text-ink-2",
+  drafted:       "bg-violet-500/10 text-violet-700",
+  sent:          "bg-info/10 text-info",
+  followed_up:   "bg-honey/10 text-honey",
+  replied:       "bg-pine/10 text-pine",
+  converted:     "bg-pine/10 text-pine",
+  no_response:   "bg-shade text-ink-3",
+  disqualified:  "bg-red-600/10 text-red-700",
 };
 
 export default async function LeadDetail({
@@ -44,18 +44,18 @@ export default async function LeadDetail({
         <div>
           <Link
             href="/partners/outreach"
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
+            className="text-ink-3 hover:text-ink text-sm transition-colors"
           >
             ← Pipeline
           </Link>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-white">{lead.company_name}</h1>
+            <h1 className="text-2xl font-bold text-ink">{lead.company_name}</h1>
             <span
               className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[lead.status] ?? ""}`}
             >
               {lead.status.replace("_", " ")}
             </span>
-            <span className="text-zinc-400 text-sm">{meta?.label ?? lead.business_type}</span>
+            <span className="text-ink-2 text-sm">{meta?.label ?? lead.business_type}</span>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default async function LeadDetail({
         <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Lead info */}
           <section className="glass-card p-6">
-            <h2 className="text-white font-semibold mb-4">Lead Info</h2>
+            <h2 className="text-ink font-semibold mb-4">Lead Info</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <Field label="Contact" value={lead.contact_name} />
               <Field label="Title" value={lead.contact_title} />
@@ -74,14 +74,14 @@ export default async function LeadDetail({
               <Field label="Source" value={lead.source} />
               {lead.website && (
                 <div className="sm:col-span-2">
-                  <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">
+                  <p className="text-ink-2 text-xs uppercase tracking-wide mb-0.5">
                     Website
                   </p>
                   <a
                     href={lead.website.startsWith("http") ? lead.website : `https://${lead.website}`}
                     target="_blank"
                     rel="noopener"
-                    className="text-blue-400 hover:underline"
+                    className="text-info hover:underline"
                   >
                     {lead.website}
                   </a>
@@ -89,8 +89,8 @@ export default async function LeadDetail({
               )}
               {lead.notes && (
                 <div className="sm:col-span-2">
-                  <p className="text-zinc-400 text-xs uppercase tracking-wide mb-1">Notes</p>
-                  <p className="text-zinc-200">{lead.notes}</p>
+                  <p className="text-ink-2 text-xs uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-ink">{lead.notes}</p>
                 </div>
               )}
             </div>
@@ -98,9 +98,9 @@ export default async function LeadDetail({
 
           {/* Messages */}
           <section className="glass-card p-6">
-            <h2 className="text-white font-semibold mb-4">Outreach Messages</h2>
+            <h2 className="text-ink font-semibold mb-4">Outreach Messages</h2>
             {!messages?.length ? (
-              <p className="text-zinc-500 text-sm italic">
+              <p className="text-ink-3 text-sm italic">
                 No messages drafted yet. Use the actions panel on the right.
               </p>
             ) : (
@@ -116,7 +116,7 @@ export default async function LeadDetail({
         {/* Right: actions */}
         <div className="flex flex-col gap-5">
           <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Actions</h2>
+            <h2 className="text-ink font-semibold mb-3">Actions</h2>
             <LeadActions
               leadId={lead.id}
               status={lead.status}
@@ -132,8 +132,8 @@ export default async function LeadDetail({
 function Field({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
-      <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">{label}</p>
-      <p className="text-zinc-200">{value || "—"}</p>
+      <p className="text-ink-2 text-xs uppercase tracking-wide mb-0.5">{label}</p>
+      <p className="text-ink">{value || "—"}</p>
     </div>
   );
 }

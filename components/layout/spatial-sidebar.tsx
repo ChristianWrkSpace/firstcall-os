@@ -23,7 +23,7 @@ export function SpatialSidebar({ sections, activePath, logo, footer, className }
                       isActive ? "bg-[color:var(--color-surface-strong)] text-[color:var(--color-text-primary)]" : "text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface)]")}>
                       {item.icon && <span className="text-base w-5 text-center">{item.icon}</span>}
                       <span className="flex-1">{item.label}</span>
-                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#5FBDB0]" />}
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#D97757]" />}
                     </a>
                   </li>
                 );

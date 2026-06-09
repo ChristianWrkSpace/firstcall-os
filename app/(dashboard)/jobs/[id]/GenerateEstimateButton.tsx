@@ -26,7 +26,7 @@ export default function GenerateEstimateButton({
       <button
         onClick={onClick}
         disabled={pending || !hasScope}
-        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-ink text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
         title={!hasScope ? "Run Argus scope analysis first" : undefined}
       >
         {pending ? (
@@ -37,7 +37,7 @@ export default function GenerateEstimateButton({
           <>💰 Generate Estimate</>
         )}
       </button>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </div>
   );
 }

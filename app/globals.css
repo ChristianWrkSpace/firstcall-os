@@ -1,68 +1,64 @@
 @import "tailwindcss";
 
-/* ─── Industrial Glassmorphism — global utilities ──────────────────────
-   Drop-in replacement for the legacy `bg-zinc-900 border border-zinc-800
-   rounded-xl` pattern. Apply as a single class to any container card.
-   Pages can either import from components/ui/Glass for full primitive
-   control, or just slap `glass-card` on existing markup. */
+/* ─── Daylight — warm light theme ──────────────────────────────────────
+   Morning-coffee palette: warm cream base, white paper cards, terracotta
+   for live/agents, marigold for needs-you, dusty blue for money/info.
+   Solid cards (no backdrop-filter) — cheaper to composite than glass. */
 
 .glass-card {
   border-radius: 1rem;
-  background-color: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: #FFFDF9;
+  border: 1px solid #EAE1D2;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-    0 8px 32px -12px rgba(0, 0, 0, 0.6);
+    0 1px 2px rgba(58, 47, 38, 0.04),
+    0 8px 24px -12px rgba(58, 47, 38, 0.10);
 }
 
 .glass-card-strong {
   border-radius: 1rem;
-  background-color: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #FFFFFF;
+  border: 1px solid #E5DBC9;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 12px 48px -16px rgba(0, 0, 0, 0.8);
+    0 1px 3px rgba(58, 47, 38, 0.06),
+    0 16px 40px -16px rgba(58, 47, 38, 0.14);
 }
 
 .glass-row {
   border-radius: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: #FFFDF9;
+  border: 1px solid #EDE5D7;
   transition: background-color 180ms ease;
 }
 .glass-row:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: #FBF5EA;
 }
 
-/* App backdrop — dark slate base + ambient gradients. */
+/* App backdrop — warm cream + faint sunrise tints. */
 .app-backdrop {
-  background-color: #0E1012;
+  background-color: #FAF6EF;
   background-image:
-    radial-gradient(circle at 18% 12%, rgba(107, 138, 217, 0.12) 0%, transparent 38%),
-    radial-gradient(circle at 82% 88%, rgba(95, 189, 176, 0.10) 0%, transparent 42%);
-  color: rgba(255, 255, 255, 0.92);
+    radial-gradient(circle at 18% 12%, rgba(217, 119, 87, 0.05) 0%, transparent 38%),
+    radial-gradient(circle at 82% 88%, rgba(233, 162, 59, 0.05) 0%, transparent 42%);
+  color: #2A2520;
 }
 
-/* ─── Ambient Intelligence OS — Semantic Color Tokens ─────────────── */
+/* ─── Semantic Color Tokens ───────────────────────────────────────── */
 :root {
-  --color-primary: #6B8AD9;
-  --color-positive: #5FBDB0;
-  --color-caution: #F59E0B;
-  --color-danger: #EF4444;
-  --color-surface: rgba(255, 255, 255, 0.03);
-  --color-surface-strong: rgba(255, 255, 255, 0.05);
-  --color-edge: rgba(255, 255, 255, 0.06);
-  --color-text-primary: rgba(255, 255, 255, 0.92);
-  --color-text-secondary: rgba(255, 255, 255, 0.50);
-  --color-text-muted: rgba(255, 255, 255, 0.32);
-  --color-bg-deep: #0A0B0D;
-  --color-bg-base: #0E1012;
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --color-primary: #D97757;            /* terracotta — live, agents, CTAs */
+  --color-positive: #2E7D5B;           /* pine — paid, dry, done */
+  --color-caution: #B97718;            /* deep marigold — needs you (text-safe) */
+  --color-danger: #C0392B;
+  --color-surface: #FFFDF9;            /* paper card */
+  --color-surface-strong: #F4EDE0;     /* warm shade panel */
+  --color-edge: #EAE1D2;               /* warm hairline */
+  --color-text-primary: #2A2520;       /* warm ink */
+  --color-text-secondary: #5A5248;
+  --color-text-muted: #8A8071;
+  --color-bg-deep: #F3EDE0;
+  --color-bg-base: #FAF6EF;
+  --background: #FAF6EF;
+  --foreground: #2A2520;
 }
 
 @theme inline {
@@ -82,13 +78,22 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Utility palette for the Daylight sweep — usable as text-ink, bg-card,
+     border-edge2, bg-cta, text-info, etc. */
+  --color-ink: #2A2520;
+  --color-ink-2: #5A5248;
+  --color-ink-3: #8A8071;
+  --color-card: #FFFDF9;
+  --color-shade: #F1EAE0;
+  --color-tint: rgba(58, 47, 38, 0.05);
+  --color-edge2: #E5DBC9;
+  --color-cta: #D97757;
+  --color-cta-deep: #C4663F;
+  --color-info: #5B82B8;
+  --color-info-deep: #44689A;
+  --color-pine: #2E7D5B;
+  --color-honey: #B97718;
 }
 
 body {
@@ -118,9 +123,9 @@ body {
 }
 
 @keyframes ping-ambient {
-  0%   { box-shadow: 0 0 0 0 rgba(95, 189, 176, 0.4); }
-  70%  { box-shadow: 0 0 0 12px rgba(95, 189, 176, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(95, 189, 176, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.35); }
+  70%  { box-shadow: 0 0 0 12px rgba(217, 119, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 119, 87, 0); }
 }
 
 @keyframes pulse-ambient {
@@ -149,8 +154,8 @@ body {
 .animate-spatial-fade { animation: spatial-fade-in 500ms ease-out; }
 .animate-ping-ambient { animation: ping-ambient 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
 .animate-pulse-ambient { animation: pulse-ambient 3s ease-in-out infinite; }
-.animate-shimmer { 
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(58, 47, 38, 0.04) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer-sweep 2.4s ease-in-out infinite;
 }

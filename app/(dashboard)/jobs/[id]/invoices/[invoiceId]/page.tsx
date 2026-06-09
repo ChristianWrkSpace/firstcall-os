@@ -7,12 +7,12 @@ import PaymentsPanel from "./PaymentsPanel";
 import RemindersPanel from "./RemindersPanel";
 
 const STATUS_COLORS: Record<string, string> = {
-  draft:   "bg-zinc-700 text-zinc-300",
-  sent:    "bg-blue-500/15 text-blue-400",
-  partial: "bg-yellow-500/15 text-yellow-400",
-  paid:    "bg-green-500/15 text-green-400",
-  overdue: "bg-red-500/15 text-red-400",
-  void:    "bg-zinc-800 text-zinc-500",
+  draft:   "bg-shade text-ink-2",
+  sent:    "bg-info/10 text-info",
+  partial: "bg-honey/10 text-honey",
+  paid:    "bg-pine/10 text-pine",
+  overdue: "bg-red-600/10 text-red-700",
+  void:    "bg-shade text-ink-3",
 };
 
 export default async function InvoiceDetail({
@@ -84,12 +84,12 @@ export default async function InvoiceDetail({
         <div>
           <Link
             href={`/jobs/${jobId}`}
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
+            className="text-ink-3 hover:text-ink text-sm transition-colors"
           >
             ← Back to Job
           </Link>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-white font-mono">
+            <h1 className="text-2xl font-bold text-ink font-mono">
               {invoice.invoice_number}
             </h1>
             <span
@@ -99,17 +99,17 @@ export default async function InvoiceDetail({
             </span>
             {daysOutstanding !== null && invoice.status !== "paid" && invoice.status !== "void" && (
               <span
-                className={`text-xs ${daysOutstanding > 60 ? "text-red-400" : daysOutstanding > 30 ? "text-yellow-400" : "text-zinc-400"}`}
+                className={`text-xs ${daysOutstanding > 60 ? "text-red-700" : daysOutstanding > 30 ? "text-honey" : "text-ink-2"}`}
               >
                 {daysOutstanding}d outstanding
               </span>
             )}
           </div>
           {(job as any) && (
-            <p className="text-zinc-400 text-sm mt-1">
+            <p className="text-ink-2 text-sm mt-1">
               <Link
                 href={`/jobs/${jobId}`}
-                className="text-blue-400 hover:underline font-mono"
+                className="text-info hover:underline font-mono"
               >
                 {(job as any).job_number}
               </Link>
@@ -121,12 +121,12 @@ export default async function InvoiceDetail({
           )}
         </div>
         <div className="text-right">
-          <p className="text-zinc-500 text-xs uppercase tracking-wide">Balance Due</p>
-          <p className={`text-3xl font-bold font-mono ${balance > 0 ? "text-white" : "text-green-400"}`}>
+          <p className="text-ink-3 text-xs uppercase tracking-wide">Balance Due</p>
+          <p className={`text-3xl font-bold font-mono ${balance > 0 ? "text-ink" : "text-pine"}`}>
             ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           {paid > 0 && (
-            <p className="text-zinc-500 text-xs mt-0.5">
+            <p className="text-ink-3 text-xs mt-0.5">
               ${paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} paid
               {" of "}
               ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -138,9 +138,9 @@ export default async function InvoiceDetail({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="lg:col-span-3 flex flex-col gap-5">
           <section className="glass-card overflow-hidden">
-            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-              <h2 className="text-white font-semibold">Line Items</h2>
-              <p className="text-zinc-500 text-xs">{items.length} items · ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <div className="px-5 py-3 border-b border-edge2 flex items-center justify-between">
+              <h2 className="text-ink font-semibold">Line Items</h2>
+              <p className="text-ink-3 text-xs">{items.length} items · ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <InvoiceLineTable
               invoiceId={invoiceId}
@@ -166,7 +166,7 @@ export default async function InvoiceDetail({
 
         <div className="flex flex-col gap-5">
           <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Actions</h2>
+            <h2 className="text-ink font-semibold mb-3">Actions</h2>
             <InvoiceActions
               invoiceId={invoiceId}
               jobId={jobId}
@@ -177,7 +177,7 @@ export default async function InvoiceDetail({
           </section>
 
           <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Meta</h2>
+            <h2 className="text-ink font-semibold mb-3">Meta</h2>
             <dl className="text-sm space-y-2">
               <Meta label="Issued" value={new Date(invoice.issue_date ?? invoice.created_at).toLocaleDateString()} />
               {invoice.due_date && (
@@ -204,8 +204,8 @@ export default async function InvoiceDetail({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <dt className="text-zinc-500 text-xs uppercase tracking-wide">{label}</dt>
-      <dd className="text-zinc-200 text-xs">{value}</dd>
+      <dt className="text-ink-3 text-xs uppercase tracking-wide">{label}</dt>
+      <dd className="text-ink text-xs">{value}</dd>
     </div>
   );
 }

@@ -33,8 +33,8 @@ export default async function CustomersPage({
     <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white">Customers</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-ink">Customers</h1>
+          <p className="text-ink-2 text-sm mt-0.5">
             {customers?.length ?? 0}
             {q ? ` matching "${q}"` : " total"}
           </p>
@@ -42,7 +42,7 @@ export default async function CustomersPage({
         {q && (
           <Link
             href="/customers"
-            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg"
+            className="px-3 py-1.5 bg-shade hover:bg-shade text-ink-2 text-sm rounded-lg"
           >
             Clear filter
           </Link>
@@ -51,13 +51,13 @@ export default async function CustomersPage({
 
       <div className="glass-card overflow-x-auto">
         {!customers?.length ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
+          <div className="px-5 py-10 text-center text-ink-3 text-sm">
             {q ? `No customers match "${q}".` : "No customers yet — they're created automatically when you create a job or take a call."}
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Name</th>
                 <th className="px-5 py-3 text-left">Phone</th>
                 <th className="px-5 py-3 text-left">Email</th>
@@ -76,39 +76,39 @@ export default async function CustomersPage({
                 return (
                   <tr
                     key={c.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link
                         href={`/customers/${c.id}`}
-                        className="text-blue-400 hover:underline font-medium"
+                        className="text-info hover:underline font-medium"
                       >
                         {c.name}
                       </Link>
                     </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
+                    <td className="px-5 py-3 text-ink-2 text-xs">
                       {c.phone ?? "—"}
                     </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
+                    <td className="px-5 py-3 text-ink-2 text-xs">
                       {c.email ?? "—"}
                     </td>
-                    <td className="px-5 py-3 text-zinc-300 text-xs">
+                    <td className="px-5 py-3 text-ink-2 text-xs">
                       {c.insurance_company ?? "—"}
                       {c.insurance_claim_number && (
-                        <p className="text-zinc-500 font-mono text-[10px]">
+                        <p className="text-ink-3 font-mono text-[10px]">
                           {c.insurance_claim_number}
                         </p>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-right text-zinc-300 text-xs">
+                    <td className="px-5 py-3 text-right text-ink-2 text-xs">
                       {jobs.length}
                       {activeCount > 0 && (
-                        <span className="text-blue-400">
+                        <span className="text-info">
                           {" "}({activeCount} active)
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-zinc-500 text-xs">
+                    <td className="px-5 py-3 text-ink-3 text-xs">
                       {new Date(c.created_at).toLocaleDateString()}
                     </td>
                   </tr>

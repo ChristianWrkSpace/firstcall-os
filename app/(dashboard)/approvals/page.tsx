@@ -43,8 +43,8 @@ export default async function ApprovalsPage() {
   return (
     <div className="p-4 md:p-8 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">🔔 Approval Inbox</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
+        <h1 className="text-2xl font-bold text-ink">🔔 Approval Inbox</h1>
+        <p className="text-ink-2 text-sm mt-1 max-w-2xl">
           Drafts the system created for you. Review each, approve via its
           underlying screen, or dismiss. Per the AI-native rule: agents draft;
           you decide.
@@ -53,7 +53,7 @@ export default async function ApprovalsPage() {
 
       {items.length === 0 ? (
         <div className="glass-card p-10 text-center">
-          <p className="text-zinc-400 text-sm">
+          <p className="text-ink-2 text-sm">
             ✓ No pending approvals. The agents are caught up.
           </p>
         </div>
@@ -68,12 +68,12 @@ export default async function ApprovalsPage() {
                 {KIND_EMOJI[it.kind] ?? "•"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
+                <p className="text-ink-3 text-[10px] uppercase tracking-wide font-semibold">
                   {KIND_LABEL[it.kind] ?? it.kind}
                 </p>
-                <p className="text-white font-medium mt-1">{it.title}</p>
+                <p className="text-ink font-medium mt-1">{it.title}</p>
                 {it.detail && (
-                  <p className="text-zinc-400 text-sm mt-1.5 leading-snug">
+                  <p className="text-ink-2 text-sm mt-1.5 leading-snug">
                     {it.detail}
                   </p>
                 )}
@@ -81,7 +81,7 @@ export default async function ApprovalsPage() {
                   {it.link && (
                     <Link
                       href={it.link}
-                      className="text-blue-400 hover:underline text-xs"
+                      className="text-info hover:underline text-xs"
                     >
                       Review →
                     </Link>
@@ -89,12 +89,12 @@ export default async function ApprovalsPage() {
                   {it.job_id && (
                     <Link
                       href={`/jobs/${it.job_id}`}
-                      className="text-zinc-500 hover:text-zinc-300 text-xs"
+                      className="text-ink-3 hover:text-ink-2 text-xs"
                     >
                       Open job
                     </Link>
                   )}
-                  <span className="text-zinc-600 text-xs">
+                  <span className="text-ink-3 text-xs">
                     {new Date(it.created_at).toLocaleString()}
                   </span>
                 </div>
@@ -116,22 +116,22 @@ export default async function ApprovalsPage() {
 
       {(recent?.length ?? 0) > 0 && (
         <section>
-          <h2 className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
+          <h2 className="text-ink-3 text-xs uppercase tracking-wide font-semibold mb-3">
             Recently resolved
           </h2>
           <ul className="flex flex-col gap-1">
             {recent!.map((r: any) => (
               <li
                 key={r.id}
-                className="text-zinc-500 text-xs flex justify-between gap-3"
+                className="text-ink-3 text-xs flex justify-between gap-3"
               >
                 <span className="truncate">
-                  <span className="text-zinc-400">
+                  <span className="text-ink-2">
                     {KIND_EMOJI[r.kind] ?? "•"}
                   </span>{" "}
                   {r.title}
                 </span>
-                <span className="shrink-0 text-zinc-600">
+                <span className="shrink-0 text-ink-3">
                   {r.status} · {new Date(r.resolved_at).toLocaleDateString()}
                 </span>
               </li>

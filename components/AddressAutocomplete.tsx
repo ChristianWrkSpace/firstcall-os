@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm";
-const LABEL = "text-zinc-300 text-sm font-medium";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta focus:border-transparent text-sm";
+const LABEL = "text-ink-2 text-sm font-medium";
 
 const US_STATE_TO_ABBR: Record<string, string> = {
   Alabama: "AL", Alaska: "AK", Arizona: "AZ", Arkansas: "AR",
@@ -153,12 +153,12 @@ export default function AddressAutocomplete({
           placeholder="Start typing — e.g. 5800 Manchaca…"
         />
         {loading && (
-          <span className="absolute right-3 top-9 text-zinc-500 text-xs">…</span>
+          <span className="absolute right-3 top-9 text-ink-3 text-xs">…</span>
         )}
         {open && suggestions.length > 0 && (
           <ul
             role="listbox"
-            className="absolute z-20 left-0 right-0 top-full mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl overflow-hidden"
+            className="absolute z-20 left-0 right-0 top-full mt-1 bg-card border border-edge2 rounded-lg shadow-xl overflow-hidden"
           >
             {suggestions.map((f, i) => {
               const { line1, line2 } = describe(f);
@@ -173,18 +173,18 @@ export default function AddressAutocomplete({
                     pick(f);
                   }}
                   onMouseEnter={() => setHighlighted(i)}
-                  className={`px-3 py-2 cursor-pointer border-b border-zinc-800 last:border-0 ${
-                    active ? "bg-blue-600/20" : "hover:bg-zinc-800"
+                  className={`px-3 py-2 cursor-pointer border-b border-edge2 last:border-0 ${
+                    active ? "bg-cta/20" : "hover:bg-shade"
                   }`}
                 >
-                  <p className="text-white text-sm">{line1 || "—"}</p>
-                  <p className="text-zinc-500 text-xs">{line2}</p>
+                  <p className="text-ink text-sm">{line1 || "—"}</p>
+                  <p className="text-ink-3 text-xs">{line2}</p>
                 </li>
               );
             })}
           </ul>
         )}
-        <p className="text-zinc-600 text-[10px]">
+        <p className="text-ink-3 text-[10px]">
           Type a few digits + street and pick from the list — city, state, zip auto-fill.
         </p>
       </div>

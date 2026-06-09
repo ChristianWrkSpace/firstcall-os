@@ -21,7 +21,7 @@ export default function DeleteButton({ id }: { id: string }) {
       type="button"
       onClick={onDelete}
       disabled={pending}
-      className="text-zinc-500 hover:text-red-400 text-xs disabled:opacity-50"
+      className="text-ink-3 hover:text-red-700 text-xs disabled:opacity-50"
     >
       {pending ? "…" : "Delete"}
     </button>

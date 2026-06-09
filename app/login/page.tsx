@@ -11,11 +11,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: "var(--color-bg-base)" }}>
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle at 50% 20%, rgba(107,138,217,0.12) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(95,189,176,0.08) 0%, transparent 40%)" }} />
+        <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle at 50% 20%, rgba(91,130,184,0.12) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(217,119,87,0.08) 0%, transparent 40%)" }} />
         {/* Static noise tile — rasterized once, unlike a live feTurbulence filter */}
         <div className="absolute inset-0 opacity-[0.02]" aria-hidden="true" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
       </div>
-      <div className="relative z-10 w-full max-w-sm px-8 py-10 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", backdropFilter: "blur(16px)", boxShadow: "0 8px 32px -12px rgba(0,0,0,0.6), 0 0 48px -16px rgba(107,138,217,0.08)" }}>
+      <div className="relative z-10 w-full max-w-sm px-8 py-10 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)", boxShadow: "0 8px 32px -12px rgba(58,47,38,0.15), 0 0 48px -16px rgba(217,119,87,0.10)" }}>
         <div className="mb-8">
           <div className="flex justify-center mb-6"><Logo variant="banner" size={44} priority /></div>
           <h1 className="text-2xl font-bold text-center" style={{ color: "var(--color-text-primary)" }}>Sign in</h1>
@@ -36,7 +36,7 @@ export default function LoginPage() {
           {state?.error && (
             <div className="text-sm rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "var(--color-danger)" }}>{state.error}</div>
           )}
-          <button type="submit" disabled={pending} className="w-full py-2.5 rounded-xl text-white font-medium text-sm transition-all mt-1 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]" style={{ backgroundColor: "var(--color-primary)", boxShadow: "0 4px 16px -4px rgba(107,138,217,0.3)" }}>
+          <button type="submit" disabled={pending} className="w-full py-2.5 rounded-xl text-white font-medium text-sm transition-all mt-1 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]" style={{ backgroundColor: "var(--color-primary)", boxShadow: "0 4px 16px -4px rgba(91,130,184,0.3)" }}>
             {pending ? "Signing in…" : "Sign in"}
           </button>
         </form>

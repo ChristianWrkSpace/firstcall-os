@@ -34,11 +34,11 @@ function gradeCarrier(row: Omit<CarrierRow, "grade">): Grade {
 }
 
 const GRADE_COLORS: Record<Grade, string> = {
-  A: "bg-green-500/20 text-green-300 border-green-500/40",
-  B: "bg-blue-500/20 text-blue-300 border-blue-500/40",
-  C: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
-  F: "bg-red-500/20 text-red-300 border-red-500/40",
-  "—": "bg-zinc-800 text-zinc-500 border-zinc-700",
+  A: "bg-pine/10 text-pine border-green-500/40",
+  B: "bg-info/10 text-info border-info/40",
+  C: "bg-honey/10 text-honey border-yellow-500/40",
+  F: "bg-red-600/10 text-red-700 border-red-500/40",
+  "—": "bg-shade text-ink-3 border-edge2",
 };
 
 export default async function AdjusterScoringPage() {
@@ -225,12 +225,12 @@ export default async function AdjusterScoringPage() {
       <div className="mb-6">
         <Link
           href="/reports"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Reports
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Adjuster Scoring</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink mt-2">Adjuster Scoring</h1>
+        <p className="text-ink-2 text-sm mt-0.5">
           How fast each carrier pays. Grade them, prioritize the As, escalate the Fs.
         </p>
       </div>
@@ -252,14 +252,14 @@ export default async function AdjusterScoringPage() {
           }
           color={
             overallCollectionRate != null && overallCollectionRate < 0.85
-              ? "text-yellow-400"
-              : "text-white"
+              ? "text-honey"
+              : "text-ink"
           }
         />
         <Tile
           label="Open Balance"
           value={fmt(portfolioOpen)}
-          color={portfolioOpen > 0 ? "text-yellow-400" : "text-white"}
+          color={portfolioOpen > 0 ? "text-honey" : "text-ink"}
           sub={portfolioOpen > 0 ? "still owed" : "all caught up"}
         />
         <Tile
@@ -268,10 +268,10 @@ export default async function AdjusterScoringPage() {
           sub="paid invoices only"
           color={
             weightedDso > 60
-              ? "text-red-400"
+              ? "text-red-700"
               : weightedDso > 30
-                ? "text-yellow-400"
-                : "text-green-400"
+                ? "text-honey"
+                : "text-pine"
           }
         />
       </div>
@@ -279,7 +279,7 @@ export default async function AdjusterScoringPage() {
       {/* Top Issues — what to act on right now */}
       {issues.length > 0 && (
         <div className="bg-yellow-500/5 border border-yellow-500/30 rounded-xl p-4 mb-6">
-          <p className="text-yellow-300 text-xs uppercase tracking-wide font-semibold mb-2">
+          <p className="text-honey text-xs uppercase tracking-wide font-semibold mb-2">
             🔥 Top Issues — act on these first
           </p>
           <ul className="space-y-1.5">
@@ -290,14 +290,14 @@ export default async function AdjusterScoringPage() {
               >
                 <span
                   className={
-                    i.severity === "high" ? "text-red-400" : "text-yellow-400"
+                    i.severity === "high" ? "text-red-700" : "text-honey"
                   }
                 >
                   ●
                 </span>
-                <span className="text-zinc-200">
+                <span className="text-ink">
                   <span className="font-semibold">{i.carrier}</span>
-                  <span className="text-zinc-400"> — {i.detail}</span>
+                  <span className="text-ink-2"> — {i.detail}</span>
                 </span>
               </li>
             ))}
@@ -308,13 +308,13 @@ export default async function AdjusterScoringPage() {
       {/* Per-carrier table */}
       <div className="glass-card overflow-x-auto">
         {rows.length === 0 ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
+          <div className="px-5 py-10 text-center text-ink-3 text-sm">
             No invoiced carriers yet. Send some invoices and check back.
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Carrier</th>
                 <th className="px-4 py-3 text-center">Grade</th>
                 <th className="px-4 py-3 text-right">Jobs</th>
@@ -330,28 +330,28 @@ export default async function AdjusterScoringPage() {
               {rows.map((r) => {
                 const dsoColor =
                   r.avgDsoDays == null
-                    ? "text-zinc-500"
+                    ? "text-ink-3"
                     : r.avgDsoDays > 60
-                      ? "text-red-400"
+                      ? "text-red-700"
                       : r.avgDsoDays > 30
-                        ? "text-yellow-400"
-                        : "text-green-400";
+                        ? "text-honey"
+                        : "text-pine";
                 const rateColor =
                   r.collectionRate == null
-                    ? "text-zinc-500"
+                    ? "text-ink-3"
                     : r.collectionRate >= 0.95
-                      ? "text-green-400"
+                      ? "text-pine"
                       : r.collectionRate >= 0.85
-                        ? "text-blue-400"
+                        ? "text-info"
                         : r.collectionRate >= 0.70
-                          ? "text-yellow-400"
-                          : "text-red-400";
+                          ? "text-honey"
+                          : "text-red-700";
                 return (
                   <tr
                     key={r.carrier}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade transition-colors"
                   >
-                    <td className="px-4 py-3 text-white font-medium">
+                    <td className="px-4 py-3 text-ink font-medium">
                       {r.carrier}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -366,17 +366,17 @@ export default async function AdjusterScoringPage() {
                         {r.grade}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">
                       {r.jobsCount}
                     </td>
-                    <td className="px-4 py-3 text-right text-white font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink font-mono text-xs">
                       {fmt(r.totalBilled)}
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">
                       {fmt(r.totalCollected)}
                     </td>
                     <td
-                      className={`px-4 py-3 text-right font-mono text-xs ${r.openBalance > 0 ? "text-yellow-400" : "text-zinc-500"}`}
+                      className={`px-4 py-3 text-right font-mono text-xs ${r.openBalance > 0 ? "text-honey" : "text-ink-3"}`}
                     >
                       {r.openBalance > 0 ? fmt(r.openBalance) : "—"}
                     </td>
@@ -395,14 +395,14 @@ export default async function AdjusterScoringPage() {
                     <td
                       className={`px-4 py-3 text-right font-mono text-xs ${
                         r.oldestUnpaidDays == null
-                          ? "text-zinc-500"
+                          ? "text-ink-3"
                           : r.oldestUnpaidDays > 90
-                            ? "text-red-400"
+                            ? "text-red-700"
                             : r.oldestUnpaidDays > 60
-                              ? "text-orange-400"
+                              ? "text-orange-700"
                               : r.oldestUnpaidDays > 30
-                                ? "text-yellow-400"
-                                : "text-zinc-400"
+                                ? "text-honey"
+                                : "text-ink-2"
                       }`}
                     >
                       {r.oldestUnpaidDays != null ? `${r.oldestUnpaidDays}d` : "—"}
@@ -416,19 +416,19 @@ export default async function AdjusterScoringPage() {
       </div>
 
       {/* Grading legend */}
-      <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-2">How carriers are graded</p>
+      <div className="mt-6 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-2">How carriers are graded</p>
         <ul className="space-y-1">
-          <li><span className="text-green-400 font-mono">A</span> — Avg DSO ≤ 30 days AND ≥ 95% collected. Prioritize these claims.</li>
-          <li><span className="text-blue-400 font-mono">B</span> — Avg DSO ≤ 60 days AND ≥ 85% collected. Solid carrier.</li>
-          <li><span className="text-yellow-400 font-mono">C</span> — Avg DSO ≤ 90 days AND ≥ 70% collected. Watch for slippage.</li>
-          <li><span className="text-red-400 font-mono">F</span> — Worse than C on either dimension. Esquire demand letter territory.</li>
-          <li><span className="text-zinc-500 font-mono">—</span> — Not enough fully-paid invoices yet to grade.</li>
+          <li><span className="text-pine font-mono">A</span> — Avg DSO ≤ 30 days AND ≥ 95% collected. Prioritize these claims.</li>
+          <li><span className="text-info font-mono">B</span> — Avg DSO ≤ 60 days AND ≥ 85% collected. Solid carrier.</li>
+          <li><span className="text-honey font-mono">C</span> — Avg DSO ≤ 90 days AND ≥ 70% collected. Watch for slippage.</li>
+          <li><span className="text-red-700 font-mono">F</span> — Worse than C on either dimension. Esquire demand letter territory.</li>
+          <li><span className="text-ink-3 font-mono">—</span> — Not enough fully-paid invoices yet to grade.</li>
         </ul>
         <p className="mt-3">
           DSO (Days Sales Outstanding) is computed only over fully-paid invoices —
           partial pays sit in "Open Balance" until cleared. Voided invoices excluded.
-          Drafts (no <code className="text-zinc-300 bg-zinc-800 px-1 rounded">sent_at</code>) excluded.
+          Drafts (no <code className="text-ink-2 bg-shade px-1 rounded">sent_at</code>) excluded.
         </p>
       </div>
     </div>
@@ -439,7 +439,7 @@ function Tile({
   label,
   value,
   sub,
-  color = "text-white",
+  color = "text-ink",
 }: {
   label: string;
   value: string;
@@ -448,9 +448,9 @@ function Tile({
 }) {
   return (
     <div className="glass-card p-4">
-      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
+      <p className="text-ink-3 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
-      {sub && <p className="text-zinc-500 text-xs mt-1">{sub}</p>}
+      {sub && <p className="text-ink-3 text-xs mt-1">{sub}</p>}
     </div>
   );
 }

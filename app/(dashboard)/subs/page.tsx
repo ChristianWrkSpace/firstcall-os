@@ -62,8 +62,8 @@ export default async function SubsPage() {
   return (
     <div className="p-4 md:p-8 max-w-6xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Subcontractors</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink">Subcontractors</h1>
+        <p className="text-ink-2 text-sm mt-0.5">
           Outside companies you pay to do part of a job. Tracks YTD totals so
           1099-NEC season isn't a scramble (IRS threshold: ${THRESHOLD_1099} per non-corp vendor).
         </p>
@@ -72,16 +72,16 @@ export default async function SubsPage() {
       {/* 1099 alert */}
       {needs1099.length > 0 && (
         <div className="bg-yellow-500/5 border border-yellow-500/30 rounded-xl p-4 mb-6">
-          <p className="text-yellow-300 text-xs uppercase tracking-wide font-semibold mb-2">
+          <p className="text-honey text-xs uppercase tracking-wide font-semibold mb-2">
             📋 1099-NEC required this year ({needs1099.length})
           </p>
           <ul className="space-y-1">
             {needs1099.map((s: any) => (
-              <li key={s.id} className="text-sm text-zinc-200">
+              <li key={s.id} className="text-sm text-ink">
                 <span className="font-medium">{s.name}</span>
-                <span className="text-zinc-500"> — {fmt(ytdBySub.get(s.id) ?? 0)} YTD</span>
+                <span className="text-ink-3"> — {fmt(ytdBySub.get(s.id) ?? 0)} YTD</span>
                 {!s.ein_or_ssn_last4 && (
-                  <span className="text-red-400 text-xs ml-2">⚠ no W-9 / EIN on file</span>
+                  <span className="text-red-700 text-xs ml-2">⚠ no W-9 / EIN on file</span>
                 )}
               </li>
             ))}
@@ -91,23 +91,23 @@ export default async function SubsPage() {
 
       {/* Add sub */}
       <div className="glass-card p-5 mb-6">
-        <h2 className="text-white font-semibold mb-3">Add a subcontractor</h2>
+        <h2 className="text-ink font-semibold mb-3">Add a subcontractor</h2>
         <NewSubForm />
       </div>
 
       {/* Subs list */}
       <div className="glass-card overflow-x-auto mb-6">
-        <div className="px-5 py-3 border-b border-white/[0.06]">
-          <h2 className="text-white font-semibold">Active Subs</h2>
+        <div className="px-5 py-3 border-b border-edge2">
+          <h2 className="text-ink font-semibold">Active Subs</h2>
         </div>
         {!subs?.length ? (
-          <p className="px-5 py-10 text-center text-zinc-500 text-sm">
+          <p className="px-5 py-10 text-center text-ink-3 text-sm">
             No subcontractors yet. Add one above.
           </p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Trade</th>
                 <th className="px-4 py-3 text-left">Contact</th>
@@ -123,40 +123,40 @@ export default async function SubsPage() {
                 return (
                   <tr
                     key={s.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04]"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade"
                   >
                     <td className="px-4 py-3">
-                      <p className="text-white font-medium">{s.name}</p>
+                      <p className="text-ink font-medium">{s.name}</p>
                       {s.ein_or_ssn_last4 && (
-                        <p className="text-zinc-600 text-[10px] font-mono">EIN ····{s.ein_or_ssn_last4}</p>
+                        <p className="text-ink-3 text-[10px] font-mono">EIN ····{s.ein_or_ssn_last4}</p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-zinc-400 text-xs">{s.trade ?? "—"}</td>
+                    <td className="px-4 py-3 text-ink-2 text-xs">{s.trade ?? "—"}</td>
                     <td className="px-4 py-3 text-xs">
-                      <p className="text-zinc-300">{s.contact_name ?? "—"}</p>
-                      <p className="text-zinc-500">{s.phone ?? s.email ?? ""}</p>
+                      <p className="text-ink-2">{s.contact_name ?? "—"}</p>
+                      <p className="text-ink-3">{s.phone ?? s.email ?? ""}</p>
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-[10px] ${
                           s.is_corporation
-                            ? "bg-blue-500/15 text-blue-400"
-                            : "bg-zinc-700 text-zinc-300"
+                            ? "bg-info/10 text-info"
+                            : "bg-shade text-ink-2"
                         }`}
                       >
                         {s.is_corporation ? "Corp (no 1099)" : "Individual / LLC"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-white font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink font-mono text-xs">
                       {ytd > 0 ? fmt(ytd) : "—"}
                     </td>
                     <td className="px-4 py-3 text-right">
                       {need1099 ? (
-                        <span className="text-yellow-400 text-xs font-semibold">📋 Yes</span>
+                        <span className="text-honey text-xs font-semibold">📋 Yes</span>
                       ) : s.is_corporation ? (
-                        <span className="text-zinc-600 text-xs">—</span>
+                        <span className="text-ink-3 text-xs">—</span>
                       ) : (
-                        <span className="text-zinc-500 text-xs">below ${THRESHOLD_1099}</span>
+                        <span className="text-ink-3 text-xs">below ${THRESHOLD_1099}</span>
                       )}
                     </td>
                   </tr>
@@ -169,18 +169,18 @@ export default async function SubsPage() {
 
       {/* Recent invoices */}
       <div className="glass-card overflow-x-auto">
-        <div className="px-5 py-3 border-b border-white/[0.06]">
-          <h2 className="text-white font-semibold">Recent Sub Invoices</h2>
+        <div className="px-5 py-3 border-b border-edge2">
+          <h2 className="text-ink font-semibold">Recent Sub Invoices</h2>
         </div>
         {!recentInvoices?.length ? (
-          <p className="px-5 py-10 text-center text-zinc-500 text-sm italic">
+          <p className="px-5 py-10 text-center text-ink-3 text-sm italic">
             No sub invoices logged yet. Log them from a job's P&L section
             (coming next) or via API.
           </p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Sub</th>
                 <th className="px-4 py-3 text-left">Job</th>
@@ -191,16 +191,16 @@ export default async function SubsPage() {
             </thead>
             <tbody>
               {recentInvoices.map((i: any) => (
-                <tr key={i.id} className="border-b border-white/[0.06] last:border-0">
-                  <td className="px-4 py-3 text-zinc-400 text-xs font-mono">{i.invoice_date}</td>
-                  <td className="px-4 py-3 text-zinc-200 text-xs">
+                <tr key={i.id} className="border-b border-edge2 last:border-0">
+                  <td className="px-4 py-3 text-ink-2 text-xs font-mono">{i.invoice_date}</td>
+                  <td className="px-4 py-3 text-ink text-xs">
                     {i.subcontractors?.name ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-xs">
                     {i.jobs ? (
                       <Link
                         href={`/jobs/${i.jobs.id}`}
-                        className="text-blue-400 hover:underline font-mono"
+                        className="text-info hover:underline font-mono"
                       >
                         {i.jobs.job_number}
                       </Link>
@@ -208,17 +208,17 @@ export default async function SubsPage() {
                       "—"
                     )}
                   </td>
-                  <td className="px-4 py-3 text-zinc-400 text-xs truncate max-w-[280px]">
+                  <td className="px-4 py-3 text-ink-2 text-xs truncate max-w-[280px]">
                     {i.description ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-right text-white font-mono text-xs">
+                  <td className="px-4 py-3 text-right text-ink font-mono text-xs">
                     {fmt(Number(i.amount))}
                   </td>
                   <td className="px-4 py-3 text-right text-xs">
                     {i.paid_at ? (
-                      <span className="text-green-400">✓ paid</span>
+                      <span className="text-pine">✓ paid</span>
                     ) : (
-                      <span className="text-yellow-400">unpaid</span>
+                      <span className="text-honey">unpaid</span>
                     )}
                   </td>
                 </tr>

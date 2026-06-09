@@ -11,7 +11,7 @@ interface DockItem {
 
 export function AmbientDock({ items }: { items: DockItem[] }) {
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-2 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "rgba(14,16,18,0.85)", borderColor: "var(--color-edge)", backdropFilter: "blur(16px)", boxShadow: "0 8px 32px -8px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04) inset" }}>
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-2 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "rgba(250,246,239,0.92)", borderColor: "var(--color-edge)", boxShadow: "0 8px 24px -8px rgba(58,47,38,0.25), 0 0 0 1px rgba(58,47,38,0.04) inset" }}>
       {items.map((item, i) => (
         <a
           key={i}
@@ -22,12 +22,12 @@ export function AmbientDock({ items }: { items: DockItem[] }) {
         >
           <span>{item.icon}</span>
           {/* Tooltip on hover */}
-          <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ backgroundColor: "var(--color-surface-strong)", color: "var(--color-text-primary)", border: "1px solid var(--color-edge)", backdropFilter: "blur(10px)" }}>
+          <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ backgroundColor: "var(--color-surface-strong)", color: "var(--color-text-primary)", border: "1px solid var(--color-edge)" }}>
             {item.label}
           </span>
           {/* Active indicator */}
           {item.active && (
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#5FBDB0]" />
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D97757]" />
           )}
         </a>
       ))}

@@ -138,7 +138,7 @@ export default function LegalDocActions({
         {editable && !editing && (
           <button
             onClick={() => setEditing(true)}
-            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm rounded-lg"
+            className="px-3 py-1.5 bg-shade hover:bg-shade text-ink text-sm rounded-lg"
           >
             ✏️ Edit
           </button>
@@ -147,14 +147,14 @@ export default function LegalDocActions({
           <button
             onClick={handleApprove}
             disabled={pending}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+            className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg"
           >
             ✓ Approve Draft
           </button>
         )}
         <button
           onClick={() => window.print()}
-          className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm rounded-lg"
+          className="px-3 py-1.5 bg-shade hover:bg-shade text-ink text-sm rounded-lg"
           title="Use 'Save as PDF' as the destination in the print dialog"
         >
           📥 Download PDF
@@ -163,20 +163,20 @@ export default function LegalDocActions({
           <button
             onClick={handleDelete}
             disabled={pending}
-            className="ml-auto px-3 py-1.5 text-red-400 hover:text-red-300 text-sm rounded-lg"
+            className="ml-auto px-3 py-1.5 text-red-700 hover:text-red-700 text-sm rounded-lg"
           >
             Delete draft
           </button>
         )}
         {!canDelete && (
-          <span className="ml-auto px-3 py-1.5 text-zinc-500 text-xs">
+          <span className="ml-auto px-3 py-1.5 text-ink-3 text-xs">
             🔒 Permanent record — cannot be deleted
           </span>
         )}
       </div>
 
       {error && (
-        <p className="no-print text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+        <p className="no-print text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
@@ -186,37 +186,37 @@ export default function LegalDocActions({
         <form action={saveAction} className="flex flex-col gap-3 no-print">
           <input type="hidden" name="doc_id" value={docId} />
           <div className="flex flex-col gap-1.5">
-            <label className="text-zinc-400 text-xs">Subject</label>
+            <label className="text-ink-2 text-xs">Subject</label>
             <input
               name="subject"
               defaultValue={subject}
-              className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm"
+              className="px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-zinc-400 text-xs">Body</label>
+            <label className="text-ink-2 text-xs">Body</label>
             <textarea
               name="body"
               defaultValue={body}
               rows={28}
-              className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm font-mono whitespace-pre-wrap leading-relaxed"
+              className="px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm font-mono whitespace-pre-wrap leading-relaxed"
             />
           </div>
           {saveState?.error && (
-            <p className="text-red-400 text-sm">{saveState.error}</p>
+            <p className="text-red-700 text-sm">{saveState.error}</p>
           )}
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={savePending}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+              className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg"
             >
               {savePending ? "Saving…" : "Save Changes"}
             </button>
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="px-4 py-2 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-sm rounded-lg"
+              className="px-4 py-2 border border-edge2 text-ink-2 hover:bg-shade text-sm rounded-lg"
             >
               Cancel
             </button>
@@ -236,23 +236,23 @@ export default function LegalDocActions({
 
           {/* Signing link card — visible only when there's an active sign URL and not yet signed */}
           {signingUrl && status !== "signed" && (
-            <div className="no-print bg-zinc-900 border border-blue-500/30 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap">
+            <div className="no-print bg-card border border-info/30 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap">
               <div className="min-w-0 flex-1">
-                <p className="text-zinc-300 text-xs font-semibold">
+                <p className="text-ink-2 text-xs font-semibold">
                   ✍️ Customer signing link
                 </p>
-                <p className="text-zinc-500 text-[11px] mt-0.5">
+                <p className="text-ink-3 text-[11px] mt-0.5">
                   Customer received this in their email. You can re-share it
                   manually if needed.
                 </p>
-                <p className="text-blue-400 text-xs font-mono break-all mt-2">
+                <p className="text-info text-xs font-mono break-all mt-2">
                   {signingUrl}
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={copySignUrl}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg"
+                  className="px-3 py-1.5 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg"
                 >
                   {copiedSign ? "✓ Copied" : "📋 Copy link"}
                 </button>
@@ -260,7 +260,7 @@ export default function LegalDocActions({
                   href={signingUrl}
                   target="_blank"
                   rel="noopener"
-                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-lg"
+                  className="px-3 py-1.5 bg-shade hover:bg-shade text-ink-2 text-xs rounded-lg"
                 >
                   Preview
                 </a>
@@ -276,7 +276,7 @@ export default function LegalDocActions({
                 alt="First Call Mitigation"
                 style={{ height: 48, width: "auto" }}
               />
-              <div className="text-right text-[10px] text-zinc-600 leading-snug uppercase tracking-wider">
+              <div className="text-right text-[10px] text-ink-3 leading-snug uppercase tracking-wider">
                 <p>Austin, Texas</p>
                 <p>IICRC Certified</p>
                 <p>24/7 Emergency Response</p>
@@ -287,7 +287,7 @@ export default function LegalDocActions({
             </pre>
             {status === "signed" && signedByName && (
               <div className="mt-8 pt-6 border-t-2 border-black">
-                <p className="text-xs uppercase tracking-wider text-zinc-600">
+                <p className="text-xs uppercase tracking-wider text-ink-3">
                   Electronic Signature
                 </p>
                 <p
@@ -299,10 +299,10 @@ export default function LegalDocActions({
                 >
                   {signedByName}
                 </p>
-                <p className="text-zinc-700 text-xs mt-2">
+                <p className="text-ink-3 text-xs mt-2">
                   Signed {signedAt ? new Date(signedAt).toLocaleString() : "—"}
                 </p>
-                <div className="mt-3 text-[10px] text-zinc-600 leading-relaxed">
+                <div className="mt-3 text-[10px] text-ink-3 leading-relaxed">
                   <p>
                     <strong>Audit trail:</strong> IP {signatureIp ?? "—"} ·
                     Browser {(signatureUserAgent ?? "—").slice(0, 80)}
@@ -323,10 +323,10 @@ export default function LegalDocActions({
         <div className="no-print flex flex-col gap-3 mt-2 glass-card p-5">
           {canMarkSent && (
             <div className="flex flex-col gap-2">
-              <label className="text-zinc-300 text-sm font-medium">
+              <label className="text-ink-2 text-sm font-medium">
                 Mark sent
               </label>
-              <p className="text-zinc-500 text-xs">
+              <p className="text-ink-3 text-xs">
                 {needsRecipient
                   ? "Enter the carrier email or contact this was sent to."
                   : "Enter the recipient (homeowner email or 'in person')."}
@@ -336,12 +336,12 @@ export default function LegalDocActions({
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
                   placeholder="recipient@example.com"
-                  className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm"
+                  className="flex-1 px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm"
                 />
                 <button
                   onClick={handleMarkSent}
                   disabled={pending}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-ink text-sm font-medium rounded-lg"
                 >
                   Mark Sent
                 </button>
@@ -350,10 +350,10 @@ export default function LegalDocActions({
           )}
           {canMarkSigned && (
             <div className="flex flex-col gap-2">
-              <label className="text-zinc-300 text-sm font-medium">
+              <label className="text-ink-2 text-sm font-medium">
                 Mark signed
               </label>
-              <p className="text-zinc-500 text-xs">
+              <p className="text-ink-3 text-xs">
                 Enter the name of the person who signed (homeowner or technician).
               </p>
               <div className="flex gap-2">
@@ -361,7 +361,7 @@ export default function LegalDocActions({
                   value={signerName}
                   onChange={(e) => setSignerName(e.target.value)}
                   placeholder="Jane Smith"
-                  className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm"
+                  className="flex-1 px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm"
                 />
                 <button
                   onClick={handleMarkSigned}
@@ -381,9 +381,9 @@ export default function LegalDocActions({
 
 function DeliveryStatus({ attempt }: { attempt: SendAttempt }) {
   const colorByStatus = {
-    sent: "bg-green-500/10 border-green-500/30 text-green-300",
-    skipped: "bg-amber-500/10 border-amber-500/30 text-amber-300",
-    failed: "bg-red-500/10 border-red-500/30 text-red-300",
+    sent: "bg-pine/10 border-green-500/30 text-pine",
+    skipped: "bg-honey/10 border-amber-500/30 text-honey",
+    failed: "bg-red-600/10 border-red-500/30 text-red-700",
   };
   const iconByStatus = {
     sent: "✅",
@@ -402,17 +402,17 @@ function DeliveryStatus({ attempt }: { attempt: SendAttempt }) {
       <p className="text-xs font-semibold flex items-center gap-2">
         <span>{iconByStatus[attempt.status]}</span>
         <span>{labelByStatus[attempt.status]}</span>
-        <span className="text-zinc-500 font-normal">
+        <span className="text-ink-3 font-normal">
           · {new Date(attempt.attempted_at).toLocaleString()}
         </span>
       </p>
       {attempt.recipient && (
-        <p className="text-zinc-300 text-xs mt-2 font-mono">
+        <p className="text-ink-2 text-xs mt-2 font-mono">
           → {attempt.recipient}
         </p>
       )}
       {attempt.reason && (
-        <p className="text-zinc-300 text-xs mt-2 leading-snug">
+        <p className="text-ink-2 text-xs mt-2 leading-snug">
           {attempt.reason}
         </p>
       )}
@@ -465,10 +465,10 @@ function ManualSendButton({
     <div className="no-print flex flex-col gap-2 glass-card p-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-zinc-300 text-sm font-medium">
+          <p className="text-ink-2 text-sm font-medium">
             Resend to customer
           </p>
-          <p className="text-zinc-500 text-xs mt-0.5">
+          <p className="text-ink-3 text-xs mt-0.5">
             Push the email through right now. Bypasses auto-pause + opt-out
             flags. Use this if the auto-send was skipped or you want the
             customer to get the email again.
@@ -477,13 +477,13 @@ function ManualSendButton({
         <button
           onClick={go}
           disabled={pending}
-          className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg whitespace-nowrap"
+          className="px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-lg whitespace-nowrap"
         >
           {pending ? "Sending…" : "📨 Send Now"}
         </button>
       </div>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
-      {result && <p className="text-zinc-300 text-xs">{result}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
+      {result && <p className="text-ink-2 text-xs">{result}</p>}
     </div>
   );
 }

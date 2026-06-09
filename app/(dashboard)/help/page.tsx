@@ -413,8 +413,8 @@ export default function HelpPage() {
         <div className="flex flex-col items-start gap-4">
           <Logo variant="banner" size={48} priority />
           <div>
-            <h1 className="text-3xl font-bold text-white">Welcome to FirstCall OS</h1>
-            <p className="text-zinc-400 mt-1 max-w-2xl">
+            <h1 className="text-3xl font-bold text-ink">Welcome to FirstCall OS</h1>
+            <p className="text-ink-2 mt-1 max-w-2xl">
               Everything you need to run First Call Mitigation in one place — from
               the moment the phone rings to the final payment. AI agents handle the
               boring admin so the field crew can focus on the work.
@@ -424,33 +424,33 @@ export default function HelpPage() {
       </section>
 
       {/* Brand-new? Start here */}
-      <section className="mb-8 bg-blue-500/5 border border-blue-500/20 rounded-xl p-6">
-        <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-2">
+      <section className="mb-8 bg-blue-500/5 border border-info/20 rounded-xl p-6">
+        <p className="text-info text-xs uppercase tracking-wide font-semibold mb-2">
           New here? Read this first.
         </p>
-        <h2 className="text-xl font-bold text-white mb-3">
+        <h2 className="text-xl font-bold text-ink mb-3">
           The 30-second mental model
         </h2>
-        <ol className="flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside leading-relaxed">
+        <ol className="flex flex-col gap-2 text-sm text-ink-2 list-decimal list-inside leading-relaxed">
           <li>
-            <strong className="text-white">Every customer call becomes a Job.</strong>{" "}
+            <strong className="text-ink">Every customer call becomes a Job.</strong>{" "}
             Either Athena makes it for you (record the call), or you click 'New Job' yourself.
           </li>
           <li>
-            <strong className="text-white">Every Job has one page</strong> with everything about
+            <strong className="text-ink">Every Job has one page</strong> with everything about
             it — photos, paperwork, equipment, estimate, invoice, customer details.
           </li>
           <li>
-            <strong className="text-white">AI agents handle the work nobody likes</strong> —
+            <strong className="text-ink">AI agents handle the work nobody likes</strong> —
             Argus reads your photos and writes the scope, Ledger prices the estimate,
             Esquire writes the legal docs, Abacus chases payment.
           </li>
           <li>
-            <strong className="text-white">You stay in control.</strong> Every AI draft has an
+            <strong className="text-ink">You stay in control.</strong> Every AI draft has an
             Approve button. Nothing gets sent to a customer or carrier without you saying yes.
           </li>
           <li>
-            <strong className="text-white">Don't worry about typos.</strong> Almost everything
+            <strong className="text-ink">Don't worry about typos.</strong> Almost everything
             has an Edit button. If you took a call without the claim #, just plug it in later.
           </li>
         </ol>
@@ -458,59 +458,59 @@ export default function HelpPage() {
 
       {/* What's new — recent shipped work, in plain English */}
       <section className="mb-8 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
-        <p className="text-emerald-300 text-xs uppercase tracking-wide font-semibold mb-2">
+        <p className="text-pine text-xs uppercase tracking-wide font-semibold mb-2">
           What's new — May 5, 2026
         </p>
-        <h2 className="text-xl font-bold text-white mb-3">
+        <h2 className="text-xl font-bold text-ink mb-3">
           Pricing got more honest, AI got more flexible
         </h2>
-        <ul className="flex flex-col gap-3 text-sm text-zinc-300 leading-relaxed">
+        <ul className="flex flex-col gap-3 text-sm text-ink-2 leading-relaxed">
           <li>
-            <strong className="text-white">📒 Estimates stop drifting.</strong>{" "}
+            <strong className="text-ink">📒 Estimates stop drifting.</strong>{" "}
             Ledger now uses a reviewed Xactimate price book as the source of truth.
             Every line gets tagged{" "}
-            <span className="text-green-400 font-semibold">book</span> (price came
+            <span className="text-pine font-semibold">book</span> (price came
             from your reviewed list) or{" "}
-            <span className="text-yellow-400 font-semibold">guess</span> (AI invented
+            <span className="text-honey font-semibold">guess</span> (AI invented
             it). A panel at the top of every estimate tells you exactly how much of
             the total is anchored vs guessed — so you know which lines to scrutinize
             before clicking send.{" "}
             <Link
               href="/settings/price-book"
-              className="text-blue-400 hover:underline"
+              className="text-info hover:underline"
             >
               Manage the book →
             </Link>
           </li>
           <li>
-            <strong className="text-white">🛰 The Command Center sees every AI provider.</strong>{" "}
+            <strong className="text-ink">🛰 The Command Center sees every AI provider.</strong>{" "}
             The Compute panel now splits spend by provider (Anthropic / Google /
             DeepSeek), not just by tier. So when calls start routing through
             Gemini or DeepSeek, you'll see it instantly.
           </li>
           <li>
-            <strong className="text-white">⚡ Any agent can be swapped to a cheaper model — no redeploy.</strong>{" "}
+            <strong className="text-ink">⚡ Any agent can be swapped to a cheaper model — no redeploy.</strong>{" "}
             Set an env var like{" "}
-            <code className="text-blue-300 bg-blue-500/10 px-1 rounded text-xs">
+            <code className="text-info bg-info/10 px-1 rounded text-xs">
               MODEL_HUNTER=deepseek/deepseek-v3
             </code>{" "}
             and Hunter routes through DeepSeek (5–15× cheaper for cold-email
             drafts). Already live for Hunter today.{" "}
             <Link
               href="/settings/ai-routing"
-              className="text-blue-400 hover:underline"
+              className="text-info hover:underline"
             >
               See routing →
             </Link>
           </li>
           <li>
-            <strong className="text-white">🛟 If a provider has an outage, calls auto-fail-over.</strong>{" "}
+            <strong className="text-ink">🛟 If a provider has an outage, calls auto-fail-over.</strong>{" "}
             When the primary model fails with a network or server error, the system
             silently retries on a different provider. The agent doing the work
             doesn't even know it happened.
           </li>
           <li>
-            <strong className="text-white">🩹 Argus vision calls don't hang anymore.</strong>{" "}
+            <strong className="text-ink">🩹 Argus vision calls don't hang anymore.</strong>{" "}
             Fixed a retry bug where photo-scope assessments were timing out at 3
             minutes instead of 60 seconds. Vision calls now complete reliably.
           </li>
@@ -519,18 +519,18 @@ export default function HelpPage() {
 
       {/* How it fits together */}
       <Section title="How everything fits together">
-        <p className="text-zinc-300 leading-relaxed">
+        <p className="text-ink-2 leading-relaxed">
           Think of this as a circular org chart, not a pyramid.{" "}
-          <strong className="text-white">You and your team</strong> are at the
+          <strong className="text-ink">You and your team</strong> are at the
           edge — making decisions, handling emergencies, building relationships.{" "}
-          <strong className="text-white">FirstCall OS</strong> sits in the
+          <strong className="text-ink">FirstCall OS</strong> sits in the
           middle as the "intelligence layer," capturing every call, photo,
           reading, and dollar so nothing falls through the cracks. Each AI
           agent handles one slice of the boring admin work.
         </p>
-        <div className="mt-4 bg-white/[0.03] border border-zinc-700 rounded-lg p-4 text-sm text-zinc-300 leading-relaxed">
+        <div className="mt-4 bg-tint border border-edge2 rounded-lg p-4 text-sm text-ink-2 leading-relaxed">
           <p>
-            <strong className="text-white">The daily flow:</strong> Athena
+            <strong className="text-ink">The daily flow:</strong> Athena
             picks up the call → Argus scopes the damage → Ledger prices it →
             Esquire signs the homeowner → Atlas deploys equipment → daily
             moisture readings logged → Abacus invoices → customer pays via
@@ -547,16 +547,16 @@ export default function HelpPage() {
             <Link
               key={a.name}
               href={a.href}
-              className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 transition-colors flex flex-col"
+              className="bg-card border border-edge2 hover:border-edge2 rounded-xl p-5 transition-colors flex flex-col"
             >
               <div className="flex items-baseline gap-2.5">
                 <span className="text-2xl">{a.emoji}</span>
-                <p className="text-white font-semibold">{a.name}</p>
-                <span className="text-zinc-500 text-xs">— {a.oneLiner}</span>
+                <p className="text-ink font-semibold">{a.name}</p>
+                <span className="text-ink-3 text-xs">— {a.oneLiner}</span>
               </div>
-              <p className="text-zinc-400 text-sm mt-2 leading-snug">{a.what}</p>
-              <p className="text-zinc-500 text-xs mt-2 leading-snug italic">
-                <span className="text-zinc-400 not-italic font-medium">
+              <p className="text-ink-2 text-sm mt-2 leading-snug">{a.what}</p>
+              <p className="text-ink-3 text-xs mt-2 leading-snug italic">
+                <span className="text-ink-2 not-italic font-medium">
                   When to use:
                 </span>{" "}
                 {a.when}
@@ -572,14 +572,14 @@ export default function HelpPage() {
           {DAILY_STEPS.map((s) => (
             <li
               key={s.num}
-              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex gap-4"
+              className="bg-card border border-edge2 rounded-lg p-4 flex gap-4"
             >
-              <span className="text-blue-400 font-mono text-sm shrink-0 w-6">
+              <span className="text-info font-mono text-sm shrink-0 w-6">
                 {s.num.toString().padStart(2, "0")}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm">{s.title}</p>
-                <p className="text-zinc-400 text-sm mt-1 leading-snug">
+                <p className="text-ink font-semibold text-sm">{s.title}</p>
+                <p className="text-ink-2 text-sm mt-1 leading-snug">
                   {s.detail}
                 </p>
                 {s.tip && (
@@ -599,15 +599,15 @@ export default function HelpPage() {
           {HOW_TO.map((ht) => (
             <details
               key={ht.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 group open:border-zinc-700"
+              className="bg-card border border-edge2 rounded-lg p-4 group open:border-edge2"
             >
-              <summary className="text-white font-medium cursor-pointer list-none flex justify-between items-center gap-3">
+              <summary className="text-ink font-medium cursor-pointer list-none flex justify-between items-center gap-3">
                 {ht.title}
-                <span className="text-zinc-500 text-xs shrink-0 group-open:rotate-180 transition-transform">
+                <span className="text-ink-3 text-xs shrink-0 group-open:rotate-180 transition-transform">
                   ▼
                 </span>
               </summary>
-              <ol className="mt-3 flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside leading-relaxed marker:text-zinc-500">
+              <ol className="mt-3 flex flex-col gap-2 text-sm text-ink-2 list-decimal list-inside leading-relaxed marker:text-ink-3">
                 {ht.steps.map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
@@ -619,7 +619,7 @@ export default function HelpPage() {
 
       {/* Oops recovery */}
       <Section title="Oops — I messed up. How do I fix it?">
-        <p className="text-zinc-400 text-sm mb-3">
+        <p className="text-ink-2 text-sm mb-3">
           Almost nothing in this system is unrecoverable. Here's how to fix
           the common mistakes.
         </p>
@@ -629,13 +629,13 @@ export default function HelpPage() {
               key={i}
               className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 group open:border-amber-500/30"
             >
-              <summary className="text-white font-medium cursor-pointer list-none flex justify-between items-start gap-3">
+              <summary className="text-ink font-medium cursor-pointer list-none flex justify-between items-start gap-3">
                 {r.problem}
-                <span className="text-amber-400/70 text-xs shrink-0 group-open:rotate-180 transition-transform">
+                <span className="text-honey/70 text-xs shrink-0 group-open:rotate-180 transition-transform">
                   ▼
                 </span>
               </summary>
-              <p className="text-zinc-300 text-sm mt-3 leading-snug">{r.fix}</p>
+              <p className="text-ink-2 text-sm mt-3 leading-snug">{r.fix}</p>
             </details>
           ))}
         </div>
@@ -647,15 +647,15 @@ export default function HelpPage() {
           {FAQ.map((f, i) => (
             <details
               key={i}
-              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 group open:border-zinc-700"
+              className="bg-card border border-edge2 rounded-lg p-4 group open:border-edge2"
             >
-              <summary className="text-white font-medium cursor-pointer list-none flex justify-between items-start gap-3">
+              <summary className="text-ink font-medium cursor-pointer list-none flex justify-between items-start gap-3">
                 {f.q}
-                <span className="text-zinc-500 text-xs shrink-0 group-open:rotate-180 transition-transform">
+                <span className="text-ink-3 text-xs shrink-0 group-open:rotate-180 transition-transform">
                   ▼
                 </span>
               </summary>
-              <p className="text-zinc-400 text-sm mt-3 leading-snug">{f.a}</p>
+              <p className="text-ink-2 text-sm mt-3 leading-snug">{f.a}</p>
             </details>
           ))}
         </div>
@@ -663,7 +663,7 @@ export default function HelpPage() {
 
       {/* Glossary */}
       <Section title="Restoration vocab cheat-sheet">
-        <p className="text-zinc-400 text-sm mb-3">
+        <p className="text-ink-2 text-sm mb-3">
           Industry terms that come up in scopes, paperwork, and on calls with
           adjusters.
         </p>
@@ -671,10 +671,10 @@ export default function HelpPage() {
           {GLOSSARY.map((g) => (
             <div
               key={g.term}
-              className="bg-zinc-900 border border-zinc-800 rounded-lg p-3"
+              className="bg-card border border-edge2 rounded-lg p-3"
             >
-              <p className="text-white text-sm font-semibold">{g.term}</p>
-              <p className="text-zinc-400 text-xs mt-1 leading-snug">{g.meaning}</p>
+              <p className="text-ink text-sm font-semibold">{g.term}</p>
+              <p className="text-ink-2 text-xs mt-1 leading-snug">{g.meaning}</p>
             </div>
           ))}
         </div>
@@ -700,16 +700,16 @@ export default function HelpPage() {
       </Section>
 
       {/* Contact */}
-      <section className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 mt-5 text-center">
-        <p className="text-white font-semibold">
+      <section className="bg-blue-500/5 border border-info/20 rounded-xl p-6 mt-5 text-center">
+        <p className="text-ink font-semibold">
           Stuck? Something doesn't make sense?
         </p>
-        <p className="text-zinc-400 text-sm mt-2">
+        <p className="text-ink-2 text-sm mt-2">
           First, try Echo (top bar) — it knows the system. If that doesn't sort
           it, email{" "}
           <a
             href="mailto:hello@firstcallm.com"
-            className="text-blue-400 hover:underline"
+            className="text-info hover:underline"
           >
             hello@firstcallm.com
           </a>{" "}
@@ -729,7 +729,7 @@ function Section({
 }) {
   return (
     <section className="mb-8">
-      <h2 className="text-xl font-bold text-white mb-3">{title}</h2>
+      <h2 className="text-xl font-bold text-ink mb-3">{title}</h2>
       {children}
     </section>
   );
@@ -739,7 +739,7 @@ function QuickLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-colors"
+      className="px-3 py-2 rounded-lg bg-card border border-edge2 hover:border-edge2 text-ink-2 hover:text-ink transition-colors"
     >
       {label}
     </Link>

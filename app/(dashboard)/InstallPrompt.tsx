@@ -89,19 +89,19 @@ export default function InstallPrompt() {
   // iOS hint
   if (iosHint) {
     return (
-      <div className="md:hidden bg-blue-500/10 border-b border-blue-500/30 px-4 py-3 flex items-start gap-3">
+      <div className="md:hidden bg-info/10 border-b border-info/30 px-4 py-3 flex items-start gap-3">
         <span className="text-2xl shrink-0 leading-none">📱</span>
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium">
+          <p className="text-ink text-sm font-medium">
             Install FirstCall on your home screen
           </p>
-          <p className="text-zinc-300 text-xs mt-1 leading-snug">
+          <p className="text-ink-2 text-xs mt-1 leading-snug">
             Tap{" "}
-            <span className="inline-block px-1.5 py-0.5 bg-zinc-800 rounded text-[10px]">
+            <span className="inline-block px-1.5 py-0.5 bg-shade rounded text-[10px]">
               Share
             </span>{" "}
             below, then{" "}
-            <span className="inline-block px-1.5 py-0.5 bg-zinc-800 rounded text-[10px]">
+            <span className="inline-block px-1.5 py-0.5 bg-shade rounded text-[10px]">
               Add to Home Screen
             </span>
             . Acts like a native app — works one-handed in the field.
@@ -109,7 +109,7 @@ export default function InstallPrompt() {
         </div>
         <button
           onClick={dismiss}
-          className="text-zinc-400 hover:text-white text-lg leading-none px-2"
+          className="text-ink-2 hover:text-ink text-lg leading-none px-2"
           aria-label="Dismiss"
         >
           ×
@@ -120,14 +120,14 @@ export default function InstallPrompt() {
 
   // Android / Chrome — programmatic install
   return (
-    <div className="bg-blue-500/10 border-b border-blue-500/30 px-4 py-3 flex items-center justify-between gap-3">
+    <div className="bg-info/10 border-b border-info/30 px-4 py-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <span className="text-2xl shrink-0 leading-none">📱</span>
         <div className="min-w-0">
-          <p className="text-white text-sm font-medium">
+          <p className="text-ink text-sm font-medium">
             Install FirstCall as an app
           </p>
-          <p className="text-zinc-400 text-xs">
+          <p className="text-ink-2 text-xs">
             One tap from your phone's home screen — perfect for the field.
           </p>
         </div>
@@ -135,13 +135,13 @@ export default function InstallPrompt() {
       <div className="flex gap-2 shrink-0">
         <button
           onClick={install}
-          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg"
+          className="px-3 py-1.5 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg"
         >
           Install
         </button>
         <button
           onClick={dismiss}
-          className="text-zinc-400 hover:text-white text-sm px-2"
+          className="text-ink-2 hover:text-ink text-sm px-2"
           aria-label="Dismiss"
         >
           ×

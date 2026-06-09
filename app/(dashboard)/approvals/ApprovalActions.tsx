@@ -38,24 +38,24 @@ export function DismissButton({
         <button
           onClick={() => dismiss(false)}
           disabled={pending}
-          className="text-zinc-500 hover:text-zinc-300 text-xs"
+          className="text-ink-3 hover:text-ink-2 text-xs"
         >
           Dismiss
         </button>
         {hasUnderlying && (
           <>
-            <span className="text-zinc-700 text-xs">·</span>
+            <span className="text-ink-3 text-xs">·</span>
             <button
               onClick={() => dismiss(true)}
               disabled={pending}
-              className="text-red-400 hover:text-red-300 text-xs"
+              className="text-red-700 hover:text-red-700 text-xs"
             >
               Discard draft
             </button>
           </>
         )}
       </div>
-      {error && <p className="text-red-400 text-[10px]">{error}</p>}
+      {error && <p className="text-red-700 text-[10px]">{error}</p>}
     </div>
   );
 }
@@ -81,11 +81,11 @@ export function ApplySuggestionButton({ approvalId }: { approvalId: string }) {
       <button
         onClick={apply}
         disabled={pending}
-        className="px-3 py-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded"
+        className="px-3 py-1 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded"
       >
         {pending ? "Applying…" : "Apply"}
       </button>
-      {error && <p className="text-red-400 text-[10px]">{error}</p>}
+      {error && <p className="text-red-700 text-[10px]">{error}</p>}
     </div>
   );
 }

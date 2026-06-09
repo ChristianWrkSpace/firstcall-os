@@ -30,29 +30,29 @@ export default async function NotificationBell() {
 
   return (
     <details className="hidden md:block fixed top-4 right-20 z-30 group">
-      <summary className="list-none cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
+      <summary className="list-none cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-edge2 hover:border-edge2 transition-colors">
         <span className="text-base leading-none">🔔</span>
         {n > 0 ? (
-          <span className="text-xs font-mono font-semibold text-blue-400">
+          <span className="text-xs font-mono font-semibold text-info">
             {n}
           </span>
         ) : (
-          <span className="text-xs text-zinc-500">0</span>
+          <span className="text-xs text-ink-3">0</span>
         )}
       </summary>
 
       <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] glass-card shadow-2xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-          <p className="text-white text-sm font-semibold">Pending approvals</p>
+        <div className="px-4 py-3 border-b border-edge2 flex items-center justify-between">
+          <p className="text-ink text-sm font-semibold">Pending approvals</p>
           {n > 0 && (
-            <span className="text-blue-400 text-xs font-mono">
+            <span className="text-info text-xs font-mono">
               {n} waiting
             </span>
           )}
         </div>
         {list.length === 0 ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-zinc-400 text-sm">
+            <p className="text-ink-2 text-sm">
               ✓ Caught up. The agents have nothing for you to review.
             </p>
           </div>
@@ -61,21 +61,21 @@ export default async function NotificationBell() {
             {list.map((it: any) => (
               <li
                 key={it.id}
-                className="border-b border-white/[0.06]/60 last:border-0"
+                className="border-b border-edge2/60 last:border-0"
               >
                 <Link
                   href={it.link ?? "/approvals"}
-                  className="block px-4 py-3 hover:bg-white/[0.03] transition-colors"
+                  className="block px-4 py-3 hover:bg-shade transition-colors"
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-lg shrink-0 leading-none mt-0.5">
                       {KIND_EMOJI[it.kind] ?? "•"}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-zinc-100 text-sm truncate">
+                      <p className="text-ink text-sm truncate">
                         {it.title}
                       </p>
-                      <p className="text-zinc-500 text-[11px] mt-0.5">
+                      <p className="text-ink-3 text-[11px] mt-0.5">
                         {new Date(it.created_at).toLocaleString()}
                       </p>
                     </div>
@@ -85,16 +85,16 @@ export default async function NotificationBell() {
             ))}
           </ul>
         )}
-        <div className="px-4 py-2 border-t border-zinc-800 flex items-center justify-between text-xs">
+        <div className="px-4 py-2 border-t border-edge2 flex items-center justify-between text-xs">
           <Link
             href="/approvals"
-            className="text-blue-400 hover:text-blue-300"
+            className="text-info hover:text-info-deep"
           >
             All approvals →
           </Link>
           <Link
             href="/activity"
-            className="text-zinc-400 hover:text-white"
+            className="text-ink-2 hover:text-ink"
           >
             Activity feed
           </Link>

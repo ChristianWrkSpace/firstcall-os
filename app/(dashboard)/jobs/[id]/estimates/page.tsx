@@ -3,11 +3,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
-  draft:    "bg-zinc-700 text-zinc-300",
-  approved: "bg-green-500/15 text-green-400",
-  sent:     "bg-blue-500/15 text-blue-400",
-  rejected: "bg-red-500/15 text-red-400",
-  revised:  "bg-yellow-500/15 text-yellow-400",
+  draft:    "bg-shade text-ink-2",
+  approved: "bg-pine/10 text-pine",
+  sent:     "bg-info/10 text-info",
+  rejected: "bg-red-600/10 text-red-700",
+  revised:  "bg-honey/10 text-honey",
 };
 
 export default async function EstimatesIndex({
@@ -34,17 +34,17 @@ export default async function EstimatesIndex({
       <div className="mb-6">
         <Link
           href={`/jobs/${id}`}
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Back to Job
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Estimates</h1>
+        <h1 className="text-2xl font-bold text-ink mt-2">Estimates</h1>
       </div>
 
       {!estimates?.length ? (
         <div className="glass-card p-8 text-center">
-          <p className="text-zinc-400 text-sm mb-3">No estimates yet for this job.</p>
-          <p className="text-zinc-500 text-xs">
+          <p className="text-ink-2 text-sm mb-3">No estimates yet for this job.</p>
+          <p className="text-ink-3 text-xs">
             Generate one from the job detail page after running Argus scope analysis.
           </p>
         </div>
@@ -52,7 +52,7 @@ export default async function EstimatesIndex({
         <div className="glass-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Version</th>
                 <th className="px-5 py-3 text-left">Status</th>
                 <th className="px-5 py-3 text-right">Line Items</th>
@@ -69,12 +69,12 @@ export default async function EstimatesIndex({
                 return (
                   <tr
                     key={est.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link
                         href={`/jobs/${id}/estimates/${est.id}`}
-                        className="text-blue-400 hover:underline font-mono"
+                        className="text-info hover:underline font-mono"
                       >
                         v{est.version}
                       </Link>
@@ -86,13 +86,13 @@ export default async function EstimatesIndex({
                         {est.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-5 py-3 text-right text-ink-2 font-mono text-xs">
                       {(est.line_items ?? []).length}
                     </td>
-                    <td className="px-5 py-3 text-right text-white font-mono">
+                    <td className="px-5 py-3 text-right text-ink font-mono">
                       ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className="px-5 py-3 text-zinc-500 text-xs">
+                    <td className="px-5 py-3 text-ink-3 text-xs">
                       {new Date(est.created_at).toLocaleDateString()}
                     </td>
                   </tr>

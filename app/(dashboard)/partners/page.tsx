@@ -56,15 +56,15 @@ export default async function PartnersPage() {
     <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white">Partners</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-ink">Partners</h1>
+          <p className="text-ink-2 text-sm mt-0.5">
             Plumbers, property managers, restaurants, GCs, and other referral
             sources. Click any partner to see ROI.
           </p>
         </div>
         <Link
           href="/partners/outreach"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-2 bg-cta hover:bg-cta-deep text-white text-sm font-medium rounded-lg transition-colors"
         >
           🎯 B2B Outreach
         </Link>
@@ -72,9 +72,9 @@ export default async function PartnersPage() {
 
       <div className="glass-card overflow-x-auto">
         {!partners?.length ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
+          <div className="px-5 py-10 text-center text-ink-3 text-sm">
             No partners yet. Convert leads from{" "}
-            <Link href="/partners/outreach" className="text-blue-400 hover:underline">
+            <Link href="/partners/outreach" className="text-info hover:underline">
               Outreach Pipeline
             </Link>
             .
@@ -82,7 +82,7 @@ export default async function PartnersPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Name</th>
                 <th className="px-5 py-3 text-left">Type</th>
                 <th className="px-5 py-3 text-right">Referrals</th>
@@ -100,29 +100,29 @@ export default async function PartnersPage() {
                 return (
                   <tr
                     key={p.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade transition-colors"
                   >
                     <td className="px-5 py-3">
                       <Link
                         href={`/partners/${p.id}`}
-                        className="text-white hover:text-blue-400 transition-colors font-medium"
+                        className="text-ink hover:text-info-deep transition-colors font-medium"
                       >
                         {p.name}
                       </Link>
                       {p.company && (
-                        <p className="text-zinc-500 text-xs">{p.company}</p>
+                        <p className="text-ink-3 text-xs">{p.company}</p>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
+                    <td className="px-5 py-3 text-ink-2 text-xs">
                       {PARTNER_TYPE_LABEL[ptype]}
                     </td>
-                    <td className="px-5 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-5 py-3 text-right text-ink-2 font-mono text-xs">
                       {s.referrals}
                     </td>
-                    <td className="px-5 py-3 text-right text-green-400 font-mono text-xs">
+                    <td className="px-5 py-3 text-right text-pine font-mono text-xs">
                       {fmt(s.revenue)}
                     </td>
-                    <td className="px-5 py-3 text-right text-zinc-400 font-mono text-xs">
+                    <td className="px-5 py-3 text-right text-ink-2 font-mono text-xs">
                       {fmt(invested)}
                     </td>
                     <td className="px-5 py-3 text-right font-mono text-xs">
@@ -130,16 +130,16 @@ export default async function PartnersPage() {
                         <span
                           className={
                             roi >= 5
-                              ? "text-green-400"
+                              ? "text-pine"
                               : roi < 1
-                                ? "text-red-400"
-                                : "text-zinc-300"
+                                ? "text-red-700"
+                                : "text-ink-2"
                           }
                         >
                           {roi.toFixed(1)}×
                         </span>
                       ) : (
-                        <span className="text-zinc-600">—</span>
+                        <span className="text-ink-3">—</span>
                       )}
                     </td>
                   </tr>

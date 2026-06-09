@@ -6,9 +6,9 @@ import { SECRETS } from "@/lib/secrets-catalog";
 import MarkRotatedDialog from "./MarkRotatedDialog";
 
 const BLAST_BADGE = {
-  low:    "bg-zinc-700 text-zinc-300",
-  medium: "bg-yellow-500/15 text-yellow-300",
-  high:   "bg-red-500/15 text-red-400",
+  low:    "bg-shade text-ink-2",
+  medium: "bg-honey/10 text-honey",
+  high:   "bg-red-600/10 text-red-700",
 };
 
 export default async function SecretsRotationPage() {
@@ -17,8 +17,8 @@ export default async function SecretsRotationPage() {
   if (me.role !== "owner" && me.role !== "manager") {
     return (
       <div className="p-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-white">Secrets Rotation</h1>
-        <p className="text-zinc-400 text-sm mt-2">Owner / manager only.</p>
+        <h1 className="text-2xl font-bold text-ink">Secrets Rotation</h1>
+        <p className="text-ink-2 text-sm mt-2">Owner / manager only.</p>
       </div>
     );
   }
@@ -46,17 +46,17 @@ export default async function SecretsRotationPage() {
   return (
     <div className="p-4 md:p-8 max-w-4xl">
       <div className="mb-6">
-        <Link href="/settings" className="text-zinc-500 hover:text-white text-sm">
+        <Link href="/settings" className="text-ink-3 hover:text-ink text-sm">
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">🔑 Secrets Rotation</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
+        <h1 className="text-2xl font-bold text-ink mt-2">🔑 Secrets Rotation</h1>
+        <p className="text-ink-2 text-sm mt-1 max-w-2xl">
           Track when each API key was last rotated. Status flags appear when a
           secret is overdue against its target cadence. Rotation procedure for
           each vendor lives in the{" "}
           <Link
             href="/settings/incident-response"
-            className="text-blue-400 hover:underline"
+            className="text-info hover:underline"
           >
             Incident Response runbook
           </Link>
@@ -67,7 +67,7 @@ export default async function SecretsRotationPage() {
       <section className="glass-card p-6">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
               <th className="text-left py-2">Secret</th>
               <th className="text-left py-2">Vendor</th>
               <th className="text-left py-2">Blast</th>
@@ -96,33 +96,33 @@ export default async function SecretsRotationPage() {
                       : "ok";
               const statusBadge =
                 status === "overdue"
-                  ? "bg-red-500/15 text-red-400"
+                  ? "bg-red-600/10 text-red-700"
                   : status === "soon"
-                    ? "bg-yellow-500/15 text-yellow-300"
+                    ? "bg-honey/10 text-honey"
                     : status === "never"
-                      ? "bg-zinc-700 text-zinc-300"
-                      : "bg-green-500/15 text-green-400";
+                      ? "bg-shade text-ink-2"
+                      : "bg-pine/10 text-pine";
 
               return (
                 <tr
                   key={s.name}
-                  className="border-b border-white/[0.06]/60 last:border-0 align-top"
+                  className="border-b border-edge2/60 last:border-0 align-top"
                 >
                   <td className="py-3 pr-3">
-                    <p className="text-white font-mono text-xs">{s.name}</p>
-                    <p className="text-zinc-500 text-[10px] mt-0.5 leading-snug max-w-xs">
+                    <p className="text-ink font-mono text-xs">{s.name}</p>
+                    <p className="text-ink-3 text-[10px] mt-0.5 leading-snug max-w-xs">
                       {s.description}
                     </p>
                     <a
                       href={s.rotation_url}
                       target="_blank"
                       rel="noopener"
-                      className="text-blue-400 hover:underline text-[10px] mt-1 inline-block"
+                      className="text-info hover:underline text-[10px] mt-1 inline-block"
                     >
                       Rotate at vendor →
                     </a>
                   </td>
-                  <td className="py-3 pr-3 text-zinc-300 text-xs">
+                  <td className="py-3 pr-3 text-ink-2 text-xs">
                     {s.vendor}
                   </td>
                   <td className="py-3 pr-3">
@@ -132,15 +132,15 @@ export default async function SecretsRotationPage() {
                       {s.blast_radius}
                     </span>
                   </td>
-                  <td className="py-3 pr-3 text-zinc-400 text-xs">
+                  <td className="py-3 pr-3 text-ink-2 text-xs">
                     Every {s.cadence_days}d
                   </td>
-                  <td className="py-3 pr-3 text-zinc-300 text-xs">
+                  <td className="py-3 pr-3 text-ink-2 text-xs">
                     {latest
                       ? `${new Date(latest.rotated_at).toLocaleDateString()} (${ageDays}d ago)`
                       : "Never logged"}
                     {latest?.notes && (
-                      <p className="text-zinc-500 text-[10px] mt-0.5 italic">
+                      <p className="text-ink-3 text-[10px] mt-0.5 italic">
                         {latest.notes}
                       </p>
                     )}
@@ -163,15 +163,15 @@ export default async function SecretsRotationPage() {
       </section>
 
       <section className="glass-card p-6 mt-5">
-        <h2 className="text-white font-semibold mb-3">Rotation Steps (every secret)</h2>
-        <ol className="flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside">
+        <h2 className="text-ink font-semibold mb-3">Rotation Steps (every secret)</h2>
+        <ol className="flex flex-col gap-2 text-sm text-ink-2 list-decimal list-inside">
           <li>Log into the vendor and create a NEW key (don't delete the old one yet).</li>
           <li>
-            Update Vercel env: <code className="text-blue-300">vercel env rm SECRET_NAME production</code>{" "}
-            then <code className="text-blue-300">vercel env add SECRET_NAME production</code>.
+            Update Vercel env: <code className="text-info">vercel env rm SECRET_NAME production</code>{" "}
+            then <code className="text-info">vercel env add SECRET_NAME production</code>.
           </li>
           <li>
-            Trigger a redeploy: <code className="text-blue-300">vercel deploy --prod --yes</code>.
+            Trigger a redeploy: <code className="text-info">vercel deploy --prod --yes</code>.
           </li>
           <li>
             Verify the new key works (hit the affected feature once: send a

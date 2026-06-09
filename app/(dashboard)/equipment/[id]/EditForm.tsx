@@ -5,8 +5,8 @@ import { updateEquipment, deleteEquipment } from "@/app/actions/equipment";
 import { EQUIPMENT_MANUFACTURERS } from "@/lib/restoration-catalog";
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
-const LABEL = "text-zinc-400 text-xs uppercase tracking-wide";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm";
+const LABEL = "text-ink-2 text-xs uppercase tracking-wide";
 
 export default function EditForm({
   id,
@@ -48,10 +48,10 @@ export default function EditForm({
     return (
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-semibold">Equipment Info</h2>
+          <h2 className="text-ink font-semibold">Equipment Info</h2>
           <button
             onClick={() => setEditing(true)}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            className="text-info hover:text-info-deep text-xs font-medium"
           >
             Edit
           </button>
@@ -94,14 +94,14 @@ export default function EditForm({
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-white font-semibold">Edit Equipment</h2>
+        <h2 className="text-ink font-semibold">Edit Equipment</h2>
         <button
           type="button"
           onClick={() => {
             setEditing(false);
             setError(null);
           }}
-          className="text-zinc-500 hover:text-zinc-300 text-xs"
+          className="text-ink-3 hover:text-ink-2 text-xs"
         >
           Cancel
         </button>
@@ -155,21 +155,21 @@ export default function EditForm({
         </div>
       </div>
 
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
 
       <div className="flex justify-between items-center">
         <button
           type="button"
           onClick={handleDelete}
           disabled={pending}
-          className="text-red-400 hover:text-red-300 text-xs"
+          className="text-red-700 hover:text-red-700 text-xs"
         >
           Delete
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm rounded-lg"
+          className="px-4 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm rounded-lg"
         >
           {pending ? "Saving…" : "Save"}
         </button>
@@ -189,8 +189,8 @@ function Field({
 }) {
   return (
     <div>
-      <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">{label}</p>
-      <p className={`text-zinc-200 ${mono ? "font-mono text-sm" : ""}`}>{value}</p>
+      <p className="text-ink-2 text-xs uppercase tracking-wide mb-0.5">{label}</p>
+      <p className={`text-ink ${mono ? "font-mono text-sm" : ""}`}>{value}</p>
     </div>
   );
 }

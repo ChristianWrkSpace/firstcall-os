@@ -12,12 +12,12 @@ export default async function CostBasisPage() {
       <div className="mb-6">
         <Link
           href="/settings"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Cost Basis</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink mt-2">Cost Basis</h1>
+        <p className="text-ink-2 text-sm mt-0.5">
           The numbers behind every Job P&L. Tune these to match your real costs —
           Job Economics + per-job net profit recompute on the fly.
         </p>
@@ -25,24 +25,24 @@ export default async function CostBasisPage() {
 
       <CostBasisForm initial={cb} />
 
-      <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-2">How each field is used</p>
+      <div className="mt-6 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-2">How each field is used</p>
         <ul className="space-y-1.5">
           <li>
-            <span className="text-zinc-300 font-mono">Default hourly rate</span> — applied to a
+            <span className="text-ink-2 font-mono">Default hourly rate</span> — applied to a
             tech labor entry when no per-entry rate is set. Override per entry for senior techs / OT.
           </li>
           <li>
-            <span className="text-zinc-300 font-mono">Van cost per job</span> — flat per-job
+            <span className="text-ink-2 font-mono">Van cost per job</span> — flat per-job
             allocation for truck/fuel/insurance. Crude but honest until you log per-job mileage.
           </li>
           <li>
-            <span className="text-zinc-300 font-mono">Default equipment daily</span> — used when an
+            <span className="text-ink-2 font-mono">Default equipment daily</span> — used when an
             equipment row's <code>daily_cost</code> is null. Set per-piece on /equipment for
             accuracy on owned vs leased units.
           </li>
           <li>
-            <span className="text-zinc-300 font-mono">Monthly overhead</span> — fixed costs
+            <span className="text-ink-2 font-mono">Monthly overhead</span> — fixed costs
             (rent, software, admin payroll, insurance) prorated to each window and allocated to
             jobs proportionally to their billed revenue.
           </li>

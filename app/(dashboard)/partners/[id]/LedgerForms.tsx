@@ -53,15 +53,15 @@ export function PayoutForm({ partnerId }: { partnerId: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg"
+        className="px-3 py-1.5 bg-shade hover:bg-shade text-ink text-xs font-medium rounded-lg"
       >
         + Log Cash Payout
       </button>
     );
   }
   return (
-    <div className="bg-white/[0.03] border border-zinc-700 rounded-lg p-4 flex flex-col gap-2">
-      <p className="text-zinc-300 text-xs font-medium">New cash payout (1099-tracked)</p>
+    <div className="bg-tint border border-edge2 rounded-lg p-4 flex flex-col gap-2">
+      <p className="text-ink-2 text-xs font-medium">New cash payout (1099-tracked)</p>
       <div className="grid grid-cols-2 gap-2">
         <input
           value={amount}
@@ -70,18 +70,18 @@ export function PayoutForm({ partnerId }: { partnerId: string }) {
           min="0"
           step="0.01"
           placeholder="Amount $"
-          className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         />
         <input
           value={date}
           onChange={(e) => setDate(e.target.value)}
           type="date"
-          className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         />
         <select
           value={method}
           onChange={(e) => setMethod(e.target.value as PayoutMethod)}
-          className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         >
           {PAYOUT_METHODS.map((m) => (
             <option key={m.value} value={m.value}>
@@ -93,7 +93,7 @@ export function PayoutForm({ partnerId }: { partnerId: string }) {
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           placeholder="Reference / check #"
-          className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         />
       </div>
       <textarea
@@ -101,20 +101,20 @@ export function PayoutForm({ partnerId }: { partnerId: string }) {
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Notes — which job, why, etc."
         rows={2}
-        className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs resize-none"
+        className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs resize-none"
       />
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
       <div className="flex gap-2">
         <button
           onClick={submit}
           disabled={pending}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded"
+          className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded"
         >
           {pending ? "Saving…" : "Save Payout"}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="px-3 py-1.5 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-xs rounded"
+          className="px-3 py-1.5 border border-edge2 text-ink-2 hover:bg-shade text-xs rounded"
         >
           Cancel
         </button>
@@ -158,15 +158,15 @@ export function InvestmentForm({ partnerId }: { partnerId: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg"
+        className="px-3 py-1.5 bg-shade hover:bg-shade text-ink text-xs font-medium rounded-lg"
       >
         + Log Soft Investment
       </button>
     );
   }
   return (
-    <div className="bg-white/[0.03] border border-zinc-700 rounded-lg p-4 flex flex-col gap-2">
-      <p className="text-zinc-300 text-xs font-medium">New soft investment (relationship)</p>
+    <div className="bg-tint border border-edge2 rounded-lg p-4 flex flex-col gap-2">
+      <p className="text-ink-2 text-xs font-medium">New soft investment (relationship)</p>
       <div className="grid grid-cols-2 gap-2">
         <input
           value={amount}
@@ -175,18 +175,18 @@ export function InvestmentForm({ partnerId }: { partnerId: string }) {
           min="0"
           step="0.01"
           placeholder="Amount $"
-          className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         />
         <input
           value={date}
           onChange={(e) => setDate(e.target.value)}
           type="date"
-          className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as InvestmentCategory)}
-          className="col-span-2 px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs"
+          className="col-span-2 px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs"
         >
           {INVESTMENT_CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
@@ -200,20 +200,20 @@ export function InvestmentForm({ partnerId }: { partnerId: string }) {
         onChange={(e) => setNotes(e.target.value)}
         placeholder="What was it (lunch at X, gift basket, holiday card box, etc.)"
         rows={2}
-        className="px-2 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-white text-xs resize-none"
+        className="px-2 py-1.5 rounded bg-card border border-edge2 text-ink text-xs resize-none"
       />
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
       <div className="flex gap-2">
         <button
           onClick={submit}
           disabled={pending}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded"
+          className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded"
         >
           {pending ? "Saving…" : "Save Investment"}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="px-3 py-1.5 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-xs rounded"
+          className="px-3 py-1.5 border border-edge2 text-ink-2 hover:bg-shade text-xs rounded"
         >
           Cancel
         </button>
@@ -243,7 +243,7 @@ export function DeleteEntryButton({
     <button
       onClick={go}
       disabled={pending}
-      className="text-red-400 hover:text-red-300 text-xs disabled:opacity-50"
+      className="text-red-700 hover:text-red-700 text-xs disabled:opacity-50"
     >
       {pending ? "..." : "delete"}
     </button>

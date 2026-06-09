@@ -35,7 +35,7 @@ const MATERIALS = [
 ];
 
 const INPUT =
-  "w-full px-2.5 py-1.5 rounded bg-zinc-800 border border-zinc-700 text-white text-xs placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-600";
+  "w-full px-2.5 py-1.5 rounded bg-shade border border-edge2 text-ink text-xs placeholder:text-ink-3 focus:outline-none focus:ring-1 focus:ring-cta";
 
 export default function MoistureLog({
   jobId,
@@ -75,14 +75,14 @@ export default function MoistureLog({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <p className="text-zinc-400 text-xs">
+        <p className="text-ink-2 text-xs">
           {readings.length} {readings.length === 1 ? "reading" : "readings"} logged
           {dates.length > 0 && ` · last on ${new Date(dates[0]).toLocaleDateString()}`}
         </p>
         {!adding && (
           <button
             onClick={() => setAdding(true)}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            className="text-info hover:text-info-deep text-xs font-medium"
           >
             + Log Reading
           </button>
@@ -92,10 +92,10 @@ export default function MoistureLog({
       {adding && (
         <form
           action={handleSubmit}
-          className="bg-zinc-800/60 border border-zinc-700 rounded-lg p-3 grid grid-cols-2 sm:grid-cols-4 gap-2"
+          className="bg-shade border border-edge2 rounded-lg p-3 grid grid-cols-2 sm:grid-cols-4 gap-2"
         >
           <div className="col-span-2 sm:col-span-2 flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Room *</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Room *</label>
             <input
               name="room"
               required
@@ -104,7 +104,7 @@ export default function MoistureLog({
             />
           </div>
           <div className="col-span-2 sm:col-span-2 flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Location detail</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Location detail</label>
             <input
               name="location_detail"
               placeholder="Wall behind nightstand"
@@ -112,7 +112,7 @@ export default function MoistureLog({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Date</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Date</label>
             <input
               name="reading_date"
               type="date"
@@ -121,7 +121,7 @@ export default function MoistureLog({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Material</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Material</label>
             <select name="material" className={INPUT}>
               <option value="">—</option>
               {MATERIALS.map((m) => (
@@ -132,7 +132,7 @@ export default function MoistureLog({
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Moisture %</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Moisture %</label>
             <input
               name="moisture_pct"
               type="number"
@@ -142,38 +142,38 @@ export default function MoistureLog({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">RH %</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">RH %</label>
             <input name="rh_pct" type="number" step="0.1" placeholder="55" className={INPUT} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Temp °F</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Temp °F</label>
             <input name="temp_f" type="number" step="0.1" placeholder="72" className={INPUT} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">GPP</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">GPP</label>
             <input name="gpp" type="number" step="0.1" placeholder="65" className={INPUT} />
           </div>
           <div className="col-span-2 sm:col-span-3 flex flex-col gap-1">
-            <label className="text-zinc-400 text-[10px] uppercase tracking-wide">Notes</label>
+            <label className="text-ink-2 text-[10px] uppercase tracking-wide">Notes</label>
             <input name="notes" placeholder="optional" className={INPUT} />
           </div>
-          <label className="col-span-2 sm:col-span-1 flex items-center gap-2 text-xs text-zinc-300 mt-5">
+          <label className="col-span-2 sm:col-span-1 flex items-center gap-2 text-xs text-ink-2 mt-5">
             <input type="checkbox" name="is_dry_standard" />
             Dry standard met
           </label>
-          {error && <p className="col-span-full text-red-400 text-xs">{error}</p>}
+          {error && <p className="col-span-full text-red-700 text-xs">{error}</p>}
           <div className="col-span-full flex justify-end gap-2 mt-1">
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="text-zinc-500 hover:text-zinc-300 text-xs"
+              className="text-ink-3 hover:text-ink-2 text-xs"
             >
               cancel
             </button>
             <button
               type="submit"
               disabled={pending}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs rounded-lg"
+              className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs rounded-lg"
             >
               {pending ? "saving…" : "Log Reading"}
             </button>
@@ -182,14 +182,14 @@ export default function MoistureLog({
       )}
 
       {readings.length === 0 ? (
-        <p className="text-zinc-500 text-sm italic">
+        <p className="text-ink-3 text-sm italic">
           No moisture readings yet. Log one daily during drying for IICRC S500 compliance.
         </p>
       ) : (
         <div className="flex flex-col gap-3">
           {dates.map((date) => (
             <div key={date}>
-              <p className="text-zinc-400 text-xs uppercase tracking-wide font-semibold mb-1.5">
+              <p className="text-ink-2 text-xs uppercase tracking-wide font-semibold mb-1.5">
                 {new Date(date).toLocaleDateString("en-US", {
                   weekday: "short",
                   month: "short",
@@ -199,7 +199,7 @@ export default function MoistureLog({
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-white/[0.06] text-zinc-500 uppercase tracking-wide">
+                    <tr className="border-b border-edge2 text-ink-3 uppercase tracking-wide">
                       <th className="text-left py-1.5">Room</th>
                       <th className="text-left py-1.5">Material</th>
                       <th className="text-right py-1.5">Moisture %</th>
@@ -212,39 +212,39 @@ export default function MoistureLog({
                   </thead>
                   <tbody>
                     {byDate[date].map((r) => (
-                      <tr key={r.id} className="border-b border-white/[0.06]/40">
-                        <td className="py-1.5 text-zinc-200">
+                      <tr key={r.id} className="border-b border-edge2/40">
+                        <td className="py-1.5 text-ink">
                           {r.room}
                           {r.location_detail && (
-                            <p className="text-zinc-500 text-[10px]">{r.location_detail}</p>
+                            <p className="text-ink-3 text-[10px]">{r.location_detail}</p>
                           )}
                         </td>
-                        <td className="py-1.5 text-zinc-400">
+                        <td className="py-1.5 text-ink-2">
                           {r.material?.replace(/_/g, " ") ?? "—"}
                         </td>
-                        <td className="py-1.5 text-right text-zinc-300 font-mono">
+                        <td className="py-1.5 text-right text-ink-2 font-mono">
                           {r.moisture_pct !== null ? `${r.moisture_pct}%` : "—"}
                         </td>
-                        <td className="py-1.5 text-right text-zinc-400 font-mono">
+                        <td className="py-1.5 text-right text-ink-2 font-mono">
                           {r.rh_pct !== null ? `${r.rh_pct}%` : "—"}
                         </td>
-                        <td className="py-1.5 text-right text-zinc-400 font-mono">
+                        <td className="py-1.5 text-right text-ink-2 font-mono">
                           {r.temp_f !== null ? `${r.temp_f}°` : "—"}
                         </td>
-                        <td className="py-1.5 text-right text-zinc-400 font-mono">
+                        <td className="py-1.5 text-right text-ink-2 font-mono">
                           {r.gpp !== null ? r.gpp : "—"}
                         </td>
                         <td className="py-1.5 text-center">
                           {r.is_dry_standard ? (
-                            <span className="text-green-400">✓</span>
+                            <span className="text-pine">✓</span>
                           ) : (
-                            <span className="text-zinc-700">—</span>
+                            <span className="text-ink-3">—</span>
                           )}
                         </td>
                         <td className="py-1.5 text-right">
                           <button
                             onClick={() => remove(r.id)}
-                            className="text-red-400 hover:text-red-300 text-[10px]"
+                            className="text-red-700 hover:text-red-700 text-[10px]"
                           >
                             del
                           </button>

@@ -61,34 +61,34 @@ export default function AdjusterShareCard({
   if (!token) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-zinc-400 text-xs">
+        <p className="text-ink-2 text-xs">
           Read-only link for the insurance adjuster. Shows scope, photos, moisture
           readings, signed AOB, drying certificates — everything they need to approve.
         </p>
         <button
           onClick={gen}
           disabled={pending}
-          className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
           {pending ? "Generating…" : "🔗 Generate Adjuster Link"}
         </button>
-        {error && <p className="text-red-400 text-xs">{error}</p>}
+        {error && <p className="text-red-700 text-xs">{error}</p>}
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-zinc-400 text-xs">
+      <p className="text-ink-2 text-xs">
         Adjuster can review the full claim packet here without logging in.
       </p>
-      <div className="bg-zinc-800/60 border border-zinc-700 rounded-lg px-3 py-2 break-all text-blue-400 text-xs font-mono">
+      <div className="bg-shade border border-edge2 rounded-lg px-3 py-2 break-all text-info text-xs font-mono">
         {url}
       </div>
       <div className="flex gap-2">
         <button
           onClick={() => url && copyLink(url)}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg"
+          className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg"
         >
           {copied ? "✓ Copied" : "📋 Copy Link"}
         </button>
@@ -96,7 +96,7 @@ export default function AdjusterShareCard({
           href={url ?? "#"}
           target="_blank"
           rel="noopener"
-          className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-lg"
+          className="px-3 py-1.5 bg-shade hover:bg-shade text-ink-2 text-xs rounded-lg"
         >
           Preview
         </a>
@@ -105,20 +105,20 @@ export default function AdjusterShareCard({
         <button
           onClick={regen}
           disabled={pending}
-          className="text-zinc-500 hover:text-zinc-300 text-[10px]"
+          className="text-ink-3 hover:text-ink-2 text-[10px]"
         >
           regenerate link
         </button>
-        <span className="text-zinc-700">·</span>
+        <span className="text-ink-3">·</span>
         <button
           onClick={revoke}
           disabled={pending}
-          className="text-red-400 hover:text-red-300 text-[10px]"
+          className="text-red-700 hover:text-red-700 text-[10px]"
         >
           revoke access
         </button>
       </div>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </div>
   );
 }

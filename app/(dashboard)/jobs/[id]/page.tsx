@@ -270,8 +270,8 @@ export default async function JobDetailPage({
                 {customer?.phone && (
                   <a
                     href={`tel:${customer.phone}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors hover:bg-white/[0.06]"
-                    style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)", backgroundColor: "rgba(255,255,255,0.03)" }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors hover:bg-shade"
+                    style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)", backgroundColor: "rgba(58,47,38,0.05)" }}
                   >
                     📞 Call {customer.name?.split(" ")[0] ?? "customer"}
                   </a>
@@ -281,8 +281,8 @@ export default async function JobDetailPage({
                     href={mapsHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors hover:bg-white/[0.06] max-w-full"
-                    style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)", backgroundColor: "rgba(255,255,255,0.03)" }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors hover:bg-shade max-w-full"
+                    style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)", backgroundColor: "rgba(58,47,38,0.05)" }}
                   >
                     🧭 <span className="truncate">{job.site_address ?? "Navigate"}</span>
                   </a>
@@ -303,16 +303,16 @@ export default async function JobDetailPage({
                     {i > 0 && (
                       <span
                         className="w-4 h-px"
-                        style={{ backgroundColor: done || current ? "rgba(95,189,176,0.4)" : "var(--color-edge)" }}
+                        style={{ backgroundColor: done || current ? "rgba(217,119,87,0.4)" : "var(--color-edge)" }}
                       />
                     )}
                     <span
                       className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider whitespace-nowrap"
                       style={
                         current
-                          ? { backgroundColor: "rgba(95,189,176,0.15)", color: "#5FBDB0", boxShadow: "0 0 0 1px rgba(95,189,176,0.3)" }
+                          ? { backgroundColor: "rgba(217,119,87,0.15)", color: "#D97757", boxShadow: "0 0 0 1px rgba(217,119,87,0.3)" }
                           : done
-                            ? { color: "rgba(95,189,176,0.6)" }
+                            ? { color: "rgba(217,119,87,0.6)" }
                             : { color: "var(--color-text-muted)" }
                       }
                     >
@@ -361,7 +361,7 @@ export default async function JobDetailPage({
           id="act-field"
           title="The Field"
           agent="Argus scopes from photos · you approve"
-          accent="#5FBDB0"
+          accent="#D97757"
           open={fieldOpen}
         >
           <EditableJobDetailsCard
@@ -387,7 +387,7 @@ export default async function JobDetailPage({
                 {job.scope_assessment && (
                   <Link
                     href={`/jobs/${job.id}/loadout`}
-                    className="px-4 py-2 border rounded-lg text-sm font-medium transition-colors hover:bg-white/[0.06]"
+                    className="px-4 py-2 border rounded-lg text-sm font-medium transition-colors hover:bg-shade"
                     style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)" }}
                   >
                     📋 Loadout Sheet
@@ -462,7 +462,7 @@ export default async function JobDetailPage({
           id="act-money"
           title="The Money"
           agent="Ledger estimates · Abacus invoices & collects"
-          accent="#6B8AD9"
+          accent="#5B82B8"
           open={moneyOpen}
         >
           <div id="pnl" className="scroll-mt-24">
@@ -517,21 +517,21 @@ export default async function JobDetailPage({
                     0
                   );
                   const statusColors: Record<string, string> = {
-                    draft:    "bg-white/[0.06] text-[color:var(--color-text-secondary)]",
-                    approved: "bg-emerald-500/15 text-emerald-300",
-                    sent:     "bg-[#6B8AD9]/15 text-[#A6B8E7]",
-                    rejected: "bg-red-500/15 text-red-300",
-                    revised:  "bg-amber-500/15 text-amber-300",
+                    draft:    "bg-tint text-[color:var(--color-text-secondary)]",
+                    approved: "bg-pine/10 text-pine",
+                    sent:     "bg-[#5B82B8]/15 text-[#44689A]",
+                    rejected: "bg-red-600/10 text-red-700",
+                    revised:  "bg-honey/10 text-honey",
                   };
                   return (
                     <Link
                       key={est.id}
                       href={`/jobs/${job.id}/estimates/${est.id}`}
-                      className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors hover:bg-white/[0.05]"
-                      style={{ backgroundColor: "rgba(255,255,255,0.03)", borderColor: "var(--color-edge)" }}
+                      className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors hover:bg-shade"
+                      style={{ backgroundColor: "rgba(58,47,38,0.05)", borderColor: "var(--color-edge)" }}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm" style={{ color: "#A6B8E7" }}>
+                        <span className="font-mono text-sm" style={{ color: "#44689A" }}>
                           v{est.version}
                         </span>
                         <span
@@ -577,22 +577,22 @@ export default async function JobDetailPage({
                   );
                   const balance = total - paid;
                   const statusColors: Record<string, string> = {
-                    draft:   "bg-white/[0.06] text-[color:var(--color-text-secondary)]",
-                    sent:    "bg-[#6B8AD9]/15 text-[#A6B8E7]",
-                    partial: "bg-amber-500/15 text-amber-300",
-                    paid:    "bg-emerald-500/15 text-emerald-300",
-                    overdue: "bg-red-500/15 text-red-300",
-                    void:    "bg-white/[0.04] text-[color:var(--color-text-muted)]",
+                    draft:   "bg-tint text-[color:var(--color-text-secondary)]",
+                    sent:    "bg-[#5B82B8]/15 text-[#44689A]",
+                    partial: "bg-honey/10 text-honey",
+                    paid:    "bg-pine/10 text-pine",
+                    overdue: "bg-red-600/10 text-red-700",
+                    void:    "bg-tint text-[color:var(--color-text-muted)]",
                   };
                   return (
                     <Link
                       key={inv.id}
                       href={`/jobs/${job.id}/invoices/${inv.id}`}
-                      className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors hover:bg-white/[0.05]"
-                      style={{ backgroundColor: "rgba(255,255,255,0.03)", borderColor: "var(--color-edge)" }}
+                      className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors hover:bg-shade"
+                      style={{ backgroundColor: "rgba(58,47,38,0.05)", borderColor: "var(--color-edge)" }}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm" style={{ color: "#A6B8E7" }}>
+                        <span className="font-mono text-sm" style={{ color: "#44689A" }}>
                           {inv.invoice_number}
                         </span>
                         <span
@@ -608,7 +608,7 @@ export default async function JobDetailPage({
                       </div>
                       <span
                         className="font-mono font-semibold"
-                        style={{ color: balance > 0 ? "var(--color-text-primary)" : "#6EE7B7" }}
+                        style={{ color: balance > 0 ? "var(--color-text-primary)" : "#2E7D5B" }}
                       >
                         ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
@@ -660,7 +660,7 @@ export default async function JobDetailPage({
           id="act-people"
           title="The People"
           agent="customer · adjuster · crew · portals"
-          accent="#A6B8E7"
+          accent="#44689A"
         >
           <div>
             {customer ? (
@@ -812,7 +812,7 @@ export default async function JobDetailPage({
                   <div key={note.id} className="flex gap-3">
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+                      style={{ backgroundColor: "rgba(58,47,38,0.05)" }}
                     >
                       <span className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
                         {((note.profiles as any)?.name ?? "?")[0].toUpperCase()}

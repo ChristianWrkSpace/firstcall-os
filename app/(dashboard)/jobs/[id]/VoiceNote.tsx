@@ -115,16 +115,16 @@ export default function VoiceNote({ jobId }: { jobId: string }) {
 
   if (state === "done" && transcript) {
     return (
-      <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-        <p className="text-green-300 text-xs font-semibold uppercase tracking-wide">
+      <div className="bg-pine/10 border border-green-500/30 rounded-xl p-4">
+        <p className="text-pine text-xs font-semibold uppercase tracking-wide">
           ✓ Voice note saved
         </p>
-        <p className="text-zinc-200 text-sm mt-2 leading-snug whitespace-pre-wrap">
+        <p className="text-ink text-sm mt-2 leading-snug whitespace-pre-wrap">
           {transcript}
         </p>
         <button
           onClick={reset}
-          className="mt-3 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs rounded-lg"
+          className="mt-3 px-3 py-2 bg-shade hover:bg-shade text-ink text-xs rounded-lg"
         >
           + New voice note
         </button>
@@ -134,11 +134,11 @@ export default function VoiceNote({ jobId }: { jobId: string }) {
 
   if (state === "error") {
     return (
-      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-        <p className="text-red-300 text-sm">{error ?? "Something went wrong."}</p>
+      <div className="bg-red-600/10 border border-red-500/30 rounded-xl p-4">
+        <p className="text-red-700 text-sm">{error ?? "Something went wrong."}</p>
         <button
           onClick={reset}
-          className="mt-3 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs rounded-lg"
+          className="mt-3 px-3 py-2 bg-shade hover:bg-shade text-ink text-xs rounded-lg"
         >
           Try again
         </button>
@@ -152,7 +152,7 @@ export default function VoiceNote({ jobId }: { jobId: string }) {
         <button
           onClick={start}
           disabled={state === "asking_permission"}
-          className="flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg min-h-[48px]"
+          className="flex items-center gap-2 px-4 py-3 bg-cta hover:bg-cta-deep active:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg min-h-[48px]"
         >
           <span className="text-base leading-none">🎤</span>
           <span>
@@ -168,12 +168,12 @@ export default function VoiceNote({ jobId }: { jobId: string }) {
           <span>Stop ({fmtTime(elapsed)})</span>
         </button>
       ) : state === "uploading" ? (
-        <div className="flex items-center gap-2 px-4 py-3 bg-zinc-800 text-zinc-300 text-sm font-medium rounded-lg min-h-[48px]">
+        <div className="flex items-center gap-2 px-4 py-3 bg-shade text-ink-2 text-sm font-medium rounded-lg min-h-[48px]">
           <span className="text-base leading-none">⏳</span>
           <span>Transcribing…</span>
         </div>
       ) : null}
-      <p className="text-zinc-500 text-[11px]">
+      <p className="text-ink-3 text-[11px]">
         Records your voice → AI transcribes → saves to job notes.
       </p>
     </div>

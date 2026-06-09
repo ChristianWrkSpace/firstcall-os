@@ -5,8 +5,8 @@ import { updateJobIntake, type JobIntakePatch } from "@/app/actions/jobs";
 import { JOB_TYPES } from "@/lib/constants";
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
-const LABEL = "text-zinc-400 text-xs uppercase tracking-wide mb-0.5";
+  "w-full px-3 py-2 rounded-lg bg-card border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm";
+const LABEL = "text-ink-2 text-xs uppercase tracking-wide mb-0.5";
 
 export interface EditableJobDetails {
   type: string;
@@ -67,11 +67,11 @@ export default function EditableJobDetailsCard({
     return (
       <>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-semibold">Job Details</h2>
+          <h2 className="text-ink font-semibold">Job Details</h2>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            className="text-info hover:text-info-deep text-xs font-medium"
           >
             Edit
           </button>
@@ -96,7 +96,7 @@ export default function EditableJobDetailsCard({
           {job.description && (
             <div className="col-span-2">
               <p className={LABEL}>Description</p>
-              <p className="text-zinc-200">{job.description}</p>
+              <p className="text-ink">{job.description}</p>
             </div>
           )}
         </div>
@@ -107,12 +107,12 @@ export default function EditableJobDetailsCard({
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-white font-semibold">Edit Job Details</h2>
+        <h2 className="text-ink font-semibold">Edit Job Details</h2>
         <button
           type="button"
           onClick={cancel}
           disabled={pending}
-          className="text-zinc-500 hover:text-white text-xs font-medium"
+          className="text-ink-3 hover:text-ink text-xs font-medium"
         >
           Cancel
         </button>
@@ -185,7 +185,7 @@ export default function EditableJobDetailsCard({
 
         {error && (
           <div className="col-span-1 sm:col-span-2">
-            <p className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
+            <p className="text-red-700 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
               {error}
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function EditableJobDetailsCard({
             type="button"
             onClick={save}
             disabled={pending}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
           >
             {pending ? "Saving…" : "Save"}
           </button>
@@ -218,7 +218,7 @@ function Field({
   return (
     <div>
       <p className={LABEL}>{label}</p>
-      <p className={`text-zinc-200 ${capitalize ? "capitalize" : ""}`}>{value || "—"}</p>
+      <p className={`text-ink ${capitalize ? "capitalize" : ""}`}>{value || "—"}</p>
     </div>
   );
 }

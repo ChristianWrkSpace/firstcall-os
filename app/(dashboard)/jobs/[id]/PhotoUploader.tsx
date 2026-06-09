@@ -84,7 +84,7 @@ export default function PhotoUploader({ jobId }: { jobId: string }) {
         <button
           type="button"
           disabled
-          className="px-4 py-2 bg-zinc-800 border border-zinc-700 opacity-50 text-white text-sm rounded-lg flex items-center gap-2"
+          className="px-4 py-2 bg-shade border border-edge2 opacity-50 text-ink text-sm rounded-lg flex items-center gap-2"
         >
           <Spinner /> Uploading {progress!.done}/{progress!.total}…
         </button>
@@ -93,20 +93,20 @@ export default function PhotoUploader({ jobId }: { jobId: string }) {
           <button
             type="button"
             onClick={() => cameraRef.current?.click()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-cta hover:bg-cta-deep text-white text-sm rounded-lg transition-colors flex items-center gap-2"
           >
             📷 Take Photo
           </button>
           <button
             type="button"
             onClick={() => libraryRef.current?.click()}
-            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-shade hover:bg-shade border border-edge2 text-ink text-sm rounded-lg transition-colors flex items-center gap-2"
           >
             <UploadIcon className="w-4 h-4" /> Upload
           </button>
         </div>
       )}
-      {error && <p className="text-red-400 text-xs whitespace-pre-line">{error}</p>}
+      {error && <p className="text-red-700 text-xs whitespace-pre-line">{error}</p>}
     </div>
   );
 }

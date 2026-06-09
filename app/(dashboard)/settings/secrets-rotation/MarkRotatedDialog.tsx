@@ -37,7 +37,7 @@ export default function MarkRotatedDialog({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-blue-400 hover:text-blue-300 text-xs"
+        className="text-info hover:text-info-deep text-xs"
       >
         Mark rotated →
       </button>
@@ -45,8 +45,8 @@ export default function MarkRotatedDialog({
   }
 
   return (
-    <div className="flex flex-col gap-2 mt-2 bg-white/[0.03] border border-zinc-700 rounded-lg p-3">
-      <label className="text-zinc-400 text-[10px] uppercase tracking-wide">
+    <div className="flex flex-col gap-2 mt-2 bg-tint border border-edge2 rounded-lg p-3">
+      <label className="text-ink-2 text-[10px] uppercase tracking-wide">
         Notes (optional)
       </label>
       <input
@@ -54,20 +54,20 @@ export default function MarkRotatedDialog({
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         placeholder="e.g. quarterly rotation, after laptop reset"
-        className="px-2 py-1.5 rounded bg-zinc-800 border border-zinc-700 text-white text-xs"
+        className="px-2 py-1.5 rounded bg-shade border border-edge2 text-ink text-xs"
       />
-      {error && <p className="text-red-400 text-[10px]">{error}</p>}
+      {error && <p className="text-red-700 text-[10px]">{error}</p>}
       <div className="flex gap-2">
         <button
           onClick={save}
           disabled={pending}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded"
+          className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded"
         >
           {pending ? "Saving…" : "Confirm Rotated"}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="px-3 py-1.5 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-xs rounded"
+          className="px-3 py-1.5 border border-edge2 text-ink-2 hover:bg-shade text-xs rounded"
         >
           Cancel
         </button>

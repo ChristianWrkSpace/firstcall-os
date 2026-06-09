@@ -59,7 +59,7 @@ export default function DeployEquipmentPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
+        className="px-3 py-1.5 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg transition-colors"
       >
         + Deploy
       </button>
@@ -67,9 +67,9 @@ export default function DeployEquipmentPicker({
   }
 
   return (
-    <div className="w-full mt-3 bg-white/[0.03] border border-zinc-700 rounded-lg p-3">
+    <div className="w-full mt-3 bg-tint border border-edge2 rounded-lg p-3">
       <div className="flex items-center justify-between mb-2 gap-2">
-        <p className="text-zinc-300 text-xs font-semibold uppercase tracking-wide">
+        <p className="text-ink-2 text-xs font-semibold uppercase tracking-wide">
           Pick from available inventory
         </p>
         <button
@@ -78,14 +78,14 @@ export default function DeployEquipmentPicker({
             setOpen(false);
             setError(null);
           }}
-          className="text-zinc-500 hover:text-white text-xs"
+          className="text-ink-3 hover:text-ink text-xs"
         >
           ✕
         </button>
       </div>
 
       {available.length === 0 ? (
-        <p className="text-zinc-500 text-sm italic py-2">
+        <p className="text-ink-3 text-sm italic py-2">
           Nothing available in inventory. Add equipment in /equipment first.
         </p>
       ) : (
@@ -94,7 +94,7 @@ export default function DeployEquipmentPicker({
             const meta = TYPE_META[type] ?? { icon: "🛠", label: type };
             return (
               <div key={type}>
-                <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold mb-1">
+                <p className="text-ink-3 text-[10px] uppercase tracking-wide font-semibold mb-1">
                   {meta.icon} {meta.label} ({list.length})
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -106,8 +106,8 @@ export default function DeployEquipmentPicker({
                       onClick={() => deploy(e.id)}
                       className={`px-2.5 py-1 text-xs rounded-md border transition-colors ${
                         busyId === e.id
-                          ? "bg-blue-600 border-blue-500 text-white"
-                          : "bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800 hover:border-blue-500"
+                          ? "bg-cta border-info text-white"
+                          : "bg-card border-edge2 text-ink hover:bg-shade hover:border-info"
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                       title={e.model ?? ""}
                     >
@@ -122,7 +122,7 @@ export default function DeployEquipmentPicker({
       )}
 
       {error && (
-        <p className="mt-2 text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
+        <p className="mt-2 text-red-700 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
           {error}
         </p>
       )}

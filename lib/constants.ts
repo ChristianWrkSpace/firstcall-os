@@ -1,11 +1,12 @@
+// Daylight palette — soft tinted pills with deep, readable text on cream.
 export const STATUS_COLORS: Record<string, string> = {
-  lead:           "bg-blue-500/20 text-blue-400",
-  inspection:     "bg-yellow-500/20 text-yellow-400",
-  mitigation:     "bg-orange-500/20 text-orange-400",
-  drying:         "bg-purple-500/20 text-purple-400",
-  reconstruction: "bg-indigo-500/20 text-indigo-400",
-  completed:      "bg-green-500/20 text-green-400",
-  cancelled:      "bg-zinc-500/20 text-zinc-400",
+  lead:           "bg-sky-600/10 text-sky-700",
+  inspection:     "bg-amber-500/15 text-amber-700",
+  mitigation:     "bg-orange-500/15 text-orange-700",
+  drying:         "bg-violet-500/10 text-violet-700",
+  reconstruction: "bg-indigo-500/10 text-indigo-700",
+  completed:      "bg-emerald-500/10 text-emerald-700",
+  cancelled:      "bg-stone-500/10 text-stone-500",
 };
 
 export const JOB_STATUSES = [
@@ -44,7 +45,7 @@ export const PAYMENT_ROUTES: Array<{
     short: "Customer-pay",
     description:
       "Homeowner is paying the full bill themselves. Pay Online button stays on.",
-    badge: "bg-green-500/15 text-green-300",
+    badge: "bg-emerald-500/10 text-emerald-700",
   },
   {
     value: "insurance_primary",
@@ -52,7 +53,7 @@ export const PAYMENT_ROUTES: Array<{
     short: "Insurance",
     description:
       "Carrier pays the full claim. No deductible owed. Customer portal hides Pay Online and shows the claim status instead.",
-    badge: "bg-blue-500/15 text-blue-300",
+    badge: "bg-sky-600/10 text-sky-700",
   },
   {
     value: "insurance_with_deductible",
@@ -60,7 +61,7 @@ export const PAYMENT_ROUTES: Array<{
     short: "Insurance + deductible",
     description:
       "Carrier covers the bulk; customer owes a deductible. Pay Online charges only the deductible amount.",
-    badge: "bg-purple-500/15 text-purple-300",
+    badge: "bg-violet-500/10 text-violet-700",
   },
 ];
 

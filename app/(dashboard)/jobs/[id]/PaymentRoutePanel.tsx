@@ -37,18 +37,18 @@ export default function PaymentRoutePanel({
             {meta.short}
           </span>
           {currentRoute === "insurance_with_deductible" && currentDeductible != null && (
-            <span className="text-zinc-300 font-mono text-xs">
+            <span className="text-ink-2 font-mono text-xs">
               ${Number(currentDeductible).toFixed(2)} deductible
             </span>
           )}
         </div>
-        <p className="text-zinc-500 text-xs">{meta.description}</p>
+        <p className="text-ink-3 text-xs">{meta.description}</p>
         <button
           onClick={() => {
             setRoute(currentRoute);
             setEditing(true);
           }}
-          className="self-start mt-1 text-blue-400 hover:text-blue-300 text-xs"
+          className="self-start mt-1 text-info hover:text-info-deep text-xs"
         >
           Change route →
         </button>
@@ -65,8 +65,8 @@ export default function PaymentRoutePanel({
             key={r.value}
             className={`flex gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors ${
               route === r.value
-                ? "border-blue-500 bg-blue-500/5"
-                : "border-zinc-700 hover:border-zinc-600"
+                ? "border-info bg-blue-500/5"
+                : "border-edge2 hover:border-edge2"
             }`}
           >
             <input
@@ -78,8 +78,8 @@ export default function PaymentRoutePanel({
               className="mt-0.5"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-medium">{r.label}</p>
-              <p className="text-zinc-500 text-[10px] mt-0.5 leading-tight">
+              <p className="text-ink text-xs font-medium">{r.label}</p>
+              <p className="text-ink-3 text-[10px] mt-0.5 leading-tight">
                 {r.description}
               </p>
             </div>
@@ -89,9 +89,9 @@ export default function PaymentRoutePanel({
 
       {route === "insurance_with_deductible" && (
         <div className="flex flex-col gap-1">
-          <label className="text-zinc-400 text-xs">Deductible</label>
+          <label className="text-ink-2 text-xs">Deductible</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3 text-sm">
               $
             </span>
             <input
@@ -101,27 +101,27 @@ export default function PaymentRoutePanel({
               step="0.01"
               required
               defaultValue={currentDeductible ?? ""}
-              className="w-full pl-7 pr-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full pl-7 pr-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-cta"
               placeholder="1000.00"
             />
           </div>
         </div>
       )}
 
-      {state?.error && <p className="text-red-400 text-xs">{state.error}</p>}
+      {state?.error && <p className="text-red-700 text-xs">{state.error}</p>}
 
       <div className="flex gap-2 mt-1">
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg"
+          className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-lg"
         >
           {pending ? "Saving…" : "Save"}
         </button>
         <button
           type="button"
           onClick={() => setEditing(false)}
-          className="px-3 py-1.5 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-xs rounded-lg"
+          className="px-3 py-1.5 border border-edge2 text-ink-2 hover:bg-shade text-xs rounded-lg"
         >
           Cancel
         </button>

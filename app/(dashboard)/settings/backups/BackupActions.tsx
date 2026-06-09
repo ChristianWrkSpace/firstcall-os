@@ -39,12 +39,12 @@ export function ManualBackupButton() {
       <button
         onClick={go}
         disabled={pending}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+        className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg"
       >
         {pending ? "Backing up…" : "💾 Run Backup Now"}
       </button>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
-      {success && <p className="text-green-400 text-xs">{success}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
+      {success && <p className="text-pine text-xs">{success}</p>}
     </div>
   );
 }
@@ -75,22 +75,22 @@ export function VerifyLatestBackupButton() {
       <button
         onClick={go}
         disabled={pending}
-        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg self-start"
+        className="px-4 py-2 bg-shade hover:bg-shade border border-edge2 disabled:opacity-50 text-ink text-sm font-medium rounded-lg self-start"
       >
         {pending ? "Verifying…" : "🔍 Verify Latest Backup"}
       </button>
       {result && "error" in result && result.error && (
-        <p className="text-red-400 text-xs">{result.error}</p>
+        <p className="text-red-700 text-xs">{result.error}</p>
       )}
       {result && "ok" in result && result.ok === true && (
-        <div className="text-green-400 text-xs bg-green-500/5 border border-green-500/20 rounded-lg px-3 py-2">
+        <div className="text-pine text-xs bg-green-500/5 border border-green-500/20 rounded-lg px-3 py-2">
           ✓ Backup intact — {result.totalRows.toLocaleString()} rows across{" "}
           {result.tableCount} tables, {result.backupAgeHours.toFixed(1)}h old.
           Drill recorded in audit log.
         </div>
       )}
       {result && "ok" in result && result.ok === false && (
-        <div className="text-red-400 text-xs bg-red-500/5 border border-red-500/20 rounded-lg px-3 py-2">
+        <div className="text-red-700 text-xs bg-red-500/5 border border-red-500/20 rounded-lg px-3 py-2">
           ⚠ Mismatches detected — investigate immediately:
           <ul className="mt-1 ml-4 list-disc">
             {(result as any).mismatches.map((m: any) => (
@@ -126,11 +126,11 @@ export function DownloadBackupLink({ storagePath }: { storagePath: string }) {
       <button
         onClick={dl}
         disabled={pending}
-        className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
+        className="text-info hover:text-info-deep text-xs disabled:opacity-50"
       >
         {pending ? "..." : "Download"}
       </button>
-      {error && <p className="text-red-400 text-[10px]">{error}</p>}
+      {error && <p className="text-red-700 text-[10px]">{error}</p>}
     </div>
   );
 }

@@ -21,7 +21,7 @@ interface Assignment {
 }
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-cta";
 
 function toLocalInput(iso: string | null): string {
   if (!iso) return "";
@@ -107,13 +107,13 @@ export default function SchedulingPanel({
     <div className="flex flex-col gap-3">
       {/* Schedule */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-zinc-400 text-xs uppercase tracking-wide">
+        <label className="text-ink-2 text-xs uppercase tracking-wide">
           Scheduled For
         </label>
         {scheduledLabel ? (
-          <p className="text-white text-sm font-medium">{scheduledLabel}</p>
+          <p className="text-ink text-sm font-medium">{scheduledLabel}</p>
         ) : (
-          <p className="text-zinc-500 text-sm italic">Not scheduled</p>
+          <p className="text-ink-3 text-sm italic">Not scheduled</p>
         )}
         <div className="flex gap-2 mt-1">
           <input
@@ -127,7 +127,7 @@ export default function SchedulingPanel({
           <button
             onClick={handleSetSchedule}
             disabled={pending || !scheduleValue}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs rounded-lg flex-1"
+            className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs rounded-lg flex-1"
           >
             {pending ? "Saving…" : scheduledAt ? "Update" : "Schedule"}
           </button>
@@ -135,7 +135,7 @@ export default function SchedulingPanel({
             <button
               onClick={handleClearSchedule}
               disabled={pending}
-              className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs rounded-lg"
+              className="px-3 py-1.5 bg-shade hover:bg-shade text-ink-2 text-xs rounded-lg"
             >
               Clear
             </button>
@@ -144,12 +144,12 @@ export default function SchedulingPanel({
       </div>
 
       {/* Assigned techs */}
-      <div className="border-t border-zinc-800 pt-3">
-        <label className="text-zinc-400 text-xs uppercase tracking-wide block mb-2">
+      <div className="border-t border-edge2 pt-3">
+        <label className="text-ink-2 text-xs uppercase tracking-wide block mb-2">
           Assigned Techs
         </label>
         {assignments.length === 0 ? (
-          <p className="text-zinc-500 text-xs italic mb-2">No techs assigned yet.</p>
+          <p className="text-ink-3 text-xs italic mb-2">No techs assigned yet.</p>
         ) : (
           <div className="flex flex-col gap-1.5 mb-2">
             {assignments.map((a) => {
@@ -157,14 +157,14 @@ export default function SchedulingPanel({
               return (
                 <div
                   key={a.id}
-                  className="flex items-center justify-between gap-2 bg-white/[0.03] rounded px-2 py-1.5 text-xs"
+                  className="flex items-center justify-between gap-2 bg-tint rounded px-2 py-1.5 text-xs"
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-zinc-200 truncate">
+                    <span className="text-ink truncate">
                       {a.profiles?.name ?? "—"}
                     </span>
                     {isLead && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-blue-500/20 text-blue-300 rounded">
+                      <span className="text-[10px] px-1.5 py-0.5 bg-info/10 text-info rounded">
                         LEAD
                       </span>
                     )}
@@ -174,7 +174,7 @@ export default function SchedulingPanel({
                       <button
                         onClick={() => handleSetLead(a.profile_id)}
                         disabled={pending}
-                        className="text-blue-400 hover:text-blue-300 text-[10px]"
+                        className="text-info hover:text-info-deep text-[10px]"
                       >
                         make lead
                       </button>
@@ -182,7 +182,7 @@ export default function SchedulingPanel({
                     <button
                       onClick={() => handleUnassign(a.id)}
                       disabled={pending}
-                      className="text-red-400 hover:text-red-300 text-[10px]"
+                      className="text-red-700 hover:text-red-700 text-[10px]"
                     >
                       remove
                     </button>
@@ -210,20 +210,20 @@ export default function SchedulingPanel({
             <button
               onClick={handleAssign}
               disabled={pending || !techToAssign}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs rounded-lg"
+              className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs rounded-lg"
             >
               + Add
             </button>
           </div>
         )}
         {availableTechs.length === 0 && (
-          <p className="text-zinc-500 text-[10px] italic">
+          <p className="text-ink-3 text-[10px] italic">
             No techs in the system yet — add profiles via Supabase auth.
           </p>
         )}
       </div>
 
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </div>
   );
 }

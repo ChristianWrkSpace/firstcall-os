@@ -26,19 +26,19 @@ interface TimelineEvent {
 }
 
 const KIND_COLOR: Record<EventKind, string> = {
-  job_created: "border-blue-500/50 bg-blue-500/5",
-  audit: "border-zinc-700 bg-white/[0.03]",
+  job_created: "border-info/50 bg-blue-500/5",
+  audit: "border-edge2 bg-tint",
   notification_sent: "border-purple-500/40 bg-purple-500/5",
   legal_doc_created: "border-yellow-500/40 bg-yellow-500/5",
-  legal_doc_sent: "border-blue-500/40 bg-blue-500/5",
+  legal_doc_sent: "border-info/40 bg-blue-500/5",
   legal_doc_signed: "border-green-500/40 bg-green-500/5",
   moisture_reading: "border-cyan-500/40 bg-cyan-500/5",
   equipment_deployed: "border-orange-500/40 bg-orange-500/5",
-  equipment_retrieved: "border-zinc-600 bg-white/[0.03]",
+  equipment_retrieved: "border-edge2 bg-tint",
   estimate_created: "border-purple-500/40 bg-purple-500/5",
   estimate_approved: "border-green-500/40 bg-green-500/5",
-  invoice_created: "border-blue-500/40 bg-blue-500/5",
-  invoice_sent: "border-blue-500/40 bg-blue-500/5",
+  invoice_created: "border-info/40 bg-blue-500/5",
+  invoice_sent: "border-info/40 bg-blue-500/5",
   payment_received: "border-green-500/40 bg-green-500/5",
 };
 
@@ -299,7 +299,7 @@ export default async function JobActivityTimeline({ jobId }: { jobId: string }) 
 
   if (events.length === 0) {
     return (
-      <p className="text-zinc-500 text-sm italic px-2 py-3">
+      <p className="text-ink-3 text-sm italic px-2 py-3">
         No activity logged yet for this job.
       </p>
     );
@@ -316,18 +316,18 @@ export default async function JobActivityTimeline({ jobId }: { jobId: string }) 
             <span className="text-base shrink-0 leading-none mt-0.5">{e.icon}</span>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                <p className="text-white text-sm font-medium capitalize">
+                <p className="text-ink text-sm font-medium capitalize">
                   {e.title}
                 </p>
-                <p className="text-zinc-500 text-[10px] font-mono shrink-0">
+                <p className="text-ink-3 text-[10px] font-mono shrink-0">
                   {fmtDate(e.at)}
                 </p>
               </div>
               {e.detail && (
-                <p className="text-zinc-400 text-xs mt-0.5">{e.detail}</p>
+                <p className="text-ink-2 text-xs mt-0.5">{e.detail}</p>
               )}
               {e.actor && (
-                <p className="text-zinc-600 text-[10px] mt-0.5">by {e.actor}</p>
+                <p className="text-ink-3 text-[10px] mt-0.5">by {e.actor}</p>
               )}
             </div>
           </div>

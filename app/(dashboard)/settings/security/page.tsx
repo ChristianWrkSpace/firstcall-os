@@ -19,11 +19,11 @@ export default async function SecuritySettingsPage() {
   return (
     <div className="p-4 md:p-8 max-w-3xl">
       <div className="mb-6">
-        <Link href="/settings" className="text-zinc-500 hover:text-white text-sm transition-colors">
+        <Link href="/settings" className="text-ink-3 hover:text-ink text-sm transition-colors">
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Security</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink mt-2">Security</h1>
+        <p className="text-ink-2 text-sm mt-0.5">
           Two-factor authentication for {me.email}. Strongly recommended for owner + manager
           accounts handling claim data.
         </p>
@@ -40,12 +40,12 @@ export default async function SecuritySettingsPage() {
         <div className="flex items-start gap-3">
           <span className="text-2xl">{hasMfa ? "🔒" : "⚠️"}</span>
           <div>
-            <p className={`font-semibold ${hasMfa ? "text-green-300" : "text-yellow-300"}`}>
+            <p className={`font-semibold ${hasMfa ? "text-pine" : "text-honey"}`}>
               {hasMfa
                 ? "Two-factor authentication is on"
                 : "Two-factor authentication is off"}
             </p>
-            <p className="text-zinc-400 text-sm mt-0.5">
+            <p className="text-ink-2 text-sm mt-0.5">
               {hasMfa
                 ? "Login requires your password + a 6-digit code from your authenticator app."
                 : "Anyone with your password can sign in. Add an authenticator below."}
@@ -57,7 +57,7 @@ export default async function SecuritySettingsPage() {
       {/* Existing factors */}
       {factors.length > 0 && (
         <div className="glass-card p-5 mb-6">
-          <h2 className="text-white font-semibold mb-3">Active Authenticators</h2>
+          <h2 className="text-ink font-semibold mb-3">Active Authenticators</h2>
           <ul className="flex flex-col gap-2">
             {factors.map((f) => (
               <FactorRow key={f.id} factor={f} />
@@ -68,8 +68,8 @@ export default async function SecuritySettingsPage() {
 
       {/* Enrollment */}
       <div className="glass-card p-5">
-        <h2 className="text-white font-semibold mb-1">Add an authenticator</h2>
-        <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
+        <h2 className="text-ink font-semibold mb-1">Add an authenticator</h2>
+        <p className="text-ink-3 text-xs mb-4 leading-relaxed">
           Use Google Authenticator, 1Password, Authy, or any TOTP-compatible app.
           Scan the QR code, enter the 6-digit code to confirm. No SMS — SMS 2FA is
           vulnerable to SIM-swap attacks.
@@ -85,8 +85,8 @@ export default async function SecuritySettingsPage() {
       />
 
       {/* Footer guidance */}
-      <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">If you lose your authenticator</p>
+      <div className="mt-6 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-1">If you lose your authenticator</p>
         <p>
           You'll need an account recovery via the owner. Save your recovery codes
           (printed/secured) when you enroll, and consider enrolling a backup
@@ -104,13 +104,13 @@ function FactorRow({
 }) {
   const statusColor =
     factor.status === "verified"
-      ? "bg-green-500/15 text-green-400"
-      : "bg-yellow-500/15 text-yellow-400";
+      ? "bg-pine/10 text-pine"
+      : "bg-honey/10 text-honey";
   return (
-    <li className="flex items-center justify-between gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg">
+    <li className="flex items-center justify-between gap-3 px-3 py-2 bg-tint border border-edge2 rounded-lg">
       <div>
-        <p className="text-white text-sm">{factor.friendlyName}</p>
-        <p className="text-zinc-500 text-xs">
+        <p className="text-ink text-sm">{factor.friendlyName}</p>
+        <p className="text-ink-3 text-xs">
           {factor.type.toUpperCase()} · added {new Date(factor.createdAt).toLocaleDateString()}
         </p>
       </div>

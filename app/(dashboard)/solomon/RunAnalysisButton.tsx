@@ -24,12 +24,12 @@ export default function RunAnalysisButton() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2 items-center">
-        <label className="text-zinc-400 text-xs">Window</label>
+        <label className="text-ink-2 text-xs">Window</label>
         <select
           value={windowDays}
           onChange={(e) => setWindowDays(Number(e.target.value))}
           disabled={pending}
-          className="px-2 py-1.5 rounded bg-zinc-800 border border-zinc-700 text-white text-xs"
+          className="px-2 py-1.5 rounded bg-shade border border-edge2 text-ink text-xs"
         >
           <option value={30}>Last 30 days</option>
           <option value={60}>Last 60 days</option>
@@ -40,12 +40,12 @@ export default function RunAnalysisButton() {
         <button
           onClick={run}
           disabled={pending}
-          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg"
+          className="px-4 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-lg"
         >
           {pending ? "Analyzing… (~30s)" : "🧠 Run Analysis"}
         </button>
       </div>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </div>
   );
 }

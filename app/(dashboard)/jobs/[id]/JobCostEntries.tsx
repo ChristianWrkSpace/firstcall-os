@@ -11,7 +11,7 @@ import {
 import { CONSUMABLES_CATALOG, findConsumable } from "@/lib/restoration-catalog";
 
 const INPUT =
-  "px-2.5 py-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-600 text-xs";
+  "px-2.5 py-1.5 rounded-md bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-1 focus:ring-cta text-xs";
 
 interface Tech {
   id: string;
@@ -103,16 +103,16 @@ function LaborSection({
   }
 
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
+    <div className="bg-tint border border-edge2 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div>
-          <p className="text-white text-sm font-semibold">👷 Tech Labor</p>
-          <p className="text-zinc-500 text-[10px]">{entries.length} entries · {fmt(total)} total</p>
+          <p className="text-ink text-sm font-semibold">👷 Tech Labor</p>
+          <p className="text-ink-3 text-[10px]">{entries.length} entries · {fmt(total)} total</p>
         </div>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="text-blue-400 hover:text-blue-300 text-xs"
+          className="text-info hover:text-info-deep text-xs"
         >
           {open ? "× Cancel" : "+ Log hours"}
         </button>
@@ -158,12 +158,12 @@ function LaborSection({
           <button
             type="submit"
             disabled={pending}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-md"
+            className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-md"
           >
             {pending ? "…" : "Add"}
           </button>
           {state?.error && (
-            <p className="text-red-400 text-[11px] basis-full">{state.error}</p>
+            <p className="text-red-700 text-[11px] basis-full">{state.error}</p>
           )}
         </form>
       )}
@@ -175,25 +175,25 @@ function LaborSection({
             return (
               <li
                 key={e.id}
-                className="flex items-center justify-between gap-2 text-xs px-2 py-1 rounded hover:bg-zinc-800"
+                className="flex items-center justify-between gap-2 text-xs px-2 py-1 rounded hover:bg-shade"
               >
                 <div className="flex-1 min-w-0">
-                  <span className="text-zinc-300">
+                  <span className="text-ink-2">
                     {e.profiles?.name ?? "Tech"}
                   </span>
-                  <span className="text-zinc-500"> · {e.work_date}</span>
+                  <span className="text-ink-3"> · {e.work_date}</span>
                 </div>
-                <span className="text-zinc-400 font-mono">
+                <span className="text-ink-2 font-mono">
                   {Number(e.hours).toFixed(2)}h × ${Number(e.hourly_rate).toFixed(2)}
                 </span>
-                <span className="text-white font-mono w-16 text-right">
+                <span className="text-ink font-mono w-16 text-right">
                   {fmt(cost)}
                 </span>
                 <button
                   type="button"
                   onClick={() => onDelete(e.id)}
                   disabled={pendingDelete}
-                  className="text-zinc-500 hover:text-red-400 text-xs disabled:opacity-50"
+                  className="text-ink-3 hover:text-red-700 text-xs disabled:opacity-50"
                   aria-label="Delete entry"
                 >
                   ×
@@ -203,7 +203,7 @@ function LaborSection({
           })}
         </ul>
       ) : (
-        <p className="text-zinc-500 text-xs italic">No labor logged yet.</p>
+        <p className="text-ink-3 text-xs italic">No labor logged yet.</p>
       )}
     </div>
   );
@@ -247,16 +247,16 @@ function ConsumablesSection({
   }
 
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
+    <div className="bg-tint border border-edge2 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div>
-          <p className="text-white text-sm font-semibold">🧪 Consumables</p>
-          <p className="text-zinc-500 text-[10px]">{entries.length} items · {fmt(total)} total</p>
+          <p className="text-ink text-sm font-semibold">🧪 Consumables</p>
+          <p className="text-ink-3 text-[10px]">{entries.length} items · {fmt(total)} total</p>
         </div>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="text-blue-400 hover:text-blue-300 text-xs"
+          className="text-info hover:text-info-deep text-xs"
         >
           {open ? "× Cancel" : "+ Log item"}
         </button>
@@ -304,7 +304,7 @@ function ConsumablesSection({
               className={`${INPUT} w-24 ${unitLabel ? "pr-10" : ""}`}
             />
             {unitLabel && (
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 text-[10px] pointer-events-none">
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-3 text-[10px] pointer-events-none">
                 /{unitLabel}
               </span>
             )}
@@ -312,14 +312,14 @@ function ConsumablesSection({
           <button
             type="submit"
             disabled={pending}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-md"
+            className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-md"
           >
             {pending ? "…" : "Add"}
           </button>
           {state?.error && (
-            <p className="text-red-400 text-[11px] basis-full">{state.error}</p>
+            <p className="text-red-700 text-[11px] basis-full">{state.error}</p>
           )}
-          <p className="text-zinc-600 text-[10px] basis-full">
+          <p className="text-ink-3 text-[10px] basis-full">
             Pick from {CONSUMABLES_CATALOG.length} catalog items (auto-fills cost) or type your own.
           </p>
         </form>
@@ -332,20 +332,20 @@ function ConsumablesSection({
             return (
               <li
                 key={e.id}
-                className="flex items-center justify-between gap-2 text-xs px-2 py-1 rounded hover:bg-zinc-800"
+                className="flex items-center justify-between gap-2 text-xs px-2 py-1 rounded hover:bg-shade"
               >
-                <span className="text-zinc-300 flex-1 min-w-0 truncate">{e.item}</span>
-                <span className="text-zinc-400 font-mono">
+                <span className="text-ink-2 flex-1 min-w-0 truncate">{e.item}</span>
+                <span className="text-ink-2 font-mono">
                   {Number(e.quantity)} × ${Number(e.unit_cost).toFixed(2)}
                 </span>
-                <span className="text-white font-mono w-16 text-right">
+                <span className="text-ink font-mono w-16 text-right">
                   {fmt(cost)}
                 </span>
                 <button
                   type="button"
                   onClick={() => onDelete(e.id)}
                   disabled={pendingDelete}
-                  className="text-zinc-500 hover:text-red-400 text-xs disabled:opacity-50"
+                  className="text-ink-3 hover:text-red-700 text-xs disabled:opacity-50"
                   aria-label="Delete entry"
                 >
                   ×
@@ -355,7 +355,7 @@ function ConsumablesSection({
           })}
         </ul>
       ) : (
-        <p className="text-zinc-500 text-xs italic">No consumables logged yet.</p>
+        <p className="text-ink-3 text-xs italic">No consumables logged yet.</p>
       )}
     </div>
   );

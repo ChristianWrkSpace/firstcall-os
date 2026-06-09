@@ -16,12 +16,12 @@ export default async function AiRoutingPage() {
       <div className="mb-6">
         <Link
           href="/settings"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Back to Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">AI Routing</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
+        <h1 className="text-2xl font-bold text-ink mt-2">AI Routing</h1>
+        <p className="text-ink-2 text-sm mt-1 max-w-2xl">
           Per-agent model overrides and cross-provider fallback chains. The
           system always tries the agent&apos;s primary model first; if it
           fails with a retryable error (timeout / 5xx / rate-limit), the
@@ -30,7 +30,7 @@ export default async function AiRoutingPage() {
       </div>
 
       <section className="glass-card p-5 mb-5">
-        <p className="text-zinc-500 text-xs uppercase tracking-wide mb-3">
+        <p className="text-ink-3 text-xs uppercase tracking-wide mb-3">
           Gateway status
         </p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -44,10 +44,10 @@ export default async function AiRoutingPage() {
           <Field label="Default SMART" value={MODELS.SMART} />
         </div>
         {AI_PROVIDER !== "gateway" && (
-          <p className="mt-3 text-yellow-400 text-xs">
+          <p className="mt-3 text-honey text-xs">
             ⚠ Direct Anthropic mode — cross-provider fallback is disabled
             (the SDK client is pointed at api.anthropic.com). Set{" "}
-            <code className="bg-yellow-500/10 px-1 rounded">AI_GATEWAY_ENABLED=true</code>{" "}
+            <code className="bg-honey/10 px-1 rounded">AI_GATEWAY_ENABLED=true</code>{" "}
             in Vercel env to enable.
           </p>
         )}
@@ -55,13 +55,13 @@ export default async function AiRoutingPage() {
 
       <section className="glass-card p-5 mb-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-white font-semibold">Per-Agent Model Overrides</h2>
-          <span className="text-zinc-500 text-xs">
+          <h2 className="text-ink font-semibold">Per-Agent Model Overrides</h2>
+          <span className="text-ink-3 text-xs">
             {routing.perAgentOverrides.length} active
           </span>
         </div>
         {routing.perAgentOverrides.length === 0 ? (
-          <p className="text-zinc-400 text-sm">
+          <p className="text-ink-2 text-sm">
             No agents are currently overridden. Every agent uses its declared
             default tier (Haiku / Sonnet / Opus). To swap an agent onto a
             cheaper provider, set a Vercel env var:
@@ -69,7 +69,7 @@ export default async function AiRoutingPage() {
         ) : (
           <table className="w-full text-sm mb-3">
             <thead>
-              <tr className="text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="text-ink-3 text-xs uppercase tracking-wide">
                 <th className="text-left py-2">Agent</th>
                 <th className="text-left py-2">Routed to</th>
                 <th className="text-left py-2">Source</th>
@@ -77,17 +77,17 @@ export default async function AiRoutingPage() {
             </thead>
             <tbody>
               {routing.perAgentOverrides.map((o) => (
-                <tr key={o.agent} className="border-t border-white/[0.06]">
-                  <td className="py-2 text-zinc-200 capitalize">{o.agent}</td>
-                  <td className="py-2 font-mono text-blue-300 text-xs">
+                <tr key={o.agent} className="border-t border-edge2">
+                  <td className="py-2 text-ink capitalize">{o.agent}</td>
+                  <td className="py-2 font-mono text-info text-xs">
                     {o.model}
                   </td>
                   <td className="py-2">
                     <span
                       className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide border ${
                         o.from === "env"
-                          ? "bg-blue-500/15 text-blue-400 border-blue-500/20"
-                          : "bg-purple-500/15 text-purple-400 border-purple-500/20"
+                          ? "bg-info/10 text-info border-info/20"
+                          : "bg-violet-500/10 text-violet-700 border-purple-500/20"
                       }`}
                     >
                       {o.from === "env" ? "env var" : "static"}
@@ -98,48 +98,48 @@ export default async function AiRoutingPage() {
             </tbody>
           </table>
         )}
-        <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
-          <p className="text-blue-300 font-semibold text-sm mb-2">
+        <div className="bg-blue-500/5 border border-info/20 rounded-lg p-4">
+          <p className="text-info font-semibold text-sm mb-2">
             How to override an agent (no redeploy required)
           </p>
-          <p className="text-zinc-300 text-xs mb-2">
+          <p className="text-ink-2 text-xs mb-2">
             In Vercel project settings → Environment Variables, set:
           </p>
-          <div className="font-mono text-xs space-y-1 text-zinc-200 bg-zinc-900/50 rounded p-3">
+          <div className="font-mono text-xs space-y-1 text-ink bg-card rounded p-3">
             <div>
-              <span className="text-zinc-500"># Examples — pick what fits your traffic</span>
+              <span className="text-ink-3"># Examples — pick what fits your traffic</span>
             </div>
             <div>MODEL_HUNTER=deepseek/deepseek-v3</div>
             <div>MODEL_ECHO=google/gemini-2.5-flash</div>
             <div>MODEL_EXTRACT=deepseek/deepseek-v3</div>
           </div>
-          <p className="text-zinc-400 text-xs mt-2">
+          <p className="text-ink-2 text-xs mt-2">
             After saving, redeploy or restart. Delete the env var to revert.
           </p>
         </div>
       </section>
 
       <section className="glass-card p-5 mb-5">
-        <h2 className="text-white font-semibold mb-3">Fallback Chains</h2>
-        <p className="text-zinc-400 text-xs mb-3">
+        <h2 className="text-ink font-semibold mb-3">Fallback Chains</h2>
+        <p className="text-ink-2 text-xs mb-3">
           When a model fails with a retryable error, the wrapper retries on
           the next entry. Cross-provider fallbacks of similar capability —
           a timeout on Sonnet falls to Gemini 2.5 Pro, not Haiku.
         </p>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="text-ink-3 text-xs uppercase tracking-wide">
               <th className="text-left py-2 w-1/3">Primary</th>
               <th className="text-left py-2">Falls back to (in order)</th>
             </tr>
           </thead>
           <tbody>
             {routing.fallbackChains.map((fc) => (
-              <tr key={fc.model} className="border-t border-white/[0.06]">
-                <td className="py-2 font-mono text-zinc-200 text-xs">
+              <tr key={fc.model} className="border-t border-edge2">
+                <td className="py-2 font-mono text-ink text-xs">
                   {fc.model}
                 </td>
-                <td className="py-2 font-mono text-blue-300 text-xs">
+                <td className="py-2 font-mono text-info text-xs">
                   {fc.chain.join(" → ")}
                 </td>
               </tr>
@@ -148,19 +148,19 @@ export default async function AiRoutingPage() {
         </table>
       </section>
 
-      <section className="bg-zinc-800/40 border border-zinc-700 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-2 text-sm">
+      <section className="bg-shade border border-edge2 rounded-xl p-5">
+        <h2 className="text-ink font-semibold mb-2 text-sm">
           What gets logged on a fallback
         </h2>
-        <ul className="text-zinc-300 text-xs space-y-1 list-disc pl-5">
+        <ul className="text-ink-2 text-xs space-y-1 list-disc pl-5">
           <li>
             The failed primary attempt logs as an error row in{" "}
-            <code className="text-zinc-200">agent_invocations</code> with
+            <code className="text-ink">agent_invocations</code> with
             the original error message.
           </li>
           <li>
             The succeeded fallback logs as a success row with{" "}
-            <code className="text-zinc-200">error = &quot;fallback_used: primary=...&quot;</code>{" "}
+            <code className="text-ink">error = &quot;fallback_used: primary=...&quot;</code>{" "}
             so dashboards can flag fallback frequency.
           </li>
           <li>
@@ -184,13 +184,13 @@ function Field({
 }) {
   const cls =
     tone === "good"
-      ? "text-green-400"
+      ? "text-pine"
       : tone === "warn"
-      ? "text-yellow-400"
-      : "text-zinc-200";
+      ? "text-honey"
+      : "text-ink";
   return (
     <div>
-      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
+      <p className="text-ink-3 text-xs uppercase tracking-wide">{label}</p>
       <p className={`font-mono text-sm mt-0.5 ${cls}`}>{value}</p>
     </div>
   );

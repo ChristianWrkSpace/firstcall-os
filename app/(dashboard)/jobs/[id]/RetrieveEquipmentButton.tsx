@@ -31,11 +31,11 @@ export default function RetrieveEquipmentButton({
         type="button"
         onClick={handleRetrieve}
         disabled={pending}
-        className="px-2 py-1 text-xs rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white border border-zinc-700 hover:border-zinc-600 transition-colors disabled:opacity-50"
+        className="px-2 py-1 text-xs rounded-md bg-shade hover:bg-shade text-ink hover:text-ink border border-edge2 hover:border-edge2 transition-colors disabled:opacity-50"
       >
         {pending ? "Retrieving…" : "↩ Retrieve"}
       </button>
-      {error && <span className="text-red-400 text-[10px]">{error}</span>}
+      {error && <span className="text-red-700 text-[10px]">{error}</span>}
     </div>
   );
 }

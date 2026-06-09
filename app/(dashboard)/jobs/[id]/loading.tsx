@@ -5,13 +5,13 @@ export default function Loading() {
   return (
     <div className="p-4 md:p-8 animate-pulse">
       <div className="mb-6">
-        <div className="h-3 w-16 bg-zinc-800 rounded" />
+        <div className="h-3 w-16 bg-shade rounded" />
         <div className="flex items-center gap-3 mt-2 flex-wrap">
-          <div className="h-7 w-40 bg-zinc-800 rounded" />
-          <div className="h-5 w-16 bg-zinc-800 rounded-full" />
-          <div className="h-5 w-24 bg-zinc-800 rounded-full" />
+          <div className="h-7 w-40 bg-shade rounded" />
+          <div className="h-5 w-16 bg-shade rounded-full" />
+          <div className="h-5 w-24 bg-shade rounded-full" />
         </div>
-        <div className="h-3 w-64 bg-zinc-800 rounded mt-2" />
+        <div className="h-3 w-64 bg-shade rounded mt-2" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -33,10 +33,10 @@ export default function Loading() {
 function SkeletonCard({ h }: { h: string }) {
   return (
     <div className={`glass-card p-6 ${h}`}>
-      <div className="h-4 w-24 bg-zinc-800 rounded mb-4" />
-      <div className="h-3 w-full bg-zinc-800/60 rounded mb-2" />
-      <div className="h-3 w-5/6 bg-zinc-800/60 rounded mb-2" />
-      <div className="h-3 w-2/3 bg-zinc-800/60 rounded" />
+      <div className="h-4 w-24 bg-shade rounded mb-4" />
+      <div className="h-3 w-full bg-shade rounded mb-2" />
+      <div className="h-3 w-5/6 bg-shade rounded mb-2" />
+      <div className="h-3 w-2/3 bg-shade rounded" />
     </div>
   );
 }

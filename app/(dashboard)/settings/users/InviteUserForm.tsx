@@ -5,7 +5,7 @@ import { inviteUser } from "@/app/actions/users";
 import { ALL_ROLES, ROLE_META } from "@/lib/permissions";
 
 const inputStyle = {
-  backgroundColor: "rgba(255,255,255,0.04)",
+  backgroundColor: "rgba(58,47,38,0.05)",
   border: "1px solid var(--color-edge)",
   color: "var(--color-text-primary)",
 } as const;
@@ -28,7 +28,7 @@ export default function InviteUserForm() {
           required
           placeholder="Full name"
           autoComplete="off"
-          className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5FBDB0]/40 min-h-[44px]"
+          className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D97757]/40 min-h-[44px]"
           style={inputStyle}
         />
         <input
@@ -37,13 +37,13 @@ export default function InviteUserForm() {
           required
           placeholder="email@firstcallm.com"
           autoComplete="off"
-          className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5FBDB0]/40 min-h-[44px]"
+          className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D97757]/40 min-h-[44px]"
           style={inputStyle}
         />
         <select
           name="role"
           defaultValue="technician"
-          className="px-3 py-2.5 rounded-xl text-sm capitalize focus:outline-none focus:ring-2 focus:ring-[#5FBDB0]/40 min-h-[44px] cursor-pointer"
+          className="px-3 py-2.5 rounded-xl text-sm capitalize focus:outline-none focus:ring-2 focus:ring-[#D97757]/40 min-h-[44px] cursor-pointer"
           style={inputStyle}
         >
           {ALL_ROLES.map((r) => (
@@ -56,16 +56,16 @@ export default function InviteUserForm() {
           type="submit"
           disabled={pending}
           className="px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 min-h-[44px]"
-          style={{ background: "linear-gradient(135deg, #6B8AD9, #5FBDB0)" }}
+          style={{ background: "linear-gradient(135deg, #E08A63, #C4663F)" }}
         >
           {pending ? "Sending…" : "Send invite"}
         </button>
       </div>
       {state?.error && (
-        <p className="text-red-300 text-xs mt-2.5">{state.error}</p>
+        <p className="text-red-700 text-xs mt-2.5">{state.error}</p>
       )}
       {state?.ok && (
-        <p className="text-xs mt-2.5" style={{ color: "#5FBDB0" }}>
+        <p className="text-xs mt-2.5" style={{ color: "#D97757" }}>
           ✓ {state.message}
         </p>
       )}

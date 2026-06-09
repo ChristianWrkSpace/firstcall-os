@@ -54,13 +54,13 @@ export default function MobileNav({
           as installed PWA (display:standalone) so the hamburger isn't tucked
           under the system clock. */}
       <header
-        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-[#0E1012]/90 backdrop-blur-2xl border-b border-white/[0.06]"
+        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-[#FAF6EF]/90 backdrop-blur-sm border-b border-edge2"
         style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
       >
         <button
           onClick={() => setOpen(true)}
           aria-label="Open menu"
-          className="p-2 -ml-2 text-white hover:text-blue-400 transition-colors"
+          className="p-2 -ml-2 text-ink hover:text-info-deep transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +79,7 @@ export default function MobileNav({
         </button>
         <div className="flex items-center gap-2">
           <Logo variant="mark" size={28} />
-          <p className="text-white text-sm font-semibold">FirstCall OS</p>
+          <p className="text-ink text-sm font-semibold">FirstCall OS</p>
         </div>
         <SearchTrigger variant="mobile" />
       </header>
@@ -94,20 +94,20 @@ export default function MobileNav({
 
       {/* Drawer */}
       <aside
-        className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0E1012]/95 backdrop-blur-2xl border-r border-white/[0.08] flex flex-col transform transition-transform duration-200 ${
+        className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#FAF6EF]/95 backdrop-blur-sm border-r border-edge2 flex flex-col transform transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand + close — top padding respects notch when drawer is open */}
         <div
-          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-white/[0.06]"
+          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-edge2"
           style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
         >
           <Logo variant="banner" size={28} />
           <button
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="p-2 text-zinc-400 hover:text-white text-2xl min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 text-ink-2 hover:text-ink text-2xl min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             ✕
           </button>
@@ -117,7 +117,7 @@ export default function MobileNav({
         <nav className="flex-1 px-2 py-2 flex flex-col gap-0.5 overflow-y-auto">
           {sections.map((section, i) => (
             <div key={section.title} className={i === 0 ? "" : "mt-3"}>
-              <p className="px-3 pt-2 pb-1 text-[9px] uppercase tracking-[0.2em] text-white/30 font-semibold">
+              <p className="px-3 pt-2 pb-1 text-[9px] uppercase tracking-[0.2em] text-ink/30 font-semibold">
                 {section.title}
               </p>
               <div className="flex flex-col gap-0.5">
@@ -130,15 +130,15 @@ export default function MobileNav({
                       href={item.href}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
                         active
-                          ? "bg-white/[0.06] text-white ring-1 ring-white/[0.06]"
-                          : "text-white/55 hover:text-white hover:bg-white/[0.04]"
+                          ? "bg-tint text-ink ring-1 ring-edge2"
+                          : "text-ink/55 hover:text-ink hover:bg-shade"
                       }`}
                     >
                       <span className="text-lg leading-none w-5 text-center">{item.icon}</span>
                       <span className="flex-1 leading-tight">
                         {item.label}
                         {item.hint && (
-                          <span className="block text-[10px] text-white/35 mt-0.5">
+                          <span className="block text-[10px] text-ink/35 mt-0.5">
                             {item.hint}
                           </span>
                         )}
@@ -152,11 +152,11 @@ export default function MobileNav({
         </nav>
 
         {/* Sign out */}
-        <div className="px-2 py-3 border-t border-white/[0.06]">
+        <div className="px-2 py-3 border-t border-edge2">
           <form action={signOut}>
             <button
               type="submit"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/55 hover:text-white hover:bg-white/[0.04] transition-colors text-sm text-left"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink/55 hover:text-ink hover:bg-shade transition-colors text-sm text-left"
             >
               <span className="text-lg leading-none w-5 text-center">→</span>
               Sign out

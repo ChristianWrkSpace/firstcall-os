@@ -42,7 +42,7 @@ const KIND_META: Record<
     ring: "ring-red-400/30",
   },
   info: {
-    color: "bg-zinc-800/95 border-zinc-600/60 text-white",
+    color: "bg-shade border-edge2/60 text-ink",
     emoji: "ℹ️",
     ring: "ring-blue-400/30",
   },
@@ -103,7 +103,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => dismiss(t.id)}
                   aria-label="Dismiss"
-                  className="text-white/70 hover:text-white text-xs px-1 leading-none -mt-0.5"
+                  className="text-ink/70 hover:text-ink text-xs px-1 leading-none -mt-0.5"
                 >
                   ✕
                 </button>

@@ -5,8 +5,8 @@ import { updateCustomerInfo, type CustomerIntake } from "@/app/actions/customers
 import { INSURANCE_CARRIERS } from "@/lib/restoration-catalog";
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
-const LABEL = "text-zinc-400 text-xs uppercase tracking-wide mb-0.5";
+  "w-full px-3 py-2 rounded-lg bg-card border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm";
+const LABEL = "text-ink-2 text-xs uppercase tracking-wide mb-0.5";
 
 export interface EditableCustomer {
   id: string;
@@ -69,11 +69,11 @@ export default function EditableCustomerCard({
     return (
       <>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-semibold">Customer</h2>
+          <h2 className="text-ink font-semibold">Customer</h2>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            className="text-info hover:text-info-deep text-xs font-medium"
           >
             Edit
           </button>
@@ -81,12 +81,12 @@ export default function EditableCustomerCard({
         <div className="flex flex-col gap-3 text-sm">
           <div>
             <p className={LABEL}>Name</p>
-            <p className="text-white font-medium">{customer.name}</p>
+            <p className="text-ink font-medium">{customer.name}</p>
           </div>
           {customer.phone && (
             <div>
               <p className={LABEL}>Phone</p>
-              <a href={`tel:${customer.phone}`} className="text-blue-400 hover:underline">
+              <a href={`tel:${customer.phone}`} className="text-info hover:underline">
                 {customer.phone}
               </a>
             </div>
@@ -96,7 +96,7 @@ export default function EditableCustomerCard({
               <p className={LABEL}>Email</p>
               <a
                 href={`mailto:${customer.email}`}
-                className="text-blue-400 hover:underline truncate block"
+                className="text-info hover:underline truncate block"
               >
                 {customer.email}
               </a>
@@ -108,15 +108,15 @@ export default function EditableCustomerCard({
             <div>
               <p className={LABEL}>Insurance</p>
               {customer.insurance_company && (
-                <p className="text-zinc-200">{customer.insurance_company}</p>
+                <p className="text-ink">{customer.insurance_company}</p>
               )}
               {customer.insurance_policy_number && (
-                <p className="text-zinc-500 text-xs mt-0.5 font-mono">
+                <p className="text-ink-3 text-xs mt-0.5 font-mono">
                   Policy: {customer.insurance_policy_number}
                 </p>
               )}
               {customer.insurance_claim_number && (
-                <p className="text-zinc-500 text-xs mt-0.5 font-mono">
+                <p className="text-ink-3 text-xs mt-0.5 font-mono">
                   Claim: {customer.insurance_claim_number}
                 </p>
               )}
@@ -126,7 +126,7 @@ export default function EditableCustomerCard({
             !customer.insurance_company &&
             !customer.insurance_policy_number &&
             !customer.insurance_claim_number && (
-              <p className="text-amber-400/80 text-xs italic">
+              <p className="text-honey/80 text-xs italic">
                 No insurance info yet — click Edit to add it once you have the policy/claim #.
               </p>
             )}
@@ -138,12 +138,12 @@ export default function EditableCustomerCard({
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-white font-semibold">Edit Customer</h2>
+        <h2 className="text-ink font-semibold">Edit Customer</h2>
         <button
           type="button"
           onClick={cancel}
           disabled={pending}
-          className="text-zinc-500 hover:text-white text-xs font-medium"
+          className="text-ink-3 hover:text-ink text-xs font-medium"
         >
           Cancel
         </button>
@@ -177,8 +177,8 @@ export default function EditableCustomerCard({
 
         {showInsurance && (
           <>
-            <div className="mt-2 pt-3 border-t border-zinc-800">
-              <p className="text-zinc-400 text-[10px] uppercase tracking-wide font-semibold mb-2">
+            <div className="mt-2 pt-3 border-t border-edge2">
+              <p className="text-ink-2 text-[10px] uppercase tracking-wide font-semibold mb-2">
                 Insurance
               </p>
             </div>
@@ -217,7 +217,7 @@ export default function EditableCustomerCard({
         )}
 
         {error && (
-          <p className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
+          <p className="text-red-700 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
             {error}
           </p>
         )}
@@ -227,7 +227,7 @@ export default function EditableCustomerCard({
             type="button"
             onClick={save}
             disabled={pending || !draft.name?.trim()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
           >
             {pending ? "Saving…" : "Save"}
           </button>

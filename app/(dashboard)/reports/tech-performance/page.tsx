@@ -113,11 +113,11 @@ export default async function TechPerformancePage({
     <div className="p-4 md:p-8">
       <div className="mb-6 flex items-end justify-between gap-3 flex-wrap">
         <div>
-          <Link href="/reports" className="text-zinc-500 hover:text-white text-sm transition-colors">
+          <Link href="/reports" className="text-ink-3 hover:text-ink text-sm transition-colors">
             ← Reports
           </Link>
-          <h1 className="text-2xl font-bold text-white mt-2">Tech Performance</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-ink mt-2">Tech Performance</h1>
+          <p className="text-ink-2 text-sm mt-0.5">
             Hours, jobs touched, and revenue contribution per tech.
             Sorted by revenue per hour (efficiency proxy).
           </p>
@@ -129,8 +129,8 @@ export default async function TechPerformancePage({
               href={`/reports/tech-performance?window=${d}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 windowDays === d
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                  ? "bg-cta text-white"
+                  : "bg-shade text-ink-2 hover:bg-shade hover:text-ink"
               }`}
             >
               {d === 365 ? "1y" : `${d}d`}
@@ -142,25 +142,25 @@ export default async function TechPerformancePage({
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Tile label="Total Hours" value={`${totalHours.toFixed(1)}h`} sub={`${rows.length} techs`} />
-        <Tile label="Total Labor Cost" value={fmt(totalLaborCost)} color="text-orange-400" />
-        <Tile label="Revenue Touched" value={fmt(totalRevenue)} color="text-green-400" sub="jobs the tech worked on" />
+        <Tile label="Total Labor Cost" value={fmt(totalLaborCost)} color="text-orange-700" />
+        <Tile label="Revenue Touched" value={fmt(totalRevenue)} color="text-pine" sub="jobs the tech worked on" />
         <Tile
           label="Avg Revenue / Hour"
           value={fmt(avgRevenuePerHour)}
-          color={avgRevenuePerHour >= 100 ? "text-green-400" : avgRevenuePerHour >= 60 ? "text-yellow-400" : "text-red-400"}
+          color={avgRevenuePerHour >= 100 ? "text-pine" : avgRevenuePerHour >= 60 ? "text-honey" : "text-red-700"}
         />
       </div>
 
       {/* Per-tech table */}
       <div className="glass-card overflow-x-auto">
         {rows.length === 0 ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
+          <div className="px-5 py-10 text-center text-ink-3 text-sm">
             No labor logged in this window. Log hours from any job's P&L section.
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Tech</th>
                 <th className="px-4 py-3 text-right">Hours</th>
                 <th className="px-4 py-3 text-right">Labor Cost</th>
@@ -174,31 +174,31 @@ export default async function TechPerformancePage({
               {rows.map((r) => {
                 const rphColor =
                   r.revenuePerHour == null
-                    ? "text-zinc-500"
+                    ? "text-ink-3"
                     : r.revenuePerHour >= 100
-                      ? "text-green-400"
+                      ? "text-pine"
                       : r.revenuePerHour >= 60
-                        ? "text-yellow-400"
-                        : "text-red-400";
+                        ? "text-honey"
+                        : "text-red-700";
                 return (
                   <tr
                     key={r.profileId}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04]"
+                    className="border-b border-edge2 last:border-0 hover:bg-shade"
                   >
-                    <td className="px-4 py-3 text-white font-medium">{r.name}</td>
-                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-4 py-3 text-ink font-medium">{r.name}</td>
+                    <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">
                       {r.hours.toFixed(1)}h
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">
                       {fmt(r.laborCost)}
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">
                       {r.jobsTouched}
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-400 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">
                       {r.avgHoursPerJob != null ? `${r.avgHoursPerJob.toFixed(1)}h` : "—"}
                     </td>
-                    <td className="px-4 py-3 text-right text-white font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-ink font-mono text-xs">
                       {fmt(r.revenueOnJobs)}
                     </td>
                     <td className={`px-4 py-3 text-right font-mono text-xs font-semibold ${rphColor}`}>
@@ -212,10 +212,10 @@ export default async function TechPerformancePage({
         )}
       </div>
 
-      <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">Reading the table</p>
+      <div className="mt-6 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-1">Reading the table</p>
         <p>
-          <strong className="text-zinc-300">$/Hour</strong> is the revenue on the jobs a tech touched,
+          <strong className="text-ink-2">$/Hour</strong> is the revenue on the jobs a tech touched,
           divided by their logged hours on those jobs. It's a proxy for productivity, not a perfect
           one — a tech who takes a single big-ticket job will look better than one running many
           smaller ones. Use it directionally and combined with <strong>Jobs Touched</strong> +{" "}
@@ -233,7 +233,7 @@ function Tile({
   label,
   value,
   sub,
-  color = "text-white",
+  color = "text-ink",
 }: {
   label: string;
   value: string;
@@ -242,9 +242,9 @@ function Tile({
 }) {
   return (
     <div className="glass-card p-4">
-      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
+      <p className="text-ink-3 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
-      {sub && <p className="text-zinc-500 text-xs mt-1">{sub}</p>}
+      {sub && <p className="text-ink-3 text-xs mt-1">{sub}</p>}
     </div>
   );
 }

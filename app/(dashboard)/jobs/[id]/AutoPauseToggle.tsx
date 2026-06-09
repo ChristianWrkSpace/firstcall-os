@@ -36,7 +36,7 @@ export default function AutoPauseToggle({
         onClick={toggle}
         disabled={pending}
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${
-          paused ? "bg-amber-500" : "bg-zinc-700"
+          paused ? "bg-amber-500" : "bg-shade"
         } disabled:opacity-50`}
         aria-pressed={paused}
       >
@@ -47,15 +47,15 @@ export default function AutoPauseToggle({
         />
       </button>
       <div className="flex-1 min-w-0">
-        <p className={`text-xs font-medium ${paused ? "text-amber-300" : "text-zinc-300"}`}>
+        <p className={`text-xs font-medium ${paused ? "text-honey" : "text-ink-2"}`}>
           {paused ? "Auto-actions PAUSED" : "Auto-actions enabled"}
         </p>
-        <p className="text-zinc-500 text-[10px] leading-snug mt-0.5">
+        <p className="text-ink-3 text-[10px] leading-snug mt-0.5">
           {paused
             ? "Litigated / sensitive case — agents won't draft anything for this job."
             : "Agents will auto-draft estimates, legal docs, drying certs, etc. as conditions are met."}
         </p>
-        {error && <p className="text-red-400 text-[10px] mt-1">{error}</p>}
+        {error && <p className="text-red-700 text-[10px] mt-1">{error}</p>}
       </div>
     </div>
   );

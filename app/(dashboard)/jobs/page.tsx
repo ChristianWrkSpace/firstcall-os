@@ -105,7 +105,7 @@ export default async function JobsPage({
           <Link
             href="/jobs/new"
             className="px-4 py-2 text-sm font-medium rounded-xl text-white transition-opacity hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #6B8AD9, #5FBDB0)" }}
+            style={{ background: "linear-gradient(135deg, #E08A63, #C4663F)" }}
           >
             + New Job
           </Link>
@@ -120,10 +120,10 @@ export default async function JobsPage({
                 key={f}
                 href={f === "active" ? "/jobs" : `/jobs?filter=${f}`}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  active ? "ring-1 ring-[#5FBDB0]/30" : "hover:bg-white/[0.06]"
+                  active ? "ring-1 ring-[#D97757]/30" : "hover:bg-shade"
                 }`}
                 style={{
-                  backgroundColor: active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
+                  backgroundColor: active ? "rgba(58,47,38,0.05)" : "rgba(58,47,38,0.05)",
                   color: active ? "var(--color-text-primary)" : "var(--color-text-secondary)",
                 }}
               >
@@ -149,7 +149,7 @@ export default async function JobsPage({
               <Link
                 href="/jobs/new"
                 className="inline-block mt-3 text-sm hover:underline"
-                style={{ color: "#5FBDB0" }}
+                style={{ color: "#D97757" }}
               >
                 Create your first job →
               </Link>
@@ -163,7 +163,7 @@ export default async function JobsPage({
                 <Link
                   key={job.id}
                   href={`/jobs/${job.id}`}
-                  className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-colors hover:bg-white/[0.05]"
+                  className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-colors hover:bg-shade"
                   style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
                 >
                   <div className="min-w-0 flex-1">
@@ -186,7 +186,7 @@ export default async function JobsPage({
                   </div>
                   <div className="text-right shrink-0">
                     {balance > 0 && (
-                      <p className="font-mono text-xs text-amber-300">⚠ {fmt(balance)}</p>
+                      <p className="font-mono text-xs text-honey">⚠ {fmt(balance)}</p>
                     )}
                     <p className="text-[11px] mt-0.5" style={{ color: "var(--color-text-muted)" }}>
                       {new Date(job.created_at).toLocaleDateString()}

@@ -30,12 +30,12 @@ export default function AutoNotifyToggle({
   }
 
   return (
-    <div className="flex items-start gap-2 mt-3 pt-3 border-t border-zinc-800">
+    <div className="flex items-start gap-2 mt-3 pt-3 border-t border-edge2">
       <button
         onClick={toggle}
         disabled={pending}
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${
-          enabled ? "bg-blue-600" : "bg-zinc-700"
+          enabled ? "bg-cta" : "bg-shade"
         } disabled:opacity-50`}
         aria-pressed={enabled}
       >
@@ -46,15 +46,15 @@ export default function AutoNotifyToggle({
         />
       </button>
       <div className="flex-1 min-w-0">
-        <p className="text-zinc-200 text-xs font-medium">
+        <p className="text-ink text-xs font-medium">
           Auto-email on status change
         </p>
-        <p className="text-zinc-500 text-[10px] leading-snug mt-0.5">
+        <p className="text-ink-3 text-[10px] leading-snug mt-0.5">
           {enabled
             ? "Customer gets an email when this job hits Mitigation, Drying, or Completed."
             : "OFF — only manual sends will reach this customer."}
         </p>
-        {error && <p className="text-red-400 text-[10px] mt-1">{error}</p>}
+        {error && <p className="text-red-700 text-[10px] mt-1">{error}</p>}
       </div>
     </div>
   );

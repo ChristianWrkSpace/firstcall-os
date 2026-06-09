@@ -58,13 +58,13 @@ export default async function JobEconomicsPage({
     <div className="p-4 md:p-8">
       <div className="mb-6 flex items-end justify-between gap-3 flex-wrap">
         <div>
-          <Link href="/reports" className="text-zinc-500 hover:text-white text-sm transition-colors">
+          <Link href="/reports" className="text-ink-3 hover:text-ink text-sm transition-colors">
             ← Reports
           </Link>
-          <h1 className="text-2xl font-bold text-white mt-2">Job Economics — Live P&L</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-ink mt-2">Job Economics — Live P&L</h1>
+          <p className="text-ink-2 text-sm mt-0.5">
             True P&L: revenue minus all COGS minus allocated overhead. Tune cost basis at{" "}
-            <Link href="/settings/cost-basis" className="text-blue-400 hover:underline">
+            <Link href="/settings/cost-basis" className="text-info hover:underline">
               Settings → Cost Basis
             </Link>
             .
@@ -81,15 +81,15 @@ export default async function JobEconomicsPage({
               href={`/reports/job-economics?window=${w.d}${jobType ? `&type=${jobType}` : ""}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 windowDays === w.d
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                  ? "bg-cta text-white"
+                  : "bg-shade text-ink-2 hover:bg-shade hover:text-ink"
               }`}
             >
               {w.label}
             </Link>
           ))}
         </div>
-        <span className="text-zinc-700">·</span>
+        <span className="text-ink-3">·</span>
         <div className="flex items-center gap-1">
           {TYPES.map((t) => (
             <Link
@@ -97,8 +97,8 @@ export default async function JobEconomicsPage({
               href={`/reports/job-economics?window=${windowDays}${t.v !== "all" ? `&type=${t.v}` : ""}`}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 (pnl.jobType === t.v || (pnl.jobType === "all" && t.v === "all"))
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                  ? "bg-cta text-white"
+                  : "bg-shade text-ink-2 hover:bg-shade hover:text-ink"
               }`}
             >
               {t.icon} {t.label}
@@ -114,7 +114,7 @@ export default async function JobEconomicsPage({
           label="Total COGS"
           value={fmt(pnl.totals.totalCogs)}
           sub={`Labor + Consumables + Equip + Van`}
-          color="text-orange-400"
+          color="text-orange-700"
         />
         <Tile
           label="Gross Profit"
@@ -122,10 +122,10 @@ export default async function JobEconomicsPage({
           sub={`Margin ${pct(pnl.totals.grossMarginPct)}`}
           color={
             pnl.totals.grossProfit < 0
-              ? "text-red-400"
+              ? "text-red-700"
               : (pnl.totals.grossMarginPct ?? 0) >= 0.4
-                ? "text-green-400"
-                : "text-yellow-400"
+                ? "text-pine"
+                : "text-honey"
           }
         />
         <Tile
@@ -134,30 +134,30 @@ export default async function JobEconomicsPage({
           sub={`After ${fmt(pnl.totals.overheadAllocated)} overhead · ${pct(pnl.totals.netMarginPct)}`}
           color={
             pnl.totals.netProfit < 0
-              ? "text-red-400"
+              ? "text-red-700"
               : (pnl.totals.netMarginPct ?? 0) >= 0.2
-                ? "text-green-400"
-                : "text-yellow-400"
+                ? "text-pine"
+                : "text-honey"
           }
         />
       </div>
 
       {/* What you have to work with */}
-      <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 mb-5">
+      <div className="bg-blue-500/5 border border-info/20 rounded-xl p-4 mb-5">
         <div className="flex items-baseline justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold">
+            <p className="text-info text-xs uppercase tracking-wide font-semibold">
               What you have to work with
             </p>
-            <p className="text-zinc-400 text-xs mt-0.5">
+            <p className="text-ink-2 text-xs mt-0.5">
               Cash collected, minus COGS, minus overhead. The honest number.
             </p>
           </div>
           <p
             className={`text-3xl font-bold font-mono ${
               pnl.totals.revenueCollected - pnl.totals.totalCogs - pnl.totals.overheadAllocated >= 0
-                ? "text-green-400"
-                : "text-red-400"
+                ? "text-pine"
+                : "text-red-700"
             }`}
           >
             {fmt(pnl.totals.revenueCollected - pnl.totals.totalCogs - pnl.totals.overheadAllocated)}
@@ -168,11 +168,11 @@ export default async function JobEconomicsPage({
       {/* Per job-type breakdown */}
       {pnl.byType.length > 1 && (
         <div className="glass-card p-5 mb-5">
-          <h2 className="text-white font-semibold mb-3">By Job Type</h2>
+          <h2 className="text-ink font-semibold mb-3">By Job Type</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                   <th className="text-left px-3 py-2">Type</th>
                   <th className="text-right px-3 py-2">Jobs</th>
                   <th className="text-right px-3 py-2">Revenue</th>
@@ -184,24 +184,24 @@ export default async function JobEconomicsPage({
               </thead>
               <tbody>
                 {pnl.byType.map((t) => (
-                  <tr key={t.type} className="border-b border-white/[0.06] last:border-0">
-                    <td className="px-3 py-2 text-white capitalize">{t.type}</td>
-                    <td className="px-3 py-2 text-right text-zinc-400 font-mono text-xs">{t.jobCount}</td>
-                    <td className="px-3 py-2 text-right text-white font-mono text-xs">{fmt(t.revenueBilled)}</td>
-                    <td className="px-3 py-2 text-right text-orange-400 font-mono text-xs">{fmt(t.totalCogs)}</td>
+                  <tr key={t.type} className="border-b border-edge2 last:border-0">
+                    <td className="px-3 py-2 text-ink capitalize">{t.type}</td>
+                    <td className="px-3 py-2 text-right text-ink-2 font-mono text-xs">{t.jobCount}</td>
+                    <td className="px-3 py-2 text-right text-ink font-mono text-xs">{fmt(t.revenueBilled)}</td>
+                    <td className="px-3 py-2 text-right text-orange-700 font-mono text-xs">{fmt(t.totalCogs)}</td>
                     <td className="px-3 py-2 text-right font-mono text-xs">{fmt(t.grossProfit)}</td>
                     <td
                       className={`px-3 py-2 text-right font-mono text-xs font-semibold ${
                         t.netProfit < 0
-                          ? "text-red-400"
+                          ? "text-red-700"
                           : (t.netMarginPct ?? 0) >= 0.2
-                            ? "text-green-400"
-                            : "text-yellow-400"
+                            ? "text-pine"
+                            : "text-honey"
                       }`}
                     >
                       {fmt(t.netProfit)}
                     </td>
-                    <td className="px-3 py-2 text-right text-zinc-400 font-mono text-xs">{pct(t.netMarginPct)}</td>
+                    <td className="px-3 py-2 text-right text-ink-2 font-mono text-xs">{pct(t.netMarginPct)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -219,13 +219,13 @@ export default async function JobEconomicsPage({
       {/* Per-job table */}
       <div className="glass-card overflow-x-auto">
         {sortedJobs.length === 0 ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
+          <div className="px-5 py-10 text-center text-ink-3 text-sm">
             No jobs in this window.
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Job #</th>
                 <th className="px-4 py-3 text-left">Customer</th>
                 <th className="px-4 py-3 text-left">Type</th>
@@ -243,29 +243,29 @@ export default async function JobEconomicsPage({
               {sortedJobs.slice(0, 50).map((j) => (
                 <tr
                   key={j.jobId}
-                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                  className="border-b border-edge2 last:border-0 hover:bg-shade transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <Link href={`/jobs/${j.jobId}`} className="text-blue-400 hover:underline font-mono text-xs">
+                    <Link href={`/jobs/${j.jobId}`} className="text-info hover:underline font-mono text-xs">
                       {j.jobNumber}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-zinc-200 text-xs truncate max-w-[140px]">{j.customerName}</td>
-                  <td className="px-4 py-3 text-zinc-400 text-xs capitalize">{j.jobType ?? "—"}</td>
-                  <td className="px-4 py-3 text-right text-white font-mono text-xs">{fmt(j.revenueBilled)}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400 font-mono text-xs">{fmt(j.laborCost)}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400 font-mono text-xs">{fmt(j.consumablesCost)}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400 font-mono text-xs">{fmt(j.equipmentCost)}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400 font-mono text-xs">{fmt(j.vanCost)}</td>
+                  <td className="px-4 py-3 text-ink text-xs truncate max-w-[140px]">{j.customerName}</td>
+                  <td className="px-4 py-3 text-ink-2 text-xs capitalize">{j.jobType ?? "—"}</td>
+                  <td className="px-4 py-3 text-right text-ink font-mono text-xs">{fmt(j.revenueBilled)}</td>
+                  <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">{fmt(j.laborCost)}</td>
+                  <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">{fmt(j.consumablesCost)}</td>
+                  <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">{fmt(j.equipmentCost)}</td>
+                  <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">{fmt(j.vanCost)}</td>
                   <td className="px-4 py-3 text-right font-mono text-xs">{fmt(j.grossProfit)}</td>
                   <td
                     className={`px-4 py-3 text-right font-mono text-xs font-semibold ${
-                      j.netProfit < 0 ? "text-red-400" : "text-green-400"
+                      j.netProfit < 0 ? "text-red-700" : "text-pine"
                     }`}
                   >
                     {fmt(j.netProfit)}
                   </td>
-                  <td className="px-4 py-3 text-right text-zinc-400 font-mono text-xs">{pct(j.netMarginPct)}</td>
+                  <td className="px-4 py-3 text-right text-ink-2 font-mono text-xs">{pct(j.netMarginPct)}</td>
                 </tr>
               ))}
             </tbody>
@@ -274,22 +274,22 @@ export default async function JobEconomicsPage({
       </div>
 
       {/* Wisdom footer — generational principles applied to actual numbers */}
-      <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-xl p-5">
-        <p className="text-white text-sm font-semibold mb-3">📜 Principles Applied</p>
+      <div className="mt-6 bg-card border border-edge2 rounded-xl p-5">
+        <p className="text-ink text-sm font-semibold mb-3">📜 Principles Applied</p>
         <ul className="space-y-2.5">
           {wisdom.map((w, i) => (
-            <li key={i} className="text-zinc-400 text-xs leading-relaxed">
-              <span className="text-zinc-200 font-medium">{w.principle}</span>{" "}
-              <span className="text-zinc-600">— {w.source}.</span>{" "}
-              <span className="block mt-0.5 text-zinc-300">{w.action}</span>
+            <li key={i} className="text-ink-2 text-xs leading-relaxed">
+              <span className="text-ink font-medium">{w.principle}</span>{" "}
+              <span className="text-ink-3">— {w.source}.</span>{" "}
+              <span className="block mt-0.5 text-ink-2">{w.action}</span>
             </li>
           ))}
         </ul>
       </div>
 
       {/* Honest caveat */}
-      <div className="mt-5 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">What this is</p>
+      <div className="mt-5 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-1">What this is</p>
         <p>
           A real P&L per job + portfolio. Revenue from sent invoices minus the COGS you log
           (labor entries, consumables) plus equipment-days × daily cost plus van allocation.
@@ -306,7 +306,7 @@ function Tile({
   label,
   value,
   sub,
-  color = "text-white",
+  color = "text-ink",
 }: {
   label: string;
   value: string;
@@ -315,9 +315,9 @@ function Tile({
 }) {
   return (
     <div className="glass-card p-4">
-      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
+      <p className="text-ink-3 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
-      {sub && <p className="text-zinc-500 text-[10px] mt-1">{sub}</p>}
+      {sub && <p className="text-ink-3 text-[10px] mt-1">{sub}</p>}
     </div>
   );
 }
@@ -339,26 +339,26 @@ function PerformerCard({
 }) {
   return (
     <div className="glass-card p-4">
-      <p className="text-white text-sm font-semibold mb-2">{title}</p>
+      <p className="text-ink text-sm font-semibold mb-2">{title}</p>
       {rows.length === 0 ? (
-        <p className="text-zinc-500 text-xs italic">Not enough data yet.</p>
+        <p className="text-ink-3 text-xs italic">Not enough data yet.</p>
       ) : (
         <ul className="flex flex-col gap-1.5">
           {rows.map((r) => (
             <li key={r.jobId} className="flex items-center justify-between gap-2 text-sm">
-              <Link href={`/jobs/${r.jobId}`} className="text-blue-400 hover:underline font-mono text-xs truncate">
+              <Link href={`/jobs/${r.jobId}`} className="text-info hover:underline font-mono text-xs truncate">
                 {r.jobNumber}
               </Link>
-              <span className="text-zinc-300 truncate flex-1 mx-2 text-xs">{r.customerName}</span>
+              <span className="text-ink-2 truncate flex-1 mx-2 text-xs">{r.customerName}</span>
               <span
                 className={`font-mono text-xs font-semibold whitespace-nowrap ${
                   positive
                     ? r.netProfit >= 0
-                      ? "text-green-400"
-                      : "text-yellow-400"
+                      ? "text-pine"
+                      : "text-honey"
                     : r.netProfit < 0
-                      ? "text-red-400"
-                      : "text-yellow-400"
+                      ? "text-red-700"
+                      : "text-honey"
                 }`}
               >
                 {fmt(r.netProfit)} · {pct(r.netMarginPct)}

@@ -9,19 +9,19 @@ export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(requestPasswordReset, undefined);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
-      <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-card p-4">
+      <div className="w-full max-w-sm bg-card border border-edge2 rounded-2xl p-8">
         <div className="flex justify-center mb-6">
           <Logo variant="banner" size={40} priority />
         </div>
 
-        <h1 className="text-xl font-bold text-white">Reset your password</h1>
-        <p className="text-zinc-400 text-sm mt-1">
+        <h1 className="text-xl font-bold text-ink">Reset your password</h1>
+        <p className="text-ink-2 text-sm mt-1">
           Enter your email — we'll send a link to set a new password.
         </p>
 
         {state?.ok ? (
-          <div className="mt-5 px-4 py-3 bg-green-500/10 border border-green-500/30 text-green-300 rounded-lg text-sm">
+          <div className="mt-5 px-4 py-3 bg-pine/10 border border-green-500/30 text-pine rounded-lg text-sm">
             ✓ If that email exists in our system, a reset link is on the way. Check
             your inbox (and spam).
           </div>
@@ -32,15 +32,15 @@ export default function ForgotPasswordPage() {
               type="email"
               required
               placeholder="you@example.com"
-              className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+              className="px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm"
             />
             {state?.error && (
-              <p className="text-red-400 text-xs">{state.error}</p>
+              <p className="text-red-700 text-xs">{state.error}</p>
             )}
             <button
               type="submit"
               disabled={pending}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {pending ? "Sending…" : "Send reset link"}
             </button>
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
 
         <Link
           href="/login"
-          className="text-zinc-500 hover:text-white text-xs mt-4 inline-block"
+          className="text-ink-3 hover:text-ink text-xs mt-4 inline-block"
         >
           ← Back to login
         </Link>

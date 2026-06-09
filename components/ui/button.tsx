@@ -7,7 +7,7 @@ type ButtonVariant = "primary" | "glass" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/90 text-white shadow-lg shadow-[#6B8AD9]/20",
+  primary: "bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/90 text-white shadow-lg shadow-[#5B82B8]/20",
   glass: "bg-[color:var(--color-surface)] hover:bg-[color:var(--color-surface-strong)] text-[color:var(--color-text-primary)] border border-[color:var(--color-edge)] backdrop-blur-md",
   ghost: "text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface)]",
   danger: "bg-[color:var(--color-danger)]/10 hover:bg-[color:var(--color-danger)]/20 text-[color:var(--color-danger)] border border-[color:var(--color-danger)]/20",

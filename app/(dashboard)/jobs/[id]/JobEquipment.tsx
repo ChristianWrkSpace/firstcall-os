@@ -88,14 +88,14 @@ export default function JobEquipment({
       <div className="flex flex-col gap-3">
         {compareRows.length > 0 && (
           <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3">
-            <p className="text-yellow-300 text-xs uppercase tracking-wide font-semibold mb-2">
+            <p className="text-honey text-xs uppercase tracking-wide font-semibold mb-2">
               Argus recommends
             </p>
             <div className="flex flex-wrap gap-2">
               {compareRows.map((r) => (
                 <span
                   key={r.type}
-                  className="px-2 py-1 bg-zinc-800 text-zinc-200 text-xs rounded"
+                  className="px-2 py-1 bg-shade text-ink text-xs rounded"
                 >
                   {TYPE_META[r.type]?.icon} {r.needed} × {TYPE_META[r.type]?.label ?? r.type}
                 </span>
@@ -103,12 +103,12 @@ export default function JobEquipment({
             </div>
           </div>
         )}
-        <p className="text-zinc-500 text-sm italic">
+        <p className="text-ink-3 text-sm italic">
           No equipment deployed yet on this job.
         </p>
         <Link
           href="/equipment"
-          className="text-blue-400 hover:underline text-sm self-start"
+          className="text-info hover:underline text-sm self-start"
         >
           → Deploy from inventory
         </Link>
@@ -136,12 +136,12 @@ export default function JobEquipment({
                 <p className="text-base">{meta.icon}</p>
                 <p
                   className={`text-sm font-mono font-semibold ${
-                    ok ? "text-green-400" : "text-yellow-300"
+                    ok ? "text-pine" : "text-honey"
                   }`}
                 >
                   {r.deployed} / {r.needed}
                 </p>
-                <p className="text-zinc-400 text-[10px] uppercase tracking-wide">
+                <p className="text-ink-2 text-[10px] uppercase tracking-wide">
                   {meta.label}
                 </p>
               </div>
@@ -161,27 +161,27 @@ export default function JobEquipment({
           return (
             <li
               key={a.id}
-              className="flex items-center justify-between gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg"
+              className="flex items-center justify-between gap-3 px-3 py-2 bg-tint border border-edge2 rounded-lg"
             >
               <Link
                 href={`/equipment/${a.equipment?.id ?? ""}`}
-                className="flex items-center gap-3 min-w-0 flex-1 hover:text-blue-400 transition-colors"
+                className="flex items-center gap-3 min-w-0 flex-1 hover:text-info-deep transition-colors"
               >
                 <span className="text-lg shrink-0">{meta.icon}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="text-white text-sm font-medium block truncate">
+                  <span className="text-ink text-sm font-medium block truncate">
                     {meta.label}
                     {a.equipment?.model && (
-                      <span className="text-zinc-400 font-normal"> · {a.equipment.model}</span>
+                      <span className="text-ink-2 font-normal"> · {a.equipment.model}</span>
                     )}
                   </span>
-                  <span className="text-zinc-500 text-xs font-mono block truncate">
+                  <span className="text-ink-3 text-xs font-mono block truncate">
                     SN: {a.equipment?.serial_number ?? "—"}
                   </span>
                 </span>
               </Link>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-zinc-400 text-xs text-right">
+                <span className="text-ink-2 text-xs text-right">
                   {days != null ? (
                     <>{days === 0 ? "today" : `${days}d on site`}</>
                   ) : (
@@ -202,7 +202,7 @@ export default function JobEquipment({
 
       <Link
         href="/equipment"
-        className="text-blue-400 hover:underline text-xs self-start"
+        className="text-info hover:underline text-xs self-start"
       >
         Manage in inventory →
       </Link>

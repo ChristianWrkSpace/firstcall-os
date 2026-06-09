@@ -5,9 +5,9 @@ import Link from "next/link";
 import { ManualBackupButton, DownloadBackupLink, VerifyLatestBackupButton } from "./BackupActions";
 
 const STATUS_BADGE: Record<string, string> = {
-  ok:      "bg-green-500/15 text-green-400",
-  failed:  "bg-red-500/15 text-red-400",
-  running: "bg-yellow-500/15 text-yellow-300",
+  ok:      "bg-pine/10 text-pine",
+  failed:  "bg-red-600/10 text-red-700",
+  running: "bg-honey/10 text-honey",
 };
 
 export default async function BackupsPage() {
@@ -16,8 +16,8 @@ export default async function BackupsPage() {
   if (me.role !== "owner" && me.role !== "manager") {
     return (
       <div className="p-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-white">Backups</h1>
-        <p className="text-zinc-400 text-sm mt-2">
+        <h1 className="text-2xl font-bold text-ink">Backups</h1>
+        <p className="text-ink-2 text-sm mt-2">
           Owner / manager only.
         </p>
       </div>
@@ -41,12 +41,12 @@ export default async function BackupsPage() {
       <div className="mb-6">
         <Link
           href="/settings"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="text-ink-3 hover:text-ink text-sm transition-colors"
         >
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">💾 Backups & DR</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
+        <h1 className="text-2xl font-bold text-ink mt-2">💾 Backups & DR</h1>
+        <p className="text-ink-2 text-sm mt-1 max-w-2xl">
           Weekly automated logical export of operational tables to private
           Supabase Storage. Defense-in-depth on top of Supabase point-in-time
           recovery — not a replacement.
@@ -55,44 +55,44 @@ export default async function BackupsPage() {
 
       {/* Layered protection summary */}
       <section className="glass-card p-6 mb-5">
-        <h2 className="text-white font-semibold mb-3">Protection Layers</h2>
+        <h2 className="text-ink font-semibold mb-3">Protection Layers</h2>
         <ul className="flex flex-col gap-3 text-sm">
           <li className="flex gap-3">
-            <span className="text-blue-400 font-mono text-xs mt-0.5">L1</span>
+            <span className="text-info font-mono text-xs mt-0.5">L1</span>
             <div>
-              <p className="text-zinc-200 font-medium">
+              <p className="text-ink font-medium">
                 Supabase Point-in-Time Recovery (PITR)
               </p>
-              <p className="text-zinc-500 text-xs mt-0.5">
+              <p className="text-ink-3 text-xs mt-0.5">
                 Continuous WAL replication. Restore to any second in the last 7+
                 days. Configured in your Supabase project Database settings.{" "}
-                <span className="text-amber-300">
+                <span className="text-honey">
                   Verify: Database → Backups → PITR enabled.
                 </span>
               </p>
             </div>
           </li>
           <li className="flex gap-3">
-            <span className="text-blue-400 font-mono text-xs mt-0.5">L2</span>
+            <span className="text-info font-mono text-xs mt-0.5">L2</span>
             <div>
-              <p className="text-zinc-200 font-medium">
+              <p className="text-ink font-medium">
                 Daily Auto Backups (Supabase)
               </p>
-              <p className="text-zinc-500 text-xs mt-0.5">
+              <p className="text-ink-3 text-xs mt-0.5">
                 Full DB snapshot every 24h, retained 7 days on free / longer on
                 paid tiers.
               </p>
             </div>
           </li>
           <li className="flex gap-3">
-            <span className="text-blue-400 font-mono text-xs mt-0.5">L3</span>
+            <span className="text-info font-mono text-xs mt-0.5">L3</span>
             <div>
-              <p className="text-zinc-200 font-medium">
+              <p className="text-ink font-medium">
                 Weekly Logical Export (this page)
               </p>
-              <p className="text-zinc-500 text-xs mt-0.5">
+              <p className="text-ink-3 text-xs mt-0.5">
                 Every Sunday 03:00 UTC, the cron exports operational tables to
-                JSON in the private <code className="text-blue-300">backups</code>{" "}
+                JSON in the private <code className="text-info">backups</code>{" "}
                 bucket. Useful for accidental-mass-delete recovery and
                 project-to-project moves.
               </p>
@@ -105,8 +105,8 @@ export default async function BackupsPage() {
       <section className="glass-card p-6 mb-5">
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
-            <h2 className="text-white font-semibold">Cron Status</h2>
-            <p className="text-zinc-500 text-xs mt-0.5">
+            <h2 className="text-ink font-semibold">Cron Status</h2>
+            <p className="text-ink-3 text-xs mt-0.5">
               Schedule: Sundays 03:00 UTC (10:00 PM Saturday Austin).
             </p>
           </div>
@@ -144,9 +144,9 @@ export default async function BackupsPage() {
 
       {/* History */}
       <section className="glass-card p-6">
-        <h2 className="text-white font-semibold mb-3">Recent Runs</h2>
+        <h2 className="text-ink font-semibold mb-3">Recent Runs</h2>
         {!backups?.length ? (
-          <p className="text-zinc-500 text-sm italic">
+          <p className="text-ink-3 text-sm italic">
             No backups yet. The first cron will fire next Sunday, or click "Run
             Backup Now" to test.
           </p>
@@ -154,7 +154,7 @@ export default async function BackupsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                   <th className="text-left py-2">When</th>
                   <th className="text-left py-2">Source</th>
                   <th className="text-left py-2">Status</th>
@@ -168,12 +168,12 @@ export default async function BackupsPage() {
                 {backups.map((b: any) => (
                   <tr
                     key={b.id}
-                    className="border-b border-white/[0.06]/60 last:border-0"
+                    className="border-b border-edge2/60 last:border-0"
                   >
-                    <td className="py-2.5 text-zinc-300">
+                    <td className="py-2.5 text-ink-2">
                       {new Date(b.created_at).toLocaleString()}
                     </td>
-                    <td className="py-2.5 text-zinc-400 capitalize">
+                    <td className="py-2.5 text-ink-2 capitalize">
                       {b.triggered_by}
                     </td>
                     <td className="py-2.5">
@@ -183,12 +183,12 @@ export default async function BackupsPage() {
                         {b.status}
                       </span>
                       {b.error && (
-                        <p className="text-red-400 text-[10px] mt-1">
+                        <p className="text-red-700 text-[10px] mt-1">
                           {b.error}
                         </p>
                       )}
                     </td>
-                    <td className="py-2.5 text-right text-zinc-400 font-mono text-xs">
+                    <td className="py-2.5 text-right text-ink-2 font-mono text-xs">
                       {b.bytes
                         ? `${(Number(b.bytes) / 1024).toFixed(0)} KB`
                         : "—"}
@@ -198,7 +198,7 @@ export default async function BackupsPage() {
                         {b.status === "ok" && b.storage_path ? (
                           <DownloadBackupLink storagePath={b.storage_path} />
                         ) : (
-                          <span className="text-zinc-700">—</span>
+                          <span className="text-ink-3">—</span>
                         )}
                       </td>
                     )}
@@ -212,8 +212,8 @@ export default async function BackupsPage() {
 
       {/* Restore drill */}
       <section className="glass-card p-6 mt-5">
-        <h2 className="text-white font-semibold mb-1">Restore Drill</h2>
-        <p className="text-zinc-500 text-xs mb-4 leading-relaxed">
+        <h2 className="text-ink font-semibold mb-1">Restore Drill</h2>
+        <p className="text-ink-3 text-xs mb-4 leading-relaxed">
           A backup you've never restored is a backup you don't have. The Verify
           button below downloads the latest successful backup, parses it, and
           confirms row counts match the metadata — answers "is this actually
@@ -222,9 +222,9 @@ export default async function BackupsPage() {
 
         <VerifyLatestBackupButton />
 
-        <div className="mt-5 pt-5 border-t border-zinc-800">
-          <p className="text-white text-sm font-semibold mb-2">Full quarterly drill (still recommended)</p>
-          <ol className="flex flex-col gap-1.5 text-sm text-zinc-300 list-decimal list-inside leading-relaxed">
+        <div className="mt-5 pt-5 border-t border-edge2">
+          <p className="text-ink text-sm font-semibold mb-2">Full quarterly drill (still recommended)</p>
+          <ol className="flex flex-col gap-1.5 text-sm text-ink-2 list-decimal list-inside leading-relaxed">
             <li>Click Verify above to confirm the latest backup is intact.</li>
             <li>
               Spin up a sandbox Supabase project (or restore PITR snapshot to a
@@ -243,8 +243,8 @@ export default async function BackupsPage() {
               cold restore). Tear down the sandbox.
             </li>
           </ol>
-          <p className="text-zinc-500 text-xs mt-3">
-            Drills are auto-logged to the audit trail (action <code className="text-zinc-300 bg-zinc-800 px-1 rounded">backup.drill_verify</code>) so you can see the last 4 quarters at a glance from /settings/audit.
+          <p className="text-ink-3 text-xs mt-3">
+            Drills are auto-logged to the audit trail (action <code className="text-ink-2 bg-shade px-1 rounded">backup.drill_verify</code>) so you can see the last 4 quarters at a glance from /settings/audit.
           </p>
         </div>
       </section>
@@ -262,12 +262,12 @@ function Stat({
   note?: string;
 }) {
   return (
-    <div className="bg-white/[0.03] rounded-lg px-4 py-3">
-      <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
+    <div className="bg-tint rounded-lg px-4 py-3">
+      <p className="text-ink-3 text-[10px] uppercase tracking-wide font-semibold">
         {label}
       </p>
-      <p className="text-white text-sm font-medium mt-1">{value}</p>
-      {note && <p className="text-zinc-500 text-[10px] mt-0.5">{note}</p>}
+      <p className="text-ink text-sm font-medium mt-1">{value}</p>
+      {note && <p className="text-ink-3 text-[10px] mt-0.5">{note}</p>}
     </div>
   );
 }

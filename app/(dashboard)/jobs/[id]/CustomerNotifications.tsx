@@ -13,7 +13,7 @@ interface SentNotification {
 }
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm";
 
 export default function CustomerNotifications({
   jobId,
@@ -59,7 +59,7 @@ export default function CustomerNotifications({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2">
-        <label className="text-zinc-400 text-xs uppercase tracking-wide">
+        <label className="text-ink-2 text-xs uppercase tracking-wide">
           Event
         </label>
         <select
@@ -73,12 +73,12 @@ export default function CustomerNotifications({
             </option>
           ))}
         </select>
-        <p className="text-zinc-500 text-xs">{meta.description}</p>
+        <p className="text-ink-3 text-xs">{meta.description}</p>
       </div>
 
       {event === "custom" && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-zinc-400 text-xs uppercase tracking-wide">
+          <label className="text-ink-2 text-xs uppercase tracking-wide">
             Message
           </label>
           <textarea
@@ -88,14 +88,14 @@ export default function CustomerNotifications({
             placeholder="Write your message to the customer…"
             className={`${INPUT} resize-none`}
           />
-          <p className="text-zinc-500 text-[10px]">
+          <p className="text-ink-3 text-[10px]">
             Will be wrapped in the standard branded email layout.
           </p>
         </div>
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-zinc-400 text-xs uppercase tracking-wide">
+        <label className="text-ink-2 text-xs uppercase tracking-wide">
           To
         </label>
         <input
@@ -105,25 +105,25 @@ export default function CustomerNotifications({
           placeholder={customerEmail ?? "no customer email on file"}
           className={INPUT}
         />
-        <p className="text-zinc-500 text-[10px]">
+        <p className="text-ink-3 text-[10px]">
           Defaults to customer's email. Override here for testing or alternate contact.
         </p>
       </div>
 
-      {error && <p className="text-red-400 text-xs">{error}</p>}
-      {info && <p className="text-green-400 text-xs">{info}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
+      {info && <p className="text-pine text-xs">{info}</p>}
 
       <button
         onClick={send}
         disabled={pending || (!customerEmail && !recipientOverride.trim())}
-        className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+        className="px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
       >
         {pending ? "Sending…" : `${meta.emoji} Send to ${recipient}`}
       </button>
 
       {history.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-zinc-800">
-          <p className="text-zinc-500 text-[10px] uppercase tracking-wide mb-2">
+        <div className="mt-3 pt-3 border-t border-edge2">
+          <p className="text-ink-3 text-[10px] uppercase tracking-wide mb-2">
             Sent History
           </p>
           <ul className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
@@ -132,12 +132,12 @@ export default function CustomerNotifications({
               return (
                 <li
                   key={h.id}
-                  className="text-xs flex items-center justify-between gap-2 bg-white/[0.03] rounded px-2 py-1.5"
+                  className="text-xs flex items-center justify-between gap-2 bg-tint rounded px-2 py-1.5"
                 >
-                  <span className="text-zinc-300 truncate">
+                  <span className="text-ink-2 truncate">
                     {ev?.emoji ?? "•"} {ev?.label ?? h.event_type}
                   </span>
-                  <span className="text-zinc-500 whitespace-nowrap">
+                  <span className="text-ink-3 whitespace-nowrap">
                     {new Date(h.sent_at).toLocaleDateString()}
                   </span>
                 </li>

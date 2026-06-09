@@ -46,7 +46,7 @@ export default function AnalyzeButton({
           type="button"
           onClick={() => run("quick")}
           disabled={pending || !hasPhotos}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
         >
           {pending && pendingMode === "quick" ? (
             <>
@@ -64,7 +64,7 @@ export default function AnalyzeButton({
             onClick={() => run("deep")}
             disabled={pending || !hasPhotos}
             title={`Run Argus on every one of ${photoCount} photos in batches, then synthesize one unified scope. Slower (~60-90s) and pricier (~$0.30-0.50) but covers everything.`}
-            className="px-3 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] disabled:opacity-50 disabled:cursor-not-allowed text-white/85 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 bg-tint hover:bg-shade border border-edge2 disabled:opacity-50 disabled:cursor-not-allowed text-ink/85 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
           >
             {pending && pendingMode === "deep" ? (
               <>
@@ -77,7 +77,7 @@ export default function AnalyzeButton({
         )}
       </div>
       {showDeepOption && !pending && !lastResult && (
-        <p className="text-white/40 text-[10px]">
+        <p className="text-ink/40 text-[10px]">
           Quick mode samples 16 of {photoCount} photos · Deep scans every one
         </p>
       )}
@@ -88,7 +88,7 @@ export default function AnalyzeButton({
         </p>
       )}
       {error && (
-        <p className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
+        <p className="text-red-700 text-xs bg-red-400/10 border border-red-400/20 rounded px-2 py-1">
           {error}
         </p>
       )}

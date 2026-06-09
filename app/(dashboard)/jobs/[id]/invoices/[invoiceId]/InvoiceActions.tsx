@@ -75,15 +75,15 @@ export default function InvoiceActions({
         <button
           onClick={() => setShowSend(true)}
           disabled={pending}
-          className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
           ✉ Send Invoice
         </button>
       )}
 
       {showSend && (
-        <div className="bg-zinc-800/60 border border-zinc-700 rounded-lg p-3 flex flex-col gap-2">
-          <label className="text-zinc-400 text-xs uppercase tracking-wide">
+        <div className="bg-shade border border-edge2 rounded-lg p-3 flex flex-col gap-2">
+          <label className="text-ink-2 text-xs uppercase tracking-wide">
             Recipient email
           </label>
           <input
@@ -91,19 +91,19 @@ export default function InvoiceActions({
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="adjuster@statefarm.com"
-            className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="px-3 py-2 rounded-lg bg-card border border-edge2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-cta"
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setShowSend(false)}
-              className="px-3 py-1.5 text-zinc-400 hover:text-white text-xs"
+              className="px-3 py-1.5 text-ink-2 hover:text-ink text-xs"
             >
               Cancel
             </button>
             <button
               onClick={handleSend}
               disabled={pending}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg"
+              className="px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded-lg"
             >
               {pending ? "Sending…" : "Send via Resend"}
             </button>
@@ -114,29 +114,29 @@ export default function InvoiceActions({
       {/* Reminders — sent/partial/overdue */}
       {hasBeenSent && status !== "paid" && status !== "void" && (
         <>
-          <div className="border-t border-zinc-800 pt-2 mt-1">
-            <p className="text-zinc-500 text-[10px] uppercase tracking-wide mb-1.5">
+          <div className="border-t border-edge2 pt-2 mt-1">
+            <p className="text-ink-3 text-[10px] uppercase tracking-wide mb-1.5">
               Send Reminder
             </p>
             <div className="flex flex-col gap-1.5">
               <button
                 onClick={() => handleReminder("gentle")}
                 disabled={pending}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-200 text-xs rounded-lg text-left"
+                className="px-3 py-1.5 bg-shade hover:bg-shade disabled:opacity-50 text-ink text-xs rounded-lg text-left"
               >
                 😊 Gentle nudge
               </button>
               <button
                 onClick={() => handleReminder("firm")}
                 disabled={pending}
-                className="px-3 py-1.5 bg-yellow-500/10 hover:bg-yellow-500/20 disabled:opacity-50 text-yellow-300 text-xs rounded-lg text-left"
+                className="px-3 py-1.5 bg-honey/10 hover:bg-honey/10 disabled:opacity-50 text-honey text-xs rounded-lg text-left"
               >
                 ⚠️ Firm follow-up
               </button>
               <button
                 onClick={() => handleReminder("final")}
                 disabled={pending}
-                className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 text-red-300 text-xs rounded-lg text-left"
+                className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/10 disabled:opacity-50 text-red-700 text-xs rounded-lg text-left"
               >
                 🚨 Final notice (cites Tex. Ins. Code)
               </button>
@@ -151,7 +151,7 @@ export default function InvoiceActions({
           href={`/jobs/${jobId}/invoices/${invoiceId}/print`}
           target="_blank"
           rel="noopener"
-          className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors text-center mt-2"
+          className="px-3 py-2 bg-shade hover:bg-shade text-ink-2 text-sm rounded-lg transition-colors text-center mt-2"
         >
           🖨 Print / Export
         </a>
@@ -162,14 +162,14 @@ export default function InvoiceActions({
         <button
           onClick={handleVoid}
           disabled={pending}
-          className="px-3 py-2 bg-zinc-800 hover:bg-red-600/20 text-red-400 text-sm rounded-lg transition-colors mt-2"
+          className="px-3 py-2 bg-shade hover:bg-red-600/20 text-red-700 text-sm rounded-lg transition-colors mt-2"
         >
           Void Invoice
         </button>
       )}
 
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
-      {info && <p className="text-green-400 text-xs mt-2">{info}</p>}
+      {error && <p className="text-red-700 text-xs mt-2">{error}</p>}
+      {info && <p className="text-pine text-xs mt-2">{info}</p>}
     </div>
   );
 }

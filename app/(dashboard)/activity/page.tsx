@@ -64,12 +64,12 @@ const ACTION_META: Record<
 };
 
 const COLOR_CLASSES: Record<string, string> = {
-  blue: "bg-blue-500/10 border-blue-500/30 text-blue-300",
-  green: "bg-green-500/10 border-green-500/30 text-green-300",
-  amber: "bg-amber-500/10 border-amber-500/30 text-amber-300",
-  red: "bg-red-500/10 border-red-500/30 text-red-300",
-  purple: "bg-purple-500/10 border-purple-500/30 text-purple-300",
-  zinc: "bg-white/[0.03] border-zinc-700 text-zinc-300",
+  blue: "bg-info/10 border-info/30 text-info",
+  green: "bg-pine/10 border-green-500/30 text-pine",
+  amber: "bg-honey/10 border-amber-500/30 text-honey",
+  red: "bg-red-600/10 border-red-500/30 text-red-700",
+  purple: "bg-violet-500/10 border-purple-500/30 text-violet-700",
+  zinc: "bg-tint border-edge2 text-ink-2",
 };
 
 const AGENT_FILTER_OPTIONS = [
@@ -122,8 +122,8 @@ export default async function ActivityPage({
   return (
     <div className="p-4 md:p-8 max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">🎛️ Agent Activity</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
+        <h1 className="text-2xl font-bold text-ink">🎛️ Agent Activity</h1>
+        <p className="text-ink-2 text-sm mt-1 max-w-2xl">
           Real-time feed of every system action across all jobs. What the agents
           drafted, what got auto-sent, what's blocked. Filter by agent to focus.
         </p>
@@ -137,12 +137,12 @@ export default async function ActivityPage({
             href={`/activity?agent=${o.value}`}
             className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
               agentFilter === o.value
-                ? "border-blue-500 bg-blue-500/10 text-white"
-                : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700"
+                ? "border-info bg-info/10 text-white"
+                : "border-edge2 bg-card text-ink-2 hover:border-edge2"
             }`}
           >
             <p className="font-semibold">{o.value}</p>
-            <p className="text-zinc-500 text-[10px] mt-0.5">
+            <p className="text-ink-3 text-[10px] mt-0.5">
               {counts[o.value] ?? 0} actions
             </p>
           </Link>
@@ -152,7 +152,7 @@ export default async function ActivityPage({
       {agentFilter && (
         <Link
           href="/activity"
-          className="inline-block mb-3 text-blue-400 hover:underline text-xs"
+          className="inline-block mb-3 text-info hover:underline text-xs"
         >
           ← All agents
         </Link>
@@ -161,7 +161,7 @@ export default async function ActivityPage({
       {/* Feed */}
       {items.length === 0 ? (
         <div className="glass-card p-10 text-center">
-          <p className="text-zinc-400 text-sm">
+          <p className="text-ink-2 text-sm">
             {agentFilter
               ? `No recent activity from ${agentFilter}.`
               : "No system activity yet. Once you create a job or approve a draft, agents start working."}
@@ -197,23 +197,23 @@ export default async function ActivityPage({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm">
                     <span className="font-semibold">{meta.agent}</span>
-                    <span className="text-zinc-400"> · </span>
+                    <span className="text-ink-2"> · </span>
                     <span>{meta.label}</span>
                     {r.details?.doc_type && (
                       <>
-                        <span className="text-zinc-500"> · </span>
-                        <span className="text-zinc-300 text-xs font-mono">
+                        <span className="text-ink-3"> · </span>
+                        <span className="text-ink-2 text-xs font-mono">
                           {r.details.doc_type}
                         </span>
                       </>
                     )}
                   </p>
-                  <div className="mt-1 text-[11px] text-zinc-400 flex flex-wrap gap-2">
+                  <div className="mt-1 text-[11px] text-ink-2 flex flex-wrap gap-2">
                     <span>{new Date(r.created_at).toLocaleString()}</span>
                     <span>·</span>
                     <span>
                       {isSystem ? (
-                        <em className="text-zinc-500">system</em>
+                        <em className="text-ink-3">system</em>
                       ) : (
                         r.user_name ?? "unknown user"
                       )}
@@ -221,7 +221,7 @@ export default async function ActivityPage({
                     {r.details?.reason && (
                       <>
                         <span>·</span>
-                        <span className="text-zinc-300">
+                        <span className="text-ink-2">
                           {r.details.reason}
                         </span>
                       </>
@@ -239,7 +239,7 @@ export default async function ActivityPage({
                 {jobLink && (
                   <Link
                     href={jobLink}
-                    className="text-xs text-zinc-300 hover:text-white shrink-0 self-center"
+                    className="text-xs text-ink-2 hover:text-ink shrink-0 self-center"
                   >
                     Open →
                   </Link>

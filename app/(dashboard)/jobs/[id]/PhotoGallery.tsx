@@ -29,7 +29,7 @@ export default function PhotoGallery({ jobId, photos }: { jobId: string; photos:
 
   if (photos.length === 0) {
     return (
-      <p className="text-zinc-500 text-sm italic">
+      <p className="text-ink-3 text-sm italic">
         No photos uploaded yet. Snap photos of every affected area, water source, and damage close-ups.
       </p>
     );
@@ -39,7 +39,7 @@ export default function PhotoGallery({ jobId, photos }: { jobId: string; photos:
     <>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
         {photos.map((p) => (
-          <div key={p.id} className="relative group aspect-square bg-zinc-800 rounded-lg overflow-hidden">
+          <div key={p.id} className="relative group aspect-square bg-shade rounded-lg overflow-hidden">
             {urls[p.id] ? (
               <img
                 src={urls[p.id]}
@@ -48,7 +48,7 @@ export default function PhotoGallery({ jobId, photos }: { jobId: string; photos:
                 className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-zinc-600 text-xs">
+              <div className="w-full h-full flex items-center justify-center text-ink-3 text-xs">
                 Loading…
               </div>
             )}

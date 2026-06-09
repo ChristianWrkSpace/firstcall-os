@@ -38,7 +38,7 @@ export default function UserRoleEditor({
 
   if (!canEdit) {
     return (
-      <span className="capitalize text-zinc-300">
+      <span className="capitalize text-ink-2">
         {ROLE_META[currentRole as Role]?.label ?? currentRole}
       </span>
     );
@@ -50,7 +50,7 @@ export default function UserRoleEditor({
         value={currentRole}
         onChange={onChange}
         disabled={pending}
-        className="px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-white text-xs capitalize cursor-pointer disabled:opacity-50"
+        className="px-2 py-1 rounded bg-shade border border-edge2 text-ink text-xs capitalize cursor-pointer disabled:opacity-50"
       >
         {ALL_ROLES.map((r) => (
           <option key={r} value={r}>
@@ -61,11 +61,11 @@ export default function UserRoleEditor({
       <button
         onClick={toggleActive}
         disabled={pending}
-        className="text-zinc-500 hover:text-zinc-300 text-[10px]"
+        className="text-ink-3 hover:text-ink-2 text-[10px]"
       >
         {isActive ? "deactivate" : "activate"}
       </button>
-      {error && <span className="text-red-400 text-[10px]">{error}</span>}
+      {error && <span className="text-red-700 text-[10px]">{error}</span>}
     </div>
   );
 }

@@ -12,8 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "AI-powered operating system for First Call Mitigation. Field-ready.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#0a0a0a",
-    theme_color: "#0a0a0a",
+    background_color: "#FAF6EF",
+    theme_color: "#D97757",
     orientation: "portrait",
     categories: ["business", "productivity"],
     icons: [

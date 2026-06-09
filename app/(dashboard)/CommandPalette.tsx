@@ -113,21 +113,21 @@ export default function CommandPalette() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-xl bg-card border border-edge2 rounded-xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-          <SearchIcon className="w-5 h-5 text-zinc-500 shrink-0" />
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-edge2">
+          <SearchIcon className="w-5 h-5 text-ink-3 shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onInputKey}
             placeholder="Search jobs, customers, equipment, partners…"
-            className="flex-1 bg-transparent text-white text-sm placeholder:text-zinc-500 focus:outline-none"
+            className="flex-1 bg-transparent text-ink text-sm placeholder:text-ink-3 focus:outline-none"
           />
-          {loading && <span className="text-zinc-500 text-xs">…</span>}
-          <kbd className="text-zinc-500 text-[10px] px-1.5 py-0.5 bg-zinc-800 rounded border border-zinc-700">
+          {loading && <span className="text-ink-3 text-xs">…</span>}
+          <kbd className="text-ink-3 text-[10px] px-1.5 py-0.5 bg-shade rounded border border-edge2">
             esc
           </kbd>
         </div>
@@ -135,24 +135,24 @@ export default function CommandPalette() {
         {/* Results */}
         <div className="overflow-y-auto max-h-[50vh]">
           {query.length < 2 ? (
-            <div className="px-4 py-10 text-center text-zinc-500 text-sm">
+            <div className="px-4 py-10 text-center text-ink-3 text-sm">
               Type 2+ characters to search.
               <p className="text-xs mt-2">
-                <kbd className="text-zinc-600 text-[10px] px-1.5 py-0.5 bg-zinc-800 rounded border border-zinc-700">
+                <kbd className="text-ink-3 text-[10px] px-1.5 py-0.5 bg-shade rounded border border-edge2">
                   ⌘K
                 </kbd>{" "}
                 to open from anywhere.
               </p>
             </div>
           ) : results.length === 0 ? (
-            <div className="px-4 py-10 text-center text-zinc-500 text-sm">
+            <div className="px-4 py-10 text-center text-ink-3 text-sm">
               {loading ? "Searching…" : `No results for "${query}".`}
             </div>
           ) : (
             <div>
               {Object.entries(grouped).map(([type, items]) => (
                 <div key={type}>
-                  <p className="px-4 pt-3 pb-1 text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
+                  <p className="px-4 pt-3 pb-1 text-ink-3 text-[10px] uppercase tracking-wide font-semibold">
                     {TYPE_LABELS[type as SearchResult["type"]] ?? type}
                   </p>
                   {items.map((r) => {
@@ -164,20 +164,20 @@ export default function CommandPalette() {
                         onClick={() => navigate(r)}
                         onMouseEnter={() => setActiveIndex(i)}
                         className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
-                          active ? "bg-blue-600/20" : "hover:bg-zinc-800/60"
+                          active ? "bg-cta/20" : "hover:bg-shade/60"
                         }`}
                       >
-                        <span className="text-base shrink-0 text-blue-400">
+                        <span className="text-base shrink-0 text-info">
                           {r.emoji}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-white text-sm truncate">{r.title}</p>
-                          <p className="text-zinc-400 text-xs truncate">
+                          <p className="text-ink text-sm truncate">{r.title}</p>
+                          <p className="text-ink-2 text-xs truncate">
                             {r.subtitle}
                           </p>
                         </div>
                         {r.meta && (
-                          <span className="text-zinc-500 text-xs shrink-0 capitalize">
+                          <span className="text-ink-3 text-xs shrink-0 capitalize">
                             {r.meta}
                           </span>
                         )}
@@ -190,11 +190,11 @@ export default function CommandPalette() {
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-zinc-800 flex items-center justify-between text-[10px] text-zinc-500">
+        <div className="px-4 py-2 border-t border-edge2 flex items-center justify-between text-[10px] text-ink-3">
           <span>
-            <kbd className="px-1 py-0.5 bg-zinc-800 rounded border border-zinc-700">↑↓</kbd>{" "}
+            <kbd className="px-1 py-0.5 bg-shade rounded border border-edge2">↑↓</kbd>{" "}
             navigate ·{" "}
-            <kbd className="px-1 py-0.5 bg-zinc-800 rounded border border-zinc-700">↵</kbd>{" "}
+            <kbd className="px-1 py-0.5 bg-shade rounded border border-edge2">↵</kbd>{" "}
             open
           </span>
           <span>{results.length} results</span>

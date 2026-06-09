@@ -12,17 +12,17 @@ import {
 import { requireRoles } from "@/components/RoleGate";
 
 const STATUS_META: Record<Status, { label: string; color: string; emoji: string }> = {
-  done: { label: "Shipped", color: "text-green-400", emoji: "✅" },
-  in_progress: { label: "In Progress", color: "text-blue-400", emoji: "🔨" },
-  planned: { label: "Planned", color: "text-zinc-400", emoji: "📋" },
-  idea: { label: "Ideas", color: "text-purple-400", emoji: "💡" },
+  done: { label: "Shipped", color: "text-pine", emoji: "✅" },
+  in_progress: { label: "In Progress", color: "text-info", emoji: "🔨" },
+  planned: { label: "Planned", color: "text-ink-2", emoji: "📋" },
+  idea: { label: "Ideas", color: "text-violet-700", emoji: "💡" },
 };
 
 const EFFORT_META: Record<Effort, { label: string; hours: string; color: string }> = {
-  S:  { label: "S",  hours: "~1-2h",  color: "bg-zinc-700 text-zinc-300" },
-  M:  { label: "M",  hours: "~½ day", color: "bg-blue-500/20 text-blue-300" },
-  L:  { label: "L",  hours: "~1-2d",  color: "bg-purple-500/20 text-purple-300" },
-  XL: { label: "XL", hours: "~3+d",   color: "bg-red-500/20 text-red-300" },
+  S:  { label: "S",  hours: "~1-2h",  color: "bg-shade text-ink-2" },
+  M:  { label: "M",  hours: "~½ day", color: "bg-info/10 text-info" },
+  L:  { label: "L",  hours: "~1-2d",  color: "bg-violet-500/10 text-violet-700" },
+  XL: { label: "XL", hours: "~3+d",   color: "bg-red-600/10 text-red-700" },
 };
 
 const TRACKS: Track[] = ["core", "production", "security", "integrations"];
@@ -42,8 +42,8 @@ export default async function ProgressPage() {
   return (
     <div className="p-4 md:p-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Project Progress</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink">Project Progress</h1>
+        <p className="text-ink-2 text-sm mt-0.5">
           Source of truth. Effort-weighted. Updated as work ships.
         </p>
       </div>
@@ -52,20 +52,20 @@ export default async function ProgressPage() {
       <div className="glass-card p-6 mb-6">
         <div className="flex items-end justify-between mb-3 gap-3 flex-wrap">
           <div>
-            <p className="text-zinc-400 text-xs uppercase tracking-wide">Overall Progress</p>
-            <p className="text-5xl font-bold text-white mt-1">
+            <p className="text-ink-2 text-xs uppercase tracking-wide">Overall Progress</p>
+            <p className="text-5xl font-bold text-ink mt-1">
               {overall.percent}
-              <span className="text-2xl text-zinc-500">%</span>
+              <span className="text-2xl text-ink-3">%</span>
             </p>
-            <p className="text-zinc-500 text-xs mt-1">
+            <p className="text-ink-3 text-xs mt-1">
               {overall.doneWeight} / {overall.totalWeight} effort units shipped (S=1, M=3, L=8, XL=20)
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            <StatChip count={counts.done} label="Shipped" color="text-green-400" />
-            <StatChip count={counts.in_progress} label="In Flight" color="text-blue-400" />
-            <StatChip count={counts.planned} label="Planned" color="text-zinc-300" />
-            <StatChip count={counts.idea} label="Ideas" color="text-purple-400" />
+            <StatChip count={counts.done} label="Shipped" color="text-pine" />
+            <StatChip count={counts.in_progress} label="In Flight" color="text-info" />
+            <StatChip count={counts.planned} label="Planned" color="text-ink-2" />
+            <StatChip count={counts.idea} label="Ideas" color="text-violet-700" />
           </div>
         </div>
 
@@ -80,16 +80,16 @@ export default async function ProgressPage() {
           return (
             <div key={track} className="glass-card p-4">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-white text-sm font-semibold">
+                <p className="text-ink text-sm font-semibold">
                   {meta.emoji} {meta.label}
                 </p>
-                <p className="text-2xl font-bold text-white">
-                  {stats.percent}<span className="text-sm text-zinc-500">%</span>
+                <p className="text-2xl font-bold text-ink">
+                  {stats.percent}<span className="text-sm text-ink-3">%</span>
                 </p>
               </div>
               <ProgressBar percent={stats.percent} thin />
-              <p className="text-zinc-500 text-xs mt-2 leading-snug">{meta.description}</p>
-              <p className="text-zinc-600 text-[10px] mt-1.5 font-mono">
+              <p className="text-ink-3 text-xs mt-2 leading-snug">{meta.description}</p>
+              <p className="text-ink-3 text-[10px] mt-1.5 font-mono">
                 {stats.doneWeight} / {stats.totalWeight} effort · {stats.items} items
               </p>
             </div>
@@ -104,11 +104,11 @@ export default async function ProgressPage() {
 
         return (
           <div key={track} className="mb-10">
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/[0.06]">
-              <h2 className="text-xl font-semibold text-white">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-edge2">
+              <h2 className="text-xl font-semibold text-ink">
                 {meta.emoji} {meta.label}
               </h2>
-              <span className="text-zinc-600 text-sm">
+              <span className="text-ink-3 text-sm">
                 ({trackProgress[track].percent}%)
               </span>
             </div>
@@ -123,7 +123,7 @@ export default async function ProgressPage() {
                     <h3 className={`text-sm font-semibold ${statusMeta.color}`}>
                       {statusMeta.emoji} {statusMeta.label}
                     </h3>
-                    <span className="text-zinc-600 text-xs">({items.length})</span>
+                    <span className="text-ink-3 text-xs">({items.length})</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {items.map((item) => (
@@ -138,13 +138,13 @@ export default async function ProgressPage() {
       })}
 
       {/* Footnote */}
-      <div className="mt-8 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">How this is calculated</p>
+      <div className="mt-8 bg-card border border-edge2 rounded-lg p-4 text-ink-3 text-xs leading-relaxed">
+        <p className="text-ink-2 text-sm font-semibold mb-1">How this is calculated</p>
         <p>
           Items are weighted by effort (S=1, M=3, L=8, XL=20). Done counts full weight; in-progress
           counts half. Ideas are excluded — they're not committed scope. "Done" means shipped + working,
           not "scaffolded but needs hardening." If something here looks wrong, the source of truth is{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 py-0.5 rounded">lib/roadmap.ts</code>.
+          <code className="text-ink-2 bg-shade px-1 py-0.5 rounded">lib/roadmap.ts</code>.
         </p>
       </div>
     </div>
@@ -154,7 +154,7 @@ export default async function ProgressPage() {
 function ProgressBar({ percent, thin }: { percent: number; thin?: boolean }) {
   return (
     <div
-      className={`bg-zinc-800 rounded-full overflow-hidden ${thin ? "h-1.5" : "h-3"}`}
+      className={`bg-shade rounded-full overflow-hidden ${thin ? "h-1.5" : "h-3"}`}
     >
       <div
         className="h-full bg-gradient-to-r from-blue-600 to-green-500 transition-all duration-700"
@@ -174,9 +174,9 @@ function StatChip({
   color: string;
 }) {
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-center min-w-[70px]">
+    <div className="bg-tint border border-edge2 rounded-lg px-3 py-2 text-center min-w-[70px]">
       <p className={`text-xl font-bold ${color}`}>{count}</p>
-      <p className="text-zinc-500 text-[10px] uppercase tracking-wide">{label}</p>
+      <p className="text-ink-3 text-[10px] uppercase tracking-wide">{label}</p>
     </div>
   );
 }
@@ -189,17 +189,17 @@ function RoadmapCard({ item }: { item: RoadmapItem }) {
         item.status === "done"
           ? "bg-green-500/5 border-green-500/20"
           : item.status === "in_progress"
-            ? "bg-blue-500/10 border-blue-500/30"
+            ? "bg-info/10 border-info/30"
             : item.status === "planned"
-              ? "bg-zinc-900 border-zinc-800"
+              ? "bg-card border-edge2"
               : "bg-purple-500/5 border-purple-500/15"
       }`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <h3 className="text-white font-semibold text-sm">{item.title}</h3>
+          <h3 className="text-ink font-semibold text-sm">{item.title}</h3>
           {item.agent && (
-            <span className="px-1.5 py-0.5 bg-zinc-800 text-zinc-400 text-[10px] rounded font-mono uppercase">
+            <span className="px-1.5 py-0.5 bg-shade text-ink-2 text-[10px] rounded font-mono uppercase">
               {item.agent}
             </span>
           )}
@@ -218,12 +218,12 @@ function RoadmapCard({ item }: { item: RoadmapItem }) {
         </p>
       )}
 
-      <p className="text-zinc-400 text-xs leading-relaxed">{item.description}</p>
+      <p className="text-ink-2 text-xs leading-relaxed">{item.description}</p>
 
       {item.features && item.features.length > 0 && (
         <ul className="mt-2.5 space-y-1">
           {item.features.map((f, i) => (
-            <li key={i} className="text-zinc-500 text-xs flex items-start gap-1.5">
+            <li key={i} className="text-ink-3 text-xs flex items-start gap-1.5">
               <span className="text-green-500 shrink-0">✓</span>
               <span>{f}</span>
             </li>

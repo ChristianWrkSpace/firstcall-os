@@ -41,23 +41,23 @@ interface ScopeData {
 }
 
 const CONTAINMENT_TYPE_META: Record<string, { label: string; emoji: string; color: string }> = {
-  full_critical_barrier: { label: "Full critical barrier", emoji: "🛡", color: "text-red-300" },
-  partial_barrier:       { label: "Partial barrier",       emoji: "▦", color: "text-yellow-300" },
-  decon_chamber:         { label: "Decon chamber",         emoji: "🚪", color: "text-purple-300" },
-  negative_air_zone:     { label: "Negative-air zone",     emoji: "💨", color: "text-blue-300" },
-  splash_guard:          { label: "Splash guard",          emoji: "💧", color: "text-cyan-300" },
+  full_critical_barrier: { label: "Full critical barrier", emoji: "🛡", color: "text-red-700" },
+  partial_barrier:       { label: "Partial barrier",       emoji: "▦", color: "text-honey" },
+  decon_chamber:         { label: "Decon chamber",         emoji: "🚪", color: "text-violet-700" },
+  negative_air_zone:     { label: "Negative-air zone",     emoji: "💨", color: "text-info" },
+  splash_guard:          { label: "Splash guard",          emoji: "💧", color: "text-sky-700" },
 };
 
 const SEVERITY_COLORS = {
-  minor: "bg-green-500/15 text-green-400",
-  moderate: "bg-yellow-500/15 text-yellow-400",
-  severe: "bg-red-500/15 text-red-400",
+  minor: "bg-pine/10 text-pine",
+  moderate: "bg-honey/10 text-honey",
+  severe: "bg-red-600/10 text-red-700",
 };
 
 const CONFIDENCE_COLORS = {
-  low: "bg-red-500/15 text-red-400",
-  medium: "bg-yellow-500/15 text-yellow-400",
-  high: "bg-green-500/15 text-green-400",
+  low: "bg-red-600/10 text-red-700",
+  medium: "bg-honey/10 text-honey",
+  high: "bg-pine/10 text-pine",
 };
 
 function asArray<T = string>(value: unknown): T[] {
@@ -115,16 +115,16 @@ export default function ScopeAssessment({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5 flex-wrap">
           {scope.water_category && scope.water_category !== "n/a" && (
-            <Badge color="bg-blue-500/15 text-blue-300">Cat {scope.water_category}</Badge>
+            <Badge color="bg-info/10 text-info">Cat {scope.water_category}</Badge>
           )}
           {scope.water_class && scope.water_class !== "n/a" && (
-            <Badge color="bg-purple-500/15 text-purple-300">Class {scope.water_class}</Badge>
+            <Badge color="bg-violet-500/10 text-violet-700">Class {scope.water_class}</Badge>
           )}
           {totalSqft > 0 && (
-            <Badge color="bg-zinc-800 text-zinc-300">~{totalSqft} sqft</Badge>
+            <Badge color="bg-shade text-ink-2">~{totalSqft} sqft</Badge>
           )}
           {scope.estimated_dry_days && (
-            <Badge color="bg-zinc-800 text-zinc-300">{scope.estimated_dry_days}-day dry</Badge>
+            <Badge color="bg-shade text-ink-2">{scope.estimated_dry_days}-day dry</Badge>
           )}
           {scope.confidence && (
             <Badge color={CONFIDENCE_COLORS[scope.confidence]}>
@@ -132,13 +132,13 @@ export default function ScopeAssessment({
             </Badge>
           )}
           {analyzedAt && (
-            <span className="text-zinc-600 text-[10px] ml-auto">
+            <span className="text-ink-3 text-[10px] ml-auto">
               {new Date(analyzedAt).toLocaleString()}
             </span>
           )}
         </div>
         {tldr && (
-          <p className="text-zinc-200 text-sm leading-relaxed">{tldr}</p>
+          <p className="text-ink text-sm leading-relaxed">{tldr}</p>
         )}
       </div>
 
@@ -146,7 +146,7 @@ export default function ScopeAssessment({
       {scope.additional_photos_needed && (
         <Disclosure
           summary={
-            <span className="flex items-center gap-2 text-yellow-300">
+            <span className="flex items-center gap-2 text-honey">
               <span>📷</span>
               <span className="font-medium text-sm">More photos suggested</span>
             </span>
@@ -176,23 +176,23 @@ export default function ScopeAssessment({
             {affectedAreas.map((area, i) => {
               const materials = asArray<string>(area.materials);
               const severityColor =
-                SEVERITY_COLORS[area.severity] ?? "bg-zinc-700 text-zinc-300";
+                SEVERITY_COLORS[area.severity] ?? "bg-shade text-ink-2";
               return (
-                <div key={i} className="border-l-2 border-zinc-700 pl-3 py-0.5">
+                <div key={i} className="border-l-2 border-edge2 pl-3 py-0.5">
                   <div className="flex items-start justify-between gap-2 flex-wrap">
-                    <p className="text-white text-sm font-medium">{area.location}</p>
+                    <p className="text-ink text-sm font-medium">{area.location}</p>
                     <div className="flex items-center gap-2 shrink-0">
                       {area.estimated_sqft && (
-                        <span className="text-zinc-400 text-xs">{area.estimated_sqft} sqft</span>
+                        <span className="text-ink-2 text-xs">{area.estimated_sqft} sqft</span>
                       )}
                       {area.severity && <Badge color={severityColor}>{area.severity}</Badge>}
                     </div>
                   </div>
                   {materials.length > 0 && (
-                    <p className="text-zinc-400 text-xs mt-0.5">{materials.join(" · ")}</p>
+                    <p className="text-ink-2 text-xs mt-0.5">{materials.join(" · ")}</p>
                   )}
                   {area.notes && (
-                    <p className="text-zinc-500 text-xs italic mt-1 leading-relaxed">
+                    <p className="text-ink-3 text-xs italic mt-1 leading-relaxed">
                       {area.notes}
                     </p>
                   )}
@@ -224,7 +224,7 @@ export default function ScopeAssessment({
             {eq.air_movers ? <EqRow label="Air Movers" qty={eq.air_movers} /> : null}
             {eq.air_scrubbers ? <EqRow label="Air Scrubbers" qty={eq.air_scrubbers} /> : null}
             {equipmentOther.map((o, i) => (
-              <li key={i} className="text-zinc-300">• {o}</li>
+              <li key={i} className="text-ink-2">• {o}</li>
             ))}
           </ul>
         </Disclosure>
@@ -248,20 +248,20 @@ export default function ScopeAssessment({
                 CONTAINMENT_TYPE_META[c.type] ?? {
                   label: c.type,
                   emoji: "▦",
-                  color: "text-zinc-300",
+                  color: "text-ink-2",
                 };
               return (
                 <li
                   key={i}
-                  className="border-l-2 border-white/[0.08] pl-3 py-1"
+                  className="border-l-2 border-edge2 pl-3 py-1"
                 >
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-sm font-medium ${meta.color}`}>
                       {meta.emoji} {meta.label}
                     </span>
-                    <span className="text-white/60 text-xs">→ {c.area}</span>
+                    <span className="text-ink/60 text-xs">→ {c.area}</span>
                   </div>
-                  <p className="text-zinc-500 text-xs mt-0.5 leading-relaxed">{c.reason}</p>
+                  <p className="text-ink-3 text-xs mt-0.5 leading-relaxed">{c.reason}</p>
                 </li>
               );
             })}
@@ -289,8 +289,8 @@ export default function ScopeAssessment({
         >
           {safetyConcerns.length > 0 && (
             <div className="mb-3">
-              <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1.5">Concerns</p>
-              <ul className="text-sm text-zinc-300 space-y-1 leading-relaxed">
+              <p className="text-ink-3 text-xs uppercase tracking-wide mb-1.5">Concerns</p>
+              <ul className="text-sm text-ink-2 space-y-1 leading-relaxed">
                 {safetyConcerns.map((s, i) => (
                   <li key={i}>• {s}</li>
                 ))}
@@ -299,12 +299,12 @@ export default function ScopeAssessment({
           )}
           {ppeRequired.length > 0 && (
             <div>
-              <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1.5">Required PPE</p>
+              <p className="text-ink-3 text-xs uppercase tracking-wide mb-1.5">Required PPE</p>
               <div className="flex flex-wrap gap-1.5">
                 {ppeRequired.map((p, i) => (
                   <span
                     key={i}
-                    className="px-2 py-1 bg-zinc-800 text-zinc-200 text-xs rounded"
+                    className="px-2 py-1 bg-shade text-ink text-xs rounded"
                   >
                     {p}
                   </span>
@@ -330,7 +330,7 @@ export default function ScopeAssessment({
           <p className="text-[#A8DCD3] text-[11px] mb-2 italic">
             Read this from the truck before walking in.
           </p>
-          <ol className="text-sm text-zinc-200 space-y-2 list-decimal pl-5 leading-relaxed">
+          <ol className="text-sm text-ink space-y-2 list-decimal pl-5 leading-relaxed">
             {techPlaybook.map((step, i) => (
               <li key={i} className="pl-1">{step}</li>
             ))}
@@ -349,7 +349,7 @@ export default function ScopeAssessment({
             />
           }
         >
-          <ol className="text-sm text-zinc-300 space-y-1.5 list-decimal pl-5 leading-relaxed">
+          <ol className="text-sm text-ink-2 space-y-1.5 list-decimal pl-5 leading-relaxed">
             {mitigationSteps.map((step, i) => (
               <li key={i} className="pl-1">{step}</li>
             ))}
@@ -379,11 +379,11 @@ export default function ScopeAssessment({
               <CalcRow label="Safety Buffer" formula={scope.calculations.safety_factor_applied} />
             )}
             {asArray<string>(scope.calculations.key_assumptions).length > 0 && (
-              <div className="border-t border-blue-500/20 pt-3 mt-1">
-                <p className="text-yellow-400 text-xs uppercase tracking-wide mb-1.5">
+              <div className="border-t border-info/20 pt-3 mt-1">
+                <p className="text-honey text-xs uppercase tracking-wide mb-1.5">
                   ⚠ Verify on arrival
                 </p>
-                <ul className="text-zinc-300 text-xs space-y-1 leading-relaxed">
+                <ul className="text-ink-2 text-xs space-y-1 leading-relaxed">
                   {asArray<string>(scope.calculations.key_assumptions).map((a, i) => (
                     <li key={i}>• {a}</li>
                   ))}
@@ -399,7 +399,7 @@ export default function ScopeAssessment({
         <Disclosure
           summary={<SummaryRow icon="📝" title="Full summary" />}
         >
-          <p className="text-zinc-300 text-sm leading-relaxed">{scope.summary}</p>
+          <p className="text-ink-2 text-sm leading-relaxed">{scope.summary}</p>
         </Disclosure>
       )}
     </div>
@@ -418,9 +418,9 @@ function SummaryRow({
   return (
     <span className="flex items-center gap-2 flex-1 min-w-0">
       <span className="text-base">{icon}</span>
-      <span className="text-white text-sm font-medium">{title}</span>
+      <span className="text-ink text-sm font-medium">{title}</span>
       {count && (
-        <span className="text-zinc-500 text-xs ml-auto">{count}</span>
+        <span className="text-ink-3 text-xs ml-auto">{count}</span>
       )}
     </span>
   );
@@ -437,17 +437,17 @@ function Disclosure({
 }) {
   const accentClasses =
     accent === "blue"
-      ? "bg-blue-500/5 border-blue-500/20 hover:border-blue-500/40"
+      ? "bg-blue-500/5 border-info/20 hover:border-info/40"
       : accent === "yellow"
         ? "bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40"
         : accent === "teal"
-          ? "bg-[#5FBDB0]/[0.04] border-[#5FBDB0]/25 hover:border-[#5FBDB0]/45"
-          : "bg-white/[0.03] border-white/[0.06] hover:border-zinc-600";
+          ? "bg-[#D97757]/[0.04] border-[#D97757]/25 hover:border-[#D97757]/45"
+          : "bg-tint border-edge2 hover:border-edge2";
   return (
     <details className={`group border rounded-lg transition-colors ${accentClasses}`}>
       <summary className="cursor-pointer list-none flex items-center gap-2 px-3.5 py-2.5 select-none">
         <span className="flex-1 min-w-0">{summary}</span>
-        <span className="text-zinc-500 text-xs transition-transform group-open:rotate-90 shrink-0">
+        <span className="text-ink-3 text-xs transition-transform group-open:rotate-90 shrink-0">
           ▸
         </span>
       </summary>
@@ -459,8 +459,8 @@ function Disclosure({
 function EqRow({ label, qty }: { label: string; qty: number }) {
   return (
     <li className="flex justify-between">
-      <span className="text-zinc-300">{label}</span>
-      <span className="text-white font-mono font-semibold">× {qty}</span>
+      <span className="text-ink-2">{label}</span>
+      <span className="text-ink font-mono font-semibold">× {qty}</span>
     </li>
   );
 }
@@ -468,8 +468,8 @@ function EqRow({ label, qty }: { label: string; qty: number }) {
 function CalcRow({ label, formula }: { label: string; formula: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-zinc-400 text-xs uppercase tracking-wide">{label}</span>
-      <span className="text-zinc-100 text-sm font-mono leading-relaxed whitespace-pre-wrap">
+      <span className="text-ink-2 text-xs uppercase tracking-wide">{label}</span>
+      <span className="text-ink text-sm font-mono leading-relaxed whitespace-pre-wrap">
         {formula}
       </span>
     </div>

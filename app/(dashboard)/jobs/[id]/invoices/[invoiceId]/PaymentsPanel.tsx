@@ -14,7 +14,7 @@ interface Payment {
 }
 
 const INPUT =
-  "w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm";
+  "w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta text-sm";
 
 export default function PaymentsPanel({
   invoiceId,
@@ -52,11 +52,11 @@ export default function PaymentsPanel({
   return (
     <section className="glass-card p-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-white font-semibold">Payments</h2>
+        <h2 className="text-ink font-semibold">Payments</h2>
         {!invoiceLocked && balance > 0 && !adding && (
           <button
             onClick={() => setAdding(true)}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            className="text-info hover:text-info-deep text-xs font-medium"
           >
             + Record Payment
           </button>
@@ -66,10 +66,10 @@ export default function PaymentsPanel({
       {adding && (
         <form
           action={handleSubmit}
-          className="mb-4 bg-zinc-800/60 border border-zinc-700 rounded-lg p-3 grid grid-cols-2 gap-3"
+          className="mb-4 bg-shade border border-edge2 rounded-lg p-3 grid grid-cols-2 gap-3"
         >
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">Amount *</label>
+            <label className="text-ink-2 text-xs uppercase tracking-wide">Amount *</label>
             <input
               name="amount"
               type="number"
@@ -81,7 +81,7 @@ export default function PaymentsPanel({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">Method</label>
+            <label className="text-ink-2 text-xs uppercase tracking-wide">Method</label>
             <select name="method" className={INPUT}>
               <option value="check">Check</option>
               <option value="ach">ACH / Wire</option>
@@ -92,30 +92,30 @@ export default function PaymentsPanel({
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">Reference / Check #</label>
+            <label className="text-ink-2 text-xs uppercase tracking-wide">Reference / Check #</label>
             <input name="reference" className={INPUT} placeholder="e.g. 4598" />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">Received Date</label>
+            <label className="text-ink-2 text-xs uppercase tracking-wide">Received Date</label>
             <input name="received_at" type="date" className={INPUT} />
           </div>
           <div className="col-span-2 flex flex-col gap-1">
-            <label className="text-zinc-400 text-xs uppercase tracking-wide">Notes</label>
+            <label className="text-ink-2 text-xs uppercase tracking-wide">Notes</label>
             <input name="notes" className={INPUT} placeholder="optional" />
           </div>
-          {error && <p className="col-span-2 text-red-400 text-xs">{error}</p>}
+          {error && <p className="col-span-2 text-red-700 text-xs">{error}</p>}
           <div className="col-span-2 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="px-3 py-1.5 text-zinc-400 hover:text-white text-xs"
+              className="px-3 py-1.5 text-ink-2 hover:text-ink text-xs"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={pending}
-              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+              className="px-4 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg"
             >
               {pending ? "Saving…" : "Record Payment"}
             </button>
@@ -124,11 +124,11 @@ export default function PaymentsPanel({
       )}
 
       {payments.length === 0 ? (
-        <p className="text-zinc-500 text-sm italic">No payments recorded.</p>
+        <p className="text-ink-3 text-sm italic">No payments recorded.</p>
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
               <th className="text-left py-2">Date</th>
               <th className="text-left py-2">Method</th>
               <th className="text-left py-2">Ref</th>
@@ -139,27 +139,27 @@ export default function PaymentsPanel({
           </thead>
           <tbody>
             {payments.map((p) => (
-              <tr key={p.id} className="border-b border-white/[0.06]/40 last:border-0">
-                <td className="py-2 text-zinc-300 text-xs">
+              <tr key={p.id} className="border-b border-edge2/40 last:border-0">
+                <td className="py-2 text-ink-2 text-xs">
                   {new Date(p.received_at).toLocaleDateString()}
                 </td>
-                <td className="py-2 text-zinc-300 text-xs capitalize">
+                <td className="py-2 text-ink-2 text-xs capitalize">
                   {p.method?.replace("_", " ") ?? "—"}
                 </td>
-                <td className="py-2 text-zinc-400 text-xs font-mono">
+                <td className="py-2 text-ink-2 text-xs font-mono">
                   {p.reference ?? "—"}
                 </td>
-                <td className="py-2 text-right text-green-400 font-mono text-sm font-semibold">
+                <td className="py-2 text-right text-pine font-mono text-sm font-semibold">
                   ${Number(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
-                <td className="py-2 pl-3 text-zinc-500 text-xs">
+                <td className="py-2 pl-3 text-ink-3 text-xs">
                   {p.recorder?.name ?? "—"}
                 </td>
                 <td className="py-2 text-right">
                   <button
                     onClick={() => remove(p.id)}
                     disabled={pending}
-                    className="text-red-400 hover:text-red-300 text-xs"
+                    className="text-red-700 hover:text-red-700 text-xs"
                   >
                     del
                   </button>

@@ -6,11 +6,11 @@ import EstimateActions from "./EstimateActions";
 import GenerateInvoiceButton from "./GenerateInvoiceButton";
 
 const STATUS_COLORS: Record<string, string> = {
-  draft:    "bg-zinc-700 text-zinc-300",
-  approved: "bg-green-500/15 text-green-400",
-  sent:     "bg-blue-500/15 text-blue-400",
-  rejected: "bg-red-500/15 text-red-400",
-  revised:  "bg-yellow-500/15 text-yellow-400",
+  draft:    "bg-shade text-ink-2",
+  approved: "bg-pine/10 text-pine",
+  sent:     "bg-info/10 text-info",
+  rejected: "bg-red-600/10 text-red-700",
+  revised:  "bg-honey/10 text-honey",
 };
 
 export default async function EstimateDetailPage({
@@ -83,13 +83,13 @@ export default async function EstimateDetailPage({
         <div>
           <Link
             href={`/jobs/${jobId}`}
-            className="text-zinc-500 hover:text-white text-sm transition-colors"
+            className="text-ink-3 hover:text-ink text-sm transition-colors"
           >
             ← Back to Job
           </Link>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-white">
-              Estimate <span className="font-mono text-blue-400">v{estimate.version}</span>
+            <h1 className="text-2xl font-bold text-ink">
+              Estimate <span className="font-mono text-info">v{estimate.version}</span>
             </h1>
             <span
               className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[estimate.status] ?? ""}`}
@@ -98,10 +98,10 @@ export default async function EstimateDetailPage({
             </span>
           </div>
           {(job as any) && (
-            <p className="text-zinc-400 text-sm mt-1">
+            <p className="text-ink-2 text-sm mt-1">
               <Link
                 href={`/jobs/${jobId}`}
-                className="text-blue-400 hover:underline font-mono"
+                className="text-info hover:underline font-mono"
               >
                 {(job as any).job_number}
               </Link>
@@ -113,8 +113,8 @@ export default async function EstimateDetailPage({
           )}
         </div>
         <div className="text-right">
-          <p className="text-zinc-500 text-xs uppercase tracking-wide">Total</p>
-          <p className="text-3xl font-bold text-white font-mono">
+          <p className="text-ink-3 text-xs uppercase tracking-wide">Total</p>
+          <p className="text-3xl font-bold text-ink font-mono">
             ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
@@ -123,7 +123,7 @@ export default async function EstimateDetailPage({
       {/* AI disclaimer */}
       {estimate.status === "draft" && (
         <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg px-4 py-3 mb-5">
-          <p className="text-yellow-400 text-sm font-medium">
+          <p className="text-honey text-sm font-medium">
             ⚠️ AI-drafted estimate — review every line item, especially unit prices, before approval.
           </p>
         </div>
@@ -134,25 +134,25 @@ export default async function EstimateDetailPage({
         <div className="lg:col-span-3 flex flex-col gap-5">
           {meta.summary && (
             <section className="glass-card p-5">
-              <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Summary</p>
-              <p className="text-zinc-200 text-sm leading-relaxed">{meta.summary}</p>
+              <p className="text-ink-3 text-xs uppercase tracking-wide mb-1">Summary</p>
+              <p className="text-ink text-sm leading-relaxed">{meta.summary}</p>
             </section>
           )}
 
           {taggedCount > 0 && (
             <section className="glass-card p-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-zinc-500 text-xs uppercase tracking-wide">
+                <p className="text-ink-3 text-xs uppercase tracking-wide">
                   Pricing Confidence
                 </p>
                 <Link
                   href="/settings/price-book"
-                  className="text-blue-400 hover:underline text-xs"
+                  className="text-info hover:underline text-xs"
                 >
                   Manage price book →
                 </Link>
               </div>
-              <div className="flex h-2 rounded overflow-hidden bg-zinc-800 mb-3">
+              <div className="flex h-2 rounded overflow-hidden bg-shade mb-3">
                 <div
                   className="bg-green-500/70"
                   style={{ width: `${bookPctOfTotal}%` }}
@@ -166,23 +166,23 @@ export default async function EstimateDetailPage({
               </div>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <p className="text-green-400 font-semibold">
+                  <p className="text-pine font-semibold">
                     {bookCount} {bookCount === 1 ? "line" : "lines"} from book
                   </p>
-                  <p className="text-zinc-400 font-mono">
+                  <p className="text-ink-2 font-mono">
                     ${bookSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     {" "}
-                    <span className="text-zinc-500">({bookPctOfTotal.toFixed(0)}% of total)</span>
+                    <span className="text-ink-3">({bookPctOfTotal.toFixed(0)}% of total)</span>
                   </p>
                 </div>
                 <div>
-                  <p className="text-yellow-400 font-semibold">
+                  <p className="text-honey font-semibold">
                     {guessedCount} AI {guessedCount === 1 ? "guess" : "guesses"}
                   </p>
-                  <p className="text-zinc-400 font-mono">
+                  <p className="text-ink-2 font-mono">
                     ${guessedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     {" "}
-                    <span className="text-zinc-500">— verify before sending</span>
+                    <span className="text-ink-3">— verify before sending</span>
                   </p>
                 </div>
               </div>
@@ -190,9 +190,9 @@ export default async function EstimateDetailPage({
           )}
 
           <section className="glass-card overflow-hidden">
-            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-              <h2 className="text-white font-semibold">Line Items</h2>
-              <p className="text-zinc-500 text-xs">{items.length} items</p>
+            <div className="px-5 py-3 border-b border-edge2 flex items-center justify-between">
+              <h2 className="text-ink font-semibold">Line Items</h2>
+              <p className="text-ink-3 text-xs">{items.length} items</p>
             </div>
             <LineItemsTable
               estimateId={estimateId}
@@ -207,7 +207,7 @@ export default async function EstimateDetailPage({
         {/* Right: actions + meta */}
         <div className="flex flex-col gap-5">
           <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Actions</h2>
+            <h2 className="text-ink font-semibold mb-3">Actions</h2>
             <EstimateActions
               estimateId={estimateId}
               jobId={jobId}
@@ -215,9 +215,9 @@ export default async function EstimateDetailPage({
               total={total}
             />
             {(estimate.status === "approved" || estimate.status === "sent") && (
-              <div className="mt-3 pt-3 border-t border-zinc-800">
+              <div className="mt-3 pt-3 border-t border-edge2">
                 <GenerateInvoiceButton estimateId={estimateId} jobId={jobId} />
-                <p className="text-zinc-500 text-[10px] mt-1.5 leading-snug">
+                <p className="text-ink-3 text-[10px] mt-1.5 leading-snug">
                   Creates a draft invoice with these line items, ready to send to the
                   carrier.
                 </p>
@@ -226,7 +226,7 @@ export default async function EstimateDetailPage({
           </section>
 
           <section className="glass-card p-5">
-            <h2 className="text-white font-semibold mb-3">Meta</h2>
+            <h2 className="text-ink font-semibold mb-3">Meta</h2>
             <dl className="text-sm space-y-2">
               <Meta label="Generated" value={new Date(estimate.created_at).toLocaleString()} />
               {(estimate as any).generated?.name && (
@@ -249,11 +249,11 @@ export default async function EstimateDetailPage({
           </section>
 
           {meta.assumptions && Array.isArray(meta.assumptions) && meta.assumptions.length > 0 && (
-            <section className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-5">
-              <h2 className="text-blue-300 font-semibold text-sm mb-2">
+            <section className="bg-blue-500/5 border border-info/20 rounded-xl p-5">
+              <h2 className="text-info font-semibold text-sm mb-2">
                 ⚠ Verify These Assumptions
               </h2>
-              <ul className="text-zinc-300 text-xs space-y-1">
+              <ul className="text-ink-2 text-xs space-y-1">
                 {meta.assumptions.map((a: string, i: number) => (
                   <li key={i}>• {a}</li>
                 ))}
@@ -263,10 +263,10 @@ export default async function EstimateDetailPage({
 
           {meta.notes_for_estimator && (
             <section className="glass-card p-5">
-              <h2 className="text-white font-semibold text-sm mb-2">
+              <h2 className="text-ink font-semibold text-sm mb-2">
                 Notes for Estimator
               </h2>
-              <p className="text-zinc-300 text-xs leading-relaxed">
+              <p className="text-ink-2 text-xs leading-relaxed">
                 {meta.notes_for_estimator}
               </p>
             </section>
@@ -280,8 +280,8 @@ export default async function EstimateDetailPage({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <dt className="text-zinc-500 text-xs uppercase tracking-wide">{label}</dt>
-      <dd className="text-zinc-200 text-xs">{value}</dd>
+      <dt className="text-ink-3 text-xs uppercase tracking-wide">{label}</dt>
+      <dd className="text-ink text-xs">{value}</dd>
     </div>
   );
 }
