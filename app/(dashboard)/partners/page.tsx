@@ -3,6 +3,7 @@ import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { PARTNER_TYPE_LABEL, type PartnerType } from "@/lib/partner-types";
 import { requireRoles } from "@/components/RoleGate";
+import { PageShell, GlassRow, EmptyState } from "@/components/ui/Glass";
 
 const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -53,102 +54,78 @@ export default async function PartnersPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Partners</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
-            Plumbers, property managers, restaurants, GCs, and other referral
-            sources. Click any partner to see ROI.
-          </p>
-        </div>
+    <PageShell
+      eyebrow="Partners + ROI"
+      title="Partners"
+      subtitle="Plumbers, property managers, restaurants, GCs, and other referral sources. Open any partner to see ROI."
+      action={
         <Link
           href="/partners/outreach"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-2 rounded-lg bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-semibold shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:shadow-[0_0_26px_rgba(95,189,176,0.4)] transition-shadow"
         >
           🎯 B2B Outreach
         </Link>
-      </div>
-
-      <div className="glass-card overflow-x-auto">
-        {!partners?.length ? (
-          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
-            No partners yet. Convert leads from{" "}
-            <Link href="/partners/outreach" className="text-blue-400 hover:underline">
-              Outreach Pipeline
-            </Link>
-            .
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 text-left">Name</th>
-                <th className="px-5 py-3 text-left">Type</th>
-                <th className="px-5 py-3 text-right">Referrals</th>
-                <th className="px-5 py-3 text-right">Revenue</th>
-                <th className="px-5 py-3 text-right">Invested</th>
-                <th className="px-5 py-3 text-right">ROI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {partners.map((p: any) => {
-                const s = stats.get(p.id) ?? { referrals: 0, revenue: 0, cash: 0, soft: 0 };
-                const invested = s.cash + s.soft;
-                const roi = invested > 0 ? s.revenue / invested : null;
-                const ptype = (p.partner_type ?? "other") as PartnerType;
-                return (
-                  <tr
-                    key={p.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
-                  >
-                    <td className="px-5 py-3">
-                      <Link
-                        href={`/partners/${p.id}`}
-                        className="text-white hover:text-blue-400 transition-colors font-medium"
-                      >
-                        {p.name}
-                      </Link>
-                      {p.company && (
-                        <p className="text-zinc-500 text-xs">{p.company}</p>
-                      )}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
+      }
+      width="wide"
+    >
+      {!partners?.length ? (
+        <EmptyState icon="◐" title="No partners yet.">
+          Convert leads from the{" "}
+          <Link href="/partners/outreach" className="text-[#A8DCD3] hover:text-white transition-colors">
+            Outreach Pipeline
+          </Link>
+          .
+        </EmptyState>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {partners.map((p: any, i: number) => {
+            const s = stats.get(p.id) ?? { referrals: 0, revenue: 0, cash: 0, soft: 0 };
+            const invested = s.cash + s.soft;
+            const roi = invested > 0 ? s.revenue / invested : null;
+            const ptype = (p.partner_type ?? "other") as PartnerType;
+            const roiColor =
+              roi == null ? "text-white/30" : roi >= 5 ? "text-emerald-300" : roi < 1 ? "text-red-400" : "text-white/80";
+            return (
+              <GlassRow
+                key={p.id}
+                href={`/partners/${p.id}`}
+                index={i}
+                accent={roi != null && roi >= 5 ? "teal" : "neutral"}
+                meta={
+                  <>
+                    <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wide ring-1 bg-white/5 text-white/60 ring-white/10">
                       {PARTNER_TYPE_LABEL[ptype]}
-                    </td>
-                    <td className="px-5 py-3 text-right text-zinc-300 font-mono text-xs">
-                      {s.referrals}
-                    </td>
-                    <td className="px-5 py-3 text-right text-green-400 font-mono text-xs">
-                      {fmt(s.revenue)}
-                    </td>
-                    <td className="px-5 py-3 text-right text-zinc-400 font-mono text-xs">
-                      {fmt(invested)}
-                    </td>
-                    <td className="px-5 py-3 text-right font-mono text-xs">
-                      {roi != null ? (
-                        <span
-                          className={
-                            roi >= 5
-                              ? "text-green-400"
-                              : roi < 1
-                                ? "text-red-400"
-                                : "text-zinc-300"
-                          }
-                        >
-                          {roi.toFixed(1)}×
-                        </span>
-                      ) : (
-                        <span className="text-zinc-600">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
+                    </span>
+                    {s.referrals > 0 && (
+                      <span className="text-white/35 text-[11px] font-mono">
+                        {s.referrals} referral{s.referrals === 1 ? "" : "s"}
+                      </span>
+                    )}
+                  </>
+                }
+                title={p.name}
+                sub={
+                  [
+                    p.company,
+                    s.revenue > 0 ? `${fmt(s.revenue)} revenue` : null,
+                    invested > 0 ? `${fmt(invested)} invested` : null,
+                  ]
+                    .filter(Boolean)
+                    .join("   ·   ") || undefined
+                }
+                trailing={
+                  <>
+                    <span className={`font-mono font-semibold ${roiColor}`}>
+                      {roi != null ? `${roi.toFixed(1)}×` : "—"}
+                    </span>
+                    <span className="text-white/30 text-[10px] uppercase tracking-wide">ROI</span>
+                  </>
+                }
+              />
+            );
+          })}
+        </div>
+      )}
+    </PageShell>
   );
 }

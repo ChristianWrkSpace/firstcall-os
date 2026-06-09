@@ -1,7 +1,8 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
-import { STATUS_COLORS } from "@/lib/constants";
+import { GLASS_STATUS, GLASS_STATUS_FALLBACK } from "@/lib/constants";
+import { PageShell, Glass } from "@/components/ui/Glass";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -28,6 +29,9 @@ function dayLabel(d: Date, today: Date) {
     day: "numeric",
   });
 }
+
+const navBtn =
+  "px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors";
 
 export default async function SchedulePage({
   searchParams,
@@ -86,47 +90,38 @@ export default async function SchedulePage({
   const nextStart = dayKey(endDate);
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Schedule</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
-            {startDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })}{" "}
-            – {addDays(endDate, -1).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
-            <span className="text-zinc-600"> · </span>
-            <span className="text-zinc-500">{scheduledJobs?.length ?? 0} scheduled</span>
-            {(unscheduledJobs?.length ?? 0) > 0 && (
-              <>
-                <span className="text-zinc-600"> · </span>
-                <span className="text-yellow-400">
-                  {unscheduledJobs?.length} unscheduled
-                </span>
-              </>
-            )}
-          </p>
-        </div>
+    <PageShell
+      eyebrow="Calendar"
+      title="Schedule"
+      subtitle={
+        <>
+          {startDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} –{" "}
+          {addDays(endDate, -1).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
+          <span className="text-white/25"> · </span>
+          <span className="text-white/40">{scheduledJobs?.length ?? 0} scheduled</span>
+          {(unscheduledJobs?.length ?? 0) > 0 && (
+            <>
+              <span className="text-white/25"> · </span>
+              <span className="text-amber-300">{unscheduledJobs?.length} unscheduled</span>
+            </>
+          )}
+        </>
+      }
+      action={
         <div className="flex items-center gap-2">
-          <Link
-            href={`/schedule?start=${prevStart}&days=${numDays}`}
-            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg"
-          >
+          <Link href={`/schedule?start=${prevStart}&days=${numDays}`} className={navBtn}>
             ← Prev
           </Link>
-          <Link
-            href="/schedule"
-            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg"
-          >
+          <Link href="/schedule" className={navBtn}>
             Today
           </Link>
-          <Link
-            href={`/schedule?start=${nextStart}&days=${numDays}`}
-            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg"
-          >
+          <Link href={`/schedule?start=${nextStart}&days=${numDays}`} className={navBtn}>
             Next →
           </Link>
         </div>
-      </div>
-
+      }
+      width="full"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         {/* Schedule (week agenda) */}
         <div className="lg:col-span-3 flex flex-col gap-3">
@@ -135,30 +130,22 @@ export default async function SchedulePage({
             const isToday = dayKey(date) === dayKey(today);
             const isPast = date < today;
             return (
-              <section
+              <Glass
                 key={dateKey}
-                className={`bg-zinc-900 border rounded-xl p-4 ${
-                  isToday
-                    ? "border-blue-500/40"
-                    : isPast
-                      ? "border-zinc-800 opacity-60"
-                      : "border-zinc-800"
-                }`}
+                level={isToday ? "stage" : isPast ? "shadow" : "surface"}
+                accent={isToday ? "blue" : "neutral"}
+                className="p-4"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <p
-                    className={`text-sm font-semibold ${
-                      isToday ? "text-blue-300" : "text-white"
-                    }`}
-                  >
+                  <p className={`text-sm font-semibold ${isToday ? "text-[#A6B8E7]" : "text-white/90"}`}>
                     {dayLabel(date, today)}
                   </p>
-                  <p className="text-zinc-500 text-xs">
+                  <p className="text-white/40 text-xs">
                     {jobs.length} {jobs.length === 1 ? "job" : "jobs"}
                   </p>
                 </div>
                 {jobs.length === 0 ? (
-                  <p className="text-zinc-600 text-xs italic">Nothing scheduled</p>
+                  <p className="text-white/30 text-xs italic">Nothing scheduled</p>
                 ) : (
                   <div className="flex flex-col gap-2">
                     {jobs.map((j: any) => (
@@ -166,24 +153,20 @@ export default async function SchedulePage({
                     ))}
                   </div>
                 )}
-              </section>
+              </Glass>
             );
           })}
         </div>
 
         {/* Unscheduled jobs */}
         <div className="flex flex-col gap-3">
-          <section className="glass-card p-4">
+          <Glass accent="amber" className="p-4">
             <div className="mb-3">
-              <p className="text-white text-sm font-semibold">
-                ⏳ Unscheduled
-              </p>
-              <p className="text-zinc-500 text-xs mt-0.5">
-                Active jobs without a scheduled time
-              </p>
+              <p className="text-white/90 text-sm font-semibold">⏳ Unscheduled</p>
+              <p className="text-white/40 text-xs mt-0.5">Active jobs without a scheduled time</p>
             </div>
             {(unscheduledJobs?.length ?? 0) === 0 ? (
-              <p className="text-zinc-600 text-xs italic">All active jobs scheduled.</p>
+              <p className="text-white/30 text-xs italic">All active jobs scheduled.</p>
             ) : (
               <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto">
                 {unscheduledJobs!.map((j: any) => (
@@ -191,10 +174,10 @@ export default async function SchedulePage({
                 ))}
               </div>
             )}
-          </section>
+          </Glass>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 
@@ -208,37 +191,28 @@ function ScheduledJobCard({ job }: { job: any }) {
       .map((a: any) => a.profiles?.name)
       .filter(Boolean)
       .join(", ") || "no tech assigned";
+  const statusPill = GLASS_STATUS[job.status] ?? GLASS_STATUS_FALLBACK;
 
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="flex items-center gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg hover:bg-zinc-800 transition-colors"
+      className="flex items-center gap-3 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg hover:bg-white/[0.06] transition-colors"
     >
-      <div className="text-zinc-400 text-xs font-mono w-16 shrink-0">{time}</div>
+      <div className="text-white/50 text-xs font-mono w-16 shrink-0">{time}</div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-blue-400 font-mono text-xs">{job.job_number}</span>
-          <span
-            className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ${STATUS_COLORS[job.status] ?? ""}`}
-          >
+          <span className="text-white/45 font-mono text-xs">{job.job_number}</span>
+          <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ring-1 ${statusPill}`}>
             {job.status}
           </span>
         </div>
-        <p className="text-white text-sm truncate mt-0.5">
-          {job.customers?.name ?? "—"}
-        </p>
-        <p className="text-zinc-500 text-xs truncate">
+        <p className="text-white/90 text-sm truncate mt-0.5">{job.customers?.name ?? "—"}</p>
+        <p className="text-white/40 text-xs truncate">
           {[job.site_address, job.site_city].filter(Boolean).join(", ")}
         </p>
       </div>
       <div className="text-right shrink-0">
-        <p
-          className={`text-xs ${
-            (job.assignments ?? []).length === 0
-              ? "text-yellow-400"
-              : "text-zinc-400"
-          }`}
-        >
+        <p className={`text-xs ${(job.assignments ?? []).length === 0 ? "text-amber-300" : "text-white/45"}`}>
           👷 {techNames}
         </p>
       </div>
@@ -247,24 +221,21 @@ function ScheduledJobCard({ job }: { job: any }) {
 }
 
 function UnscheduledCard({ job }: { job: any }) {
+  const statusPill = GLASS_STATUS[job.status] ?? GLASS_STATUS_FALLBACK;
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="flex items-center justify-between px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg hover:bg-zinc-800 transition-colors"
+      className="flex items-center justify-between px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg hover:bg-white/[0.06] transition-colors"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-blue-400 font-mono text-xs">{job.job_number}</span>
-          <span
-            className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ${STATUS_COLORS[job.status] ?? ""}`}
-          >
+          <span className="text-white/45 font-mono text-xs">{job.job_number}</span>
+          <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ring-1 ${statusPill}`}>
             {job.status}
           </span>
         </div>
-        <p className="text-white text-sm truncate mt-0.5">
-          {job.customers?.name ?? "—"}
-        </p>
-        <p className="text-zinc-500 text-xs truncate capitalize">{job.type}</p>
+        <p className="text-white/90 text-sm truncate mt-0.5">{job.customers?.name ?? "—"}</p>
+        <p className="text-white/40 text-xs truncate capitalize">{job.type}</p>
       </div>
     </Link>
   );
