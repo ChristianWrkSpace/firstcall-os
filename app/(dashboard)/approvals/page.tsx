@@ -3,6 +3,7 @@ import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { DismissButton, ApplySuggestionButton } from "./ApprovalActions";
 import { KIND_EMOJI } from "../NotificationBell";
+import { PageShell, Glass, Band, EmptyState } from "@/components/ui/Glass";
 
 const KIND_LABEL: Record<string, string> = {
   estimate_draft: "Estimate ready for review",
@@ -41,47 +42,41 @@ export default async function ApprovalsPage() {
   const items = pending ?? [];
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">🔔 Approval Inbox</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
-          Drafts the system created for you. Review each, approve via its
-          underlying screen, or dismiss. Per the AI-native rule: agents draft;
-          you decide.
-        </p>
-      </div>
-
+    <PageShell
+      eyebrow="Hand-offs"
+      title="Approval Inbox"
+      subtitle={
+        items.length > 0
+          ? `${items.length} waiting on you — agents draft, you decide`
+          : "Drafts the agents created for you, in one feed to scan"
+      }
+    >
       {items.length === 0 ? (
-        <div className="glass-card p-10 text-center">
-          <p className="text-zinc-400 text-sm">
-            ✓ No pending approvals. The agents are caught up.
-          </p>
-        </div>
+        <EmptyState icon="✓" title="No pending approvals.">
+          The agents are caught up.
+        </EmptyState>
       ) : (
-        <div className="flex flex-col gap-3 mb-8">
-          {items.map((it: any) => (
-            <article
+        <div className="flex flex-col gap-3">
+          {items.map((it: any, i: number) => (
+            <Glass
               key={it.id}
-              className="glass-card p-5 flex gap-4 items-start"
+              accent={it.kind === "status_suggestion" ? "amber" : "neutral"}
+              className="p-5 flex gap-4 items-start animate-rise-in"
             >
-              <div className="text-2xl shrink-0">
-                {KIND_EMOJI[it.kind] ?? "•"}
-              </div>
+              <div className="text-2xl shrink-0">{KIND_EMOJI[it.kind] ?? "•"}</div>
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
+                <p className="text-white/40 text-[10px] uppercase tracking-[0.15em] font-semibold">
                   {KIND_LABEL[it.kind] ?? it.kind}
                 </p>
-                <p className="text-white font-medium mt-1">{it.title}</p>
+                <p className="text-white/95 font-semibold tracking-tight mt-1">{it.title}</p>
                 {it.detail && (
-                  <p className="text-zinc-400 text-sm mt-1.5 leading-snug">
-                    {it.detail}
-                  </p>
+                  <p className="text-white/50 text-sm mt-1.5 leading-snug">{it.detail}</p>
                 )}
-                <div className="flex gap-3 mt-3 flex-wrap">
+                <div className="flex gap-3 mt-3 flex-wrap items-center">
                   {it.link && (
                     <Link
                       href={it.link}
-                      className="text-blue-400 hover:underline text-xs"
+                      className="text-[#A8DCD3] hover:text-white text-xs font-medium transition-colors"
                     >
                       Review →
                     </Link>
@@ -89,12 +84,12 @@ export default async function ApprovalsPage() {
                   {it.job_id && (
                     <Link
                       href={`/jobs/${it.job_id}`}
-                      className="text-zinc-500 hover:text-zinc-300 text-xs"
+                      className="text-white/45 hover:text-white text-xs transition-colors"
                     >
                       Open job
                     </Link>
                   )}
-                  <span className="text-zinc-600 text-xs">
+                  <span className="text-white/30 text-xs">
                     {new Date(it.created_at).toLocaleString()}
                   </span>
                 </div>
@@ -103,42 +98,32 @@ export default async function ApprovalsPage() {
                 {it.kind === "status_suggestion" ? (
                   <ApplySuggestionButton approvalId={it.id} />
                 ) : (
-                  <DismissButton
-                    approvalId={it.id}
-                    hasUnderlying={!!it.entity_id}
-                  />
+                  <DismissButton approvalId={it.id} hasUnderlying={!!it.entity_id} />
                 )}
               </div>
-            </article>
+            </Glass>
           ))}
         </div>
       )}
 
       {(recent?.length ?? 0) > 0 && (
-        <section>
-          <h2 className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
-            Recently resolved
-          </h2>
-          <ul className="flex flex-col gap-1">
-            {recent!.map((r: any) => (
-              <li
-                key={r.id}
-                className="text-zinc-500 text-xs flex justify-between gap-3"
-              >
-                <span className="truncate">
-                  <span className="text-zinc-400">
-                    {KIND_EMOJI[r.kind] ?? "•"}
-                  </span>{" "}
-                  {r.title}
-                </span>
-                <span className="shrink-0 text-zinc-600">
-                  {r.status} · {new Date(r.resolved_at).toLocaleDateString()}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div className="mt-8">
+          <Band label="Recently resolved">
+            <ul className="flex flex-col gap-1">
+              {recent!.map((r: any) => (
+                <li key={r.id} className="text-white/45 text-xs flex justify-between gap-3">
+                  <span className="truncate">
+                    <span className="text-white/60">{KIND_EMOJI[r.kind] ?? "•"}</span> {r.title}
+                  </span>
+                  <span className="shrink-0 text-white/30">
+                    {r.status} · {new Date(r.resolved_at).toLocaleDateString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Band>
+        </div>
       )}
-    </div>
+    </PageShell>
   );
 }

@@ -2,14 +2,16 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
+import { PageShell, Glass, Band, GlassRow, EmptyState } from "@/components/ui/Glass";
 
-const STATUS_COLORS: Record<string, string> = {
-  draft:   "bg-zinc-700 text-zinc-300",
-  sent:    "bg-blue-500/15 text-blue-400",
-  partial: "bg-yellow-500/15 text-yellow-400",
-  paid:    "bg-green-500/15 text-green-400",
-  overdue: "bg-red-500/15 text-red-400",
-  void:    "bg-zinc-800 text-zinc-500",
+// Invoice-status pills in the glass palette (job statuses live in GLASS_STATUS).
+const INVOICE_STATUS_GLASS: Record<string, string> = {
+  draft:   "bg-white/5 text-white/60 ring-white/10",
+  sent:    "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
+  partial: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
+  paid:    "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+  overdue: "bg-red-400/10 text-red-300 ring-red-400/20",
+  void:    "bg-white/5 text-white/35 ring-white/10",
 };
 
 const fmt = (n: number) =>
@@ -49,9 +51,9 @@ export default async function ARDashboard() {
 
   // Aging buckets (only count invoices that have been sent)
   const buckets = {
-    current: { label: "Current (0-30)", amount: 0, count: 0, color: "text-green-400" },
-    bucket31: { label: "31-60 days", amount: 0, count: 0, color: "text-yellow-400" },
-    bucket61: { label: "61-90 days", amount: 0, count: 0, color: "text-orange-400" },
+    current: { label: "Current · 0-30", amount: 0, count: 0, color: "text-emerald-300" },
+    bucket31: { label: "31-60 days", amount: 0, count: 0, color: "text-amber-300" },
+    bucket61: { label: "61-90 days", amount: 0, count: 0, color: "text-orange-300" },
     bucket90: { label: "90+ days", amount: 0, count: 0, color: "text-red-400" },
   };
   for (const inv of enriched) {
@@ -68,142 +70,114 @@ export default async function ARDashboard() {
     target.count += 1;
   }
 
-  const totalAR = enriched
-    .filter((i) => i.sent_at)
-    .reduce((s, i) => s + i.balance, 0);
+  const sent = enriched.filter((i) => i.sent_at);
+  const totalAR = sent.reduce((s, i) => s + i.balance, 0);
   const drafts = enriched.filter((i) => !i.sent_at);
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Accounts Receivable</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
-          Open invoices, aging snapshot, total at risk.
-        </p>
-      </div>
-
-      {/* AR Aging buckets */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
-        <div className="glass-card p-4">
-          <p className="text-zinc-500 text-xs uppercase tracking-wide">Total Open AR</p>
-          <p className="text-3xl font-bold text-white font-mono mt-1">{fmt(totalAR)}</p>
-          <p className="text-zinc-500 text-xs mt-1">
-            across {enriched.filter((i) => i.sent_at).length} sent invoices
-          </p>
-        </div>
+    <PageShell
+      eyebrow="Receivables"
+      title="Accounts Receivable"
+      subtitle="Open invoices, aging snapshot, total at risk."
+      width="wide"
+    >
+      {/* Aging snapshot — total at risk lit, buckets in support */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <Glass level="stage" accent="teal" className="p-4 col-span-2 md:col-span-1 animate-rise-in">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-white/45">Total Open AR</p>
+          <p className="text-3xl font-bold text-[#A8DCD3] font-mono mt-1">{fmt(totalAR)}</p>
+          <p className="text-white/40 text-xs mt-1">across {sent.length} sent invoices</p>
+        </Glass>
         {Object.values(buckets).map((b) => (
-          <div key={b.label} className="glass-card p-4">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide">{b.label}</p>
-            <p className={`text-2xl font-bold font-mono mt-1 ${b.color}`}>
-              {fmt(b.amount)}
-            </p>
-            <p className="text-zinc-500 text-xs mt-1">
+          <div
+            key={b.label}
+            className="rounded-xl bg-white/[0.025] border border-white/[0.05] ring-1 ring-white/[0.04] p-4"
+          >
+            <p className="text-[10px] uppercase tracking-[0.15em] text-white/40">{b.label}</p>
+            <p className={`text-2xl font-bold font-mono mt-1 ${b.color}`}>{fmt(b.amount)}</p>
+            <p className="text-white/40 text-xs mt-1">
               {b.count} {b.count === 1 ? "invoice" : "invoices"}
             </p>
           </div>
         ))}
       </div>
 
-      {/* Drafts callout */}
+      {/* Unsent drafts — not yet billed */}
       {drafts.length > 0 && (
-        <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 mb-6">
-          <p className="text-blue-300 text-sm font-semibold mb-2">
+        <Glass accent="blue" subtle className="p-4 mb-6">
+          <p className="text-[#A6B8E7] text-sm font-semibold mb-2.5">
             📝 {drafts.length} unsent draft{drafts.length === 1 ? "" : "s"}{" "}
-            <span className="text-zinc-500 font-normal">
+            <span className="text-white/40 font-normal">
               ({fmt(drafts.reduce((s, d) => s + d.total, 0))} not yet billed)
             </span>
           </p>
-          <ul className="text-xs space-y-1">
+          <ul className="text-xs space-y-1.5">
             {drafts.slice(0, 5).map((inv: any) => (
-              <li key={inv.id} className="flex items-center justify-between">
+              <li key={inv.id} className="flex items-center justify-between gap-3">
                 <Link
                   href={`/jobs/${inv.job_id}/invoices/${inv.id}`}
-                  className="text-blue-400 hover:underline font-mono"
+                  className="text-[#A6B8E7] hover:text-white font-mono transition-colors"
                 >
                   {inv.invoice_number}
                 </Link>
-                <span className="text-zinc-400">{inv.jobs?.customers?.name ?? "—"}</span>
-                <span className="text-zinc-300 font-mono">{fmt(inv.total)}</span>
+                <span className="text-white/45 truncate flex-1 text-right">
+                  {inv.jobs?.customers?.name ?? "—"}
+                </span>
+                <span className="text-white/80 font-mono shrink-0">{fmt(inv.total)}</span>
               </li>
             ))}
             {drafts.length > 5 && (
-              <li className="text-zinc-500 italic">+ {drafts.length - 5} more drafts</li>
+              <li className="text-white/35 italic">+ {drafts.length - 5} more drafts</li>
             )}
           </ul>
-        </div>
+        </Glass>
       )}
 
-      {/* Open invoice table */}
-      <div className="glass-card overflow-x-auto">
-        <div className="px-5 py-3 border-b border-white/[0.06]">
-          <h2 className="text-white font-semibold">Open Invoices</h2>
-        </div>
-        {enriched.filter((i) => i.sent_at).length === 0 ? (
-          <div className="px-5 py-10 text-center">
-            <p className="text-zinc-400 text-sm">🎉 No open invoices.</p>
-            <p className="text-zinc-500 text-xs mt-1">
-              All sent invoices have been paid in full.
-            </p>
-          </div>
+      {/* Open invoices — flowing rows, not a spreadsheet */}
+      <Band label="Open Invoices" hint={`${sent.length} sent · awaiting payment`}>
+        {sent.length === 0 ? (
+          <EmptyState icon="🎉" title="No open invoices.">
+            All sent invoices have been paid in full.
+          </EmptyState>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 text-left">Invoice #</th>
-                <th className="px-5 py-3 text-left">Customer</th>
-                <th className="px-5 py-3 text-left">Carrier</th>
-                <th className="px-5 py-3 text-left">Sent</th>
-                <th className="px-5 py-3 text-left">Status</th>
-                <th className="px-5 py-3 text-right">Days Out</th>
-                <th className="px-5 py-3 text-right">Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {enriched
-                .filter((i) => i.sent_at)
-                .map((inv: any) => (
-                  <tr
-                    key={inv.id}
-                    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
-                  >
-                    <td className="px-5 py-3">
-                      <Link
-                        href={`/jobs/${inv.job_id}/invoices/${inv.id}`}
-                        className="text-blue-400 hover:underline font-mono text-xs"
-                      >
-                        {inv.invoice_number}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-zinc-200">
-                      {inv.jobs?.customers?.name ?? "—"}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
-                      {inv.jobs?.customers?.insurance_company ?? "Self-pay"}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-400 text-xs">
-                      {new Date(inv.sent_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[inv.status] ?? ""}`}
-                      >
-                        {inv.status}
-                      </span>
-                    </td>
-                    <td
-                      className={`px-5 py-3 text-right font-mono text-xs ${inv.daysOut > 60 ? "text-red-400" : inv.daysOut > 30 ? "text-yellow-400" : "text-zinc-400"}`}
+          sent.map((inv: any, i: number) => {
+            const ageColor =
+              inv.daysOut > 90
+                ? "text-red-400"
+                : inv.daysOut > 60
+                  ? "text-orange-300"
+                  : inv.daysOut > 30
+                    ? "text-amber-300"
+                    : "text-white/40";
+            return (
+              <GlassRow
+                key={inv.id}
+                href={`/jobs/${inv.job_id}/invoices/${inv.id}`}
+                index={i}
+                accent={inv.daysOut > 60 ? "amber" : "neutral"}
+                meta={
+                  <>
+                    <span className="font-mono text-xs text-white/45">{inv.invoice_number}</span>
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${INVOICE_STATUS_GLASS[inv.status] ?? INVOICE_STATUS_GLASS.draft}`}
                     >
-                      {inv.daysOut}d
-                    </td>
-                    <td className="px-5 py-3 text-right text-white font-mono font-semibold">
-                      {fmt(inv.balance)}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+                      {inv.status}
+                    </span>
+                  </>
+                }
+                title={inv.jobs?.customers?.name ?? "—"}
+                sub={`${inv.jobs?.customers?.insurance_company ?? "Self-pay"} · sent ${new Date(inv.sent_at).toLocaleDateString()}`}
+                trailing={
+                  <>
+                    <span className="text-white/95 font-mono font-semibold">{fmt(inv.balance)}</span>
+                    <span className={`text-[11px] font-mono ${ageColor}`}>{inv.daysOut}d out</span>
+                  </>
+                }
+              />
+            );
+          })
         )}
-      </div>
-    </div>
+      </Band>
+    </PageShell>
   );
 }
