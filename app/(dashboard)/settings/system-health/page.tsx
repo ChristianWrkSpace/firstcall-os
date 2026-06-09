@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
+import { PageShell, Glass } from "@/components/ui/Glass";
 
 const fmtAgo = (iso: string | null): string => {
   if (!iso) return "never";
@@ -126,35 +127,33 @@ export default async function SystemHealthPage() {
         : "degraded";
   const statusBadge =
     overallStatus === "all_good"
-      ? { label: "All systems healthy", color: "bg-green-500/20 text-green-300 border-green-500/40" }
+      ? { label: "All systems healthy", color: "bg-emerald-400/15 text-emerald-300 border-emerald-400/40" }
       : overallStatus === "minor"
-        ? { label: "1 minor issue", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40" }
-        : { label: "Multiple issues", color: "bg-red-500/20 text-red-300 border-red-500/40" };
+        ? { label: "1 minor issue", color: "bg-amber-400/15 text-amber-300 border-amber-400/40" }
+        : { label: "Multiple issues", color: "bg-red-400/15 text-red-300 border-red-400/40" };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl">
-      <div className="mb-6">
-        <Link
-          href="/settings"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
-        >
-          ← Settings
-        </Link>
-        <div className="flex items-center justify-between mt-2 gap-3 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold text-white">System Health</h1>
-            <p className="text-zinc-400 text-sm mt-0.5">
-              Is the system breathing? Quick view of agent activity, failed sends, audits, and backups.
-            </p>
-          </div>
+    <PageShell
+      eyebrow="Settings"
+      title="System Health"
+      subtitle="Is the system breathing? Quick view of agent activity, failed sends, audits, and backups."
+      action={
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
+          >
+            ← Settings
+          </Link>
           <span
             className={`inline-flex px-3 py-1.5 rounded-lg text-xs font-semibold border ${statusBadge.color}`}
           >
             {passing}/{checks.length} · {statusBadge.label}
           </span>
         </div>
-      </div>
-
+      }
+      width="wide"
+    >
       {/* Health checks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
         <Check
@@ -217,8 +216,8 @@ export default async function SystemHealthPage() {
 
       {/* Agent feedback breakdown */}
       {totalOutcomes7d > 0 && (
-        <div className="glass-card p-5 mb-6">
-          <h2 className="text-white font-semibold mb-3">Agent Feedback (last 7d)</h2>
+        <Glass className="p-5 mb-6">
+          <h2 className="text-white/90 font-semibold mb-3">Agent Feedback (last 7d)</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {["argus", "ledger", "esquire", "solomon", "hunter", "extract"].map((a) => {
               const c = outcomesByAgent.get(a) ?? 0;
@@ -227,36 +226,36 @@ export default async function SystemHealthPage() {
                   key={a}
                   className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3 text-center"
                 >
-                  <p className="text-zinc-400 text-[10px] uppercase tracking-wide capitalize">{a}</p>
-                  <p className={`text-2xl font-bold font-mono mt-1 ${c > 0 ? "text-green-400" : "text-zinc-600"}`}>
+                  <p className="text-white/45 text-[10px] uppercase tracking-wide capitalize">{a}</p>
+                  <p className={`text-2xl font-bold font-mono mt-1 ${c > 0 ? "text-emerald-300" : "text-white/30"}`}>
                     {c}
                   </p>
                 </div>
               );
             })}
           </div>
-          <p className="text-zinc-500 text-xs mt-3 leading-relaxed">
+          <p className="text-white/40 text-xs mt-3 leading-relaxed">
             Each row of feedback is fuel for the next draft. Agents read their last 5
             corrections per task as in-context examples — no retraining required.
           </p>
-        </div>
+        </Glass>
       )}
 
       {/* Footnote */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">What this page is for</p>
+      <Glass subtle className="p-4 text-white/40 text-xs leading-relaxed">
+        <p className="text-white/70 text-sm font-semibold mb-1">What this page is for</p>
         <p>
           A 30-second health check before you walk into your day. If anything's red,
           the fix hint tells you where to dig. This page reads from{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">audit_logs</code>,{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">legal_documents</code>,{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">agent_outcomes</code>,{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">pending_approvals</code>, and{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">backups_log</code> — no extra
+          <code className="text-white/70 bg-white/10 px-1 rounded">audit_logs</code>,{" "}
+          <code className="text-white/70 bg-white/10 px-1 rounded">legal_documents</code>,{" "}
+          <code className="text-white/70 bg-white/10 px-1 rounded">agent_outcomes</code>,{" "}
+          <code className="text-white/70 bg-white/10 px-1 rounded">pending_approvals</code>, and{" "}
+          <code className="text-white/70 bg-white/10 px-1 rounded">backups_log</code> — no extra
           monitoring infrastructure required.
         </p>
-      </div>
-    </div>
+      </Glass>
+    </PageShell>
   );
 }
 
@@ -275,8 +274,8 @@ function Check({
     <div
       className={`border rounded-xl p-4 ${
         ok
-          ? "bg-green-500/5 border-green-500/20"
-          : "bg-yellow-500/5 border-yellow-500/30"
+          ? "bg-emerald-400/[0.05] border-emerald-400/20"
+          : "bg-amber-400/[0.05] border-amber-400/30"
       }`}
     >
       <div className="flex items-start gap-2">
@@ -284,10 +283,10 @@ function Check({
           {ok ? "✅" : "⚠️"}
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-semibold">{title}</p>
-          <p className="text-zinc-300 text-xs mt-0.5">{detail}</p>
+          <p className="text-white/90 text-sm font-semibold">{title}</p>
+          <p className="text-white/70 text-xs mt-0.5">{detail}</p>
           {!ok && (
-            <p className="text-zinc-500 text-[10px] mt-1.5 italic leading-relaxed">
+            <p className="text-white/40 text-[10px] mt-1.5 italic leading-relaxed">
               Fix hint: {fixHint}
             </p>
           )}

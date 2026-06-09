@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth-helpers";
 import { createAdminClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { PageShell, Glass } from "@/components/ui/Glass";
 
 // Engagement-prep packet for a third-party pen-test. Walk in with this
 // printed and the firm has half the kickoff-meeting answers already.
@@ -42,38 +43,39 @@ export default async function SecuritySelfAuditPage() {
   if (!me) redirect("/login");
   if (me.role !== "owner") {
     return (
-      <div className="p-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-white">Security Self-Audit</h1>
-        <p className="text-zinc-400 text-sm mt-2">Owner only.</p>
-      </div>
+      <PageShell eyebrow="Settings" title="Security Self-Audit" width="narrow">
+        <p className="text-white/45 text-sm">Owner only.</p>
+      </PageShell>
     );
   }
 
   const rls = await getRlsCoverage();
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl">
-      <div className="mb-6">
-        <Link href="/settings" className="text-zinc-500 hover:text-white text-sm transition-colors">
+    <PageShell
+      eyebrow="Settings"
+      title="🔐 Security Self-Audit & Pen-Test Engagement Packet"
+      subtitle="Hand this to the third-party firm at engagement kickoff. Saves billable hours by giving them architecture, auth model, env-var inventory, and high-risk surfaces upfront. Updated 2026-05-05."
+      action={
+        <Link
+          href="/settings"
+          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
+        >
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">🔐 Security Self-Audit & Pen-Test Engagement Packet</h1>
-        <p className="text-zinc-400 text-sm mt-1 leading-relaxed">
-          Hand this to the third-party firm at engagement kickoff. Saves billable hours by giving them
-          architecture, auth model, env-var inventory, and high-risk surfaces upfront. Updated 2026-05-05.
-        </p>
-        <p className="mt-3 text-xs text-zinc-500">
-          Press <kbd className="px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-800 font-mono">⌘P</kbd>{" "}
-          (Mac) or <kbd className="px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-800 font-mono">Ctrl+P</kbd>{" "}
-          (Windows) to save this page as PDF for the engagement.
-        </p>
-      </div>
+      }
+    >
+      <p className="mb-4 text-xs text-white/40">
+        Press <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-white/10 font-mono">⌘P</kbd>{" "}
+        (Mac) or <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-white/10 font-mono">Ctrl+P</kbd>{" "}
+        (Windows) to save this page as PDF for the engagement.
+      </p>
 
       <Section title="1. System Overview">
         <Para>
           <strong className="text-white">FirstCall OS</strong> is an internal AI-native business OS for
           First Call Mitigation, an Austin TX water/fire/mold restoration company. Production:{" "}
-          <code className="text-blue-400">https://firstcall-os.vercel.app</code>. Single-tenant. Solo
+          <code className="text-[#A6B8E7]">https://firstcall-os.vercel.app</code>. Single-tenant. Solo
           operator + a small field team. Deployed on Vercel; data on Supabase Postgres + Storage.
         </Para>
         <Para>
@@ -111,21 +113,21 @@ export default async function SecuritySelfAuditPage() {
         <Para>
           <strong className="text-white">User auth:</strong> Supabase email + password. Strict 8-char
           minimum, password reset via emailed magic link. TOTP-based MFA available at{" "}
-          <code className="text-blue-400">/settings/security</code> (no SMS — SIM-swap exposure
+          <code className="text-[#A6B8E7]">/settings/security</code> (no SMS — SIM-swap exposure
           unacceptable). Session management at the same page lets owner force-sign-out any user.
         </Para>
         <Para>
           <strong className="text-white">Roles:</strong> 4 roles — owner, manager, office, technician
-          — with explicit permission matrix in <code className="text-blue-400">lib/permissions.ts</code>.
-          Server-side enforcement via <code className="text-blue-400">requirePermission()</code>;
+          — with explicit permission matrix in <code className="text-[#A6B8E7]">lib/permissions.ts</code>.
+          Server-side enforcement via <code className="text-[#A6B8E7]">requirePermission()</code>;
           self-protection prevents owner from demoting self.
         </Para>
         <Para>
           <strong className="text-white">RLS:</strong> Row-Level Security enabled on every public
-          table. Per-table SELECT/INSERT/UPDATE/DELETE policies. <code className="text-blue-400">audit_logs</code>{" "}
+          table. Per-table SELECT/INSERT/UPDATE/DELETE policies. <code className="text-[#A6B8E7]">audit_logs</code>{" "}
           is append-only at the DB level (no UPDATE / DELETE policies). DELETE on customers/jobs/invoices/payments
-          restricted to owner / manager via security-definer helpers (<code className="text-blue-400">current_user_role()</code>,{" "}
-          <code className="text-blue-400">is_owner_or_manager()</code>).
+          restricted to owner / manager via security-definer helpers (<code className="text-[#A6B8E7]">current_user_role()</code>,{" "}
+          <code className="text-[#A6B8E7]">is_owner_or_manager()</code>).
         </Para>
         <Para>
           <strong className="text-white">RLS coverage (live):</strong>{" "}
@@ -134,17 +136,17 @@ export default async function SecuritySelfAuditPage() {
               {rls.total_policies} policies across {rls.tables_with_policies} tables.
             </>
           ) : (
-            <span className="text-zinc-500">
+            <span className="text-white/40">
               Live count unavailable from this page — query{" "}
-              <code className="text-blue-400">pg_policies</code> directly in the Supabase SQL editor.
+              <code className="text-[#A6B8E7]">pg_policies</code> directly in the Supabase SQL editor.
             </span>
           )}
         </Para>
         <Para>
           <strong className="text-white">Public token-based access:</strong> Two routes are
           intentionally public, gated only by a per-job UUID token —{" "}
-          <code className="text-blue-400">/portal/[token]</code> (customer view) and{" "}
-          <code className="text-blue-400">/adjuster/[token]</code> (insurance adjuster claim packet).
+          <code className="text-[#A6B8E7]">/portal/[token]</code> (customer view) and{" "}
+          <code className="text-[#A6B8E7]">/adjuster/[token]</code> (insurance adjuster claim packet).
           Tokens regeneratable / revocable by office. <strong>Test scope:</strong> token guessability,
           enumeration, replay after revoke.
         </Para>
@@ -152,9 +154,9 @@ export default async function SecuritySelfAuditPage() {
 
       <Section title="4. API Surface">
         <Para className="mb-3">
-          Server actions (mutations) live in <code className="text-blue-400">app/actions/*</code>. API
+          Server actions (mutations) live in <code className="text-[#A6B8E7]">app/actions/*</code>. API
           routes for streaming / webhooks / cron live below. All mutations write{" "}
-          <code className="text-blue-400">audit_logs</code> entries via <code className="text-blue-400">logAudit()</code>.
+          <code className="text-[#A6B8E7]">audit_logs</code> entries via <code className="text-[#A6B8E7]">logAudit()</code>.
         </Para>
         <KvList
           items={[
@@ -173,11 +175,11 @@ export default async function SecuritySelfAuditPage() {
       </Section>
 
       <Section title="5. High-Risk Surfaces (Test These First)">
-        <ol className="list-decimal pl-5 text-zinc-300 text-sm space-y-2">
+        <ol className="list-decimal pl-5 text-white/70 text-sm space-y-2">
           <li>
-            <strong>Service-role key handling.</strong> <code className="text-blue-400">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
+            <strong>Service-role key handling.</strong> <code className="text-[#A6B8E7]">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
             used only in server-side code. Verify no client bundle leak. Verify{" "}
-            <code className="text-blue-400">lib/supabase-server.ts</code> never imported into client components.
+            <code className="text-[#A6B8E7]">lib/supabase-server.ts</code> never imported into client components.
           </li>
           <li>
             <strong>File upload paths.</strong> Photos uploaded direct browser → Supabase Storage with
@@ -185,17 +187,17 @@ export default async function SecuritySelfAuditPage() {
             after revoke, cross-job photo access.
           </li>
           <li>
-            <strong>Public share-token routes.</strong> <code className="text-blue-400">/portal/[token]</code>{" "}
-            and <code className="text-blue-400">/adjuster/[token]</code>. Test: token entropy, brute-force
+            <strong>Public share-token routes.</strong> <code className="text-[#A6B8E7]">/portal/[token]</code>{" "}
+            and <code className="text-[#A6B8E7]">/adjuster/[token]</code>. Test: token entropy, brute-force
             resistance, post-revoke access, internal data leakage (cost basis must NEVER reach customer view).
           </li>
           <li>
             <strong>Webhook endpoints.</strong> Stripe webhook signature verification (Stripe SDK
-            constructEvent). Generic HMAC helper at <code className="text-blue-400">lib/verify-webhook.ts</code>{" "}
+            constructEvent). Generic HMAC helper at <code className="text-[#A6B8E7]">lib/verify-webhook.ts</code>{" "}
             for future Twilio/Resend. Test: tampered bodies, wrong secrets, replay.
           </li>
           <li>
-            <strong>Cron routes.</strong> All cron routes check <code className="text-blue-400">CRON_SECRET</code>{" "}
+            <strong>Cron routes.</strong> All cron routes check <code className="text-[#A6B8E7]">CRON_SECRET</code>{" "}
             bearer token. Test: missing-secret bypass, timing attack on bearer compare.
           </li>
           <li>
@@ -203,7 +205,7 @@ export default async function SecuritySelfAuditPage() {
             customer description fields. Tool-use schemas constrain output but input is user-controlled.
           </li>
           <li>
-            <strong>Rate limiting.</strong> Per-user sliding window on <code className="text-blue-400">/api/calls/*</code>{" "}
+            <strong>Rate limiting.</strong> Per-user sliding window on <code className="text-[#A6B8E7]">/api/calls/*</code>{" "}
             (30/min, 200/hour). In-memory per Vercel instance — bypass possible via concurrent cold starts.
             Test: distributed abuse pattern.
           </li>
@@ -222,7 +224,7 @@ export default async function SecuritySelfAuditPage() {
       </Section>
 
       <Section title="7. Environment Variable Inventory (Names Only)">
-        <Para className="mb-3 text-xs text-amber-400">
+        <Para className="mb-3 text-xs text-amber-300">
           ⚠ Values are NEVER displayed here. Provide values to the firm via your password manager,
           not via this packet.
         </Para>
@@ -247,8 +249,8 @@ export default async function SecuritySelfAuditPage() {
             ["DATA_CUTOFF", "Optional — UI-level filter for fresh-start (defaults to 2026-05-01)."],
           ]}
         />
-        <Para className="mt-2 text-xs text-zinc-500">
-          Rotation log + cadence at <Link href="/settings/secrets-rotation" className="text-blue-400 hover:underline">/settings/secrets-rotation</Link>.
+        <Para className="mt-2 text-xs text-white/40">
+          Rotation log + cadence at <Link href="/settings/secrets-rotation" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/secrets-rotation</Link>.
         </Para>
       </Section>
 
@@ -273,8 +275,8 @@ export default async function SecuritySelfAuditPage() {
         <Para>
           <strong className="text-white">In scope:</strong>
         </Para>
-        <ul className="list-disc pl-5 text-zinc-300 text-sm space-y-1">
-          <li>All routes under <code className="text-blue-400">https://firstcall-os.vercel.app</code></li>
+        <ul className="list-disc pl-5 text-white/70 text-sm space-y-1">
+          <li>All routes under <code className="text-[#A6B8E7]">https://firstcall-os.vercel.app</code></li>
           <li>Authenticated + unauthenticated paths (including <code>/portal/[token]</code> + <code>/adjuster/[token]</code>)</li>
           <li>API endpoints listed in section 4</li>
           <li>Auth flows: login, password reset, MFA enroll/unenroll, session management</li>
@@ -286,7 +288,7 @@ export default async function SecuritySelfAuditPage() {
         <Para className="mt-4">
           <strong className="text-white">Out of scope:</strong>
         </Para>
-        <ul className="list-disc pl-5 text-zinc-300 text-sm space-y-1">
+        <ul className="list-disc pl-5 text-white/70 text-sm space-y-1">
           <li>DoS / availability testing (low value vs. risk to live ops)</li>
           <li>Social engineering of staff or customers</li>
           <li>Vercel platform itself (their problem, not ours)</li>
@@ -296,7 +298,7 @@ export default async function SecuritySelfAuditPage() {
       </Section>
 
       <Section title="10. What to Hand the Firm at Kickoff">
-        <ol className="list-decimal pl-5 text-zinc-300 text-sm space-y-1">
+        <ol className="list-decimal pl-5 text-white/70 text-sm space-y-1">
           <li>This page (printed PDF)</li>
           <li>Read-only access to a staging copy of the Supabase project (NOT prod)</li>
           <li>A test owner account + a test technician account on staging</li>
@@ -308,30 +310,30 @@ export default async function SecuritySelfAuditPage() {
       </Section>
 
       <Section title="11. Related Pages">
-        <ul className="list-disc pl-5 text-zinc-300 text-sm space-y-1">
-          <li><Link href="/settings/pii-inventory" className="text-blue-400 hover:underline">/settings/pii-inventory</Link> — data classification + retention</li>
-          <li><Link href="/settings/secrets-rotation" className="text-blue-400 hover:underline">/settings/secrets-rotation</Link> — rotation log + cadence</li>
-          <li><Link href="/settings/incident-response" className="text-blue-400 hover:underline">/settings/incident-response</Link> — post-breach playbook</li>
-          <li><Link href="/settings/audit" className="text-blue-400 hover:underline">/settings/audit</Link> — append-only audit log viewer</li>
-          <li><Link href="/settings/security-activity" className="text-blue-400 hover:underline">/settings/security-activity</Link> — auth events + risk signals</li>
-          <li><Link href="/settings/backups" className="text-blue-400 hover:underline">/settings/backups</Link> — backup posture + verify-drill</li>
+        <ul className="list-disc pl-5 text-white/70 text-sm space-y-1">
+          <li><Link href="/settings/pii-inventory" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/pii-inventory</Link> — data classification + retention</li>
+          <li><Link href="/settings/secrets-rotation" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/secrets-rotation</Link> — rotation log + cadence</li>
+          <li><Link href="/settings/incident-response" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/incident-response</Link> — post-breach playbook</li>
+          <li><Link href="/settings/audit" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/audit</Link> — append-only audit log viewer</li>
+          <li><Link href="/settings/security-activity" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/security-activity</Link> — auth events + risk signals</li>
+          <li><Link href="/settings/backups" className="text-[#A6B8E7] hover:text-white transition-colors">/settings/backups</Link> — backup posture + verify-drill</li>
         </ul>
       </Section>
-    </div>
+    </PageShell>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="glass-card p-5 mb-4">
-      <h2 className="text-white font-semibold text-lg mb-3">{title}</h2>
+    <Glass className="p-5 mb-4">
+      <h2 className="text-white/90 font-semibold text-lg mb-3">{title}</h2>
       {children}
-    </section>
+    </Glass>
   );
 }
 
 function Para({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <p className={`text-zinc-300 text-sm leading-relaxed mb-2 ${className}`}>{children}</p>;
+  return <p className={`text-white/70 text-sm leading-relaxed mb-2 ${className}`}>{children}</p>;
 }
 
 function KvList({ items }: { items: Array<[string, string]> }) {
@@ -339,8 +341,8 @@ function KvList({ items }: { items: Array<[string, string]> }) {
     <dl className="grid grid-cols-1 gap-y-1.5 text-sm">
       {items.map(([k, v]) => (
         <div key={k} className="grid grid-cols-[180px_1fr] gap-3 md:gap-4">
-          <dt className="font-mono text-xs text-zinc-400 leading-relaxed">{k}</dt>
-          <dd className="text-zinc-300 leading-relaxed">{v}</dd>
+          <dt className="font-mono text-xs text-white/45 leading-relaxed">{k}</dt>
+          <dd className="text-white/70 leading-relaxed">{v}</dd>
         </div>
       ))}
     </dl>

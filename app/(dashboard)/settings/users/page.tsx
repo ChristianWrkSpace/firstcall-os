@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ROLE_META, ALL_ROLES, type Role } from "@/lib/permissions";
 import UserRoleEditor from "./UserRoleEditor";
+import { PageShell, Glass } from "@/components/ui/Glass";
 
 export default async function UsersPage() {
   const me = await getCurrentUser();
@@ -30,22 +31,22 @@ export default async function UsersPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6">
+    <PageShell
+      eyebrow="Settings"
+      title="Users & Permissions"
+      subtitle="Role determines what each person can see and do."
+      action={
         <Link
           href="/settings"
-          className="text-zinc-500 hover:text-white text-sm transition-colors"
+          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
         >
           ← Settings
         </Link>
-        <h1 className="text-2xl font-bold text-white mt-2">Users & Permissions</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">
-          Role determines what each person can see and do.
-        </p>
-      </div>
-
+      }
+      width="full"
+    >
       {!canManage && (
-        <div className="mb-5 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-lg text-zinc-400 text-sm">
+        <div className="mb-5 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-lg text-white/45 text-sm">
           ℹ️ View-only — only Owners can change roles.
         </div>
       )}
@@ -55,24 +56,22 @@ export default async function UsersPage() {
         {ALL_ROLES.map((r) => {
           const meta = ROLE_META[r];
           return (
-            <div key={r} className="glass-card p-4">
+            <Glass key={r} className="p-4">
               <div className="flex items-baseline justify-between mb-1">
-                <p className="text-white text-sm font-semibold">{meta.label}</p>
-                <p className="text-2xl font-bold text-blue-400 font-mono">
-                  {counts[r]}
-                </p>
+                <p className="text-white/90 text-sm font-semibold">{meta.label}</p>
+                <p className="text-2xl font-bold text-[#A6B8E7] font-mono">{counts[r]}</p>
               </div>
-              <p className="text-zinc-500 text-xs leading-snug">{meta.description}</p>
-            </div>
+              <p className="text-white/40 text-xs leading-snug">{meta.description}</p>
+            </Glass>
           );
         })}
       </div>
 
       {/* User table */}
-      <div className="glass-card overflow-x-auto">
+      <Glass className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-white/[0.06] text-white/40 text-xs uppercase tracking-wide">
               <th className="px-5 py-3 text-left">Name</th>
               <th className="px-5 py-3 text-left">Email</th>
               <th className="px-5 py-3 text-left">Role</th>
@@ -88,15 +87,15 @@ export default async function UsersPage() {
                   !p.active ? "opacity-50" : ""
                 }`}
               >
-                <td className="px-5 py-3 text-white">
+                <td className="px-5 py-3 text-white/90">
                   {p.name}
                   {p.id === me.id && (
-                    <span className="ml-2 text-[10px] text-blue-400 uppercase tracking-wider">
+                    <span className="ml-2 text-[10px] text-[#A6B8E7] uppercase tracking-wider">
                       you
                     </span>
                   )}
                 </td>
-                <td className="px-5 py-3 text-zinc-400 text-xs">{p.email ?? "—"}</td>
+                <td className="px-5 py-3 text-white/45 text-xs">{p.email ?? "—"}</td>
                 <td className="px-5 py-3">
                   <UserRoleEditor
                     profileId={p.id}
@@ -105,30 +104,30 @@ export default async function UsersPage() {
                     isActive={p.active}
                   />
                 </td>
-                <td className="px-5 py-3 text-zinc-400 text-xs">
+                <td className="px-5 py-3 text-white/45 text-xs">
                   {p.active ? (
-                    <span className="text-green-400">active</span>
+                    <span className="text-emerald-300">active</span>
                   ) : (
-                    <span className="text-zinc-500">deactivated</span>
+                    <span className="text-white/40">deactivated</span>
                   )}
                 </td>
-                <td className="px-5 py-3 text-zinc-500 text-xs">
+                <td className="px-5 py-3 text-white/40 text-xs">
                   {new Date(p.created_at).toLocaleDateString()}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Glass>
 
-      <div className="mt-5 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
-        <p className="text-zinc-300 text-sm font-semibold mb-1">How users join</p>
+      <Glass subtle className="mt-5 p-4 text-white/40 text-xs leading-relaxed">
+        <p className="text-white/70 text-sm font-semibold mb-1">How users join</p>
         <p>
           New users sign up via the standard login page. They start as{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">technician</code> by
+          <code className="text-white/70 bg-white/10 px-1 rounded">technician</code> by
           default. An Owner promotes them here once verified.
         </p>
-      </div>
-    </div>
+      </Glass>
+    </PageShell>
   );
 }

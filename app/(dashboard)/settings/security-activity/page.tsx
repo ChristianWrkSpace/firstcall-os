@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { requireRoles } from "@/components/RoleGate";
+import { PageShell, Glass } from "@/components/ui/Glass";
 
 const SECURITY_ACTIONS = [
   "session.signout_others",
@@ -17,18 +18,18 @@ const SECURITY_ACTIONS = [
 ];
 
 const ACTION_META: Record<string, { color: string; emoji: string }> = {
-  "session.signout_others":  { color: "text-blue-400",   emoji: "🚪" },
-  "session.force_signout":   { color: "text-red-400",    emoji: "🚫" },
-  "mfa.enrolled":            { color: "text-green-400",  emoji: "🔐" },
-  "mfa.unenrolled":          { color: "text-yellow-400", emoji: "🔓" },
-  "rate_limit.hit":          { color: "text-yellow-400", emoji: "🚦" },
-  "auth.failed_login":       { color: "text-red-400",    emoji: "❌" },
-  "auth.password_reset":     { color: "text-blue-400",   emoji: "🔑" },
-  "customer.pii_redacted":   { color: "text-purple-400", emoji: "🗑️" },
-  "secret.rotated":          { color: "text-green-400",  emoji: "🔄" },
-  "backup.drill_verify":     { color: "text-green-400",  emoji: "🔍" },
-  "backup.downloaded":       { color: "text-blue-400",   emoji: "📥" },
-  "default":                 { color: "text-zinc-400",   emoji: "📜" },
+  "session.signout_others":  { color: "text-[#A6B8E7]",    emoji: "🚪" },
+  "session.force_signout":   { color: "text-red-300",      emoji: "🚫" },
+  "mfa.enrolled":            { color: "text-emerald-300",  emoji: "🔐" },
+  "mfa.unenrolled":          { color: "text-amber-300",    emoji: "🔓" },
+  "rate_limit.hit":          { color: "text-amber-300",    emoji: "🚦" },
+  "auth.failed_login":       { color: "text-red-300",      emoji: "❌" },
+  "auth.password_reset":     { color: "text-[#A6B8E7]",    emoji: "🔑" },
+  "customer.pii_redacted":   { color: "text-purple-300",   emoji: "🗑️" },
+  "secret.rotated":          { color: "text-emerald-300",  emoji: "🔄" },
+  "backup.drill_verify":     { color: "text-emerald-300",  emoji: "🔍" },
+  "backup.downloaded":       { color: "text-[#A6B8E7]",    emoji: "📥" },
+  "default":                 { color: "text-white/45",     emoji: "📜" },
 };
 
 const fmtAgo = (iso: string) => {
@@ -44,6 +45,9 @@ const fmtAgo = (iso: string) => {
 
 const NDAYS_AGO = (n: number) =>
   new Date(Date.now() - n * 86_400_000).toISOString();
+
+const filterActive = "bg-white/[0.08] text-white ring-1 ring-[#5FBDB0]/25";
+const filterIdle = "bg-white/[0.03] text-white/50 hover:bg-white/[0.06] hover:text-white";
 
 export default async function SecurityActivityPage({
   searchParams,
@@ -111,50 +115,50 @@ export default async function SecurityActivityPage({
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl">
-      <div className="mb-6 flex items-end justify-between gap-3 flex-wrap">
-        <div>
-          <Link href="/settings" className="text-zinc-500 hover:text-white text-sm transition-colors">
+    <PageShell
+      eyebrow="Settings"
+      title="Security Activity"
+      subtitle="Auth events, MFA changes, rate-limit hits, secret rotations, backup drills. Sourced from the audit log."
+      action={
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
+          >
             ← Settings
           </Link>
-          <h1 className="text-2xl font-bold text-white mt-2">Security Activity</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
-            Auth events, MFA changes, rate-limit hits, secret rotations, backup drills.
-            Sourced from the audit log.
-          </p>
+          <div className="flex items-center gap-1">
+            {[1, 7, 30, 90].map((d) => (
+              <Link
+                key={d}
+                href={`/settings/security-activity?window=${d}`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  windowDays === d ? filterActive : filterIdle
+                }`}
+              >
+                {d === 1 ? "24h" : `${d}d`}
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          {[1, 7, 30, 90].map((d) => (
-            <Link
-              key={d}
-              href={`/settings/security-activity?window=${d}`}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                windowDays === d
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-              }`}
-            >
-              {d === 1 ? "24h" : `${d}d`}
-            </Link>
-          ))}
-        </div>
-      </div>
-
+      }
+      width="wide"
+    >
       {/* Risk signals */}
       {signals.length > 0 && (
-        <div className="bg-yellow-500/5 border border-yellow-500/30 rounded-xl p-4 mb-6">
-          <p className="text-yellow-300 text-xs uppercase tracking-wide font-semibold mb-2">
+        <Glass accent="amber" subtle className="p-4 mb-6">
+          <p className="text-amber-300 text-xs uppercase tracking-wide font-semibold mb-2">
             ⚠ Signals worth checking
           </p>
           <ul className="space-y-1.5">
             {signals.map((s, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
-                <span className={s.severity === "high" ? "text-red-400" : "text-yellow-400"}>●</span>
-                <span className="text-zinc-200">{s.text}</span>
+                <span className={s.severity === "high" ? "text-red-300" : "text-amber-300"}>●</span>
+                <span className="text-white/80">{s.text}</span>
               </li>
             ))}
           </ul>
-        </div>
+        </Glass>
       )}
 
       {/* Counts by action */}
@@ -166,11 +170,11 @@ export default async function SecurityActivityPage({
             return (
               <div
                 key={action}
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-center"
+                className="bg-white/[0.025] border border-white/[0.05] rounded-lg p-3 text-center"
               >
                 <p className="text-xl">{meta.emoji}</p>
                 <p className={`text-xl font-bold font-mono ${meta.color}`}>{count}</p>
-                <p className="text-zinc-500 text-[10px] mt-0.5 truncate">
+                <p className="text-white/40 text-[10px] mt-0.5 truncate">
                   {action.replace(/[._]/g, " ")}
                 </p>
               </div>
@@ -180,8 +184,8 @@ export default async function SecurityActivityPage({
 
       {/* Rate-limit key breakdown */}
       {rateLimitKeys.size > 0 && (
-        <div className="glass-card p-5 mb-6">
-          <h2 className="text-white font-semibold mb-3">🚦 Rate Limit Hits by Key</h2>
+        <Glass className="p-5 mb-6">
+          <h2 className="text-white/90 font-semibold mb-3">🚦 Rate Limit Hits by Key</h2>
           <ul className="flex flex-col gap-1.5">
             {Array.from(rateLimitKeys.entries())
               .sort((a, b) => b[1] - a[1])
@@ -191,19 +195,19 @@ export default async function SecurityActivityPage({
                   key={key}
                   className="flex items-center justify-between text-xs px-3 py-1.5 bg-white/[0.03] rounded"
                 >
-                  <code className="text-zinc-300 truncate">{key}</code>
-                  <span className="text-yellow-400 font-mono font-semibold">×{count}</span>
+                  <code className="text-white/70 truncate">{key}</code>
+                  <span className="text-amber-300 font-mono font-semibold">×{count}</span>
                 </li>
               ))}
           </ul>
-        </div>
+        </Glass>
       )}
 
       {/* Event stream */}
-      <div className="glass-card p-5">
-        <h2 className="text-white font-semibold mb-3">Event Stream</h2>
+      <Glass className="p-5">
+        <h2 className="text-white/90 font-semibold mb-3">Event Stream</h2>
         {!events?.length ? (
-          <p className="text-zinc-500 text-sm italic">No security events in this window.</p>
+          <p className="text-white/40 text-sm italic">No security events in this window.</p>
         ) : (
           <ul className="flex flex-col gap-1.5 max-h-[500px] overflow-y-auto pr-1">
             {events.map((e: any) => {
@@ -211,7 +215,7 @@ export default async function SecurityActivityPage({
               return (
                 <li
                   key={e.id}
-                  className="flex items-start gap-2 px-3 py-2 bg-white/[0.03] border border-zinc-700/40 rounded-lg"
+                  className="flex items-start gap-2 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg"
                 >
                   <span className="text-base shrink-0 leading-none mt-0.5">{meta.emoji}</span>
                   <div className="flex-1 min-w-0">
@@ -219,14 +223,14 @@ export default async function SecurityActivityPage({
                       <p className={`text-sm font-medium ${meta.color}`}>
                         {e.action.replace(/[._]/g, " ")}
                       </p>
-                      <p className="text-zinc-500 text-[10px] font-mono">{fmtAgo(e.created_at)}</p>
+                      <p className="text-white/40 text-[10px] font-mono">{fmtAgo(e.created_at)}</p>
                     </div>
-                    <p className="text-zinc-500 text-xs mt-0.5">
+                    <p className="text-white/40 text-xs mt-0.5">
                       by {e.user_name ?? "system"}
                       {e.entity_type && ` · ${e.entity_type}`}
                     </p>
                     {e.details && Object.keys(e.details).length > 0 && (
-                      <pre className="text-zinc-600 text-[10px] mt-1 overflow-x-auto">
+                      <pre className="text-white/30 text-[10px] mt-1 overflow-x-auto">
                         {JSON.stringify(e.details, null, 2).slice(0, 200)}
                       </pre>
                     )}
@@ -236,7 +240,7 @@ export default async function SecurityActivityPage({
             })}
           </ul>
         )}
-      </div>
-    </div>
+      </Glass>
+    </PageShell>
   );
 }
