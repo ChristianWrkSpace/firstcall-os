@@ -7,7 +7,7 @@ export default function AdjusterPortalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen app-backdrop">
       {children}
     </div>
   );

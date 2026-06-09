@@ -65,7 +65,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0a0a0a",
+  themeColor: "#FAF6EF",
   // viewport-fit=cover lets the PWA paint into the iPhone notch / dynamic island
   viewportFit: "cover",
 };

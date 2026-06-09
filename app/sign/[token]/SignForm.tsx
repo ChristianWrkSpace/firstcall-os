@@ -37,14 +37,14 @@ export default function SignForm({
 
   if (signed) {
     return (
-      <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-8 text-center">
+      <div className="bg-pine/10 border border-green-500/30 rounded-xl p-8 text-center">
         <div className="text-5xl mb-3">✅</div>
-        <h2 className="text-2xl font-bold text-white">Signed.</h2>
-        <p className="text-zinc-300 mt-2">
+        <h2 className="text-2xl font-bold text-ink">Signed.</h2>
+        <p className="text-ink-2 mt-2">
           Thanks, {typedName.split(" ")[0]}. Your {docTypeLabel.toLowerCase()} is
           on file.
         </p>
-        <p className="text-zinc-500 text-sm mt-4">
+        <p className="text-ink-3 text-sm mt-4">
           Signed at {signedAt}. A confirmation has been logged. You can close
           this tab — we'll handle the next step.
         </p>
@@ -53,16 +53,16 @@ export default function SignForm({
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-6">
-      <h2 className="text-white font-semibold text-lg">Sign this document</h2>
-      <p className="text-zinc-400 text-sm mt-1">
+    <div className="bg-card border border-edge2 rounded-xl p-6 mt-6">
+      <h2 className="text-ink font-semibold text-lg">Sign this document</h2>
+      <p className="text-ink-2 text-sm mt-1">
         Type your full legal name below and check the box. That's it — your
         typed signature has the same legal effect as a handwritten one under
         the federal ESIGN Act and Texas UETA.
       </p>
 
       <div className="mt-5 flex flex-col gap-2">
-        <label className="text-zinc-300 text-sm font-medium">
+        <label className="text-ink-2 text-sm font-medium">
           Full legal name
         </label>
         <input
@@ -70,7 +70,7 @@ export default function SignForm({
           onChange={(e) => setTypedName(e.target.value)}
           placeholder={customerName || "First Last"}
           autoComplete="name"
-          className="px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-base focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="px-4 py-3 rounded-lg bg-shade border border-edge2 text-ink text-base focus:outline-none focus:ring-2 focus:ring-blue-600"
         />
         {typedName.trim() && (
           <div className="mt-2 px-4 py-4 bg-white border border-zinc-300 rounded-lg">
@@ -80,7 +80,7 @@ export default function SignForm({
             >
               {typedName}
             </p>
-            <p className="text-zinc-500 text-[10px] mt-1 uppercase tracking-wider">
+            <p className="text-ink-3 text-[10px] mt-1 uppercase tracking-wider">
               Your typed signature
             </p>
           </div>
@@ -94,7 +94,7 @@ export default function SignForm({
           onChange={(e) => setAgreed(e.target.checked)}
           className="mt-1 w-4 h-4"
         />
-        <span className="text-zinc-300 text-sm leading-snug">
+        <span className="text-ink-2 text-sm leading-snug">
           I agree this typed signature has the same legal effect as a
           handwritten signature, and I consent to conduct this transaction
           electronically with First Call Mitigation.
@@ -102,7 +102,7 @@ export default function SignForm({
       </label>
 
       {error && (
-        <p className="mt-4 text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+        <p className="mt-4 text-red-700 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
@@ -115,7 +115,7 @@ export default function SignForm({
         {pending ? "Signing…" : "✍️ Sign Document"}
       </button>
 
-      <p className="text-zinc-500 text-[11px] mt-4 text-center">
+      <p className="text-ink-3 text-[11px] mt-4 text-center">
         Free · No app to install · Audit trail recorded automatically
       </p>
     </div>

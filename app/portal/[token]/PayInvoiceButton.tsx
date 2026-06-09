@@ -41,8 +41,8 @@ export default function PayInvoiceButton({
               maximumFractionDigits: 2,
             })} Online`}
       </button>
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
-      <p className="text-zinc-500 text-[11px] mt-2 text-center">
+      {error && <p className="text-red-700 text-xs mt-2">{error}</p>}
+      <p className="text-ink-3 text-[11px] mt-2 text-center">
         Secure payment via Stripe — we never see your card details.
       </p>
     </div>

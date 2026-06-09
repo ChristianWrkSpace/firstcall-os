@@ -36,7 +36,7 @@ export default function LoginPage() {
           {state?.error && (
             <div className="text-sm rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "var(--color-danger)" }}>{state.error}</div>
           )}
-          <button type="submit" disabled={pending} className="w-full py-2.5 rounded-xl text-white font-medium text-sm transition-all mt-1 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]" style={{ backgroundColor: "var(--color-primary)", boxShadow: "0 4px 16px -4px rgba(91,130,184,0.3)" }}>
+          <button type="submit" disabled={pending} className="w-full py-2.5 rounded-xl text-ink font-medium text-sm transition-all mt-1 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]" style={{ backgroundColor: "var(--color-primary)", boxShadow: "0 4px 16px -4px rgba(91,130,184,0.3)" }}>
             {pending ? "Signing in…" : "Sign in"}
           </button>
         </form>

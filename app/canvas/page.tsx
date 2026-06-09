@@ -108,7 +108,7 @@ export default async function EchoCanvasPage() {
                         <p className="text-sm font-medium text-[color:var(--color-text-primary)]">{h.title}</p>
                         <p className="text-xs text-[color:var(--color-text-muted)]">{h.detail} · {h.ageMinutes}m ago</p>
                       </div>
-                      <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-all hover:scale-105" style={{ backgroundColor: "var(--color-primary)" }}>
+                      <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-ink transition-all hover:scale-105" style={{ backgroundColor: "var(--color-primary)" }}>
                         Review
                       </button>
                     </div>

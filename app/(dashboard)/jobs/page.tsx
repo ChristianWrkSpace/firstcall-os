@@ -104,7 +104,7 @@ export default async function JobsPage({
           </div>
           <Link
             href="/jobs/new"
-            className="px-4 py-2 text-sm font-medium rounded-xl text-white transition-opacity hover:opacity-90"
+            className="px-4 py-2 text-sm font-medium rounded-xl text-ink transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #E08A63, #C4663F)" }}
           >
             + New Job

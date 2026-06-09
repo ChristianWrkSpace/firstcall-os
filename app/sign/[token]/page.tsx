@@ -34,10 +34,10 @@ export default async function SignPage({
   const alreadySigned = doc.status === "signed";
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-card">
       {/* Header */}
       <header
-        className="bg-zinc-900 border-b-2 border-blue-600 px-6 pb-5"
+        className="bg-card border-b-2 border-blue-600 px-6 pb-5"
         style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
       >
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-3 flex-wrap">
@@ -47,13 +47,13 @@ export default async function SignPage({
               alt="First Call Mitigation"
               style={{ height: 36, width: "auto" }}
             />
-            <p className="text-zinc-500 text-xs uppercase tracking-wider">
+            <p className="text-ink-3 text-xs uppercase tracking-wider">
               Document signing
             </p>
           </div>
           <div className="text-right">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide">Job</p>
-            <p className="text-white font-mono text-sm">
+            <p className="text-ink-3 text-xs uppercase tracking-wide">Job</p>
+            <p className="text-ink font-mono text-sm">
               {job?.job_number ?? ""}
             </p>
           </div>
@@ -61,20 +61,20 @@ export default async function SignPage({
       </header>
 
       <main className="max-w-3xl mx-auto px-4 md:px-8 py-8">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-ink">
           {meta?.label ?? doc.doc_type}
         </h1>
-        <p className="text-zinc-400 text-sm mt-1">
+        <p className="text-ink-2 text-sm mt-1">
           For {customer.name ?? "the homeowner"} at{" "}
           {job?.site_address ?? "the loss site"}
         </p>
 
         {alreadySigned ? (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 mt-6">
-            <p className="text-green-300 font-semibold text-lg">
+          <div className="bg-pine/10 border border-green-500/30 rounded-xl p-6 mt-6">
+            <p className="text-pine font-semibold text-lg">
               ✓ Already signed
             </p>
-            <p className="text-zinc-300 text-sm mt-2">
+            <p className="text-ink-2 text-sm mt-2">
               This document was signed by{" "}
               <strong>{doc.signed_by_name ?? "—"}</strong> on{" "}
               {doc.signed_at
@@ -99,7 +99,7 @@ export default async function SignPage({
               alt="First Call Mitigation"
               style={{ height: 44, width: "auto" }}
             />
-            <div className="text-right text-[10px] text-zinc-600 leading-snug uppercase tracking-wider">
+            <div className="text-right text-[10px] text-ink-3 leading-snug uppercase tracking-wider">
               <p>Austin, Texas</p>
               <p>IICRC Certified</p>
               <p>24/7 Emergency Response</p>
@@ -110,7 +110,7 @@ export default async function SignPage({
           </pre>
           {alreadySigned && (
             <div className="mt-8 pt-6 border-t-2 border-black">
-              <p className="text-xs uppercase tracking-wider text-zinc-600">
+              <p className="text-xs uppercase tracking-wider text-ink-3">
                 Electronic Signature
               </p>
               <p
@@ -122,7 +122,7 @@ export default async function SignPage({
               >
                 {doc.signed_by_name ?? ""}
               </p>
-              <p className="text-zinc-600 text-xs mt-2">
+              <p className="text-ink-3 text-xs mt-2">
                 Signed{" "}
                 {doc.signed_at
                   ? new Date(doc.signed_at).toLocaleString()
@@ -134,7 +134,7 @@ export default async function SignPage({
         </article>
 
         {/* Trust footer */}
-        <footer className="mt-8 text-center text-zinc-600 text-xs">
+        <footer className="mt-8 text-center text-ink-3 text-xs">
           First Call Mitigation · Austin, TX · IICRC Certified
           <br />
           Your signature is legally binding under the federal ESIGN Act and

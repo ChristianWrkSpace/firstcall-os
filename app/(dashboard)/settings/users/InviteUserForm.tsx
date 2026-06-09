@@ -55,7 +55,7 @@ export default function InviteUserForm() {
         <button
           type="submit"
           disabled={pending}
-          className="px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 min-h-[44px]"
+          className="px-5 py-2.5 rounded-xl text-sm font-medium text-ink transition-opacity hover:opacity-90 disabled:opacity-50 min-h-[44px]"
           style={{ background: "linear-gradient(135deg, #E08A63, #C4663F)" }}
         >
           {pending ? "Sending…" : "Send invite"}

@@ -137,7 +137,7 @@ export default async function ActivityPage({
             href={`/activity?agent=${o.value}`}
             className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
               agentFilter === o.value
-                ? "border-info bg-info/10 text-white"
+                ? "border-info bg-info/10 text-ink"
                 : "border-edge2 bg-card text-ink-2 hover:border-edge2"
             }`}
           >

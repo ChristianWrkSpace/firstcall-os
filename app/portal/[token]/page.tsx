@@ -4,13 +4,13 @@ import Logo from "@/components/Logo";
 import PayInvoiceButton from "./PayInvoiceButton";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  lead: { label: "We've received your call", color: "bg-blue-500/15 text-blue-300" },
-  inspection: { label: "Inspection completed", color: "bg-yellow-500/15 text-yellow-300" },
-  mitigation: { label: "Mitigation in progress", color: "bg-orange-500/15 text-orange-300" },
-  drying: { label: "Drying phase — equipment running", color: "bg-purple-500/15 text-purple-300" },
-  reconstruction: { label: "Reconstruction underway", color: "bg-indigo-500/15 text-indigo-300" },
-  completed: { label: "Work complete", color: "bg-green-500/15 text-green-300" },
-  cancelled: { label: "Job cancelled", color: "bg-zinc-700 text-zinc-400" },
+  lead: { label: "We've received your call", color: "bg-info/10 text-info" },
+  inspection: { label: "Inspection completed", color: "bg-honey/10 text-honey" },
+  mitigation: { label: "Mitigation in progress", color: "bg-orange-500/15 text-orange-700" },
+  drying: { label: "Drying phase — equipment running", color: "bg-purple-500/15 text-violet-700" },
+  reconstruction: { label: "Reconstruction underway", color: "bg-indigo-500/15 text-indigo-700" },
+  completed: { label: "Work complete", color: "bg-pine/10 text-pine" },
+  cancelled: { label: "Job cancelled", color: "bg-shade text-ink-2" },
 };
 
 const STAGES = [
@@ -152,22 +152,22 @@ export default async function PortalPage({
     : null;
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen app-backdrop">
       {/* Header */}
       <header
-        className="bg-zinc-900 border-b border-zinc-800 px-6 pb-5"
+        className="bg-card border-b border-edge2 px-6 pb-5"
         style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
       >
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <Logo variant="banner" size={36} priority />
-            <p className="text-zinc-500 text-xs">Customer Portal</p>
+            <p className="text-ink-3 text-xs">Customer Portal</p>
           </div>
           <div className="text-right">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide">
+            <p className="text-ink-3 text-xs uppercase tracking-wide">
               Job #
             </p>
-            <p className="text-white font-mono text-sm">{job.job_number}</p>
+            <p className="text-ink font-mono text-sm">{job.job_number}</p>
           </div>
         </div>
       </header>
@@ -175,18 +175,18 @@ export default async function PortalPage({
       <main className="max-w-3xl mx-auto px-6 py-8">
         {/* Greeting */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-ink">
             Hi {customer?.name?.split(" ")[0] ?? "there"} 👋
           </h1>
-          <p className="text-zinc-400 text-sm mt-1">
+          <p className="text-ink-2 text-sm mt-1">
             Here's the latest on the work at{" "}
-            <span className="text-zinc-200">{job.site_address ?? "your property"}</span>.
+            <span className="text-ink">{job.site_address ?? "your property"}</span>.
           </p>
         </div>
 
         {/* Status */}
-        <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
-          <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-2">
+        <section className="bg-card border border-edge2 rounded-xl p-6 mb-5">
+          <p className="text-ink-3 text-xs uppercase tracking-wide font-semibold mb-2">
             Current Status
           </p>
           <div
@@ -197,19 +197,19 @@ export default async function PortalPage({
 
           {/* Stage tracker */}
           <div className="mt-5">
-            <div className="flex items-center justify-between mb-2 text-[10px] text-zinc-500 uppercase tracking-wide">
+            <div className="flex items-center justify-between mb-2 text-[10px] text-ink-3 uppercase tracking-wide">
               {STAGES.slice(0, 6).map((s, i) => (
                 <span
                   key={s}
                   className={
-                    i <= currentStage ? "text-blue-400 font-medium" : "text-zinc-600"
+                    i <= currentStage ? "text-info font-medium" : "text-ink-3"
                   }
                 >
                   {s === "reconstruction" ? "recon" : s}
                 </span>
               ))}
             </div>
-            <div className="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="relative h-2 bg-shade rounded-full overflow-hidden">
               <div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-green-500 transition-all"
                 style={{
@@ -220,31 +220,31 @@ export default async function PortalPage({
           </div>
 
           {scheduled && (
-            <div className="mt-5 pt-4 border-t border-zinc-800">
-              <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">
+            <div className="mt-5 pt-4 border-t border-edge2">
+              <p className="text-ink-3 text-xs uppercase tracking-wide mb-1">
                 Next Visit
               </p>
-              <p className="text-white text-sm font-medium">{scheduled}</p>
+              <p className="text-ink text-sm font-medium">{scheduled}</p>
             </div>
           )}
         </section>
 
         {/* Insurance-primary: no Pay button, just status */}
         {paymentRoute === "insurance_primary" && unpaidInvoices.length > 0 && (
-          <section className="bg-zinc-900 border border-blue-500/30 rounded-xl p-6 mb-5">
-            <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-3">
+          <section className="bg-card border border-blue-500/30 rounded-xl p-6 mb-5">
+            <p className="text-info text-xs uppercase tracking-wide font-semibold mb-3">
               🏛️ Insurance Claim
             </p>
-            <p className="text-zinc-200 text-sm">
+            <p className="text-ink text-sm">
               Your insurance carrier
               {customer?.insurance_company ? (
-                <> (<span className="text-white">{customer.insurance_company}</span>)</>
+                <> (<span className="text-ink">{customer.insurance_company}</span>)</>
               ) : null}{" "}
               is being billed directly. You don't owe anything out of pocket for
               this work.
             </p>
             {customer?.insurance_claim_number && (
-              <p className="text-zinc-500 text-xs mt-3 font-mono">
+              <p className="text-ink-3 text-xs mt-3 font-mono">
                 Claim #{customer.insurance_claim_number}
               </p>
             )}
@@ -255,14 +255,14 @@ export default async function PortalPage({
         {(paymentRoute === "customer_pay" ||
           paymentRoute === "insurance_with_deductible") &&
           unpaidInvoices.length > 0 && (
-            <section className="bg-zinc-900 border border-blue-500/30 rounded-xl p-6 mb-5">
-              <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-3">
+            <section className="bg-card border border-blue-500/30 rounded-xl p-6 mb-5">
+              <p className="text-info text-xs uppercase tracking-wide font-semibold mb-3">
                 {paymentRoute === "insurance_with_deductible"
                   ? "💳 Pay Your Deductible"
                   : "💳 Pay Your Invoice"}
               </p>
               {paymentRoute === "insurance_with_deductible" && (
-                <p className="text-zinc-400 text-xs mb-4">
+                <p className="text-ink-2 text-xs mb-4">
                   Your insurance is covering the bulk of this claim. The amount
                   below is your deductible — that's all you owe.
                 </p>
@@ -274,13 +274,13 @@ export default async function PortalPage({
                   return (
                     <div
                       key={inv.id}
-                      className="bg-zinc-800/40 border border-zinc-700/50 rounded-lg p-4"
+                      className="bg-shade border border-edge2/50 rounded-lg p-4"
                     >
                       <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                        <p className="text-white text-sm font-mono">
+                        <p className="text-ink text-sm font-mono">
                           {inv.invoice_number}
                         </p>
-                        <p className="text-2xl font-bold text-white font-mono">
+                        <p className="text-2xl font-bold text-ink font-mono">
                           $
                           {payable.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
@@ -289,12 +289,12 @@ export default async function PortalPage({
                         </p>
                       </div>
                       {inv.due_date && (
-                        <p className="text-zinc-500 text-xs mb-3">
+                        <p className="text-ink-3 text-xs mb-3">
                           Due {new Date(inv.due_date).toLocaleDateString()}
                         </p>
                       )}
                       {alreadySettled ? (
-                        <p className="text-green-400 text-xs font-medium">
+                        <p className="text-pine text-xs font-medium">
                           ✓ Your portion is paid. Awaiting insurance settlement.
                         </p>
                       ) : (
@@ -313,8 +313,8 @@ export default async function PortalPage({
 
         {/* Site Photos */}
         {photoUrls.length > 0 && (
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
+          <section className="bg-card border border-edge2 rounded-xl p-6 mb-5">
+            <p className="text-ink-3 text-xs uppercase tracking-wide font-semibold mb-3">
               Site Photos
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -324,7 +324,7 @@ export default async function PortalPage({
                   href={p.url}
                   target="_blank"
                   rel="noopener"
-                  className="aspect-square bg-zinc-800 rounded overflow-hidden"
+                  className="aspect-square bg-shade rounded overflow-hidden"
                 >
                   <img
                     src={p.url}
@@ -334,7 +334,7 @@ export default async function PortalPage({
                 </a>
               ))}
             </div>
-            <p className="text-zinc-600 text-[10px] mt-2 italic">
+            <p className="text-ink-3 text-[10px] mt-2 italic">
               Tap any photo to view full-size.
             </p>
           </section>
@@ -342,8 +342,8 @@ export default async function PortalPage({
 
         {/* Legal Documents — auto-drafted + e-signed via /sign */}
         {(signedLegalDocs?.length ?? 0) > 0 && (
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
+          <section className="bg-card border border-edge2 rounded-xl p-6 mb-5">
+            <p className="text-ink-3 text-xs uppercase tracking-wide font-semibold mb-3">
               Legal Documents
             </p>
             <ul className="flex flex-col gap-2">
@@ -358,13 +358,13 @@ export default async function PortalPage({
                 return (
                   <li
                     key={d.id}
-                    className="flex items-center justify-between bg-zinc-800/40 rounded-lg px-3 py-2.5 text-sm gap-3"
+                    className="flex items-center justify-between bg-shade rounded-lg px-3 py-2.5 text-sm gap-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-white">
+                      <p className="text-ink">
                         {labels[d.doc_type] ?? d.doc_type}
                       </p>
-                      <p className="text-zinc-500 text-[10px]">
+                      <p className="text-ink-3 text-[10px]">
                         {isSigned
                           ? `Signed by ${d.signed_by_name ?? "you"} ${new Date(d.signed_at).toLocaleDateString()}`
                           : `Sent ${new Date(d.sent_at).toLocaleDateString()} — awaiting your signature`}
@@ -377,8 +377,8 @@ export default async function PortalPage({
                         rel="noopener"
                         className={`text-[10px] px-2.5 py-1 rounded font-semibold uppercase ${
                           isSigned
-                            ? "bg-green-500/15 text-green-400 hover:bg-green-500/25"
-                            : "bg-blue-600 text-white hover:bg-blue-500"
+                            ? "bg-pine/10 text-pine hover:bg-green-500/25"
+                            : "bg-cta text-white hover:bg-cta-deep"
                         }`}
                       >
                         {isSigned ? "✓ View" : "Sign now →"}
@@ -393,23 +393,23 @@ export default async function PortalPage({
 
         {/* Other signed documents (uploaded paper docs) */}
         {(signedDocs?.length ?? 0) > 0 && (
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
+          <section className="bg-card border border-edge2 rounded-xl p-6 mb-5">
+            <p className="text-ink-3 text-xs uppercase tracking-wide font-semibold mb-3">
               Other Signed Documents
             </p>
             <ul className="flex flex-col gap-2">
               {signedDocs!.map((d: any) => (
                 <li
                   key={d.id}
-                  className="flex items-center justify-between bg-zinc-800/40 rounded-lg px-3 py-2 text-sm"
+                  className="flex items-center justify-between bg-shade rounded-lg px-3 py-2 text-sm"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-white truncate">{d.filename}</p>
-                    <p className="text-zinc-500 text-[10px]">
+                    <p className="text-ink truncate">{d.filename}</p>
+                    <p className="text-ink-3 text-[10px]">
                       Signed {new Date(d.signed_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <span className="px-2 py-0.5 bg-green-500/15 text-green-400 text-[10px] rounded font-semibold uppercase">
+                  <span className="px-2 py-0.5 bg-pine/10 text-pine text-[10px] rounded font-semibold uppercase">
                     ✓ Signed
                   </span>
                 </li>
@@ -420,8 +420,8 @@ export default async function PortalPage({
 
         {/* Activity */}
         {(notifications?.length ?? 0) > 0 && (
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-5">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold mb-3">
+          <section className="bg-card border border-edge2 rounded-xl p-6 mb-5">
+            <p className="text-ink-3 text-xs uppercase tracking-wide font-semibold mb-3">
               Recent Updates
             </p>
             <ul className="flex flex-col gap-2">
@@ -430,10 +430,10 @@ export default async function PortalPage({
                   key={i}
                   className="flex items-start justify-between gap-3 text-sm"
                 >
-                  <span className="text-zinc-300 truncate">
+                  <span className="text-ink-2 truncate">
                     {n.subject ?? n.event_type}
                   </span>
-                  <span className="text-zinc-500 text-xs whitespace-nowrap">
+                  <span className="text-ink-3 text-xs whitespace-nowrap">
                     {new Date(n.sent_at).toLocaleDateString()}
                   </span>
                 </li>
@@ -444,14 +444,14 @@ export default async function PortalPage({
 
         {/* Contact */}
         <section className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 mt-5 text-center">
-          <p className="text-white font-semibold mb-1">Questions or concerns?</p>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-ink font-semibold mb-1">Questions or concerns?</p>
+          <p className="text-ink-2 text-sm">
             Call us anytime — we're available 24/7 for emergencies and same-day
             response.
           </p>
         </section>
 
-        <footer className="mt-8 text-center text-zinc-600 text-xs">
+        <footer className="mt-8 text-center text-ink-3 text-xs">
           First Call Mitigation · Austin, TX · IICRC Certified
         </footer>
       </main>
