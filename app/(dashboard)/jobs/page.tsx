@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { GLASS_STATUS, GLASS_STATUS_FALLBACK } from "@/lib/constants";
+import { STATUS_COLORS } from "@/lib/constants";
 import { getDataCutoff } from "@/lib/data-cutoff";
-import { PageBackdrop } from "@/components/ui/Glass";
 import Link from "next/link";
 
 const ACTIVE_STATUSES = [
@@ -92,121 +91,142 @@ export default async function JobsPage({
   }
 
   return (
-    <PageBackdrop>
-      <div className="p-4 md:p-8 max-w-5xl mx-auto">
-        <div className="flex items-end justify-between mb-5 gap-3 flex-wrap">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">Work</p>
-            <h1 className="text-2xl font-semibold tracking-tight text-white/95 mt-0.5">Jobs</h1>
-            <p className="text-white/45 text-sm mt-1">
-              {jobs?.length ?? 0} {TAB_LABELS[filter].toLowerCase()}
-              {filter === "active" && counts.completed > 0 && (
-                <>
-                  {" · "}
-                  <Link
-                    href="/jobs?filter=completed"
-                    className="text-white/40 hover:text-white transition-colors"
-                  >
-                    {counts.completed} completed
-                  </Link>
-                </>
-              )}
-            </p>
-          </div>
-          <Link
-            href="/jobs/new"
-            className="px-4 py-2 rounded-lg bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-semibold shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:shadow-[0_0_26px_rgba(95,189,176,0.4)] transition-shadow"
-          >
-            + New job
-          </Link>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 mb-4 border-b border-white/[0.06]">
-          {(Object.keys(TAB_LABELS) as Filter[]).map((f) => {
-            const active = f === filter;
-            return (
-              <Link
-                key={f}
-                href={f === "active" ? "/jobs" : `/jobs?filter=${f}`}
-                className={`px-3 py-2 text-sm transition-colors border-b-2 -mb-px ${
-                  active
-                    ? "text-white border-[#5FBDB0]"
-                    : "text-white/45 hover:text-white border-transparent"
-                }`}
-              >
-                {TAB_LABELS[f]}
-                <span className="text-white/30 text-xs ml-1.5">{counts[f]}</span>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Flowing list of glass rows — scannable, but alive, not a spreadsheet */}
-        {!jobs?.length ? (
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-16 text-center text-white/45 text-sm">
-            No {TAB_LABELS[filter].toLowerCase()} jobs.{" "}
-            {filter === "active" && (
-              <Link href="/jobs/new" className="text-[#A8DCD3] hover:text-white transition-colors">
-                Create your first job →
-              </Link>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {jobs.map((job: any, i: number) => {
-              const balance = arBalance(job);
-              const statusPill = GLASS_STATUS[job.status] ?? GLASS_STATUS_FALLBACK;
-              const site =
-                [job.site_address, job.site_city].filter(Boolean).join(", ") || "Address TBD";
-              return (
+    <div className="p-4 md:p-8">
+      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Jobs</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">
+            {jobs?.length ?? 0} {TAB_LABELS[filter].toLowerCase()}
+            {filter === "active" && counts.completed > 0 && (
+              <>
+                {" · "}
                 <Link
-                  key={job.id}
-                  href={`/jobs/${job.id}`}
-                  className="group rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.045] hover:border-white/[0.08] transition-all px-4 py-3.5 animate-rise-in"
-                  style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}
+                  href="/jobs?filter=completed"
+                  className="text-zinc-500 hover:text-white transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="font-mono text-xs text-white/45">{job.job_number}</span>
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${statusPill}`}
-                        >
-                          {job.status}
-                        </span>
-                        <span className="text-white/30 text-[11px] capitalize">{job.type ?? "—"}</span>
-                      </div>
-                      <p className="text-white/95 text-sm font-semibold tracking-tight mt-1 truncate">
-                        {job.customers?.name ?? "—"}
-                      </p>
-                      <p className="text-white/40 text-xs mt-0.5 truncate">{site}</p>
-                    </div>
-
-                    <div className="shrink-0 text-right flex flex-col items-end gap-1">
-                      {balance > 0 ? (
-                        <span
-                          className="inline-flex items-center gap-1 text-amber-300 font-mono text-xs px-2 py-0.5 rounded-md bg-amber-400/10 ring-1 ring-amber-400/20"
-                          title="Open balance — see A/R for collection"
-                        >
-                          ⚠ {fmt(balance)}
-                        </span>
-                      ) : null}
-                      <span className="text-white/30 text-[11px] font-mono">
-                        {new Date(job.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <span className="text-white/20 group-hover:text-white/50 transition-colors shrink-0">
-                      →
-                    </span>
-                  </div>
+                  {counts.completed} completed
                 </Link>
+              </>
+            )}
+          </p>
+        </div>
+        <Link
+          href="/jobs/new"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          + New Job
+        </Link>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-4 border-b border-white/[0.06]">
+        {(Object.keys(TAB_LABELS) as Filter[]).map((f) => {
+          const active = f === filter;
+          return (
+            <Link
+              key={f}
+              href={f === "active" ? "/jobs" : `/jobs?filter=${f}`}
+              className={`px-3 py-2 text-sm transition-colors border-b-2 -mb-px ${
+                active
+                  ? "text-white border-blue-500"
+                  : "text-zinc-400 hover:text-white border-transparent"
+              }`}
+            >
+              {TAB_LABELS[f]}
+              <span className="text-zinc-600 text-xs ml-1.5">
+                {counts[f]}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="glass-card overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/[0.06]">
+              {["Job #", "Customer", "Type", "Status", "Site", "A/R", "Created"].map(
+                (h) => (
+                  <th
+                    key={h}
+                    className="text-left text-zinc-400 font-medium px-4 py-3 text-xs uppercase tracking-wide"
+                  >
+                    {h}
+                  </th>
+                )
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {!jobs?.length && (
+              <tr>
+                <td colSpan={7} className="px-4 py-12 text-center text-zinc-500">
+                  No {TAB_LABELS[filter].toLowerCase()} jobs.{" "}
+                  {filter === "active" && (
+                    <Link href="/jobs/new" className="text-blue-400 hover:underline">
+                      Create your first job →
+                    </Link>
+                  )}
+                </td>
+              </tr>
+            )}
+            {jobs?.map((job: any) => {
+              const balance = arBalance(job);
+              return (
+                <tr
+                  key={job.id}
+                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                >
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="text-blue-400 hover:underline font-mono text-xs"
+                    >
+                      {job.job_number}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="text-white">{job.customers?.name ?? "—"}</p>
+                    <p className="text-zinc-500 text-xs mt-0.5">
+                      {job.customers?.phone ?? ""}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 text-zinc-300 capitalize">
+                    {job.type ?? "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[job.status] ?? ""}`}
+                    >
+                      {job.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-zinc-400 text-xs">
+                    {[job.site_address, job.site_city].filter(Boolean).join(", ") ||
+                      "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {balance > 0 ? (
+                      <Link
+                        href="/ar"
+                        className="inline-flex items-center gap-1 text-yellow-400 hover:text-yellow-300 font-mono text-xs"
+                        title="Open balance — see A/R for collection"
+                      >
+                        ⚠ {fmt(balance)}
+                      </Link>
+                    ) : (
+                      <span className="text-zinc-700 text-xs">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-500 text-xs">
+                    {new Date(job.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
               );
             })}
-          </div>
-        )}
+          </tbody>
+        </table>
       </div>
-    </PageBackdrop>
+    </div>
   );
 }

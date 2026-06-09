@@ -10,16 +10,18 @@ import {
   type SolomonInsight,
   type SolomonRecommendation,
 } from "@/lib/solomon-types";
-import { PageShell, Glass, Band, EmptyState } from "@/components/ui/Glass";
 
 export default async function SolomonPage() {
   const me = await getCurrentUser();
   if (!me) redirect("/login");
   if (me.role !== "owner" && me.role !== "manager") {
     return (
-      <PageShell eyebrow="FP&A analyst" title="🧠 Solomon" width="narrow">
-        <p className="text-white/50 text-sm">Solomon is the FP&A agent — owner / manager only.</p>
-      </PageShell>
+      <div className="p-8 max-w-2xl">
+        <h1 className="text-2xl font-bold text-white">🧠 Solomon</h1>
+        <p className="text-zinc-400 text-sm mt-2">
+          Solomon is the FP&A agent — owner / manager only.
+        </p>
+      </div>
     );
   }
 
@@ -39,36 +41,51 @@ export default async function SolomonPage() {
   const current = reports[0];
 
   return (
-    <PageShell
-      eyebrow="FP&A analyst"
-      title="🧠 Solomon"
-      subtitle="Reads jobs, invoices, payments, carriers, and zip codes — flags revenue concentration, slow-pay carriers, geographic outliers, and pricing tweaks. Honest about data limits (no COGS yet)."
-      action={<RunAnalysisButton />}
-    >
+    <div className="p-4 md:p-8">
+      <div className="flex items-start justify-between gap-3 flex-wrap mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">🧠 Solomon</h1>
+          <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
+            FP&A agent. Reads jobs, invoices, payments, carriers, and zip codes —
+            flags revenue concentration, slow-pay carriers, geographic
+            outliers, and pricing tweaks. Honest about data limits (no COGS yet).
+          </p>
+        </div>
+        <RunAnalysisButton />
+      </div>
+
       {!current ? (
-        <EmptyState icon="🧠" title="No analyses yet.">
-          Click &ldquo;Run Analysis&rdquo; to generate the first one.
-        </EmptyState>
+        <div className="glass-card p-10 text-center">
+          <p className="text-zinc-400 text-sm">
+            No analyses yet. Click "Run Analysis" to generate the first one.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-5">
-          {/* Executive summary — the lit hero */}
-          <Glass level="stage" accent="teal" className="p-6 animate-rise-in">
+          {/* Header */}
+          <section className="glass-card p-6">
             <div className="flex justify-between items-baseline gap-4 flex-wrap mb-3">
-              <p className="text-white/45 text-xs uppercase tracking-[0.15em] font-semibold">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide font-semibold">
                 Executive Summary · last {current.window_days} days
               </p>
-              <p className="text-white/40 text-xs">
+              <p className="text-zinc-500 text-xs">
                 Generated {new Date(current.created_at).toLocaleString()} by{" "}
                 {(current as any).profiles?.name ?? "—"}
               </p>
             </div>
-            <p className="text-white/85 text-base leading-relaxed">
+            <p className="text-zinc-200 text-base leading-relaxed">
               {current.raw_summary ?? "(No summary)"}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
               <Stat label="Jobs" value={current.job_count?.toString() ?? "0"} />
-              <Stat label="Invoiced" value={`$${Number(current.total_billed ?? 0).toLocaleString()}`} />
-              <Stat label="Collected" value={`$${Number(current.total_collected ?? 0).toLocaleString()}`} />
+              <Stat
+                label="Invoiced"
+                value={`$${Number(current.total_billed ?? 0).toLocaleString()}`}
+              />
+              <Stat
+                label="Collected"
+                value={`$${Number(current.total_collected ?? 0).toLocaleString()}`}
+              />
               <Stat
                 label="Cash %"
                 value={
@@ -78,85 +95,115 @@ export default async function SolomonPage() {
                 }
               />
             </div>
-          </Glass>
+          </section>
 
           {/* Insights */}
-          <Band label="Insights">
-            {((current.insights ?? []) as SolomonInsight[]).map((ins, i) => (
-              <Glass key={i} className="p-4">
-                <div className="flex items-start gap-3 flex-wrap">
-                  <span
-                    className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold ${SEVERITY_BADGE[ins.severity] ?? ""}`}
-                  >
-                    {ins.severity}
-                  </span>
-                  <span className="text-white/40 text-xs">{CATEGORY_LABEL[ins.category]}</span>
-                </div>
-                <p className="text-white/95 font-medium mt-2">{ins.headline}</p>
-                <p className="text-white/70 text-sm mt-1.5">{ins.detail}</p>
-                <p className="text-[#A6B8E7] text-xs font-mono mt-2">{ins.metric}</p>
-                {ins.evidence && ins.evidence.length > 0 && (
-                  <ul className="mt-2 flex flex-col gap-1">
-                    {ins.evidence.map((e, j) => (
-                      <li key={j} className="text-white/40 text-xs flex gap-2">
-                        <span>•</span>
-                        <span>{e}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Glass>
-            ))}
-          </Band>
-
-          {/* Recommendations */}
-          <Band label="Recommendations">
-            {((current.recommendations ?? []) as SolomonRecommendation[]).map((r, i) => (
-              <Glass key={i} className="p-4">
-                <div className="flex items-start gap-3 flex-wrap">
-                  <span
-                    className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold ${PRIORITY_BADGE[r.priority] ?? ""}`}
-                  >
-                    {r.priority.replace("_", " ")}
-                  </span>
-                  {typeof r.estimated_impact_dollars === "number" && (
-                    <span className="text-emerald-300 text-xs font-mono">
-                      ~${Math.round(r.estimated_impact_dollars).toLocaleString()} impact
+          <section className="glass-card p-6">
+            <h2 className="text-white font-semibold mb-4">Insights</h2>
+            <div className="flex flex-col gap-3">
+              {((current.insights ?? []) as SolomonInsight[]).map((ins, i) => (
+                <div
+                  key={i}
+                  className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4"
+                >
+                  <div className="flex items-start gap-3 flex-wrap">
+                    <span
+                      className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold ${SEVERITY_BADGE[ins.severity] ?? ""}`}
+                    >
+                      {ins.severity}
                     </span>
+                    <span className="text-zinc-500 text-xs">
+                      {CATEGORY_LABEL[ins.category]}
+                    </span>
+                  </div>
+                  <p className="text-white font-medium mt-2">{ins.headline}</p>
+                  <p className="text-zinc-300 text-sm mt-1.5">{ins.detail}</p>
+                  <p className="text-blue-300 text-xs font-mono mt-2">
+                    {ins.metric}
+                  </p>
+                  {ins.evidence && ins.evidence.length > 0 && (
+                    <ul className="mt-2 flex flex-col gap-1">
+                      {ins.evidence.map((e, j) => (
+                        <li
+                          key={j}
+                          className="text-zinc-500 text-xs flex gap-2"
+                        >
+                          <span>•</span>
+                          <span>{e}</span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-                <p className="text-white/95 font-medium mt-2">{r.action}</p>
-                <p className="text-white/55 text-sm mt-1.5">{r.rationale}</p>
-              </Glass>
-            ))}
-          </Band>
+              ))}
+            </div>
+          </section>
+
+          {/* Recommendations */}
+          <section className="glass-card p-6">
+            <h2 className="text-white font-semibold mb-4">Recommendations</h2>
+            <div className="flex flex-col gap-3">
+              {((current.recommendations ?? []) as SolomonRecommendation[]).map(
+                (r, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4"
+                  >
+                    <div className="flex items-start gap-3 flex-wrap">
+                      <span
+                        className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold ${PRIORITY_BADGE[r.priority] ?? ""}`}
+                      >
+                        {r.priority.replace("_", " ")}
+                      </span>
+                      {typeof r.estimated_impact_dollars === "number" && (
+                        <span className="text-green-400 text-xs font-mono">
+                          ~${Math.round(r.estimated_impact_dollars).toLocaleString()} impact
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-white font-medium mt-2">{r.action}</p>
+                    <p className="text-zinc-400 text-sm mt-1.5">
+                      {r.rationale}
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
+          </section>
 
           {/* History */}
           {reports.length > 1 && (
-            <Band label="Past Reports">
-              <Glass className="p-5">
-                <ul className="flex flex-col gap-1.5">
-                  {reports.slice(1).map((r: any) => (
-                    <li key={r.id} className="text-white/45 text-xs">
-                      {new Date(r.created_at).toLocaleDateString()} · {r.window_days}d window ·{" "}
-                      {r.job_count} jobs · ${Number(r.total_billed ?? 0).toLocaleString()} billed
-                    </li>
-                  ))}
-                </ul>
-              </Glass>
-            </Band>
+            <section className="glass-card p-6">
+              <h2 className="text-white font-semibold mb-4">Past Reports</h2>
+              <ul className="flex flex-col gap-1">
+                {reports.slice(1).map((r: any) => (
+                  <li
+                    key={r.id}
+                    className="text-zinc-500 text-xs flex justify-between"
+                  >
+                    <span>
+                      {new Date(r.created_at).toLocaleDateString()} ·{" "}
+                      {r.window_days}d window · {r.job_count} jobs · $
+                      {Number(r.total_billed ?? 0).toLocaleString()} billed
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
       )}
-    </PageShell>
+    </div>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white/[0.03] border border-white/[0.05] px-4 py-3">
-      <p className="text-white/40 text-[10px] uppercase tracking-[0.15em] font-semibold">{label}</p>
-      <p className="text-white/95 text-lg font-mono mt-1">{value}</p>
+    <div className="bg-white/[0.03] rounded-lg px-4 py-3">
+      <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
+        {label}
+      </p>
+      <p className="text-white text-lg font-mono mt-1">{value}</p>
     </div>
   );
 }

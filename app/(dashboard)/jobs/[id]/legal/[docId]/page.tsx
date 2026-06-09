@@ -6,7 +6,6 @@ import {
   type LegalDocStatus,
 } from "@/lib/esquire-types";
 import LegalDocActions from "./LegalDocActions";
-import { Glass } from "@/components/ui/Glass";
 
 // Always force dynamic — never cache the doc page. After approval/discard
 // the same URL must reflect the new state immediately.
@@ -76,36 +75,38 @@ export default async function LegalDocPage({
       <div className="p-4 md:p-8 max-w-3xl">
         <Link
           href={`/jobs/${jobId}`}
-          className="text-white/40 hover:text-white text-sm transition-colors"
+          className="text-zinc-500 hover:text-white text-sm transition-colors"
         >
           ← Back to job
         </Link>
-        <Glass className="mt-6 p-8">
-          <h1 className="text-xl font-bold text-white/95">Document not found</h1>
-          <p className="text-white/45 text-sm mt-2 leading-relaxed">
+        <div className="mt-6 glass-card p-8">
+          <h1 className="text-xl font-bold text-white">Document not found</h1>
+          <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
             This document was discarded or never existed. If a legal document
             was already approved, sent, or signed, it cannot be deleted —
             those records stay on the job permanently. If you discarded a draft
             and need a new one, generate a fresh draft from the job's Esquire
             panel.
           </p>
-          <p className="text-white/30 text-[11px] font-mono mt-3">doc id: {docId}</p>
+          <p className="text-zinc-600 text-[11px] font-mono mt-3">
+            doc id: {docId}
+          </p>
           {jobId && (
             <Link
               href={`/jobs/${jobId}`}
-              className="inline-block mt-5 px-4 py-2 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium rounded-lg hover:opacity-95 transition-opacity"
+              className="inline-block mt-5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg"
             >
               Open the job
             </Link>
           )}
-        </Glass>
+        </div>
       </div>
     );
   }
   if (!job) {
     return (
       <div className="p-4 md:p-8 max-w-3xl">
-        <p className="text-white/45 text-sm">Job not found.</p>
+        <p className="text-zinc-400 text-sm">Job not found.</p>
       </div>
     );
   }
@@ -123,12 +124,12 @@ export default async function LegalDocPage({
       <div className="mb-4 no-print">
         <Link
           href={`/jobs/${jobId}`}
-          className="text-white/40 hover:text-white text-sm transition-colors"
+          className="text-zinc-500 hover:text-white text-sm transition-colors"
         >
           ← Job {job.job_number}
         </Link>
         <div className="flex items-center gap-3 mt-2 flex-wrap">
-          <h1 className="text-2xl font-semibold tracking-tight text-white/95">
+          <h1 className="text-2xl font-bold text-white">
             {meta?.label ?? doc.doc_type}
           </h1>
           <span
@@ -137,7 +138,7 @@ export default async function LegalDocPage({
             {doc.status}
           </span>
         </div>
-        <p className="text-white/40 text-xs mt-1">
+        <p className="text-zinc-500 text-xs mt-1">
           Generated {new Date(doc.created_at).toLocaleString()}
           {doc.approved_at && ` · approved ${new Date(doc.approved_at).toLocaleString()}`}
           {doc.sent_at && ` · sent to ${doc.sent_to ?? "(unknown)"} ${new Date(doc.sent_at).toLocaleString()}`}

@@ -2,16 +2,12 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
-import { PageShell, Glass } from "@/components/ui/Glass";
 
 const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
 const NDAYS_AGO = (n: number) =>
   new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
-
-const subReportLink =
-  "inline-flex items-center gap-1.5 text-[#A8DCD3] hover:text-white text-xs transition-colors";
 
 export default async function ReportsPage({
   searchParams,
@@ -71,15 +67,27 @@ export default async function ReportsPage({
   // ─── Top KPIs ─────────────────────────────────────────────────────
   const jobsCreated = jobsInWindow?.length ?? 0;
   const callsTaken = callsInWindow?.length ?? 0;
-  const jobsCompletedInWindow = (jobsInWindow ?? []).filter((j) => j.status === "completed").length;
+  const jobsCompletedInWindow = (jobsInWindow ?? []).filter(
+    (j) => j.status === "completed"
+  ).length;
 
-  const advancedStatuses = new Set(["mitigation", "drying", "reconstruction", "completed"]);
-  const advanced = (jobsInWindow ?? []).filter((j) => advancedStatuses.has(j.status)).length;
-  const conversionPct = jobsCreated > 0 ? Math.round((advanced / jobsCreated) * 100) : 0;
+  const advancedStatuses = new Set([
+    "mitigation",
+    "drying",
+    "reconstruction",
+    "completed",
+  ]);
+  const advanced = (jobsInWindow ?? []).filter((j) =>
+    advancedStatuses.has(j.status)
+  ).length;
+  const conversionPct =
+    jobsCreated > 0 ? Math.round((advanced / jobsCreated) * 100) : 0;
 
   // Average lead → mitigation time (hours)
   // Best-effort: use updated_at as proxy for "moved to mitigation"; honest about its weakness
-  const advancedJobsWithCreated = (jobsInWindow ?? []).filter((j) => advancedStatuses.has(j.status));
+  const advancedJobsWithCreated = (jobsInWindow ?? []).filter((j) =>
+    advancedStatuses.has(j.status)
+  );
   const avgCycleHours =
     advancedJobsWithCreated.length > 0
       ? Math.round(
@@ -93,8 +101,14 @@ export default async function ReportsPage({
 
   // ─── Revenue ─────────────────────────────────────────────────────
   const allInvoices = (invoicesAll ?? []).map((inv: any) => {
-    const total = (inv.line_items ?? []).reduce((s: number, li: any) => s + Number(li.line_total ?? 0), 0);
-    const paid = (inv.payments ?? []).reduce((s: number, p: any) => s + Number(p.amount), 0);
+    const total = (inv.line_items ?? []).reduce(
+      (s: number, li: any) => s + Number(li.line_total ?? 0),
+      0
+    );
+    const paid = (inv.payments ?? []).reduce(
+      (s: number, p: any) => s + Number(p.amount),
+      0
+    );
     return { ...inv, total, paid, balance: total - paid };
   });
 
@@ -102,7 +116,10 @@ export default async function ReportsPage({
     .filter((i) => i.sent_at && new Date(i.sent_at) >= new Date(since))
     .reduce((s, i) => s + i.total, 0);
 
-  const collected30 = (payments30 ?? []).reduce((s, p) => s + Number(p.amount), 0);
+  const collected30 = (payments30 ?? []).reduce(
+    (s, p) => s + Number(p.amount),
+    0
+  );
 
   const openAR = allInvoices
     .filter((i) => i.status !== "paid" && i.status !== "void" && i.sent_at)
@@ -112,51 +129,71 @@ export default async function ReportsPage({
   const estimateTotals = (estimatesInWindow ?? [])
     .map(
       (e: any) =>
-        (e.line_items ?? []).reduce((s: number, li: any) => s + Number(li.line_total ?? 0), 0) as number
+        (e.line_items ?? []).reduce(
+          (s: number, li: any) => s + Number(li.line_total ?? 0),
+          0
+        ) as number
     )
     .filter((t) => t > 0);
   const avgEstimate =
-    estimateTotals.length > 0 ? estimateTotals.reduce((s, v) => s + v, 0) / estimateTotals.length : 0;
+    estimateTotals.length > 0
+      ? estimateTotals.reduce((s, v) => s + v, 0) / estimateTotals.length
+      : 0;
 
   // ─── Jobs by Type ─────────────────────────────────────────────────
-  const byType = (jobsInWindow ?? []).reduce((acc: Record<string, number>, j) => {
-    acc[j.type ?? "other"] = (acc[j.type ?? "other"] ?? 0) + 1;
-    return acc;
-  }, {});
+  const byType = (jobsInWindow ?? []).reduce(
+    (acc: Record<string, number>, j) => {
+      acc[j.type ?? "other"] = (acc[j.type ?? "other"] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
   // ─── Caller Type breakdown (partner vs customer) ─────────────────
-  const byCaller = (callsInWindow ?? []).reduce((acc: Record<string, number>, c) => {
-    acc[c.caller_type ?? "customer"] = (acc[c.caller_type ?? "customer"] ?? 0) + 1;
-    return acc;
-  }, {});
+  const byCaller = (callsInWindow ?? []).reduce(
+    (acc: Record<string, number>, c) => {
+      acc[c.caller_type ?? "customer"] = (acc[c.caller_type ?? "customer"] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
   // ─── Top Zip Codes ─────────────────────────────────────────────────
-  const zipCounts = (jobsInWindow ?? []).reduce((acc: Record<string, number>, j) => {
-    const z = j.site_zip ?? "—";
-    acc[z] = (acc[z] ?? 0) + 1;
-    return acc;
-  }, {});
+  const zipCounts = (jobsInWindow ?? []).reduce(
+    (acc: Record<string, number>, j) => {
+      const z = j.site_zip ?? "—";
+      acc[z] = (acc[z] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
   const topZips = Object.entries(zipCounts)
     .filter(([z]) => z !== "—")
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
   // ─── Top Carriers ─────────────────────────────────────────────────
-  const carrierCounts = (jobsInWindow ?? []).reduce((acc: Record<string, number>, j: any) => {
-    const c = j.customers?.insurance_company ?? "—";
-    acc[c] = (acc[c] ?? 0) + 1;
-    return acc;
-  }, {});
+  const carrierCounts = (jobsInWindow ?? []).reduce(
+    (acc: Record<string, number>, j: any) => {
+      const c = j.customers?.insurance_company ?? "—";
+      acc[c] = (acc[c] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
   const topCarriers = Object.entries(carrierCounts)
     .filter(([c]) => c !== "—")
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
   // ─── Pipeline snapshot (current) ─────────────────────────────────
-  const pipelineCounts = (allJobs ?? []).reduce((acc: Record<string, number>, j) => {
-    acc[j.status] = (acc[j.status] ?? 0) + 1;
-    return acc;
-  }, {});
+  const pipelineCounts = (allJobs ?? []).reduce(
+    (acc: Record<string, number>, j) => {
+      acc[j.status] = (acc[j.status] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
   const pipelineOrder = [
     "lead",
     "inspection",
@@ -175,60 +212,82 @@ export default async function ReportsPage({
   ];
 
   return (
-    <PageShell
-      eyebrow="P&L · Tech · Adjusters"
-      title="Reports"
-      subtitle={
-        <>
-          Operational + financial KPIs over the last {windowDays} days.
-          <span className="flex items-center gap-3 mt-2 flex-wrap">
-            <Link href="/reports/adjusters" className={subReportLink}>
+    <div className="p-4 md:p-8">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Reports</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">
+            Operational + financial KPIs over the last {windowDays} days.
+          </p>
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <Link
+              href="/reports/adjusters"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
               ⚖️ Adjuster Scoring →
             </Link>
-            <Link href="/reports/job-economics" className={subReportLink}>
+            <Link
+              href="/reports/job-economics"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
               💰 Job Economics →
             </Link>
-            <Link href="/reports/tech-performance" className={subReportLink}>
+            <Link
+              href="/reports/tech-performance"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
               👷 Tech Performance →
             </Link>
-            <Link href="/reports/quickbooks" className={subReportLink}>
+            <Link
+              href="/reports/quickbooks"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs"
+            >
               📤 QuickBooks Export →
             </Link>
-          </span>
-        </>
-      }
-      action={
-        <div className="flex items-center gap-1.5">
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
           {windowOptions.map((opt) => (
             <Link
               key={opt.d}
               href={`/reports?window=${opt.d}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 windowDays === opt.d
-                  ? "bg-white/[0.08] text-white ring-1 ring-[#5FBDB0]/20"
-                  : "border border-white/[0.08] text-white/45 hover:bg-white/[0.05] hover:text-white"
+                  ? "bg-blue-600 text-white"
+                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
               }`}
             >
               {opt.label}
             </Link>
           ))}
         </div>
-      }
-      width="wide"
-    >
+      </div>
+
       {/* Top KPI strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <KPI label="Calls Taken" value={callsTaken} />
         <KPI label="Jobs Created" value={jobsCreated} />
-        <KPI label="Lead → Mitigation+" value={`${conversionPct}%`} secondary={`${advanced} of ${jobsCreated}`} />
-        <KPI label="Avg Cycle" value={avgCycleHours > 0 ? `${avgCycleHours}h` : "—"} secondary="lead → mitigation+" />
+        <KPI
+          label="Lead → Mitigation+"
+          value={`${conversionPct}%`}
+          secondary={`${advanced} of ${jobsCreated}`}
+        />
+        <KPI
+          label="Avg Cycle"
+          value={avgCycleHours > 0 ? `${avgCycleHours}h` : "—"}
+          secondary="lead → mitigation+"
+        />
       </section>
 
       {/* Money strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <KPI label="Billed" value={fmt(billedInWindow)} secondary={`last ${windowDays}d`} accent="blue" />
         <KPI label="Collected" value={fmt(collected30)} secondary="last 30d" accent="green" />
-        <KPI label="Avg Estimate" value={fmt(avgEstimate)} secondary={`${estimateTotals.length} estimates`} />
+        <KPI
+          label="Avg Estimate"
+          value={fmt(avgEstimate)}
+          secondary={`${estimateTotals.length} estimates`}
+        />
         <KPI label="Open AR" value={fmt(openAR)} secondary="all-time, sent only" accent="amber" />
       </section>
 
@@ -241,7 +300,14 @@ export default async function ReportsPage({
               const count = pipelineCounts[s] ?? 0;
               const total = (allJobs ?? []).length;
               const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-              return <BarRow key={s} label={s.replace(/_/g, " ")} count={count} pct={pct} />;
+              return (
+                <BarRow
+                  key={s}
+                  label={s.replace(/_/g, " ")}
+                  count={count}
+                  pct={pct}
+                />
+              );
             })}
         </Section>
 
@@ -250,8 +316,11 @@ export default async function ReportsPage({
           {Object.entries(byType)
             .sort((a, b) => b[1] - a[1])
             .map(([type, count]) => {
-              const pct = jobsCreated > 0 ? Math.round((count / jobsCreated) * 100) : 0;
-              return <BarRow key={type} label={type} count={count} pct={pct} />;
+              const pct =
+                jobsCreated > 0 ? Math.round((count / jobsCreated) * 100) : 0;
+              return (
+                <BarRow key={type} label={type} count={count} pct={pct} />
+              );
             })}
           {Object.keys(byType).length === 0 && <Empty />}
         </Section>
@@ -261,8 +330,11 @@ export default async function ReportsPage({
           {Object.entries(byCaller)
             .sort((a, b) => b[1] - a[1])
             .map(([caller, count]) => {
-              const pct = callsTaken > 0 ? Math.round((count / callsTaken) * 100) : 0;
-              return <BarRow key={caller} label={caller} count={count} pct={pct} />;
+              const pct =
+                callsTaken > 0 ? Math.round((count / callsTaken) * 100) : 0;
+              return (
+                <BarRow key={caller} label={caller} count={count} pct={pct} />
+              );
             })}
           {Object.keys(byCaller).length === 0 && <Empty />}
         </Section>
@@ -273,9 +345,12 @@ export default async function ReportsPage({
             <Empty />
           ) : (
             topZips.map(([zip, count]) => (
-              <div key={zip} className="flex items-center justify-between py-1.5 text-sm">
-                <span className="text-white/85 font-mono">{zip}</span>
-                <span className="text-white/40 text-xs">
+              <div
+                key={zip}
+                className="flex items-center justify-between py-1.5 text-sm"
+              >
+                <span className="text-zinc-200 font-mono">{zip}</span>
+                <span className="text-zinc-400 text-xs">
                   {count} {count === 1 ? "job" : "jobs"}
                 </span>
               </div>
@@ -289,9 +364,12 @@ export default async function ReportsPage({
             <Empty />
           ) : (
             topCarriers.map(([carrier, count]) => (
-              <div key={carrier} className="flex items-center justify-between py-1.5 text-sm">
-                <span className="text-white/85 truncate pr-2">{carrier}</span>
-                <span className="text-white/40 text-xs whitespace-nowrap">
+              <div
+                key={carrier}
+                className="flex items-center justify-between py-1.5 text-sm"
+              >
+                <span className="text-zinc-200 truncate pr-2">{carrier}</span>
+                <span className="text-zinc-400 text-xs whitespace-nowrap">
                   {count} {count === 1 ? "job" : "jobs"}
                 </span>
               </div>
@@ -301,30 +379,37 @@ export default async function ReportsPage({
 
         {/* Completion */}
         <Section title="Completed Jobs" subtitle={`Last ${windowDays}d`}>
-          <p className="text-3xl font-bold text-white/95 font-mono">{jobsCompletedInWindow}</p>
-          <p className="text-white/40 text-xs mt-1">
+          <p className="text-3xl font-bold text-white font-mono">
+            {jobsCompletedInWindow}
+          </p>
+          <p className="text-zinc-500 text-xs mt-1">
             of {jobsCreated} created in window ·{" "}
-            {jobsCreated > 0 ? Math.round((jobsCompletedInWindow / jobsCreated) * 100) : 0}% completion rate
+            {jobsCreated > 0
+              ? Math.round((jobsCompletedInWindow / jobsCreated) * 100)
+              : 0}
+            % completion rate
           </p>
         </Section>
       </div>
 
       {/* Honesty footer */}
-      <Glass level="shadow" className="mt-8 p-4 text-white/50 text-xs leading-relaxed">
-        <p className="text-white/80 text-sm font-semibold mb-1">Notes on the numbers</p>
+      <div className="mt-8 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
+        <p className="text-zinc-300 text-sm font-semibold mb-1">
+          Notes on the numbers
+        </p>
         <p>
-          &ldquo;Avg Cycle&rdquo; uses <code className="text-white/75">created_at</code> →{" "}
-          <code className="text-white/75">updated_at</code> on jobs that reached mitigation+, which is a
-          rough proxy. Once we track explicit status-change timestamps it&apos;ll get more precise.
-          &ldquo;Billed&rdquo; / &ldquo;Collected&rdquo; only count invoices/payments after the Abacus
-          migration ran. AR aging detail lives at{" "}
-          <Link href="/ar" className="text-[#A8DCD3] hover:text-white transition-colors">
+          "Avg Cycle" uses <code className="text-zinc-300">created_at</code> →{" "}
+          <code className="text-zinc-300">updated_at</code> on jobs that reached
+          mitigation+, which is a rough proxy. Once we track explicit status-change
+          timestamps it'll get more precise. "Billed" / "Collected" only count
+          invoices/payments after the Abacus migration ran. AR aging detail lives at{" "}
+          <Link href="/ar" className="text-blue-400 hover:underline">
             /ar
           </Link>
           .
         </p>
-      </Glass>
-    </PageShell>
+      </div>
+    </div>
   );
 }
 
@@ -341,18 +426,20 @@ function KPI({
 }) {
   const accentColor = accent
     ? {
-        blue: "text-[#A6B8E7]",
-        green: "text-emerald-300",
-        amber: "text-amber-300",
+        blue: "text-blue-400",
+        green: "text-green-400",
+        amber: "text-amber-400",
         red: "text-red-400",
       }[accent]
-    : "text-white/95";
+    : "text-white";
   return (
-    <Glass className="p-4">
-      <p className="text-white/40 text-[10px] uppercase tracking-[0.15em]">{label}</p>
+    <div className="glass-card p-4">
+      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-3xl font-bold mt-1 ${accentColor}`}>{value}</p>
-      {secondary && <p className="text-white/40 text-xs mt-1">{secondary}</p>}
-    </Glass>
+      {secondary && (
+        <p className="text-zinc-500 text-xs mt-1">{secondary}</p>
+      )}
+    </div>
   );
 }
 
@@ -366,28 +453,36 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <Glass className="p-5">
+    <section className="glass-card p-5">
       <div className="mb-3">
-        <h3 className="text-white/95 font-semibold text-sm">{title}</h3>
-        {subtitle && <p className="text-white/40 text-xs">{subtitle}</p>}
+        <h3 className="text-white font-semibold text-sm">{title}</h3>
+        {subtitle && <p className="text-zinc-500 text-xs">{subtitle}</p>}
       </div>
       <div>{children}</div>
-    </Glass>
+    </section>
   );
 }
 
-function BarRow({ label, count, pct }: { label: string; count: number; pct: number }) {
+function BarRow({
+  label,
+  count,
+  pct,
+}: {
+  label: string;
+  count: number;
+  pct: number;
+}) {
   return (
     <div className="py-1.5">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-white/80 text-sm capitalize">{label}</span>
-        <span className="text-white/40 text-xs font-mono">
+        <span className="text-zinc-300 text-sm capitalize">{label}</span>
+        <span className="text-zinc-400 text-xs font-mono">
           {count} · {pct}%
         </span>
       </div>
-      <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-[#6B8AD9] to-[#5FBDB0] transition-all"
+          className="h-full bg-blue-500 transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -396,5 +491,5 @@ function BarRow({ label, count, pct }: { label: string; count: number; pct: numb
 }
 
 function Empty() {
-  return <p className="text-white/30 text-xs italic">No data in this window.</p>;
+  return <p className="text-zinc-600 text-xs italic">No data in this window.</p>;
 }

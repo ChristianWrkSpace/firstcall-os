@@ -2,7 +2,6 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
-import { PageShell, Glass } from "@/components/ui/Glass";
 
 const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -35,11 +34,11 @@ function gradeCarrier(row: Omit<CarrierRow, "grade">): Grade {
 }
 
 const GRADE_COLORS: Record<Grade, string> = {
-  A: "bg-emerald-400/15 text-emerald-300 border-emerald-400/40",
-  B: "bg-[#6B8AD9]/15 text-[#A6B8E7] border-[#6B8AD9]/40",
-  C: "bg-amber-400/15 text-amber-300 border-amber-400/40",
-  F: "bg-red-400/15 text-red-300 border-red-400/40",
-  "—": "bg-white/5 text-white/35 border-white/10",
+  A: "bg-green-500/20 text-green-300 border-green-500/40",
+  B: "bg-blue-500/20 text-blue-300 border-blue-500/40",
+  C: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
+  F: "bg-red-500/20 text-red-300 border-red-500/40",
+  "—": "bg-zinc-800 text-zinc-500 border-zinc-700",
 };
 
 export default async function AdjusterScoringPage() {
@@ -222,20 +221,20 @@ export default async function AdjusterScoringPage() {
   }
 
   return (
-    <PageShell
-      eyebrow="Reports"
-      title="Adjuster Scoring"
-      subtitle="How fast each carrier pays. Grade them, prioritize the As, escalate the Fs."
-      action={
+    <div className="p-4 md:p-8">
+      <div className="mb-6">
         <Link
           href="/reports"
-          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
+          className="text-zinc-500 hover:text-white text-sm transition-colors"
         >
           ← Reports
         </Link>
-      }
-      width="full"
-    >
+        <h1 className="text-2xl font-bold text-white mt-2">Adjuster Scoring</h1>
+        <p className="text-zinc-400 text-sm mt-0.5">
+          How fast each carrier pays. Grade them, prioritize the As, escalate the Fs.
+        </p>
+      </div>
+
       {/* Portfolio summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Tile
@@ -253,14 +252,14 @@ export default async function AdjusterScoringPage() {
           }
           color={
             overallCollectionRate != null && overallCollectionRate < 0.85
-              ? "text-amber-300"
-              : "text-white/95"
+              ? "text-yellow-400"
+              : "text-white"
           }
         />
         <Tile
           label="Open Balance"
           value={fmt(portfolioOpen)}
-          color={portfolioOpen > 0 ? "text-amber-300" : "text-white/95"}
+          color={portfolioOpen > 0 ? "text-yellow-400" : "text-white"}
           sub={portfolioOpen > 0 ? "still owed" : "all caught up"}
         />
         <Tile
@@ -269,46 +268,53 @@ export default async function AdjusterScoringPage() {
           sub="paid invoices only"
           color={
             weightedDso > 60
-              ? "text-red-300"
+              ? "text-red-400"
               : weightedDso > 30
-                ? "text-amber-300"
-                : "text-emerald-300"
+                ? "text-yellow-400"
+                : "text-green-400"
           }
         />
       </div>
 
       {/* Top Issues — what to act on right now */}
       {issues.length > 0 && (
-        <Glass accent="amber" subtle className="p-4 mb-6">
-          <p className="text-amber-300 text-xs uppercase tracking-wide font-semibold mb-2">
+        <div className="bg-yellow-500/5 border border-yellow-500/30 rounded-xl p-4 mb-6">
+          <p className="text-yellow-300 text-xs uppercase tracking-wide font-semibold mb-2">
             🔥 Top Issues — act on these first
           </p>
           <ul className="space-y-1.5">
             {issues.map((i, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <span className={i.severity === "high" ? "text-red-300" : "text-amber-300"}>
+              <li
+                key={idx}
+                className="flex items-start gap-2 text-sm"
+              >
+                <span
+                  className={
+                    i.severity === "high" ? "text-red-400" : "text-yellow-400"
+                  }
+                >
                   ●
                 </span>
-                <span className="text-white/80">
+                <span className="text-zinc-200">
                   <span className="font-semibold">{i.carrier}</span>
-                  <span className="text-white/45"> — {i.detail}</span>
+                  <span className="text-zinc-400"> — {i.detail}</span>
                 </span>
               </li>
             ))}
           </ul>
-        </Glass>
+        </div>
       )}
 
       {/* Per-carrier table */}
-      <Glass className="overflow-x-auto">
+      <div className="glass-card overflow-x-auto">
         {rows.length === 0 ? (
-          <div className="px-5 py-10 text-center text-white/40 text-sm">
+          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
             No invoiced carriers yet. Send some invoices and check back.
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-white/40 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-4 py-3 text-left">Carrier</th>
                 <th className="px-4 py-3 text-center">Grade</th>
                 <th className="px-4 py-3 text-right">Jobs</th>
@@ -324,28 +330,30 @@ export default async function AdjusterScoringPage() {
               {rows.map((r) => {
                 const dsoColor =
                   r.avgDsoDays == null
-                    ? "text-white/35"
+                    ? "text-zinc-500"
                     : r.avgDsoDays > 60
-                      ? "text-red-300"
+                      ? "text-red-400"
                       : r.avgDsoDays > 30
-                        ? "text-amber-300"
-                        : "text-emerald-300";
+                        ? "text-yellow-400"
+                        : "text-green-400";
                 const rateColor =
                   r.collectionRate == null
-                    ? "text-white/35"
+                    ? "text-zinc-500"
                     : r.collectionRate >= 0.95
-                      ? "text-emerald-300"
+                      ? "text-green-400"
                       : r.collectionRate >= 0.85
-                        ? "text-[#A6B8E7]"
+                        ? "text-blue-400"
                         : r.collectionRate >= 0.70
-                          ? "text-amber-300"
-                          : "text-red-300";
+                          ? "text-yellow-400"
+                          : "text-red-400";
                 return (
                   <tr
                     key={r.carrier}
                     className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
                   >
-                    <td className="px-4 py-3 text-white/90 font-medium">{r.carrier}</td>
+                    <td className="px-4 py-3 text-white font-medium">
+                      {r.carrier}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`inline-flex items-center justify-center w-7 h-7 rounded-full border text-xs font-bold ${GRADE_COLORS[r.grade]}`}
@@ -358,24 +366,28 @@ export default async function AdjusterScoringPage() {
                         {r.grade}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-white/70 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
                       {r.jobsCount}
                     </td>
-                    <td className="px-4 py-3 text-right text-white/90 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-white font-mono text-xs">
                       {fmt(r.totalBilled)}
                     </td>
-                    <td className="px-4 py-3 text-right text-white/70 font-mono text-xs">
+                    <td className="px-4 py-3 text-right text-zinc-300 font-mono text-xs">
                       {fmt(r.totalCollected)}
                     </td>
                     <td
-                      className={`px-4 py-3 text-right font-mono text-xs ${r.openBalance > 0 ? "text-amber-300" : "text-white/35"}`}
+                      className={`px-4 py-3 text-right font-mono text-xs ${r.openBalance > 0 ? "text-yellow-400" : "text-zinc-500"}`}
                     >
                       {r.openBalance > 0 ? fmt(r.openBalance) : "—"}
                     </td>
-                    <td className={`px-4 py-3 text-right font-mono text-xs ${dsoColor}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-mono text-xs ${dsoColor}`}
+                    >
                       {r.avgDsoDays != null ? `${Math.round(r.avgDsoDays)}d` : "—"}
                     </td>
-                    <td className={`px-4 py-3 text-right font-mono text-xs ${rateColor}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-mono text-xs ${rateColor}`}
+                    >
                       {r.collectionRate != null
                         ? `${(r.collectionRate * 100).toFixed(0)}%`
                         : "—"}
@@ -383,14 +395,14 @@ export default async function AdjusterScoringPage() {
                     <td
                       className={`px-4 py-3 text-right font-mono text-xs ${
                         r.oldestUnpaidDays == null
-                          ? "text-white/35"
+                          ? "text-zinc-500"
                           : r.oldestUnpaidDays > 90
-                            ? "text-red-300"
+                            ? "text-red-400"
                             : r.oldestUnpaidDays > 60
-                              ? "text-orange-300"
+                              ? "text-orange-400"
                               : r.oldestUnpaidDays > 30
-                                ? "text-amber-300"
-                                : "text-white/45"
+                                ? "text-yellow-400"
+                                : "text-zinc-400"
                       }`}
                     >
                       {r.oldestUnpaidDays != null ? `${r.oldestUnpaidDays}d` : "—"}
@@ -401,25 +413,25 @@ export default async function AdjusterScoringPage() {
             </tbody>
           </table>
         )}
-      </Glass>
+      </div>
 
       {/* Grading legend */}
-      <Glass subtle className="mt-6 p-4 text-white/40 text-xs leading-relaxed">
-        <p className="text-white/70 text-sm font-semibold mb-2">How carriers are graded</p>
+      <div className="mt-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
+        <p className="text-zinc-300 text-sm font-semibold mb-2">How carriers are graded</p>
         <ul className="space-y-1">
-          <li><span className="text-emerald-300 font-mono">A</span> — Avg DSO ≤ 30 days AND ≥ 95% collected. Prioritize these claims.</li>
-          <li><span className="text-[#A6B8E7] font-mono">B</span> — Avg DSO ≤ 60 days AND ≥ 85% collected. Solid carrier.</li>
-          <li><span className="text-amber-300 font-mono">C</span> — Avg DSO ≤ 90 days AND ≥ 70% collected. Watch for slippage.</li>
-          <li><span className="text-red-300 font-mono">F</span> — Worse than C on either dimension. Esquire demand letter territory.</li>
-          <li><span className="text-white/35 font-mono">—</span> — Not enough fully-paid invoices yet to grade.</li>
+          <li><span className="text-green-400 font-mono">A</span> — Avg DSO ≤ 30 days AND ≥ 95% collected. Prioritize these claims.</li>
+          <li><span className="text-blue-400 font-mono">B</span> — Avg DSO ≤ 60 days AND ≥ 85% collected. Solid carrier.</li>
+          <li><span className="text-yellow-400 font-mono">C</span> — Avg DSO ≤ 90 days AND ≥ 70% collected. Watch for slippage.</li>
+          <li><span className="text-red-400 font-mono">F</span> — Worse than C on either dimension. Esquire demand letter territory.</li>
+          <li><span className="text-zinc-500 font-mono">—</span> — Not enough fully-paid invoices yet to grade.</li>
         </ul>
         <p className="mt-3">
           DSO (Days Sales Outstanding) is computed only over fully-paid invoices —
           partial pays sit in "Open Balance" until cleared. Voided invoices excluded.
-          Drafts (no <code className="text-white/70 bg-white/10 px-1 rounded">sent_at</code>) excluded.
+          Drafts (no <code className="text-zinc-300 bg-zinc-800 px-1 rounded">sent_at</code>) excluded.
         </p>
-      </Glass>
-    </PageShell>
+      </div>
+    </div>
   );
 }
 
@@ -427,7 +439,7 @@ function Tile({
   label,
   value,
   sub,
-  color = "text-white/95",
+  color = "text-white",
 }: {
   label: string;
   value: string;
@@ -435,10 +447,10 @@ function Tile({
   color?: string;
 }) {
   return (
-    <Glass className="p-4">
-      <p className="text-white/40 text-xs uppercase tracking-wide">{label}</p>
+    <div className="glass-card p-4">
+      <p className="text-zinc-500 text-xs uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
-      {sub && <p className="text-white/40 text-xs mt-1">{sub}</p>}
-    </Glass>
+      {sub && <p className="text-zinc-500 text-xs mt-1">{sub}</p>}
+    </div>
   );
 }

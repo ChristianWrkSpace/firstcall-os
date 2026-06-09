@@ -413,8 +413,8 @@ export default function HelpPage() {
         <div className="flex flex-col items-start gap-4">
           <Logo variant="banner" size={48} priority />
           <div>
-            <h1 className="text-3xl font-bold text-white/95">Welcome to FirstCall OS</h1>
-            <p className="text-white/55 mt-1 max-w-2xl">
+            <h1 className="text-3xl font-bold text-white">Welcome to FirstCall OS</h1>
+            <p className="text-zinc-400 mt-1 max-w-2xl">
               Everything you need to run First Call Mitigation in one place — from
               the moment the phone rings to the final payment. AI agents handle the
               boring admin so the field crew can focus on the work.
@@ -424,12 +424,14 @@ export default function HelpPage() {
       </section>
 
       {/* Brand-new? Start here */}
-      <section className="mb-8 bg-[#6B8AD9]/[0.06] border border-[#6B8AD9]/20 rounded-xl p-6">
-        <p className="text-[#A6B8E7] text-xs uppercase tracking-wide font-semibold mb-2">
+      <section className="mb-8 bg-blue-500/5 border border-blue-500/20 rounded-xl p-6">
+        <p className="text-blue-300 text-xs uppercase tracking-wide font-semibold mb-2">
           New here? Read this first.
         </p>
-        <h2 className="text-xl font-bold text-white/95 mb-3">The 30-second mental model</h2>
-        <ol className="flex flex-col gap-2 text-sm text-white/70 list-decimal list-inside leading-relaxed">
+        <h2 className="text-xl font-bold text-white mb-3">
+          The 30-second mental model
+        </h2>
+        <ol className="flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside leading-relaxed">
           <li>
             <strong className="text-white">Every customer call becomes a Job.</strong>{" "}
             Either Athena makes it for you (record the call), or you click 'New Job' yourself.
@@ -455,25 +457,28 @@ export default function HelpPage() {
       </section>
 
       {/* What's new — recent shipped work, in plain English */}
-      <section className="mb-8 bg-emerald-400/[0.06] border border-emerald-400/20 rounded-xl p-6">
+      <section className="mb-8 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
         <p className="text-emerald-300 text-xs uppercase tracking-wide font-semibold mb-2">
           What's new — May 5, 2026
         </p>
-        <h2 className="text-xl font-bold text-white/95 mb-3">
+        <h2 className="text-xl font-bold text-white mb-3">
           Pricing got more honest, AI got more flexible
         </h2>
-        <ul className="flex flex-col gap-3 text-sm text-white/70 leading-relaxed">
+        <ul className="flex flex-col gap-3 text-sm text-zinc-300 leading-relaxed">
           <li>
             <strong className="text-white">📒 Estimates stop drifting.</strong>{" "}
             Ledger now uses a reviewed Xactimate price book as the source of truth.
             Every line gets tagged{" "}
-            <span className="text-emerald-300 font-semibold">book</span> (price came
+            <span className="text-green-400 font-semibold">book</span> (price came
             from your reviewed list) or{" "}
-            <span className="text-amber-300 font-semibold">guess</span> (AI invented
+            <span className="text-yellow-400 font-semibold">guess</span> (AI invented
             it). A panel at the top of every estimate tells you exactly how much of
             the total is anchored vs guessed — so you know which lines to scrutinize
             before clicking send.{" "}
-            <Link href="/settings/price-book" className="text-[#A6B8E7] hover:text-white transition-colors">
+            <Link
+              href="/settings/price-book"
+              className="text-blue-400 hover:underline"
+            >
               Manage the book →
             </Link>
           </li>
@@ -486,12 +491,15 @@ export default function HelpPage() {
           <li>
             <strong className="text-white">⚡ Any agent can be swapped to a cheaper model — no redeploy.</strong>{" "}
             Set an env var like{" "}
-            <code className="text-[#A6B8E7] bg-[#6B8AD9]/10 px-1 rounded text-xs">
+            <code className="text-blue-300 bg-blue-500/10 px-1 rounded text-xs">
               MODEL_HUNTER=deepseek/deepseek-v3
             </code>{" "}
             and Hunter routes through DeepSeek (5–15× cheaper for cold-email
             drafts). Already live for Hunter today.{" "}
-            <Link href="/settings/ai-routing" className="text-[#A6B8E7] hover:text-white transition-colors">
+            <Link
+              href="/settings/ai-routing"
+              className="text-blue-400 hover:underline"
+            >
               See routing →
             </Link>
           </li>
@@ -511,7 +519,7 @@ export default function HelpPage() {
 
       {/* How it fits together */}
       <Section title="How everything fits together">
-        <p className="text-white/70 leading-relaxed">
+        <p className="text-zinc-300 leading-relaxed">
           Think of this as a circular org chart, not a pyramid.{" "}
           <strong className="text-white">You and your team</strong> are at the
           edge — making decisions, handling emergencies, building relationships.{" "}
@@ -520,7 +528,7 @@ export default function HelpPage() {
           reading, and dollar so nothing falls through the cracks. Each AI
           agent handles one slice of the boring admin work.
         </p>
-        <div className="mt-4 bg-white/[0.03] border border-white/[0.08] rounded-lg p-4 text-sm text-white/70 leading-relaxed">
+        <div className="mt-4 bg-white/[0.03] border border-zinc-700 rounded-lg p-4 text-sm text-zinc-300 leading-relaxed">
           <p>
             <strong className="text-white">The daily flow:</strong> Athena
             picks up the call → Argus scopes the damage → Ledger prices it →
@@ -539,16 +547,18 @@ export default function HelpPage() {
             <Link
               key={a.name}
               href={a.href}
-              className="bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] rounded-xl p-5 transition-colors flex flex-col"
+              className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 transition-colors flex flex-col"
             >
               <div className="flex items-baseline gap-2.5">
                 <span className="text-2xl">{a.emoji}</span>
-                <p className="text-white/90 font-semibold">{a.name}</p>
-                <span className="text-white/40 text-xs">— {a.oneLiner}</span>
+                <p className="text-white font-semibold">{a.name}</p>
+                <span className="text-zinc-500 text-xs">— {a.oneLiner}</span>
               </div>
-              <p className="text-white/55 text-sm mt-2 leading-snug">{a.what}</p>
-              <p className="text-white/40 text-xs mt-2 leading-snug italic">
-                <span className="text-white/55 not-italic font-medium">When to use:</span>{" "}
+              <p className="text-zinc-400 text-sm mt-2 leading-snug">{a.what}</p>
+              <p className="text-zinc-500 text-xs mt-2 leading-snug italic">
+                <span className="text-zinc-400 not-italic font-medium">
+                  When to use:
+                </span>{" "}
                 {a.when}
               </p>
             </Link>
@@ -562,14 +572,16 @@ export default function HelpPage() {
           {DAILY_STEPS.map((s) => (
             <li
               key={s.num}
-              className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 flex gap-4"
+              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex gap-4"
             >
-              <span className="text-[#A6B8E7] font-mono text-sm shrink-0 w-6">
+              <span className="text-blue-400 font-mono text-sm shrink-0 w-6">
                 {s.num.toString().padStart(2, "0")}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-white/90 font-semibold text-sm">{s.title}</p>
-                <p className="text-white/55 text-sm mt-1 leading-snug">{s.detail}</p>
+                <p className="text-white font-semibold text-sm">{s.title}</p>
+                <p className="text-zinc-400 text-sm mt-1 leading-snug">
+                  {s.detail}
+                </p>
                 {s.tip && (
                   <p className="mt-2 text-[#A8DCD3] text-xs bg-[#A8DCD3]/5 border border-[#A8DCD3]/15 rounded px-2 py-1.5 leading-snug">
                     💡 {s.tip}
@@ -587,15 +599,15 @@ export default function HelpPage() {
           {HOW_TO.map((ht) => (
             <details
               key={ht.title}
-              className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 group open:border-white/[0.12]"
+              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 group open:border-zinc-700"
             >
-              <summary className="text-white/90 font-medium cursor-pointer list-none flex justify-between items-center gap-3">
+              <summary className="text-white font-medium cursor-pointer list-none flex justify-between items-center gap-3">
                 {ht.title}
-                <span className="text-white/40 text-xs shrink-0 group-open:rotate-180 transition-transform">
+                <span className="text-zinc-500 text-xs shrink-0 group-open:rotate-180 transition-transform">
                   ▼
                 </span>
               </summary>
-              <ol className="mt-3 flex flex-col gap-2 text-sm text-white/70 list-decimal list-inside leading-relaxed marker:text-white/40">
+              <ol className="mt-3 flex flex-col gap-2 text-sm text-zinc-300 list-decimal list-inside leading-relaxed marker:text-zinc-500">
                 {ht.steps.map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
@@ -607,7 +619,7 @@ export default function HelpPage() {
 
       {/* Oops recovery */}
       <Section title="Oops — I messed up. How do I fix it?">
-        <p className="text-white/55 text-sm mb-3">
+        <p className="text-zinc-400 text-sm mb-3">
           Almost nothing in this system is unrecoverable. Here's how to fix
           the common mistakes.
         </p>
@@ -615,15 +627,15 @@ export default function HelpPage() {
           {RECOVERY.map((r, i) => (
             <details
               key={i}
-              className="bg-amber-400/[0.06] border border-amber-400/20 rounded-lg p-4 group open:border-amber-400/30"
+              className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 group open:border-amber-500/30"
             >
-              <summary className="text-white/90 font-medium cursor-pointer list-none flex justify-between items-start gap-3">
+              <summary className="text-white font-medium cursor-pointer list-none flex justify-between items-start gap-3">
                 {r.problem}
-                <span className="text-amber-300/70 text-xs shrink-0 group-open:rotate-180 transition-transform">
+                <span className="text-amber-400/70 text-xs shrink-0 group-open:rotate-180 transition-transform">
                   ▼
                 </span>
               </summary>
-              <p className="text-white/70 text-sm mt-3 leading-snug">{r.fix}</p>
+              <p className="text-zinc-300 text-sm mt-3 leading-snug">{r.fix}</p>
             </details>
           ))}
         </div>
@@ -635,15 +647,15 @@ export default function HelpPage() {
           {FAQ.map((f, i) => (
             <details
               key={i}
-              className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 group open:border-white/[0.12]"
+              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 group open:border-zinc-700"
             >
-              <summary className="text-white/90 font-medium cursor-pointer list-none flex justify-between items-start gap-3">
+              <summary className="text-white font-medium cursor-pointer list-none flex justify-between items-start gap-3">
                 {f.q}
-                <span className="text-white/40 text-xs shrink-0 group-open:rotate-180 transition-transform">
+                <span className="text-zinc-500 text-xs shrink-0 group-open:rotate-180 transition-transform">
                   ▼
                 </span>
               </summary>
-              <p className="text-white/55 text-sm mt-3 leading-snug">{f.a}</p>
+              <p className="text-zinc-400 text-sm mt-3 leading-snug">{f.a}</p>
             </details>
           ))}
         </div>
@@ -651,7 +663,7 @@ export default function HelpPage() {
 
       {/* Glossary */}
       <Section title="Restoration vocab cheat-sheet">
-        <p className="text-white/55 text-sm mb-3">
+        <p className="text-zinc-400 text-sm mb-3">
           Industry terms that come up in scopes, paperwork, and on calls with
           adjusters.
         </p>
@@ -659,10 +671,10 @@ export default function HelpPage() {
           {GLOSSARY.map((g) => (
             <div
               key={g.term}
-              className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3"
+              className="bg-zinc-900 border border-zinc-800 rounded-lg p-3"
             >
-              <p className="text-white/90 text-sm font-semibold">{g.term}</p>
-              <p className="text-white/55 text-xs mt-1 leading-snug">{g.meaning}</p>
+              <p className="text-white text-sm font-semibold">{g.term}</p>
+              <p className="text-zinc-400 text-xs mt-1 leading-snug">{g.meaning}</p>
             </div>
           ))}
         </div>
@@ -688,12 +700,17 @@ export default function HelpPage() {
       </Section>
 
       {/* Contact */}
-      <section className="bg-[#6B8AD9]/[0.06] border border-[#6B8AD9]/20 rounded-xl p-6 mt-5 text-center">
-        <p className="text-white/95 font-semibold">Stuck? Something doesn't make sense?</p>
-        <p className="text-white/55 text-sm mt-2">
+      <section className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 mt-5 text-center">
+        <p className="text-white font-semibold">
+          Stuck? Something doesn't make sense?
+        </p>
+        <p className="text-zinc-400 text-sm mt-2">
           First, try Echo (top bar) — it knows the system. If that doesn't sort
           it, email{" "}
-          <a href="mailto:hello@firstcallm.com" className="text-[#A6B8E7] hover:text-white transition-colors">
+          <a
+            href="mailto:hello@firstcallm.com"
+            className="text-blue-400 hover:underline"
+          >
             hello@firstcallm.com
           </a>{" "}
           and we'll get you squared away.
@@ -712,7 +729,7 @@ function Section({
 }) {
   return (
     <section className="mb-8">
-      <h2 className="text-xl font-bold text-white/95 mb-3">{title}</h2>
+      <h2 className="text-xl font-bold text-white mb-3">{title}</h2>
       {children}
     </section>
   );
@@ -722,7 +739,7 @@ function QuickLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] text-white/70 hover:text-white transition-colors"
+      className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-colors"
     >
       {label}
     </Link>

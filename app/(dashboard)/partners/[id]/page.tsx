@@ -2,10 +2,8 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PARTNER_TYPE_LABEL, canLogInvestmentFor, type PartnerType } from "@/lib/partner-types";
-import { GLASS_STATUS, GLASS_STATUS_FALLBACK } from "@/lib/constants";
 import { PayoutForm, InvestmentForm, DeleteEntryButton } from "./LedgerForms";
 import { requireRoles } from "@/components/RoleGate";
-import { PageShell, Glass, Band, GlassRow, EmptyState } from "@/components/ui/Glass";
 
 const fmt = (n: number) =>
   `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -80,40 +78,42 @@ export default async function PartnerDetailPage({
   const canLog = canLogInvestmentFor(ptype);
 
   return (
-    <PageShell
-      eyebrow="Partner"
-      title={partner.name}
-      subtitle={
-        <span className="flex items-center gap-2 flex-wrap">
-          <span>{PARTNER_TYPE_LABEL[ptype] ?? "Other"}</span>
-          {partner.company && <span className="text-white/30">· {partner.company}</span>}
+    <div className="p-4 md:p-8 max-w-5xl">
+      <div className="mb-6">
+        <Link
+          href="/partners"
+          className="text-zinc-500 hover:text-white text-sm transition-colors"
+        >
+          ← Partners
+        </Link>
+        <div className="flex items-baseline gap-3 mt-2 flex-wrap">
+          <h1 className="text-2xl font-bold text-white">{partner.name}</h1>
+          <span className="text-zinc-400 text-sm">
+            {PARTNER_TYPE_LABEL[ptype] ?? "Other"}
+          </span>
           {!partner.active && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/45 ring-1 ring-white/10 uppercase">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-300 uppercase">
               Inactive
             </span>
           )}
+        </div>
+        {partner.company && (
+          <p className="text-zinc-400 text-sm mt-1">{partner.company}</p>
+        )}
+        <div className="text-zinc-500 text-xs mt-1.5 flex gap-3 flex-wrap">
           {partner.phone && (
-            <a href={`tel:${partner.phone}`} className="text-[#A6B8E7] hover:text-white transition-colors">
+            <a href={`tel:${partner.phone}`} className="hover:text-white">
               {partner.phone}
             </a>
           )}
           {partner.email && (
-            <a href={`mailto:${partner.email}`} className="text-[#A6B8E7] hover:text-white transition-colors">
+            <a href={`mailto:${partner.email}`} className="hover:text-white">
               {partner.email}
             </a>
           )}
-        </span>
-      }
-      action={
-        <Link
-          href="/partners"
-          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
-        >
-          ← Partners
-        </Link>
-      }
-      width="wide"
-    >
+        </div>
+      </div>
+
       {/* ROI tiles */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Tile label="Referrals" value={totalReferrals.toString()} accent="blue" />
@@ -133,126 +133,182 @@ export default async function PartnerDetailPage({
 
       {/* Insurance adjuster guard */}
       {!canLog && (
-        <Glass accent="amber" subtle className="p-4 mb-5 text-sm">
-          <p className="text-amber-200 font-medium">⚠ Insurance Adjuster</p>
-          <p className="text-white/70 mt-1">
-            Texas Insurance Code § 4102.158 prohibits paying anything of value to a
-            public adjuster for referring claims. Investment and payout logging is
-            disabled for this partner type. You can still track referrals and revenue.
+        <section className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-4 mb-5 text-sm">
+          <p className="text-amber-200 font-medium">
+            ⚠ Insurance Adjuster
           </p>
-        </Glass>
+          <p className="text-zinc-300 mt-1">
+            Texas Insurance Code § 4102.158 prohibits paying anything of value
+            to a public adjuster for referring claims. Investment and payout
+            logging is disabled for this partner type. You can still track
+            referrals and revenue.
+          </p>
+        </section>
       )}
 
       {/* Referred jobs */}
-      <Band label="Referred Jobs" hint={`${totalReferrals} attributed`} className="mb-6">
+      <section className="glass-card p-6 mb-5">
+        <h2 className="text-white font-semibold mb-3">Referred Jobs</h2>
         {(referredJobs?.length ?? 0) === 0 ? (
-          <EmptyState icon="🔗" title="No jobs attributed to this partner yet.">
-            When a job is created, set &ldquo;Referred by&rdquo; on the intake form to link it here.
-          </EmptyState>
+          <p className="text-zinc-500 text-sm italic">
+            No jobs attributed to this partner yet. When a job is created, set
+            "Referred by" on the intake form to link it here.
+          </p>
         ) : (
-          (referredJobs as any[]).map((j, i) => {
-            const rev = (j.invoices ?? []).reduce(
-              (s: number, inv: any) =>
-                s +
-                (inv.line_items ?? []).reduce(
-                  (li_s: number, li: any) => li_s + Number(li.line_total ?? 0),
-                  0
-                ),
-              0
-            );
-            return (
-              <GlassRow
-                key={j.id}
-                href={`/jobs/${j.id}`}
-                index={i}
-                meta={
-                  <span
-                    className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${GLASS_STATUS[j.status] ?? GLASS_STATUS_FALLBACK}`}
-                  >
-                    {j.status}
-                  </span>
-                }
-                title={<span className="font-mono text-[#A6B8E7]">{j.job_number}</span>}
-                sub={j.customers?.name ?? "—"}
-                trailing={
-                  <>
-                    <span className="text-white/95 font-mono font-semibold">{fmt2(rev)}</span>
-                    <span className="text-white/30 text-[11px] font-mono">
-                      {new Date(j.created_at).toLocaleDateString()}
-                    </span>
-                  </>
-                }
-              />
-            );
-          })
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                  <th className="text-left py-2">Job #</th>
+                  <th className="text-left py-2">Customer</th>
+                  <th className="text-left py-2">Status</th>
+                  <th className="text-left py-2">Created</th>
+                  <th className="text-right py-2">Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(referredJobs as any[]).map((j) => {
+                  const rev = (j.invoices ?? []).reduce(
+                    (s: number, inv: any) =>
+                      s +
+                      (inv.line_items ?? []).reduce(
+                        (li_s: number, li: any) => li_s + Number(li.line_total ?? 0),
+                        0
+                      ),
+                    0
+                  );
+                  return (
+                    <tr
+                      key={j.id}
+                      className="border-b border-white/[0.06]/60 last:border-0 hover:bg-white/[0.04]"
+                    >
+                      <td className="py-2.5">
+                        <Link
+                          href={`/jobs/${j.id}`}
+                          className="text-blue-400 hover:underline font-mono text-xs"
+                        >
+                          {j.job_number}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 text-zinc-300 text-xs">
+                        {j.customers?.name ?? "—"}
+                      </td>
+                      <td className="py-2.5 text-zinc-400 text-xs capitalize">
+                        {j.status}
+                      </td>
+                      <td className="py-2.5 text-zinc-500 text-xs">
+                        {new Date(j.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="py-2.5 text-right font-mono text-xs text-zinc-200">
+                        {fmt2(rev)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Band>
+      </section>
 
       {/* Cash payouts (1099) */}
       {canLog && (
-        <Glass className="p-6 mb-5">
+        <section className="glass-card p-6 mb-5">
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
             <div>
-              <h2 className="text-white/90 font-semibold">Cash Payouts</h2>
-              <p className="text-white/40 text-xs mt-0.5">1099-tracked. Owner / manager only.</p>
+              <h2 className="text-white font-semibold">Cash Payouts</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
+                1099-tracked. Owner / manager only.
+              </p>
             </div>
             <PayoutForm partnerId={partner.id} />
           </div>
           {(payouts?.length ?? 0) === 0 ? (
-            <p className="text-white/40 text-sm italic">No cash payouts logged.</p>
+            <p className="text-zinc-500 text-sm italic">No cash payouts logged.</p>
           ) : (
-            <div className="flex flex-col">
-              {(payouts as any[]).map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center gap-3 py-2.5 border-b border-white/[0.06] last:border-0 text-xs"
-                >
-                  <span className="text-white/55 w-24 shrink-0">{p.occurred_on}</span>
-                  <span className="text-white/70 capitalize w-20 shrink-0">{p.method}</span>
-                  <span className="text-white/45 font-mono flex-1 truncate">{p.reference ?? "—"}</span>
-                  <span className="text-white/40 flex-1 truncate">{p.notes ?? "—"}</span>
-                  <span className="text-white/80 font-mono shrink-0">{fmt2(Number(p.amount))}</span>
-                  <DeleteEntryButton kind="payout" entryId={p.id} partnerId={partner.id} />
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                  <th className="text-left py-2">Date</th>
+                  <th className="text-left py-2">Method</th>
+                  <th className="text-left py-2">Reference</th>
+                  <th className="text-left py-2">Notes</th>
+                  <th className="text-right py-2">Amount</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {(payouts as any[]).map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b border-white/[0.06]/60 last:border-0"
+                  >
+                    <td className="py-2.5 text-zinc-300 text-xs">{p.occurred_on}</td>
+                    <td className="py-2.5 text-zinc-300 text-xs capitalize">{p.method}</td>
+                    <td className="py-2.5 text-zinc-400 text-xs font-mono">{p.reference ?? "—"}</td>
+                    <td className="py-2.5 text-zinc-500 text-xs">{p.notes ?? "—"}</td>
+                    <td className="py-2.5 text-right font-mono text-xs text-zinc-200">
+                      {fmt2(Number(p.amount))}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <DeleteEntryButton kind="payout" entryId={p.id} partnerId={partner.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
-        </Glass>
+        </section>
       )}
 
       {/* Soft investments */}
       {canLog && (
-        <Glass className="p-6">
+        <section className="glass-card p-6">
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
             <div>
-              <h2 className="text-white/90 font-semibold">Soft Investments</h2>
-              <p className="text-white/40 text-xs mt-0.5">
+              <h2 className="text-white font-semibold">Soft Investments</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">
                 Meals, gifts, marketing co-op, holiday gestures.
               </p>
             </div>
             <InvestmentForm partnerId={partner.id} />
           </div>
           {(investments?.length ?? 0) === 0 ? (
-            <p className="text-white/40 text-sm italic">No investments logged.</p>
+            <p className="text-zinc-500 text-sm italic">No investments logged.</p>
           ) : (
-            <div className="flex flex-col">
-              {(investments as any[]).map((i) => (
-                <div
-                  key={i.id}
-                  className="flex items-center gap-3 py-2.5 border-b border-white/[0.06] last:border-0 text-xs"
-                >
-                  <span className="text-white/55 w-24 shrink-0">{i.occurred_on}</span>
-                  <span className="text-white/70 w-28 shrink-0">{CATEGORY_LABEL[i.category] ?? i.category}</span>
-                  <span className="text-white/40 flex-1 truncate">{i.notes ?? "—"}</span>
-                  <span className="text-white/80 font-mono shrink-0">{fmt2(Number(i.amount))}</span>
-                  <DeleteEntryButton kind="investment" entryId={i.id} partnerId={partner.id} />
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                  <th className="text-left py-2">Date</th>
+                  <th className="text-left py-2">Category</th>
+                  <th className="text-left py-2">Notes</th>
+                  <th className="text-right py-2">Amount</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {(investments as any[]).map((i) => (
+                  <tr
+                    key={i.id}
+                    className="border-b border-white/[0.06]/60 last:border-0"
+                  >
+                    <td className="py-2.5 text-zinc-300 text-xs">{i.occurred_on}</td>
+                    <td className="py-2.5 text-zinc-300 text-xs">{CATEGORY_LABEL[i.category] ?? i.category}</td>
+                    <td className="py-2.5 text-zinc-500 text-xs">{i.notes ?? "—"}</td>
+                    <td className="py-2.5 text-right font-mono text-xs text-zinc-200">
+                      {fmt2(Number(i.amount))}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <DeleteEntryButton kind="investment" entryId={i.id} partnerId={partner.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
-        </Glass>
+        </section>
       )}
-    </PageShell>
+    </div>
   );
 }
 
@@ -269,17 +325,19 @@ function Tile({
 }) {
   const valueClass =
     accent === "green"
-      ? "text-emerald-300"
+      ? "text-green-400"
       : accent === "red"
-        ? "text-red-300"
+        ? "text-red-400"
         : accent === "blue"
-          ? "text-[#A6B8E7]"
-          : "text-white/95";
+          ? "text-blue-400"
+          : "text-white";
   return (
-    <Glass className="p-4">
-      <p className="text-white/40 text-[10px] uppercase tracking-wide font-semibold">{label}</p>
+    <div className="glass-card p-4">
+      <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold">
+        {label}
+      </p>
       <p className={`text-2xl font-mono font-semibold mt-1 ${valueClass}`}>{value}</p>
-      {sub && <p className="text-white/40 text-[10px] mt-1">{sub}</p>}
-    </Glass>
+      {sub && <p className="text-zinc-500 text-[10px] mt-1">{sub}</p>}
+    </div>
   );
 }

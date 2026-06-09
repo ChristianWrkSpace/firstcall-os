@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
-import { PageShell, Glass, EmptyState } from "@/components/ui/Glass";
 
 export default async function CallsPage() {
   const supabase = await createServerSupabaseClient();
@@ -16,39 +15,40 @@ export default async function CallsPage() {
   const { data: calls } = await callsQuery;
 
   return (
-    <PageShell
-      eyebrow="Intake"
-      title="Calls"
-      subtitle="AI-transcribed intake calls"
-      action={
+    <div className="p-4 md:p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Calls</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">AI-transcribed intake calls</p>
+        </div>
         <div className="flex gap-2">
           <Link
             href="/calls/simulate"
-            className="px-4 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm font-medium transition-colors"
+            className="px-4 py-2 border border-zinc-700 hover:bg-zinc-800 text-zinc-200 text-sm font-medium rounded-lg transition-colors"
           >
             🎙 Talk to Athena
           </Link>
           <Link
             href="/calls/new"
-            className="px-4 py-1.5 rounded-lg bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:opacity-95 transition-opacity"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
           >
             + New Call
           </Link>
         </div>
-      }
-      width="wide"
-    >
-      {!calls?.length ? (
-        <EmptyState icon="📞" title="No calls recorded yet.">
-          <Link href="/calls/new" className="text-[#A6B8E7] hover:text-white transition-colors">
-            Record one →
-          </Link>
-        </EmptyState>
-      ) : (
-        <Glass className="overflow-x-auto">
+      </div>
+
+      <div className="glass-card overflow-x-auto">
+        {!calls?.length ? (
+          <div className="px-5 py-10 text-center text-zinc-500 text-sm">
+            No calls recorded yet.{" "}
+            <Link href="/calls/new" className="text-blue-400 hover:underline">
+              Record one →
+            </Link>
+          </div>
+        ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-white/40 text-xs uppercase tracking-wide">
+              <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Job</th>
                 <th className="px-5 py-3 text-left">Summary</th>
                 <th className="px-5 py-3 text-left">Type</th>
@@ -65,29 +65,29 @@ export default async function CallsPage() {
                     {(call.jobs as any)?.job_number ? (
                       <Link
                         href={`/jobs/${call.job_id}`}
-                        className="text-[#A6B8E7] hover:text-white font-mono text-xs transition-colors"
+                        className="text-blue-400 hover:underline font-mono text-xs"
                       >
                         {(call.jobs as any).job_number}
                       </Link>
                     ) : (
-                      <span className="text-white/30">—</span>
+                      <span className="text-zinc-600">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-white/80 max-w-xs truncate">
+                  <td className="px-5 py-3 text-zinc-200 max-w-xs truncate">
                     {call.ai_summary ?? "—"}
                   </td>
-                  <td className="px-5 py-3 text-white/45 text-xs capitalize">
+                  <td className="px-5 py-3 text-zinc-400 text-xs capitalize">
                     {(call.jobs as any)?.type ?? "—"}
                   </td>
-                  <td className="px-5 py-3 text-white/40 text-xs">
+                  <td className="px-5 py-3 text-zinc-500 text-xs">
                     {new Date(call.created_at).toLocaleDateString()}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </Glass>
-      )}
-    </PageShell>
+        )}
+      </div>
+    </div>
   );
 }

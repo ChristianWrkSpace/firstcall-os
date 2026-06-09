@@ -25,7 +25,6 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 
 // ─── Types — replace MOCK in page.tsx with real fetch later ──────────────
 export interface ShellData {
@@ -110,118 +109,47 @@ export default function CommandCenterShell({ data }: { data: ShellData }) {
       {/* Ambient backdrop — slow gradient sweep + grain for depth */}
       <BackdropAtmosphere />
 
-      <div className="relative z-10 px-4 md:px-8 pt-6 pb-16 max-w-[1400px] mx-auto">
+      <div className="relative z-10 px-4 md:px-8 pt-6 pb-16 max-w-[1600px] mx-auto">
         {/* Top bar */}
         <ShellHeader operator={data.operator} systemPulse={data.systemPulse} />
 
-        {/* THE STAGE — the one lit thing: what the crew needs from you now.
-            Caravaggio's single light. Everything below recedes into shadow. */}
+        {/* Multimodal command bar */}
         <div className="mt-6">
-          <NeedsYouStage handoffs={data.handoffs} pending={data.systemPulse.pendingApprovals} />
-        </div>
-
-        {/* The verb of the room — speak to the OS */}
-        <div className="mt-4">
           <CommandBar />
         </div>
 
-        {/* ── On the floor ── everything the crew is doing, demoted to shadow.
-            Present, quiet, summonable — brightens as a group on hover. */}
-        <div className="mt-10">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-[10px] uppercase tracking-[0.22em] text-white/30 font-semibold">
-              On the floor
-            </span>
-            <span className="h-px flex-1 bg-white/[0.06]" />
-          </div>
+        {/* Bento Grid — 12 col on desktop, stacks under md */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-12 gap-4">
+          {/* Agent Workflows — wide, top-left, the headline of the dashboard */}
+          <section className="md:col-span-8 row-span-2">
+            <AgentWorkflowsPanel workflows={data.agentWorkflows} />
+          </section>
 
-          <div className="group/floor opacity-65 hover:opacity-100 transition-opacity duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-              <section className="md:col-span-8">
-                <AgentWorkflowsPanel workflows={data.agentWorkflows} />
-              </section>
-              <section className="md:col-span-4">
-                <TodayMetrics metrics={data.todayMetrics} />
-              </section>
-              {data.compute && (
-                <section className="md:col-span-12">
-                  <ComputePanel compute={data.compute} />
-                </section>
-              )}
-              <section className="md:col-span-12">
-                <JobPulsePanel jobs={data.jobPulse} />
-              </section>
-            </div>
-          </div>
+          {/* Hand-off stack — upper right, amber-accented */}
+          <section className="md:col-span-4">
+            <HandoffStack handoffs={data.handoffs} />
+          </section>
+
+          {/* Today metrics — narrow, right of workflows on row 2 */}
+          <section className="md:col-span-4">
+            <TodayMetrics metrics={data.todayMetrics} />
+          </section>
+
+          {/* Compute — AI cost + invocation health */}
+          {data.compute && (
+            <section className="md:col-span-12">
+              <ComputePanel compute={data.compute} />
+            </section>
+          )}
+
+          {/* Job pulse — full width below */}
+          <section className="md:col-span-12">
+            <JobPulsePanel jobs={data.jobPulse} />
+          </section>
         </div>
       </div>
 
       <ShellStyles />
-    </div>
-  );
-}
-
-// ─── The Stage — "what needs you" in a pool of light ─────────────────────
-// The lit hero. Caps at the four most-urgent hand-offs (working-memory limit);
-// when the crew needs nothing, the stage breathes a calm all-clear.
-function NeedsYouStage({ handoffs, pending }: { handoffs: Handoff[]; pending: number }) {
-  const severityRank = { high: 0, med: 1, low: 2 } as const;
-  const top = [...handoffs]
-    .sort((a, b) => severityRank[a.severity] - severityRank[b.severity] || a.ageMinutes - b.ageMinutes)
-    .slice(0, 4);
-  const overflow = handoffs.length - top.length;
-  const allClear = handoffs.length === 0;
-
-  return (
-    <div
-      className={`relative rounded-2xl border backdrop-blur-2xl p-5 md:p-6 animate-rise-in ${
-        allClear
-          ? "border-white/[0.08] bg-white/[0.04] ring-1 ring-[#5FBDB0]/15 shadow-[0_0_40px_-8px_rgba(95,189,176,0.22)]"
-          : "border-amber-400/20 bg-amber-500/[0.04] ring-1 ring-amber-400/20 shadow-[0_0_48px_-10px_rgba(245,158,11,0.30)]"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2.5">
-          <PulseDot color={allClear ? "#5FBDB0" : "#F59E0B"} />
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">Needs you</p>
-            <h2 className="text-lg md:text-xl font-semibold tracking-tight text-white/95">
-              {allClear ? "You're clear — the crew has it." : `${handoffs.length} waiting on your call`}
-            </h2>
-          </div>
-        </div>
-        {!allClear && pending > 0 && (
-          <Link
-            href="/approvals"
-            className="text-[11px] px-3 py-1.5 rounded-lg bg-amber-400/15 hover:bg-amber-400/25 text-amber-100 border border-amber-400/30 font-medium transition-colors whitespace-nowrap"
-          >
-            Open approvals →
-          </Link>
-        )}
-      </div>
-
-      {allClear ? (
-        <p className="text-sm text-white/45 leading-relaxed">
-          Every agent is proceeding on its own. Nothing is blocked, nothing is overdue. Ask Echo
-          below if you want to dig into anything.
-        </p>
-      ) : (
-        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
-          {top.map((h, i) => (
-            <HandoffCard key={h.id} handoff={h} animateInDelayMs={i * 70} />
-          ))}
-          {overflow > 0 && (
-            <li className="flex items-center justify-center">
-              <Link
-                href="/approvals"
-                className="text-xs text-amber-200/70 hover:text-amber-100 transition-colors"
-              >
-                +{overflow} more waiting →
-              </Link>
-            </li>
-          )}
-        </ul>
-      )}
     </div>
   );
 }

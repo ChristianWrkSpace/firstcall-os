@@ -4,18 +4,17 @@ import Link from "next/link";
 import { BUSINESS_TYPES } from "@/lib/hunter";
 import LeadActions from "./LeadActions";
 import MessageView from "./MessageView";
-import { PageShell, Glass, EmptyState } from "@/components/ui/Glass";
 
-const LEAD_STATUS_GLASS: Record<string, string> = {
-  new:          "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
-  researching:  "bg-white/5 text-white/60 ring-white/10",
-  drafted:      "bg-purple-400/10 text-purple-300 ring-purple-400/20",
-  sent:         "bg-[#6B8AD9]/10 text-[#A6B8E7] ring-[#6B8AD9]/20",
-  followed_up:  "bg-amber-400/10 text-amber-300 ring-amber-400/20",
-  replied:      "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
-  converted:    "bg-[#5FBDB0]/12 text-[#A8DCD3] ring-[#5FBDB0]/25",
-  no_response:  "bg-white/5 text-white/35 ring-white/10",
-  disqualified: "bg-red-400/10 text-red-300 ring-red-400/20",
+const STATUS_COLORS: Record<string, string> = {
+  new:           "bg-blue-500/15 text-blue-400",
+  researching:   "bg-zinc-700 text-zinc-300",
+  drafted:       "bg-purple-500/15 text-purple-400",
+  sent:          "bg-blue-500/15 text-blue-400",
+  followed_up:   "bg-yellow-500/15 text-yellow-400",
+  replied:       "bg-green-500/15 text-green-400",
+  converted:     "bg-green-500/15 text-green-400",
+  no_response:   "bg-zinc-800 text-zinc-500",
+  disqualified:  "bg-red-500/15 text-red-400",
 };
 
 export default async function LeadDetail({
@@ -40,34 +39,32 @@ export default async function LeadDetail({
   const meta = BUSINESS_TYPES[lead.business_type as keyof typeof BUSINESS_TYPES];
 
   return (
-    <PageShell
-      eyebrow="Lead"
-      title={lead.company_name}
-      subtitle={
-        <span className="flex items-center gap-2 flex-wrap">
-          <span
-            className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ring-1 ${LEAD_STATUS_GLASS[lead.status] ?? LEAD_STATUS_GLASS.researching}`}
+    <div className="p-4 md:p-8">
+      <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <Link
+            href="/partners/outreach"
+            className="text-zinc-500 hover:text-white text-sm transition-colors"
           >
-            {lead.status.replace("_", " ")}
-          </span>
-          <span>{meta?.label ?? lead.business_type}</span>
-        </span>
-      }
-      action={
-        <Link
-          href="/partners/outreach"
-          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
-        >
-          ← Pipeline
-        </Link>
-      }
-      width="wide"
-    >
+            ← Pipeline
+          </Link>
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <h1 className="text-2xl font-bold text-white">{lead.company_name}</h1>
+            <span
+              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[lead.status] ?? ""}`}
+            >
+              {lead.status.replace("_", " ")}
+            </span>
+            <span className="text-zinc-400 text-sm">{meta?.label ?? lead.business_type}</span>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Lead info */}
-          <Glass className="p-6">
-            <h2 className="text-white/90 font-semibold mb-4">Lead Info</h2>
+          <section className="glass-card p-6">
+            <h2 className="text-white font-semibold mb-4">Lead Info</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <Field label="Contact" value={lead.contact_name} />
               <Field label="Title" value={lead.contact_title} />
@@ -77,12 +74,14 @@ export default async function LeadDetail({
               <Field label="Source" value={lead.source} />
               {lead.website && (
                 <div className="sm:col-span-2">
-                  <p className="text-white/40 text-xs uppercase tracking-wide mb-0.5">Website</p>
+                  <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">
+                    Website
+                  </p>
                   <a
                     href={lead.website.startsWith("http") ? lead.website : `https://${lead.website}`}
                     target="_blank"
                     rel="noopener"
-                    className="text-[#A6B8E7] hover:text-white transition-colors"
+                    className="text-blue-400 hover:underline"
                   >
                     {lead.website}
                   </a>
@@ -90,20 +89,20 @@ export default async function LeadDetail({
               )}
               {lead.notes && (
                 <div className="sm:col-span-2">
-                  <p className="text-white/40 text-xs uppercase tracking-wide mb-1">Notes</p>
-                  <p className="text-white/80">{lead.notes}</p>
+                  <p className="text-zinc-400 text-xs uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-zinc-200">{lead.notes}</p>
                 </div>
               )}
             </div>
-          </Glass>
+          </section>
 
           {/* Messages */}
-          <Glass className="p-6">
-            <h2 className="text-white/90 font-semibold mb-4">Outreach Messages</h2>
+          <section className="glass-card p-6">
+            <h2 className="text-white font-semibold mb-4">Outreach Messages</h2>
             {!messages?.length ? (
-              <EmptyState icon="✉️" title="No messages drafted yet.">
-                Use the actions panel on the right.
-              </EmptyState>
+              <p className="text-zinc-500 text-sm italic">
+                No messages drafted yet. Use the actions panel on the right.
+              </p>
             ) : (
               <div className="flex flex-col gap-4">
                 {messages.map((m: any) => (
@@ -111,30 +110,30 @@ export default async function LeadDetail({
                 ))}
               </div>
             )}
-          </Glass>
+          </section>
         </div>
 
         {/* Right: actions */}
         <div className="flex flex-col gap-5">
-          <Glass className="p-5">
-            <h2 className="text-white/90 font-semibold mb-3">Actions</h2>
+          <section className="glass-card p-5">
+            <h2 className="text-white font-semibold mb-3">Actions</h2>
             <LeadActions
               leadId={lead.id}
               status={lead.status}
               hasSentMessages={(messages ?? []).some((m: any) => m.status === "sent")}
             />
-          </Glass>
+          </section>
         </div>
       </div>
-    </PageShell>
+    </div>
   );
 }
 
 function Field({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
-      <p className="text-white/40 text-xs uppercase tracking-wide mb-0.5">{label}</p>
-      <p className="text-white/80">{value || "—"}</p>
+      <p className="text-zinc-400 text-xs uppercase tracking-wide mb-0.5">{label}</p>
+      <p className="text-zinc-200">{value || "—"}</p>
     </div>
   );
 }

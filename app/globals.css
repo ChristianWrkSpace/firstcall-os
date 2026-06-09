@@ -47,12 +47,37 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
+/* ─── Ambient Intelligence OS — Semantic Color Tokens ─────────────── */
 :root {
+  --color-primary: #6B8AD9;
+  --color-positive: #5FBDB0;
+  --color-caution: #F59E0B;
+  --color-danger: #EF4444;
+  --color-surface: rgba(255, 255, 255, 0.03);
+  --color-surface-strong: rgba(255, 255, 255, 0.05);
+  --color-edge: rgba(255, 255, 255, 0.06);
+  --color-text-primary: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(255, 255, 255, 0.50);
+  --color-text-muted: rgba(255, 255, 255, 0.32);
+  --color-bg-deep: #0A0B0D;
+  --color-bg-base: #0E1012;
   --background: #ffffff;
   --foreground: #171717;
 }
 
 @theme inline {
+  --color-primary: var(--color-primary);
+  --color-positive: var(--color-positive);
+  --color-caution: var(--color-caution);
+  --color-danger: var(--color-danger);
+  --color-surface: var(--color-surface);
+  --color-surface-strong: var(--color-surface-strong);
+  --color-edge: var(--color-edge);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-bg-deep: var(--color-bg-deep);
+  --color-bg-base: var(--color-bg-base);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -67,194 +92,81 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
   font-family: Arial, Helvetica, sans-serif;
-  /* Reserve space for iPhone home indicator (bottom safe area) when running
-     as installed PWA. Top safe area is handled per-component because each
-     header has different padding; bottom is uniform. */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Utility for any fixed-bottom elements (action bars, toasts, etc.) — keep
-   them above the home indicator strip on iPhone X+. */
 .safe-bottom {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
-/* Utility for fixed-top elements that need to clear the iOS status bar /
-   notch when the app runs as an installed PWA. */
 .safe-top {
   padding-top: max(0.75rem, env(safe-area-inset-top));
 }
 
-/* Print: hide app chrome, switch to white background, conserve ink */
-@media print {
-  aside,
-  nav,
-  .no-print {
-    display: none !important;
-  }
-  main {
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-  html,
-  body {
-    background: white !important;
-    color: black !important;
-  }
-  .print-page {
-    background: white !important;
-    color: black !important;
-  }
-  .page-break {
-    page-break-before: always;
-  }
-  .page-break-inside-avoid {
-    page-break-inside: avoid;
-  }
+/* ─── Spatial Motion Keyframes ──────────────────────────────────── */
+@keyframes spatial-rise-in {
+  0%   { transform: translateY(12px) translateZ(-20px) scale(0.96); opacity: 0; }
+  100% { transform: translateY(0) translateZ(0) scale(1); opacity: 1; }
 }
 
-@page {
-  size: letter;
-  margin: 0.5in;
+@keyframes spatial-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes ping-ambient {
+  0%   { box-shadow: 0 0 0 0 rgba(95, 189, 176, 0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(95, 189, 176, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(95, 189, 176, 0); }
+}
+
+@keyframes pulse-ambient {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes shimmer-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes drift-slow {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(0.5%, 0.3%) scale(1.02); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 @keyframes toast-in {
   0%   { transform: translateY(8px) scale(0.97); opacity: 0; }
   100% { transform: translateY(0) scale(1);      opacity: 1; }
 }
+
 .animate-toast-in { animation: toast-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2); }
-
-/* ─── Tenebrism motion language ────────────────────────────────────────
-   Promoted out of CommandCenterShell's <style jsx global> so every surface
-   speaks the same dialect. Light emerges; content rises; the live thing
-   breathes. Honors prefers-reduced-motion at the bottom of this block. */
-
-@keyframes rise-in {
-  0%   { opacity: 0; transform: translateY(6px) scale(0.985); }
-  100% { opacity: 1; transform: translateY(0)   scale(1); }
-}
-.animate-rise-in {
-  opacity: 0;
-  animation: rise-in 420ms cubic-bezier(0.2, 0.85, 0.3, 1.05) both;
-}
-
-@keyframes ping-slow {
-  0%   { transform: scale(1);   opacity: 0.55; }
-  80%  { transform: scale(1.6); opacity: 0; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
-.animate-ping-slow { animation: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
-
-@keyframes pulse-soft {
-  0%, 100% { opacity: 0.20; }
-  50%      { opacity: 0.55; }
-}
-.animate-pulse-soft { animation: pulse-soft 3.2s ease-in-out infinite; }
-
-@keyframes pulse-amber {
-  0%, 100% { opacity: 0.25; }
-  50%      { opacity: 0.65; }
-}
-.animate-pulse-amber { animation: pulse-amber 3.6s ease-in-out infinite; }
-
-@keyframes shimmer-bg {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
-}
-.animate-shimmer-bg {
+.animate-spatial-rise { animation: spatial-rise-in 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-spatial-fade { animation: spatial-fade-in 500ms ease-out; }
+.animate-ping-ambient { animation: ping-ambient 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-pulse-ambient { animation: pulse-ambient 3s ease-in-out infinite; }
+.animate-shimmer { 
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
   background-size: 200% 100%;
-  animation: shimmer-bg 2.4s linear infinite;
+  animation: shimmer-sweep 2.4s ease-in-out infinite;
+}
+.animate-drift { animation: drift-slow 20s ease-in-out infinite; }
+
+/* ─── Print Styles ───────────────────────────────────────────────── */
+@media print {
+  aside, nav, .no-print { display: none !important; }
+  main { padding: 0 !important; overflow: visible !important; }
+  html, body { background: white !important; color: black !important; }
+  .print-page { background: white !important; color: black !important; }
+  .page-break { page-break-before: always; }
+  .page-break-inside-avoid { page-break-inside: avoid; }
 }
 
-@keyframes shimmer-border {
-  0%   { box-shadow: 0 0 0 1px rgba(95,189,176,0.20); }
-  50%  { box-shadow: 0 0 0 2px rgba(95,189,176,0.45); }
-  100% { box-shadow: 0 0 0 1px rgba(95,189,176,0.20); }
-}
-.animate-shimmer-border { animation: shimmer-border 1.6s ease-in-out infinite; border-radius: 1rem; }
-
-@keyframes drift {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(2%, -1%) scale(1.05); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-.animate-drift { animation: drift 18s ease-in-out infinite; }
-
-/* ─── View Transitions — the Spike Lee "double-dolly" glide ─────────────
-   Route changes carry the human; content moves, the header stays anchored.
-   Directional slides are tagged per-link via <Link transitionTypes>. The
-   shared-element morph (job card → job detail) uses matching name= props. */
-
-:root {
-  --vt-duration-exit: 150ms;
-  --vt-duration-enter: 210ms;
-}
-
-::view-transition-old(.nav-forward) {
-  --slide-offset: -60px;
-  animation:
-    var(--vt-duration-exit) ease-in both vt-fade reverse,
-    400ms ease-in-out both vt-slide reverse;
-}
-::view-transition-new(.nav-forward) {
-  --slide-offset: 60px;
-  animation:
-    var(--vt-duration-enter) ease-out var(--vt-duration-exit) both vt-fade,
-    400ms ease-in-out both vt-slide;
-}
-::view-transition-old(.nav-back) {
-  --slide-offset: 60px;
-  animation:
-    var(--vt-duration-exit) ease-in both vt-fade reverse,
-    400ms ease-in-out both vt-slide reverse;
-}
-::view-transition-new(.nav-back) {
-  --slide-offset: -60px;
-  animation:
-    var(--vt-duration-enter) ease-out var(--vt-duration-exit) both vt-fade,
-    400ms ease-in-out both vt-slide;
-}
-
-/* Soften the shared-element morph with a mid-flight blur. */
-::view-transition-group(.morph) { animation-duration: 400ms; }
-::view-transition-image-pair(.morph) { animation-name: vt-blur; }
-
-@keyframes vt-fade {
-  from { filter: blur(3px); opacity: 0; }
-  to   { filter: blur(0);   opacity: 1; }
-}
-@keyframes vt-slide {
-  from { translate: var(--slide-offset); }
-  to   { translate: 0; }
-}
-@keyframes vt-blur {
-  30% { filter: blur(3px); }
-}
-
-/* Anchor the floating dock / header so it never slides with the content. */
-::view-transition-group(app-dock) { animation: none; z-index: 100; }
-::view-transition-old(app-dock)   { display: none; }
-::view-transition-new(app-dock)   { animation: none; }
-
-/* Reduced motion — nuke positional movement everywhere, keep it instant. */
-@media (prefers-reduced-motion: reduce) {
-  .animate-rise-in,
-  .animate-ping-slow,
-  .animate-pulse-soft,
-  .animate-pulse-amber,
-  .animate-shimmer-bg,
-  .animate-shimmer-border,
-  .animate-drift {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-  ::view-transition-old(*),
-  ::view-transition-new(*),
-  ::view-transition-group(*) {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
-  }
+@page {
+  size: letter;
+  margin: 0.5in;
 }

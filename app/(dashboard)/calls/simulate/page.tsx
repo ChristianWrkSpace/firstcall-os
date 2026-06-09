@@ -7,8 +7,6 @@ import { createJobFromCall } from "@/app/actions/calls";
 
 type Phase = "idle" | "in_call" | "ending" | "review" | "done";
 
-const CARD = "rounded-2xl bg-white/[0.03] border border-white/[0.06]";
-
 interface Turn {
   role: "user" | "assistant";
   content: string;
@@ -195,36 +193,36 @@ export default function SimulateCallPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto">
+    <div className="p-4 md:p-8 max-w-3xl">
       <div className="mb-6">
-        <Link href="/calls" className="text-white/40 hover:text-white text-sm transition-colors">
+        <Link href="/calls" className="text-zinc-500 hover:text-white text-sm transition-colors">
           ← Calls
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-white/95 mt-2">Talk to Athena</h1>
-        <p className="text-white/45 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-white mt-2">Talk to Athena</h1>
+        <p className="text-zinc-400 text-sm mt-0.5">
           Test the conversational AI as if you were a customer calling in.
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 px-4 py-3 bg-red-400/10 border border-red-400/20 rounded-lg text-red-300 text-sm">
+        <div className="mb-4 px-4 py-3 bg-red-400/10 border border-red-400/20 rounded-lg text-red-400 text-sm">
           {error}
         </div>
       )}
 
       {/* Idle */}
       {phase === "idle" && (
-        <div className={`${CARD} p-8 flex flex-col items-center gap-5`}>
-          <div className="w-24 h-24 rounded-full bg-[#6B8AD9]/15 border border-[#6B8AD9]/30 flex items-center justify-center">
-            <PhoneIcon className="w-10 h-10 text-[#A6B8E7]" />
+        <div className="glass-card p-8 flex flex-col items-center gap-5">
+          <div className="w-24 h-24 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+            <PhoneIcon className="w-10 h-10 text-blue-400" />
           </div>
           <button
             onClick={startCall}
-            className="px-6 py-2.5 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:opacity-95 transition-opacity"
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
           >
             Start Call
           </button>
-          <p className="text-white/40 text-xs text-center max-w-sm">
+          <p className="text-zinc-500 text-xs text-center max-w-sm">
             Athena will greet you. Then hold the mic button to talk, release to send. End the call when you have what you need.
           </p>
         </div>
@@ -232,16 +230,16 @@ export default function SimulateCallPage() {
 
       {/* Voice tuning sliders — always visible */}
       {(phase === "idle" || phase === "in_call") && (
-        <div className={`${CARD} p-4 mb-4`}>
+        <div className="glass-card p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-white/70 text-sm font-medium">Voice Tuning</h3>
+            <h3 className="text-zinc-300 text-sm font-medium">Voice Tuning</h3>
             <button
               onClick={() => {
                 setStability(0.55);
                 setSimilarity(0.85);
                 setStyle(0.25);
               }}
-              className="text-white/40 hover:text-white/70 text-xs"
+              className="text-zinc-500 hover:text-zinc-300 text-xs"
             >
               Reset
             </button>
@@ -266,8 +264,8 @@ export default function SimulateCallPage() {
               hint={style < 0.2 ? "Neutral" : style > 0.5 ? "Dramatic" : "Natural"}
             />
           </div>
-          <p className="text-white/40 text-xs mt-3">
-            Changes apply to the <span className="text-white/70">next</span> response. Adjust mid-call to compare.
+          <p className="text-zinc-500 text-xs mt-3">
+            Changes apply to the <span className="text-zinc-300">next</span> response. Adjust mid-call to compare.
           </p>
         </div>
       )}
@@ -276,9 +274,9 @@ export default function SimulateCallPage() {
       {phase === "in_call" && (
         <div className="flex flex-col gap-4">
           {/* Conversation */}
-          <div className={`${CARD} p-5 min-h-[280px] max-h-[420px] overflow-y-auto flex flex-col gap-3`}>
+          <div className="glass-card p-5 min-h-[280px] max-h-[420px] overflow-y-auto flex flex-col gap-3">
             {history.length === 0 && !thinking && (
-              <p className="text-white/40 text-sm italic text-center my-auto">
+              <p className="text-zinc-500 text-sm italic text-center my-auto">
                 Athena is dialing in…
               </p>
             )}
@@ -290,8 +288,8 @@ export default function SimulateCallPage() {
                 <div
                   className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
                     turn.role === "user"
-                      ? "bg-[#6B8AD9] text-white rounded-br-sm"
-                      : "bg-white/[0.06] text-white/90 rounded-bl-sm"
+                      ? "bg-blue-600 text-white rounded-br-sm"
+                      : "bg-zinc-800 text-zinc-100 rounded-bl-sm"
                   }`}
                 >
                   {turn.content}
@@ -300,7 +298,7 @@ export default function SimulateCallPage() {
             ))}
             {thinking && (
               <div className="flex justify-start">
-                <div className="bg-white/[0.06] text-white/55 px-4 py-2.5 rounded-2xl rounded-bl-sm text-sm">
+                <div className="bg-zinc-800 text-zinc-400 px-4 py-2.5 rounded-2xl rounded-bl-sm text-sm">
                   <span className="inline-block animate-pulse">Athena is thinking…</span>
                 </div>
               </div>
@@ -308,7 +306,7 @@ export default function SimulateCallPage() {
           </div>
 
           {/* Mic + End Call */}
-          <div className={`${CARD} p-6 flex items-center justify-between gap-4`}>
+          <div className="glass-card p-6 flex items-center justify-between gap-4">
             <button
               onMouseDown={startTalking}
               onMouseUp={stopTalking}
@@ -319,14 +317,14 @@ export default function SimulateCallPage() {
               className={`flex-1 py-4 rounded-lg font-medium text-white transition-all select-none ${
                 holding
                   ? "bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]"
-                  : "bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] hover:opacity-95"
+                  : "bg-blue-600 hover:bg-blue-500"
               } ${thinking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             >
               {holding ? "Listening… release to send" : thinking ? "…" : "Hold to Talk"}
             </button>
             <button
               onClick={endCall}
-              className="px-5 py-4 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white text-sm font-medium rounded-lg transition-colors"
+              className="px-5 py-4 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-sm font-medium rounded-lg transition-colors"
             >
               End Call
             </button>
@@ -336,9 +334,9 @@ export default function SimulateCallPage() {
 
       {/* Ending */}
       {phase === "ending" && (
-        <div className={`${CARD} p-8 flex flex-col items-center gap-4`}>
-          <SpinnerIcon className="w-10 h-10 text-[#A6B8E7] animate-spin" />
-          <p className="text-white/90 font-medium">Extracting job details…</p>
+        <div className="glass-card p-8 flex flex-col items-center gap-4">
+          <SpinnerIcon className="w-10 h-10 text-blue-400 animate-spin" />
+          <p className="text-white font-medium">Extracting job details…</p>
         </div>
       )}
 
@@ -349,8 +347,8 @@ export default function SimulateCallPage() {
             <div
               className={`px-4 py-3 rounded-lg border text-sm font-medium ${
                 extraction.job.urgency === "emergency"
-                  ? "bg-red-400/10 border-red-400/30 text-red-300"
-                  : "bg-amber-400/10 border-amber-400/30 text-amber-300"
+                  ? "bg-red-500/10 border-red-500/30 text-red-400"
+                  : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
               }`}
             >
               ⚠️ {extraction.job.urgency.toUpperCase()} — {extraction.summary}
@@ -389,16 +387,16 @@ export default function SimulateCallPage() {
             )}
           </ReviewSection>
 
-          <details className={`${CARD} p-5`}>
-            <summary className="text-white/45 text-sm cursor-pointer hover:text-white">
+          <details className="glass-card p-5">
+            <summary className="text-zinc-400 text-sm cursor-pointer hover:text-white">
               View full transcript
             </summary>
-            <pre className="mt-3 text-white/70 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+            <pre className="mt-3 text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap font-sans">
               {transcript}
             </pre>
           </details>
 
-          {submitState?.error && <p className="text-red-300 text-sm">{submitState.error}</p>}
+          {submitState?.error && <p className="text-red-400 text-sm">{submitState.error}</p>}
 
           <form action={submitAction} className="flex gap-3">
             <input type="hidden" name="extraction" value={JSON.stringify(extraction)} />
@@ -410,14 +408,14 @@ export default function SimulateCallPage() {
                 setHistory([]);
                 setPhase("idle");
               }}
-              className="px-4 py-2 border border-white/[0.08] text-white/70 rounded-lg text-sm hover:bg-white/[0.05]"
+              className="px-4 py-2 border border-zinc-700 text-zinc-300 rounded-lg text-sm hover:bg-zinc-800"
             >
               Start Over
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-2 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] disabled:opacity-50 text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:opacity-95 transition-opacity"
+              className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
             >
               {submitting ? "Creating Job…" : "Confirm & Create Job"}
             </button>
@@ -430,8 +428,8 @@ export default function SimulateCallPage() {
 
 function ReviewSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className={`${CARD} p-5`}>
-      <h2 className="text-white/90 font-semibold mb-3">{title}</h2>
+    <div className="glass-card p-5">
+      <h2 className="text-white font-semibold mb-3">{title}</h2>
       <dl className="grid grid-cols-2 gap-3 text-sm">{children}</dl>
     </div>
   );
@@ -448,9 +446,9 @@ function ReviewField({
 }) {
   return (
     <div>
-      <dt className="text-white/40 text-xs uppercase tracking-wide mb-0.5">{label}</dt>
-      <dd className={`text-white/80 ${capitalize ? "capitalize" : ""}`}>
-        {value || <span className="text-white/30">—</span>}
+      <dt className="text-zinc-500 text-xs uppercase tracking-wide mb-0.5">{label}</dt>
+      <dd className={`text-zinc-200 ${capitalize ? "capitalize" : ""}`}>
+        {value || <span className="text-zinc-600">—</span>}
       </dd>
     </div>
   );
@@ -470,8 +468,8 @@ function Slider({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <label className="text-white/45 text-xs uppercase tracking-wide">{label}</label>
-        <span className="text-white/80 text-xs font-mono">{value.toFixed(2)}</span>
+        <label className="text-zinc-400 text-xs uppercase tracking-wide">{label}</label>
+        <span className="text-zinc-200 text-xs font-mono">{value.toFixed(2)}</span>
       </div>
       <input
         type="range"
@@ -480,9 +478,9 @@ function Slider({
         step="0.05"
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full accent-[#5FBDB0]"
+        className="w-full accent-blue-500"
       />
-      {hint && <span className="text-white/40 text-[10px]">{hint}</span>}
+      {hint && <span className="text-zinc-500 text-[10px]">{hint}</span>}
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { GLASS_STATUS, GLASS_STATUS_FALLBACK } from "@/lib/constants";
-import { PageShell, Glass, Band, GlassRow, EmptyState } from "@/components/ui/Glass";
+import { STATUS_COLORS } from "@/lib/constants";
 
 export default async function CustomerDetailPage({
   params,
@@ -24,24 +23,24 @@ export default async function CustomerDetailPage({
   if (!customer) notFound();
 
   return (
-    <PageShell
-      eyebrow="People"
-      title={customer.name}
-      subtitle={`Customer since ${new Date(customer.created_at).toLocaleDateString()}`}
-      action={
+    <div className="p-4 md:p-8">
+      <div className="mb-6">
         <Link
           href="/customers"
-          className="px-3 py-1.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.05] text-white/70 text-sm transition-colors"
+          className="text-zinc-500 hover:text-white text-sm transition-colors"
         >
           ← Customers
         </Link>
-      }
-      width="wide"
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+        <h1 className="text-2xl font-bold text-white mt-2">{customer.name}</h1>
+        <p className="text-zinc-400 text-sm mt-0.5">
+          Customer since {new Date(customer.created_at).toLocaleDateString()}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Contact */}
-        <Glass className="p-6">
-          <h2 className="text-white/90 font-semibold mb-4">Contact</h2>
+        <section className="glass-card p-6">
+          <h2 className="text-white font-semibold mb-4">Contact</h2>
           <dl className="flex flex-col gap-3 text-sm">
             <Field
               label="Phone"
@@ -62,65 +61,88 @@ export default async function CustomerDetailPage({
               }
             />
           </dl>
-        </Glass>
+        </section>
 
         {/* Insurance */}
-        <Glass className="p-6">
-          <h2 className="text-white/90 font-semibold mb-4">Insurance</h2>
+        <section className="glass-card p-6">
+          <h2 className="text-white font-semibold mb-4">Insurance</h2>
           <dl className="flex flex-col gap-3 text-sm">
             <Field label="Carrier" value={customer.insurance_company} />
             <Field label="Policy #" value={customer.insurance_policy_number} mono />
             <Field label="Claim #" value={customer.insurance_claim_number} mono />
           </dl>
-        </Glass>
+        </section>
 
         {/* Notes */}
-        <Glass className="p-6">
-          <h2 className="text-white/90 font-semibold mb-4">Notes</h2>
+        <section className="glass-card p-6">
+          <h2 className="text-white font-semibold mb-4">Notes</h2>
           {customer.notes ? (
-            <p className="text-white/80 text-sm whitespace-pre-wrap">{customer.notes}</p>
+            <p className="text-zinc-200 text-sm whitespace-pre-wrap">
+              {customer.notes}
+            </p>
           ) : (
-            <p className="text-white/40 text-sm italic">No notes.</p>
+            <p className="text-zinc-500 text-sm italic">No notes.</p>
           )}
-        </Glass>
+        </section>
       </div>
 
       {/* Jobs */}
-      <Band label="Jobs" hint={`${jobs?.length ?? 0} on file`}>
+      <section className="mt-5 glass-card p-6">
+        <h2 className="text-white font-semibold mb-4">
+          Jobs ({jobs?.length ?? 0})
+        </h2>
         {!jobs?.length ? (
-          <EmptyState icon="📋" title="No jobs for this customer yet." />
+          <p className="text-zinc-500 text-sm italic">No jobs for this customer yet.</p>
         ) : (
-          jobs.map((j: any, i: number) => (
-            <GlassRow
-              key={j.id}
-              href={`/jobs/${j.id}`}
-              index={i}
-              meta={
-                <span
-                  className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ring-1 ${GLASS_STATUS[j.status] ?? GLASS_STATUS_FALLBACK}`}
-                >
-                  {j.status}
-                </span>
-              }
-              title={<span className="font-mono text-[#A6B8E7]">{j.job_number}</span>}
-              sub={
-                [
-                  j.type ? `${j.type} damage` : null,
-                  [j.site_address, j.site_city].filter(Boolean).join(", ") || null,
-                ]
-                  .filter(Boolean)
-                  .join("  ·  ")
-              }
-              trailing={
-                <span className="text-white/30 text-[11px] font-mono">
-                  {new Date(j.created_at).toLocaleDateString()}
-                </span>
-              }
-            />
-          ))
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06] text-zinc-500 text-xs uppercase tracking-wide">
+                  <th className="text-left py-2">Job #</th>
+                  <th className="text-left py-2">Type</th>
+                  <th className="text-left py-2">Status</th>
+                  <th className="text-left py-2">Address</th>
+                  <th className="text-left py-2">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((j: any) => (
+                  <tr
+                    key={j.id}
+                    className="border-b border-white/[0.06]/60 last:border-0 hover:bg-white/[0.04]"
+                  >
+                    <td className="py-2.5">
+                      <Link
+                        href={`/jobs/${j.id}`}
+                        className="text-blue-400 hover:underline font-mono text-xs"
+                      >
+                        {j.job_number}
+                      </Link>
+                    </td>
+                    <td className="py-2.5 text-zinc-400 text-xs capitalize">
+                      {j.type}
+                    </td>
+                    <td className="py-2.5">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[j.status] ?? ""}`}
+                      >
+                        {j.status}
+                      </span>
+                    </td>
+                    <td className="py-2.5 text-zinc-300 text-xs">
+                      {[j.site_address, j.site_city].filter(Boolean).join(", ") || "—"}
+                    </td>
+                    <td className="py-2.5 text-zinc-500 text-xs">
+                      {new Date(j.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Band>
-    </PageShell>
+      </section>
+    </div>
   );
 }
 
@@ -137,18 +159,18 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-white/40 text-xs uppercase tracking-wide">{label}</dt>
-      <dd className={`text-white/80 ${mono ? "font-mono text-sm" : ""}`}>
+      <dt className="text-zinc-500 text-xs uppercase tracking-wide">{label}</dt>
+      <dd className={`text-zinc-200 ${mono ? "font-mono text-sm" : ""}`}>
         {value ? (
           link ? (
-            <a href={link} className="text-[#A6B8E7] hover:text-white transition-colors">
+            <a href={link} className="text-blue-400 hover:underline">
               {value}
             </a>
           ) : (
             value
           )
         ) : (
-          <span className="text-white/30">—</span>
+          <span className="text-zinc-600">—</span>
         )}
       </dd>
     </div>

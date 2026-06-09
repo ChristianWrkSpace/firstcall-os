@@ -8,39 +8,6 @@ export const STATUS_COLORS: Record<string, string> = {
   cancelled:      "bg-zinc-500/20 text-zinc-400",
 };
 
-/**
- * GLASS_STATUS — the Tenebrism status palette. Softer, ring-based pills tuned
- * for the dark glass stage (replaces the heavier zinc/500-weight STATUS_COLORS
- * across re-cut surfaces). One source of truth for job lifecycle color.
- */
-export const GLASS_STATUS: Record<string, string> = {
-  lead:           "bg-[#6B8AD9]/15 text-[#A6B8E7] ring-[#6B8AD9]/25",
-  inspection:     "bg-yellow-400/10 text-yellow-300 ring-yellow-400/20",
-  mitigation:     "bg-orange-400/10 text-orange-300 ring-orange-400/20",
-  drying:         "bg-purple-400/10 text-purple-300 ring-purple-400/20",
-  reconstruction: "bg-indigo-400/10 text-indigo-300 ring-indigo-400/20",
-  completed:      "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
-  cancelled:      "bg-white/5 text-white/50 ring-white/10",
-};
-
-/** Fallback pill classes for an unknown status. */
-export const GLASS_STATUS_FALLBACK = "bg-white/5 text-white/60 ring-white/10";
-
-/**
- * Phase-aware lighting map — which job-detail panels are LIT for a given
- * lifecycle status. Everything not listed recedes into shadow. Drives the
- * chiaroscuro re-cut of the job page: the moment's work glows, the rest waits.
- */
-export const JOB_PHASE_LIT: Record<string, readonly string[]> = {
-  lead:           ["customer", "schedule", "photos-scope"],
-  inspection:     ["photos-scope", "schedule", "estimates"],
-  mitigation:     ["photos-scope", "equipment", "moisture"],
-  drying:         ["moisture", "equipment"],
-  reconstruction: ["estimates", "invoices", "paperwork"],
-  completed:      ["invoices", "paperwork", "pnl"],
-  cancelled:      [],
-};
-
 export const JOB_STATUSES = [
   "lead",
   "inspection",

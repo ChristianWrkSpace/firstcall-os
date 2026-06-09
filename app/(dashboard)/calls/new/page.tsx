@@ -7,8 +7,6 @@ import { useRouter } from "next/navigation";
 
 type RecordingState = "idle" | "recording" | "processing" | "review" | "submitting";
 
-const CARD = "rounded-2xl bg-white/[0.03] border border-white/[0.06]";
-
 interface Extraction {
   caller_type: "customer" | "partner";
   partner?: {
@@ -125,47 +123,47 @@ export default function NewCallPage() {
   }
 
   const urgencyColor = {
-    emergency: "text-red-300",
-    urgent: "text-amber-300",
-    standard: "text-emerald-300",
-  }[extraction?.job.urgency ?? "standard"] ?? "text-white/45";
+    emergency: "text-red-400",
+    urgent: "text-yellow-400",
+    standard: "text-green-400",
+  }[extraction?.job.urgency ?? "standard"] ?? "text-zinc-400";
 
   return (
-    <div className="p-4 md:p-8 max-w-2xl mx-auto">
+    <div className="p-4 md:p-8 max-w-2xl">
       <div className="mb-6">
-        <Link href="/calls" className="text-white/40 hover:text-white text-sm transition-colors">
+        <Link href="/calls" className="text-zinc-500 hover:text-white text-sm transition-colors">
           ← Calls
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-white/95 mt-2">New Call</h1>
+        <h1 className="text-2xl font-bold text-white mt-2">New Call</h1>
       </div>
 
       {error && (
-        <div className="mb-4 px-4 py-3 bg-red-400/10 border border-red-400/20 rounded-lg text-red-300 text-sm">
+        <div className="mb-4 px-4 py-3 bg-red-400/10 border border-red-400/20 rounded-lg text-red-400 text-sm">
           {error}
         </div>
       )}
 
       {/* Recording UI */}
       {(state === "idle" || state === "recording") && (
-        <div className={`${CARD} p-8 flex flex-col items-center gap-5`}>
+        <div className="glass-card p-8 flex flex-col items-center gap-5">
           <div
             className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
               state === "recording"
                 ? "bg-red-600 shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse"
-                : "bg-white/[0.06] hover:bg-white/[0.1]"
+                : "bg-zinc-800 hover:bg-zinc-700"
             }`}
           >
             <MicIcon className="w-10 h-10 text-white" />
           </div>
 
           {state === "recording" && (
-            <p className="font-mono text-2xl text-red-300">{formatTime(elapsed)}</p>
+            <p className="font-mono text-2xl text-red-400">{formatTime(elapsed)}</p>
           )}
 
           {state === "idle" ? (
             <button
               onClick={startRecording}
-              className="px-6 py-2.5 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:opacity-95 transition-opacity"
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
             >
               Start Recording
             </button>
@@ -178,7 +176,7 @@ export default function NewCallPage() {
             </button>
           )}
 
-          <p className="text-white/40 text-xs text-center">
+          <p className="text-zinc-500 text-xs text-center">
             {state === "idle"
               ? "Record your intake call. AI will extract job details automatically."
               : "Recording… click End Call when finished."}
@@ -188,10 +186,10 @@ export default function NewCallPage() {
 
       {/* Processing spinner */}
       {state === "processing" && (
-        <div className={`${CARD} p-8 flex flex-col items-center gap-4`}>
-          <SpinnerIcon className="w-10 h-10 text-[#A6B8E7] animate-spin" />
-          <p className="text-white/90 font-medium">Transcribing & extracting…</p>
-          <p className="text-white/40 text-xs text-center">
+        <div className="glass-card p-8 flex flex-col items-center gap-4">
+          <SpinnerIcon className="w-10 h-10 text-blue-400 animate-spin" />
+          <p className="text-white font-medium">Transcribing & extracting…</p>
+          <p className="text-zinc-500 text-xs text-center">
             Deepgram is transcribing the audio, then Claude is extracting the job details.
           </p>
         </div>
@@ -205,8 +203,8 @@ export default function NewCallPage() {
             <div
               className={`px-4 py-3 rounded-lg border text-sm font-medium ${
                 extraction.job.urgency === "emergency"
-                  ? "bg-red-400/10 border-red-400/30 text-red-300"
-                  : "bg-amber-400/10 border-amber-400/30 text-amber-300"
+                  ? "bg-red-500/10 border-red-500/30 text-red-400"
+                  : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
               }`}
             >
               ⚠️ {extraction.job.urgency.toUpperCase()} — {extraction.summary}
@@ -214,13 +212,13 @@ export default function NewCallPage() {
           )}
 
           {/* Caller type */}
-          <div className={`${CARD} p-5`}>
-            <h2 className="text-white/90 font-semibold mb-3">Call Type</h2>
+          <div className="glass-card p-5">
+            <h2 className="text-white font-semibold mb-3">Call Type</h2>
             <span
               className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
                 extraction.caller_type === "partner"
-                  ? "bg-purple-400/15 text-purple-300"
-                  : "bg-[#6B8AD9]/15 text-[#A6B8E7]"
+                  ? "bg-purple-500/15 text-purple-300"
+                  : "bg-blue-500/15 text-blue-300"
               }`}
             >
               {extraction.caller_type === "partner" ? "Partner Referral" : "Direct Customer"}
@@ -229,8 +227,8 @@ export default function NewCallPage() {
 
           {/* Partner info */}
           {extraction.caller_type === "partner" && extraction.partner && (
-            <div className={`${CARD} p-5`}>
-              <h2 className="text-white/90 font-semibold mb-3">Partner / Referral</h2>
+            <div className="glass-card p-5">
+              <h2 className="text-white font-semibold mb-3">Partner / Referral</h2>
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <ReviewField label="Name" value={extraction.partner.name} />
                 <ReviewField label="Company" value={extraction.partner.company} />
@@ -245,8 +243,8 @@ export default function NewCallPage() {
           )}
 
           {/* Customer */}
-          <div className={`${CARD} p-5`}>
-            <h2 className="text-white/90 font-semibold mb-3">Customer</h2>
+          <div className="glass-card p-5">
+            <h2 className="text-white font-semibold mb-3">Customer</h2>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <ReviewField label="Name" value={extraction.customer.name} />
               <ReviewField label="Phone" value={extraction.customer.phone} />
@@ -257,8 +255,8 @@ export default function NewCallPage() {
           </div>
 
           {/* Job */}
-          <div className={`${CARD} p-5`}>
-            <h2 className="text-white/90 font-semibold mb-3">Job Details</h2>
+          <div className="glass-card p-5">
+            <h2 className="text-white font-semibold mb-3">Job Details</h2>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <ReviewField label="Type" value={extraction.job.type} capitalize />
               <ReviewField
@@ -291,16 +289,16 @@ export default function NewCallPage() {
           </div>
 
           {/* Transcript */}
-          <details className={`${CARD} p-5`}>
-            <summary className="text-white/45 text-sm cursor-pointer hover:text-white transition-colors">
+          <details className="glass-card p-5">
+            <summary className="text-zinc-400 text-sm cursor-pointer hover:text-white transition-colors">
               View transcript
             </summary>
-            <p className="mt-3 text-white/70 text-sm leading-relaxed whitespace-pre-wrap">{transcript}</p>
+            <p className="mt-3 text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">{transcript}</p>
           </details>
 
           {/* Submit */}
           {submitState?.error && (
-            <p className="text-red-300 text-sm">{submitState.error}</p>
+            <p className="text-red-400 text-sm">{submitState.error}</p>
           )}
 
           <form action={submitAction} className="flex gap-3">
@@ -309,14 +307,14 @@ export default function NewCallPage() {
             <button
               type="button"
               onClick={() => setRecordingState("idle")}
-              className="px-4 py-2 border border-white/[0.08] text-white/70 rounded-lg text-sm hover:bg-white/[0.05] transition-colors"
+              className="px-4 py-2 border border-zinc-700 text-zinc-300 rounded-lg text-sm hover:bg-zinc-800 transition-colors"
             >
               Re-record
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-2 bg-gradient-to-br from-[#6B8AD9] to-[#5FBDB0] disabled:opacity-50 text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(95,189,176,0.25)] hover:opacity-95 transition-opacity"
+              className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {submitting ? "Creating Job…" : "Confirm & Create Job"}
             </button>
@@ -340,9 +338,9 @@ function ReviewField({
 }) {
   return (
     <div>
-      <dt className="text-white/40 text-xs uppercase tracking-wide mb-0.5">{label}</dt>
-      <dd className={`text-white/80 ${capitalize ? "capitalize" : ""} ${className ?? ""}`}>
-        {value || <span className="text-white/30">—</span>}
+      <dt className="text-zinc-500 text-xs uppercase tracking-wide mb-0.5">{label}</dt>
+      <dd className={`text-zinc-200 ${capitalize ? "capitalize" : ""} ${className ?? ""}`}>
+        {value || <span className="text-zinc-600">—</span>}
       </dd>
     </div>
   );
