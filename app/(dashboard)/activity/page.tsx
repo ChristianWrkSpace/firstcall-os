@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import Link from "next/link";
 import { requireRoles } from "@/components/RoleGate";
+import { PageShell, EmptyState } from "@/components/ui/Glass";
 
 // Live orchestration feed. Shows what every agent + system action has done
 // recently across all jobs. Color-coded by agent so the office can scan
@@ -63,13 +64,14 @@ const ACTION_META: Record<
   "secret.rotated": { agent: "Security", emoji: "🔑", color: "blue", label: "secret rotated" },
 };
 
+// Agent hue, softened to glass weights for the dark stage.
 const COLOR_CLASSES: Record<string, string> = {
-  blue: "bg-blue-500/10 border-blue-500/30 text-blue-300",
-  green: "bg-green-500/10 border-green-500/30 text-green-300",
-  amber: "bg-amber-500/10 border-amber-500/30 text-amber-300",
-  red: "bg-red-500/10 border-red-500/30 text-red-300",
-  purple: "bg-purple-500/10 border-purple-500/30 text-purple-300",
-  zinc: "bg-white/[0.03] border-zinc-700 text-zinc-300",
+  blue: "bg-[#6B8AD9]/[0.08] border-[#6B8AD9]/25 text-[#A6B8E7]",
+  green: "bg-emerald-400/[0.07] border-emerald-400/25 text-emerald-200",
+  amber: "bg-amber-400/[0.07] border-amber-400/25 text-amber-200",
+  red: "bg-red-400/[0.07] border-red-400/25 text-red-200",
+  purple: "bg-violet-400/[0.07] border-violet-400/25 text-violet-200",
+  zinc: "bg-white/[0.025] border-white/[0.08] text-white/75",
 };
 
 const AGENT_FILTER_OPTIONS = [
@@ -99,18 +101,14 @@ export default async function ActivityPage({
   const cutoff = getDataCutoff();
   let rowsQuery = supabase
     .from("audit_logs")
-    .select(
-      "id, created_at, user_id, user_name, action, entity_type, entity_id, details"
-    )
+    .select("id, created_at, user_id, user_name, action, entity_type, entity_id, details")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (cutoff) rowsQuery = rowsQuery.gte("created_at", cutoff);
   const { data: rows } = await rowsQuery;
 
   const all = (rows ?? []) as AuditRow[];
-  const items = agentFilter
-    ? all.filter((r) => ACTION_META[r.action]?.agent === agentFilter)
-    : all;
+  const items = agentFilter ? all.filter((r) => ACTION_META[r.action]?.agent === agentFilter) : all;
 
   const counts: Record<string, number> = {};
   for (const r of all) {
@@ -120,31 +118,26 @@ export default async function ActivityPage({
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">🎛️ Agent Activity</h1>
-        <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
-          Real-time feed of every system action across all jobs. What the agents
-          drafted, what got auto-sent, what's blocked. Filter by agent to focus.
-        </p>
-      </div>
-
+    <PageShell
+      eyebrow="Agent decisions"
+      title="Agent Activity"
+      subtitle="Real-time feed of every system action across all jobs — what the agents drafted, what got auto-sent, what's blocked. Filter by agent to focus."
+      width="wide"
+    >
       {/* Agent counts strip */}
       <section className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
         {AGENT_FILTER_OPTIONS.filter((o) => o.value).map((o) => (
           <Link
             key={o.value}
             href={`/activity?agent=${o.value}`}
-            className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
+            className={`px-3 py-2 rounded-xl border text-xs transition-all ${
               agentFilter === o.value
-                ? "border-blue-500 bg-blue-500/10 text-white"
-                : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700"
+                ? "border-[#5FBDB0]/30 bg-[#5FBDB0]/[0.06] text-white ring-1 ring-[#5FBDB0]/15"
+                : "border-white/[0.06] bg-white/[0.02] text-white/75 hover:border-white/15 hover:bg-white/[0.04]"
             }`}
           >
             <p className="font-semibold">{o.value}</p>
-            <p className="text-zinc-500 text-[10px] mt-0.5">
-              {counts[o.value] ?? 0} actions
-            </p>
+            <p className="text-white/40 text-[10px] mt-0.5">{counts[o.value] ?? 0} actions</p>
           </Link>
         ))}
       </section>
@@ -152,7 +145,7 @@ export default async function ActivityPage({
       {agentFilter && (
         <Link
           href="/activity"
-          className="inline-block mb-3 text-blue-400 hover:underline text-xs"
+          className="inline-block mb-3 text-[#A8DCD3] hover:text-white text-xs transition-colors"
         >
           ← All agents
         </Link>
@@ -160,23 +153,21 @@ export default async function ActivityPage({
 
       {/* Feed */}
       {items.length === 0 ? (
-        <div className="glass-card p-10 text-center">
-          <p className="text-zinc-400 text-sm">
-            {agentFilter
+        <EmptyState
+          icon="🎛"
+          title={
+            agentFilter
               ? `No recent activity from ${agentFilter}.`
-              : "No system activity yet. Once you create a job or approve a draft, agents start working."}
-          </p>
-        </div>
+              : "No system activity yet."
+          }
+        >
+          {!agentFilter && "Once you create a job or approve a draft, agents start working."}
+        </EmptyState>
       ) : (
         <div className="flex flex-col gap-2">
-          {items.map((r) => {
+          {items.map((r, i) => {
             const meta =
-              ACTION_META[r.action] ?? {
-                agent: "Other",
-                emoji: "•",
-                color: "zinc",
-                label: r.action,
-              };
+              ACTION_META[r.action] ?? { agent: "Other", emoji: "•", color: "zinc", label: r.action };
             const colorClass = COLOR_CLASSES[meta.color] ?? COLOR_CLASSES.zinc;
             const isSystem = !r.user_id;
             const jobLink =
@@ -189,49 +180,36 @@ export default async function ActivityPage({
             return (
               <article
                 key={r.id}
-                className={`flex items-start gap-3 px-4 py-3 rounded-lg border ${colorClass}`}
+                className={`flex items-start gap-3 px-4 py-3 rounded-xl border animate-rise-in ${colorClass}`}
+                style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
               >
-                <div className="text-xl shrink-0 leading-none mt-0.5">
-                  {meta.emoji}
-                </div>
+                <div className="text-xl shrink-0 leading-none mt-0.5">{meta.emoji}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm">
+                  <p className="text-sm text-white/90">
                     <span className="font-semibold">{meta.agent}</span>
-                    <span className="text-zinc-400"> · </span>
+                    <span className="text-white/40"> · </span>
                     <span>{meta.label}</span>
                     {r.details?.doc_type && (
                       <>
-                        <span className="text-zinc-500"> · </span>
-                        <span className="text-zinc-300 text-xs font-mono">
-                          {r.details.doc_type}
-                        </span>
+                        <span className="text-white/40"> · </span>
+                        <span className="text-white/70 text-xs font-mono">{r.details.doc_type}</span>
                       </>
                     )}
                   </p>
-                  <div className="mt-1 text-[11px] text-zinc-400 flex flex-wrap gap-2">
+                  <div className="mt-1 text-[11px] text-white/45 flex flex-wrap gap-2">
                     <span>{new Date(r.created_at).toLocaleString()}</span>
                     <span>·</span>
-                    <span>
-                      {isSystem ? (
-                        <em className="text-zinc-500">system</em>
-                      ) : (
-                        r.user_name ?? "unknown user"
-                      )}
-                    </span>
+                    <span>{isSystem ? <em className="text-white/35">system</em> : r.user_name ?? "unknown user"}</span>
                     {r.details?.reason && (
                       <>
                         <span>·</span>
-                        <span className="text-zinc-300">
-                          {r.details.reason}
-                        </span>
+                        <span className="text-white/70">{r.details.reason}</span>
                       </>
                     )}
                     {r.details?.recipient && (
                       <>
                         <span>·</span>
-                        <span className="font-mono">
-                          → {r.details.recipient}
-                        </span>
+                        <span className="font-mono">→ {r.details.recipient}</span>
                       </>
                     )}
                   </div>
@@ -239,7 +217,7 @@ export default async function ActivityPage({
                 {jobLink && (
                   <Link
                     href={jobLink}
-                    className="text-xs text-zinc-300 hover:text-white shrink-0 self-center"
+                    className="text-xs text-white/60 hover:text-white shrink-0 self-center transition-colors"
                   >
                     Open →
                   </Link>
@@ -249,6 +227,6 @@ export default async function ActivityPage({
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
