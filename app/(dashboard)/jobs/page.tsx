@@ -92,140 +92,117 @@ export default async function JobsPage({
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Jobs</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">
-            {jobs?.length ?? 0} {TAB_LABELS[filter].toLowerCase()}
-            {filter === "active" && counts.completed > 0 && (
-              <>
-                {" · "}
-                <Link
-                  href="/jobs?filter=completed"
-                  className="text-zinc-500 hover:text-white transition-colors"
-                >
-                  {counts.completed} completed
-                </Link>
-              </>
-            )}
-          </p>
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-primary)" }}>
+              Jobs
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
+              {jobs?.length ?? 0} {TAB_LABELS[filter].toLowerCase()}
+            </p>
+          </div>
+          <Link
+            href="/jobs/new"
+            className="px-4 py-2 text-sm font-medium rounded-xl text-white transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #6B8AD9, #5FBDB0)" }}
+          >
+            + New Job
+          </Link>
         </div>
-        <Link
-          href="/jobs/new"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          + New Job
-        </Link>
-      </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-white/[0.06]">
-        {(Object.keys(TAB_LABELS) as Filter[]).map((f) => {
-          const active = f === filter;
-          return (
-            <Link
-              key={f}
-              href={f === "active" ? "/jobs" : `/jobs?filter=${f}`}
-              className={`px-3 py-2 text-sm transition-colors border-b-2 -mb-px ${
-                active
-                  ? "text-white border-blue-500"
-                  : "text-zinc-400 hover:text-white border-transparent"
-              }`}
-            >
-              {TAB_LABELS[f]}
-              <span className="text-zinc-600 text-xs ml-1.5">
-                {counts[f]}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+        {/* Filter pills */}
+        <div className="flex gap-2 mb-5 flex-wrap">
+          {(Object.keys(TAB_LABELS) as Filter[]).map((f) => {
+            const active = f === filter;
+            return (
+              <Link
+                key={f}
+                href={f === "active" ? "/jobs" : `/jobs?filter=${f}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  active ? "ring-1 ring-[#5FBDB0]/30" : "hover:bg-white/[0.06]"
+                }`}
+                style={{
+                  backgroundColor: active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
+                  color: active ? "var(--color-text-primary)" : "var(--color-text-secondary)",
+                }}
+              >
+                {TAB_LABELS[f]}
+                <span className="ml-1.5" style={{ color: "var(--color-text-muted)" }}>
+                  {counts[f]}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
 
-      <div className="glass-card overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[0.06]">
-              {["Job #", "Customer", "Type", "Status", "Site", "A/R", "Created"].map(
-                (h) => (
-                  <th
-                    key={h}
-                    className="text-left text-zinc-400 font-medium px-4 py-3 text-xs uppercase tracking-wide"
-                  >
-                    {h}
-                  </th>
-                )
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {!jobs?.length && (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-zinc-500">
-                  No {TAB_LABELS[filter].toLowerCase()} jobs.{" "}
-                  {filter === "active" && (
-                    <Link href="/jobs/new" className="text-blue-400 hover:underline">
-                      Create your first job →
-                    </Link>
-                  )}
-                </td>
-              </tr>
+        {/* Flowing rows — the whole row is the tap target */}
+        {!jobs?.length ? (
+          <div
+            className="rounded-2xl border px-6 py-14 text-center"
+            style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
+          >
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+              No {TAB_LABELS[filter].toLowerCase()} jobs.
+            </p>
+            {filter === "active" && (
+              <Link
+                href="/jobs/new"
+                className="inline-block mt-3 text-sm hover:underline"
+                style={{ color: "#5FBDB0" }}
+              >
+                Create your first job →
+              </Link>
             )}
-            {jobs?.map((job: any) => {
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {jobs.map((job: any) => {
               const balance = arBalance(job);
               return (
-                <tr
+                <Link
                   key={job.id}
-                  className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors"
+                  href={`/jobs/${job.id}`}
+                  className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-colors hover:bg-white/[0.05]"
+                  style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
                 >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/jobs/${job.id}`}
-                      className="text-blue-400 hover:underline font-mono text-xs"
-                    >
-                      {job.job_number}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-white">{job.customers?.name ?? "—"}</p>
-                    <p className="text-zinc-500 text-xs mt-0.5">
-                      {job.customers?.phone ?? ""}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-300 capitalize">
-                    {job.type ?? "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[job.status] ?? ""}`}
-                    >
-                      {job.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-400 text-xs">
-                    {[job.site_address, job.site_city].filter(Boolean).join(", ") ||
-                      "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {balance > 0 ? (
-                      <Link
-                        href="/ar"
-                        className="inline-flex items-center gap-1 text-yellow-400 hover:text-yellow-300 font-mono text-xs"
-                        title="Open balance — see A/R for collection"
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <p className="font-medium truncate" style={{ color: "var(--color-text-primary)" }}>
+                        {job.customers?.name ?? "No customer"}
+                      </p>
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${STATUS_COLORS[job.status] ?? ""}`}
                       >
-                        ⚠ {fmt(balance)}
-                      </Link>
-                    ) : (
-                      <span className="text-zinc-700 text-xs">—</span>
+                        {job.status}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-1 truncate" style={{ color: "var(--color-text-muted)" }}>
+                      <span className="font-mono">{job.job_number}</span>
+                      {" · "}
+                      <span className="capitalize">{job.type ?? "—"}</span>
+                      {job.site_address ? ` · ${[job.site_address, job.site_city].filter(Boolean).join(", ")}` : ""}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {balance > 0 && (
+                      <p className="font-mono text-xs text-amber-300">⚠ {fmt(balance)}</p>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-500 text-xs">
-                    {new Date(job.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
+                    <p className="text-[11px] mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                      {new Date(job.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span
+                    className="shrink-0 text-xs transition-transform group-hover:translate-x-0.5"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    ›
+                  </span>
+                </Link>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
     </div>
   );

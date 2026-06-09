@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ROLE_META, ALL_ROLES, type Role } from "@/lib/permissions";
 import UserRoleEditor from "./UserRoleEditor";
+import InviteUserForm from "./InviteUserForm";
 
 export default async function UsersPage() {
   const me = await getCurrentUser();
@@ -44,9 +45,11 @@ export default async function UsersPage() {
         </p>
       </div>
 
-      {!canManage && (
+      {canManage ? (
+        <InviteUserForm />
+      ) : (
         <div className="mb-5 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-lg text-zinc-400 text-sm">
-          ℹ️ View-only — only Owners can change roles.
+          ℹ️ View-only — only Owners can invite users or change roles.
         </div>
       )}
 
@@ -124,9 +127,9 @@ export default async function UsersPage() {
       <div className="mt-5 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-zinc-500 text-xs leading-relaxed">
         <p className="text-zinc-300 text-sm font-semibold mb-1">How users join</p>
         <p>
-          New users sign up via the standard login page. They start as{" "}
-          <code className="text-zinc-300 bg-zinc-800 px-1 rounded">technician</code> by
-          default. An Owner promotes them here once verified.
+          Invite them above — they get an email link, set a password, and land with
+          the role you picked. (Self-signup via the login page still works and starts
+          as <code className="text-zinc-300 bg-zinc-800 px-1 rounded">technician</code>.)
         </p>
       </div>
     </div>
