@@ -17,14 +17,9 @@ export default async function EchoCanvasPage() {
   const pendingApprovals = data.handoffs.length;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-bg-deep)" }}>
-      {/* Ambient atmosphere */}
-      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
-        <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(91,130,184,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(217,119,87,0.05) 0%, transparent 50%)" }} />
-      </div>
-
+    <div className="min-h-screen flex flex-col pt-6">
       {/* ─── COMMAND BAR ────────────────────────────────────────── */}
-      <div className="relative z-20 px-6 pt-6 pb-4">
+      <div className="relative z-20 px-6 pb-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 p-4 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}>
             <span className="text-lg">⚡</span>
@@ -59,7 +54,7 @@ export default async function EchoCanvasPage() {
                   <div className="w-2 h-2 rounded-full bg-[#D97757] animate-ping-ambient" />
                   <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">Live Agents</p>
                 </div>
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: totalActive > 0 ? "rgba(217,119,87,0.1)" : "var(--color-surface-strong)", color: totalActive > 0 ? "#D97757" : "var(--color-text-muted)" }}>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: totalActive > 0 ? "rgba(217,119,87,0.1)" : "var(--color-surface-strong)", color: "var(--color-text-secondary)" }}>
                   {totalActive} active
                 </span>
               </div>
@@ -68,16 +63,16 @@ export default async function EchoCanvasPage() {
                   <p className="text-sm text-[color:var(--color-text-muted)]">All agents idle. System is quiet.</p>
                 ) : (
                   data.agentWorkflows.slice(0, 3).map((wf, i) => (
-                    <div key={wf.id || i} className="flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.01] cursor-pointer" style={{ backgroundColor: wf.state === "blocked" ? "rgba(245,158,11,0.05)" : "var(--color-surface-strong)" }}>
+                    <div key={wf.id || i} className="flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.01] cursor-pointer" style={{ backgroundColor: "var(--color-surface-strong)" }}>
                       <span className="text-lg">{wf.icon || "🤖"}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[color:var(--color-text-primary)] truncate">{wf.agent} · {wf.intent}</p>
                         <p className="text-xs text-[color:var(--color-text-muted)] truncate">{wf.target}</p>
                       </div>
                       <div className="w-16 h-1 rounded-full bg-[color:var(--color-surface)]">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${wf.progress}%`, backgroundColor: wf.state === "complete" ? "#D97757" : wf.state === "blocked" ? "#F59E0B" : "#5B82B8" }} />
+                        <div className="h-full rounded-full transition-all" style={{ width: `${wf.progress}%`, backgroundColor: wf.state === "complete" ? "#5FBDB0" : wf.state === "blocked" ? "#F59E0B" : "#6B8AD9" }} />
                       </div>
-                      <span className="text-[10px] font-medium" style={{ color: wf.state === "complete" ? "#D97757" : wf.state === "blocked" ? "#F59E0B" : "#5B82B8" }}>
+                      <span className="text-[10px] font-medium" style={{ color: "var(--color-text-primary)" }}>
                         {wf.progress}%
                       </span>
                     </div>
@@ -87,13 +82,13 @@ export default async function EchoCanvasPage() {
             </div>
 
             {/* Urgent Attention */}
-            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(245,158,11,0.04)" : "var(--color-surface)", borderColor: pendingApprovals > 0 ? "rgba(245,158,11,0.15)" : "var(--color-edge)" }}>
+            <div className="md:col-span-2 rounded-2xl p-5 border animate-spatial-rise" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(217,119,87,0.04)" : "var(--color-surface)", borderColor: pendingApprovals > 0 ? "rgba(217,119,87,0.15)" : "var(--color-edge)" }}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">⚠️</span>
                   <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">Needs Attention</p>
                 </div>
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(245,158,11,0.1)" : "var(--color-surface-strong)", color: pendingApprovals > 0 ? "#F59E0B" : "var(--color-text-muted)" }}>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: pendingApprovals > 0 ? "rgba(217,119,87,0.1)" : "var(--color-surface-strong)", color: "var(--color-text-secondary)" }}>
                   {pendingApprovals} pending
                 </span>
               </div>
@@ -108,7 +103,7 @@ export default async function EchoCanvasPage() {
                         <p className="text-sm font-medium text-[color:var(--color-text-primary)]">{h.title}</p>
                         <p className="text-xs text-[color:var(--color-text-muted)]">{h.detail} · {h.ageMinutes}m ago</p>
                       </div>
-                      <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-ink transition-all hover:scale-105" style={{ backgroundColor: "var(--color-primary)" }}>
+                      <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-all hover:scale-105" style={{ backgroundColor: "var(--color-cta)" }}>
                         Review
                       </button>
                     </div>
@@ -121,14 +116,14 @@ export default async function EchoCanvasPage() {
           {/* Row 2: Pulse Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Triggers 24h", value: data.systemPulse.triggersLast24h, tone: "teal" as const },
+              { label: "Triggers 24h", value: data.systemPulse.triggersLast24h, tone: "terracotta" as const },
               { label: "Open Jobs", value: openJobs, tone: "blue" as const },
               { label: "MTD AI Spend", value: fmtUsd.format(data.compute.mtdSpendUsd), tone: "amber" as const },
               { label: "Backup Age", value: `${data.systemPulse.backupAgeHours}h`, tone: "neutral" as const },
             ].map((m, i) => (
               <div key={i} className="rounded-2xl p-4 border animate-spatial-rise" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}>
                 <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[color:var(--color-text-muted)] mb-2">{m.label}</p>
-                <p className="text-2xl font-bold tabular-nums" style={{ color: m.tone === "teal" ? "#D97757" : m.tone === "amber" ? "#F59E0B" : m.tone === "blue" ? "#5B82B8" : "var(--color-text-primary)" }}>
+                <p className="text-2xl font-bold tabular-nums" style={{ color: "var(--color-text-primary)" }}>
                   {m.value}
                 </p>
               </div>
