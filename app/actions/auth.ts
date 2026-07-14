@@ -29,7 +29,7 @@ export async function signIn(
   // everyone else (owner / manager / office) goes to the Command Center,
   // the new official operational dashboard. Old /dashboard route stays
   // mounted as the "classic" view for fallback / comparison.
-  let redirectTo = "/canvas";
+  let redirectTo = "/jobs";
   try {
     const admin = createAdminClient();
     const { data: profile } = await admin
