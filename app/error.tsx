@@ -28,7 +28,7 @@ export default function Error({
             Try again
           </button>
           <Link
-            href="/canvas"
+            href="/command-center"
             className="block w-full py-2.5 rounded-xl bg-shade hover:bg-edge2 text-ink text-sm font-medium transition-colors"
           >
             Back to Command Center

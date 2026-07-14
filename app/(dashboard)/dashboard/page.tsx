@@ -1,7 +1,7 @@
-// /dashboard forwards straight to /canvas (the canonical home) — previously
-// it hopped through /command-center, costing an extra redirect round-trip.
+// /dashboard forwards straight to /command-center (the canonical home) — previously
+// it was in a custom dashboard state, now aligned.
 import { redirect } from "next/navigation";
 
-export default function DashboardLegacyRedirect() {
-  redirect("/canvas");
+export default function DashboardPageRedirect() {
+  redirect("/command-center");
 }

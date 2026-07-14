@@ -17,7 +17,7 @@ export default function NotFound() {
         </p>
         <div className="mt-6 flex flex-col gap-2">
           <Link
-            href="/canvas"
+            href="/command-center"
             className="w-full py-2.5 rounded-xl bg-cta hover:bg-cta-deep text-white text-sm font-medium transition-colors"
           >
             Back to Command Center
