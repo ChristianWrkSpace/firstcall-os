@@ -38,7 +38,7 @@ describe("manual-only billing and invoicing", () => {
     const invoiceIndex = source("app/(dashboard)/jobs/[id]/invoices/page.tsx");
 
     expect(editor).toContain("<CreateManualInvoiceButton");
-    expect(editor).toContain("Open draft invoice");
+    expect(editor).toContain("Open invoice");
     expect(button).toContain("Create draft invoice");
     expect(actions).toContain("export async function createInvoiceFromManualAmount");
     expect(actions).toContain('requirePermission("invoices.edit")');
@@ -79,5 +79,39 @@ describe("manual-only billing and invoicing", () => {
     expect(sql).toContain("substring(invoice_number from 12)");
     expect(sql).toContain("pg_advisory_xact_lock");
     expect(sql).toContain("drop function if exists public.create_invoice_from_estimate");
+  });
+
+  it("shows the invoice amount and supports viewing or printing without email", () => {
+    const invoicePage = source("app/(dashboard)/jobs/[id]/invoices/[invoiceId]/page.tsx");
+    const actions = source("app/(dashboard)/jobs/[id]/invoices/[invoiceId]/InvoiceActions.tsx");
+    const email = source("lib/abacus-templates.ts");
+    const lineTable = source("app/(dashboard)/jobs/[id]/invoices/[invoiceId]/InvoiceLineTable.tsx");
+    const printPage = source("app/(dashboard)/jobs/[id]/invoices/[invoiceId]/print/page.tsx");
+
+    expect(invoicePage).toContain("Invoice Total");
+    expect(invoicePage).toContain("customers(name, insurance_company, email)");
+    expect(invoicePage).toContain("invoice.sent_to ?? (job as any).customers?.email ?? \"\"");
+    expect(actions).toContain("View / Print Invoice");
+    expect(actions).toContain("No email is needed to view, print, or save this invoice as a PDF.");
+    expect(actions).toContain("Email Invoice");
+    expect(email).toContain("Invoice Total");
+    expect(email).toContain("${fmt(ctx.total)}");
+    expect(lineTable).toContain('"Services"');
+    expect(printPage).toContain('"Services"');
+    expect(email).toContain('"Services"');
+  });
+
+  it("reopens an existing active manual invoice instead of creating duplicates", () => {
+    const jobPage = source("app/(dashboard)/jobs/[id]/page.tsx");
+    const editor = source("app/(dashboard)/jobs/[id]/ManualBillingAmount.tsx");
+    const sql = source("supabase/migrations/037_manual_invoice_no_email_flow.sql")
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+    expect(jobPage).toContain("manualActiveInvoice");
+    expect(jobPage).toContain('invoice.status !== "void"');
+    expect(editor).toContain("Open invoice");
+    expect(sql).toContain("i.status <> 'void'");
+    expect(sql).toContain("return v_invoice_id");
   });
 });

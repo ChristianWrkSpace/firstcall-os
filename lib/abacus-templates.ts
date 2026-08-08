@@ -61,6 +61,7 @@ function renderLineItemsTable(items: LineItemForEmail[]) {
 
   // Group by category in the same order as the print invoice
   const order = [
+    "Services",
     "Water Extraction",
     "Equipment Setup",
     "Daily Drying",
@@ -124,7 +125,7 @@ function renderLineItemsTable(items: LineItemForEmail[]) {
 }
 
 export function buildInvoiceEmail(ctx: InvoiceContext) {
-  const subject = `Invoice ${ctx.invoice_number} — ${ctx.customer_name} loss${ctx.claim_number ? ` (Claim ${ctx.claim_number})` : ""}`;
+  const subject = `Invoice ${ctx.invoice_number} — ${fmt(ctx.total)} — ${ctx.customer_name}${ctx.claim_number ? ` (Claim ${ctx.claim_number})` : ""}`;
 
   const itemsTable = ctx.line_items?.length ? renderLineItemsTable(ctx.line_items) : "";
 
@@ -140,6 +141,7 @@ export function buildInvoiceEmail(ctx: InvoiceContext) {
       ${ctx.insurance_company ? `<tr><td style="color:#71717a;">Carrier</td><td>${ctx.insurance_company}</td></tr>` : ""}
       ${ctx.claim_number ? `<tr><td style="color:#71717a;">Claim #</td><td style="font-family:Menlo,monospace;">${ctx.claim_number}</td></tr>` : ""}
       <tr><td style="color:#71717a;">Job #</td><td style="font-family:Menlo,monospace;">${ctx.job_number}</td></tr>
+      <tr><td style="color:#71717a;">Invoice Total</td><td style="font-family:Menlo,monospace;font-size:16px;font-weight:700;">${fmt(ctx.total)}</td></tr>
       ${ctx.due_date ? `<tr><td style="color:#71717a;">Due Date</td><td>${ctx.due_date}</td></tr>` : ""}
     </table>
 

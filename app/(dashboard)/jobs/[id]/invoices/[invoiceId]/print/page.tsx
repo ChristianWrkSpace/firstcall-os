@@ -41,6 +41,7 @@ export default async function InvoicePrintPage({
     byCategory[cat].push(li);
   }
   const categoryOrder = [
+    "Services",
     "Water Extraction",
     "Equipment Setup",
     "Daily Drying",

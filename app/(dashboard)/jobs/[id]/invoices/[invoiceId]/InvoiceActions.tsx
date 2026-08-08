@@ -70,6 +70,20 @@ export default function InvoiceActions({
 
   return (
     <div className="flex flex-col gap-2">
+      <a
+        href={`/jobs/${jobId}/invoices/${invoiceId}/print`}
+        target="_blank"
+        rel="noopener"
+        className="px-3 py-2 bg-cta hover:bg-cta-deep text-white text-sm font-medium rounded-lg transition-colors text-center"
+      >
+        View / Print Invoice
+      </a>
+      {status === "draft" && (
+        <p className="text-ink-3 text-[11px] leading-snug">
+          No email is needed to view, print, or save this invoice as a PDF.
+        </p>
+      )}
+
       {/* Send Invoice — draft only */}
       {status === "draft" && !showSend && (
         <button
@@ -77,7 +91,7 @@ export default function InvoiceActions({
           disabled={pending}
           className="px-3 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          ✉ Send Invoice
+          ✉ Email Invoice
         </button>
       )}
 
@@ -145,17 +159,6 @@ export default function InvoiceActions({
         </>
       )}
 
-      {/* Print */}
-      {status !== "draft" && (
-        <a
-          href={`/jobs/${jobId}/invoices/${invoiceId}/print`}
-          target="_blank"
-          rel="noopener"
-          className="px-3 py-2 bg-shade hover:bg-shade text-ink-2 text-sm rounded-lg transition-colors text-center mt-2"
-        >
-          🖨 Print / Export
-        </a>
-      )}
 
       {/* Void */}
       {isOpen && (

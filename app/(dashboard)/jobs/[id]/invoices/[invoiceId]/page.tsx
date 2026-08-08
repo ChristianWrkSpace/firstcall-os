@@ -52,7 +52,7 @@ export default async function InvoiceDetail({
       .order("sent_at", { ascending: false }),
     supabase
       .from("jobs")
-      .select("job_number, customers(name, insurance_company)")
+      .select("job_number, customers(name, insurance_company, email)")
       .eq("id", jobId)
       .single(),
   ]);
@@ -121,17 +121,14 @@ export default async function InvoiceDetail({
           )}
         </div>
         <div className="text-right">
-          <p className="text-ink-3 text-xs uppercase tracking-wide">Balance Due</p>
-          <p className={`text-3xl font-bold font-mono ${balance > 0 ? "text-ink" : "text-pine"}`}>
-            ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <p className="text-ink-3 text-xs uppercase tracking-wide">Invoice Total</p>
+          <p className="text-3xl font-bold font-mono text-ink">
+            ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          {paid > 0 && (
-            <p className="text-ink-3 text-xs mt-0.5">
-              ${paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} paid
-              {" of "}
-              ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          )}
+          <p className={`text-xs mt-0.5 ${balance > 0 ? "text-ink-2" : "text-pine"}`}>
+            Balance due: ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {paid > 0 && ` · $${paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} paid`}
+          </p>
         </div>
       </div>
 
@@ -171,7 +168,7 @@ export default async function InvoiceDetail({
               invoiceId={invoiceId}
               jobId={jobId}
               status={invoice.status}
-              defaultRecipient={invoice.sent_to ?? ""}
+              defaultRecipient={invoice.sent_to ?? (job as any).customers?.email ?? ""}
               hasBeenSent={!!invoice.sent_at}
             />
           </section>

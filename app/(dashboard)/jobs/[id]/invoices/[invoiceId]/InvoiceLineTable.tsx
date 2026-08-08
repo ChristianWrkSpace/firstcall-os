@@ -22,6 +22,7 @@ interface LineItem {
 
 const UNITS = ["EA", "SF", "LF", "DA", "HR", "CY", "GAL"];
 const CATEGORIES = [
+  "Services",
   "Water Extraction",
   "Equipment Setup",
   "Daily Drying",
@@ -47,6 +48,7 @@ export default function InvoiceLineTable({
   const [adding, setAdding] = useState(false);
 
   const categoryOrder = [
+    "Services",
     "Water Extraction",
     "Equipment Setup",
     "Daily Drying",

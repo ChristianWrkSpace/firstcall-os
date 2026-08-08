@@ -8,11 +8,11 @@ import CreateManualInvoiceButton from "./CreateManualInvoiceButton";
 export default function ManualBillingAmount({
   jobId,
   initialAmount,
-  existingDraftInvoiceId,
+  existingInvoiceId,
 }: {
   jobId: string;
   initialAmount: number | null;
-  existingDraftInvoiceId: string | null;
+  existingInvoiceId: string | null;
 }) {
   const [state, action, pending] = useActionState(updateManualJobAmount, undefined);
   const formatted =
@@ -70,16 +70,16 @@ export default function ManualBillingAmount({
         <p className="mt-2 text-xs text-pine">Billing amount saved.</p>
       )}
       <div className="mt-4 border-t border-edge2 pt-4">
-        {existingDraftInvoiceId ? (
+        {existingInvoiceId ? (
           <>
             <Link
-              href={`/jobs/${jobId}/invoices/${existingDraftInvoiceId}`}
+              href={`/jobs/${jobId}/invoices/${existingInvoiceId}`}
               className="inline-flex rounded-lg border border-cta px-4 py-2 text-sm font-semibold text-cta hover:bg-cta/10"
             >
-              Open draft invoice
+              Open invoice
             </Link>
             <p className="mt-2 text-[11px] text-ink-3">
-              A manual draft already exists. Open it to review or edit its line items.
+              This job already has a manual invoice. Open it to view the amount, print it, or manage payment.
             </p>
           </>
         ) : initialAmount != null && initialAmount > 0 ? (

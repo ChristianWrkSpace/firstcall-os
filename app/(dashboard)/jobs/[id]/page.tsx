@@ -231,9 +231,9 @@ export default async function JobDetailPage({
   const mapsHref = fullAddress
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
     : null;
-  const manualDraftInvoice = (invoices ?? []).find(
+  const manualActiveInvoice = (invoices ?? []).find(
     (invoice: any) =>
-      invoice.status === "draft" &&
+      invoice.status !== "void" &&
       invoice.is_manual_billing === true
   );
 
@@ -488,7 +488,7 @@ export default async function JobDetailPage({
             <ManualBillingAmount
               jobId={job.id}
               initialAmount={job.estimated_value}
-              existingDraftInvoiceId={manualDraftInvoice?.id ?? null}
+              existingInvoiceId={manualActiveInvoice?.id ?? null}
             />
           )}
 
