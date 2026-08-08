@@ -1,0 +1,65 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const repoRoot = resolve(import.meta.dirname, "../..");
+const source = (path: string) => readFileSync(resolve(repoRoot, path), "utf8");
+
+describe("manual-only billing and invoicing", () => {
+  it("removes AI estimates from the practical job workflow", () => {
+    const jobPage = source("app/(dashboard)/jobs/[id]/page.tsx");
+    const checklist = source("app/(dashboard)/jobs/[id]/JobChecklist.tsx");
+    const scopeActions = source("app/actions/scope.ts");
+    const help = source("app/(dashboard)/help/page.tsx");
+    const reports = source("app/(dashboard)/reports/page.tsx");
+    const estimateActions = source("app/actions/estimates.ts");
+
+    expect(jobPage).not.toContain("GenerateEstimateButton");
+    expect(jobPage).not.toContain('.from("estimates")');
+    expect(jobPage).not.toContain('title="Estimates"');
+    expect(checklist).not.toContain("estimateCount");
+    expect(checklist).not.toContain('key: "estimate"');
+    expect(scopeActions).not.toContain("autoDraftEstimate");
+    expect(help).not.toContain("Build the estimate");
+    expect(reports).not.toContain('.from("estimates")');
+    expect(reports).not.toContain("Avg Estimate");
+    expect(reports).toContain("Avg Invoice");
+    expect(estimateActions).not.toContain("autoCreateInvoiceDraft");
+  });
+
+  it("creates a draft invoice from the saved manual billing amount", () => {
+    const editor = source("app/(dashboard)/jobs/[id]/ManualBillingAmount.tsx");
+    const button = source("app/(dashboard)/jobs/[id]/CreateManualInvoiceButton.tsx");
+    const actions = source("app/actions/invoices.ts");
+    const invoiceIndex = source("app/(dashboard)/jobs/[id]/invoices/page.tsx");
+
+    expect(editor).toContain("<CreateManualInvoiceButton");
+    expect(editor).toContain("Open draft invoice");
+    expect(button).toContain("Create draft invoice");
+    expect(actions).toContain("export async function createInvoiceFromManualAmount");
+    expect(actions).toContain('requirePermission("invoices.edit")');
+    expect(actions).toContain('"create_manual_invoice_from_job_amount"');
+    expect(invoiceIndex).toContain("Enter a manual billing amount");
+    expect(invoiceIndex).not.toContain("Approve an estimate first");
+  });
+
+  it("creates manual invoices atomically and exposes the RPC only to service_role", () => {
+    const sql = source("supabase/migrations/035_manual_invoice_from_job_amount.sql")
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+    expect(sql).toContain("create or replace function public.create_manual_invoice_from_job_amount");
+    expect(sql).toContain("from public.jobs where id = p_job_id for update");
+    expect(sql).toContain("v_amount is null or v_amount <= 0");
+    expect(sql).toContain("insert into public.invoices");
+    expect(sql).toContain("insert into public.invoice_line_items");
+    expect(sql).toContain("add column if not exists is_manual_billing");
+    expect(sql).toContain("create unique index if not exists idx_one_manual_draft_per_job");
+    expect(sql).toContain("is_manual_billing = true");
+    expect(sql).toContain("pg_advisory_xact_lock");
+    expect(sql).toContain("status = 'draft'");
+    expect(sql).toContain("revoke all on function public.create_manual_invoice_from_job_amount");
+    expect(sql).toContain("grant execute on function public.create_manual_invoice_from_job_amount");
+    expect(sql).toContain("to service_role");
+  });
+});

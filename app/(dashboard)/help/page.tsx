@@ -25,7 +25,7 @@ const WORKFLOW = [
   {
     step: "4",
     title: "Bill and collect",
-    text: "Build the estimate, create the invoice, record every payment, and keep the remaining balance visible until it is paid.",
+    text: "Enter the manual billing amount, create a draft invoice when needed, record every payment, and keep the remaining balance visible until it is paid.",
     href: "/ar",
     action: "Open receivables",
   },

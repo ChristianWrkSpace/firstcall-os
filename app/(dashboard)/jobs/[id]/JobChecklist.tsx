@@ -18,7 +18,6 @@ type ChecklistInput = {
     reading_date: string | null;
     is_dry_standard: boolean | null;
   }>;
-  estimateCount: number;
   invoices: { status: string }[];
   equipmentDeployed: number;
 };
@@ -66,7 +65,7 @@ type Step = {
 };
 
 function computeSteps(input: ChecklistInput): Step[] {
-  const { job, photoCount, legalDocs, moistureReadings, estimateCount, invoices, equipmentDeployed } = input;
+  const { job, photoCount, legalDocs, moistureReadings, invoices, equipmentDeployed } = input;
   const workAuth = legalDocs.find((d) => d.doc_type === "work_authorization");
   const dryingCert = legalDocs.find((d) => d.doc_type === "drying_certificate");
   const isInsurance = (job.payment_route ?? "customer_pay") !== "customer_pay";
@@ -143,19 +142,11 @@ function computeSteps(input: ChecklistInput): Step[] {
       anchor: "paperwork",
     },
     {
-      key: "estimate",
-      label: "Estimate generated",
-      done: estimateCount >= 1,
-      required: !isInsurance,
-      hint: "Auto-drafted after scope analysis. Approve it in the Estimates section.",
-      anchor: "estimates",
-    },
-    {
       key: "invoice",
       label: "Invoice sent",
       done: invoices.some((i) => i.status !== "draft"),
       required: !isInsurance,
-      hint: "Auto-drafted when the estimate is approved.",
+      hint: "Enter the manual billing amount, create a draft invoice, then review and send it.",
       anchor: "invoices",
     },
   ];

@@ -30,6 +30,36 @@ export async function createInvoiceFromEstimate(estimateId: string, jobId: strin
   redirect(`/jobs/${jobId}/invoices/${invoiceId}`);
 }
 
+export async function createInvoiceFromManualAmount(jobId: string) {
+  const auth = await requirePermission("invoices.edit");
+  if ("error" in auth) return auth;
+
+  const due = new Date();
+  due.setDate(due.getDate() + 30);
+
+  const admin = createAdminClient();
+  const { data: invoiceId, error } = await admin.rpc(
+    "create_manual_invoice_from_job_amount",
+    {
+      p_job_id: jobId,
+      p_due_date: due.toISOString().split("T")[0],
+      p_created_by: auth.user.id,
+    }
+  );
+  if (error || !invoiceId) {
+    return {
+      error:
+        error?.message === "Enter a billing amount greater than zero first"
+          ? "Enter and save a billing amount greater than zero first."
+          : "Unable to create the draft invoice.",
+    };
+  }
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/ar");
+  redirect(`/jobs/${jobId}/invoices/${invoiceId}`);
+}
+
 export async function updateInvoiceLine(
   lineItemId: string,
   updates: {

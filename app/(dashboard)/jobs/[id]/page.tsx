@@ -10,7 +10,6 @@ import PhotoGallery from "./PhotoGallery";
 import AnalyzeButton from "./AnalyzeButton";
 import ScopeAssessment from "./ScopeAssessment";
 import DispatchInputsForm from "./DispatchInputs";
-import GenerateEstimateButton from "./GenerateEstimateButton";
 import CustomerNotifications from "./CustomerNotifications";
 import DocumentsVault from "./DocumentsVault";
 import SchedulingPanel from "./SchedulingPanel";
@@ -108,7 +107,6 @@ export default async function JobDetailPage({
     { data: job },
     { data: notes },
     { data: photos },
-    { data: estimates },
     { data: invoices },
     { data: notifications },
     { data: documents },
@@ -139,14 +137,9 @@ export default async function JobDetailPage({
       .eq("job_id", id)
       .order("created_at", { ascending: true }),
     supabase
-      .from("estimates")
-      .select("id, version, status, line_items:estimate_line_items(line_total)")
-      .eq("job_id", id)
-      .order("version", { ascending: false }),
-    supabase
       .from("invoices")
       .select(
-        "id, invoice_number, status, sent_at, due_date, line_items:invoice_line_items(line_total), payments(amount)"
+        "id, invoice_number, status, sent_at, due_date, is_manual_billing, line_items:invoice_line_items(line_total), payments(amount)"
       )
       .eq("job_id", id)
       .order("created_at", { ascending: false }),
@@ -238,6 +231,11 @@ export default async function JobDetailPage({
   const mapsHref = fullAddress
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
     : null;
+  const manualDraftInvoice = (invoices ?? []).find(
+    (invoice: any) =>
+      invoice.status === "draft" &&
+      invoice.is_manual_billing === true
+  );
 
   return (
     <div className="p-4 md:p-8">
@@ -372,7 +370,6 @@ export default async function JobDetailPage({
                 reading_date: r.reading_date,
                 is_dry_standard: r.is_dry_standard,
               })),
-              estimateCount: estimates?.length ?? 0,
               invoices: (invoices ?? []).map((i: any) => ({ status: i.status })),
               equipmentDeployed: equipmentAssignments?.length ?? 0,
             }}
@@ -483,12 +480,16 @@ export default async function JobDetailPage({
         <Act
           id="act-money"
           title="Billing & Costs"
-          description="job profit, estimates, invoices, and payments"
+          description="manual billing, invoices, payments, and job costs"
           accent="#5B82B8"
           open={moneyOpen}
         >
           {currentUser && ["owner", "manager", "office"].includes(currentUser.role) && (
-            <ManualBillingAmount jobId={job.id} initialAmount={job.estimated_value} />
+            <ManualBillingAmount
+              jobId={job.id}
+              initialAmount={job.estimated_value}
+              existingDraftInvoiceId={manualDraftInvoice?.id ?? null}
+            />
           )}
 
           <div id="pnl" className="scroll-mt-24">
@@ -536,67 +537,6 @@ export default async function JobDetailPage({
             </div>
           </div>
 
-          <div id="estimates" className="scroll-mt-24">
-            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-              <SectionHeader
-                title="Estimates"
-                hint="Build and review the estimate for this job."
-              />
-              <GenerateEstimateButton
-                jobId={job.id}
-                hasScope={!!job.scope_assessment}
-              />
-            </div>
-            {!estimates?.length ? (
-              <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
-                {job.scope_assessment
-                  ? "No estimates yet. Click 'Generate Estimate' to draft one."
-                  : "Complete the scope first, then create an estimate."}
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {estimates.map((est: any) => {
-                  const total = (est.line_items ?? []).reduce(
-                    (s: number, li: any) => s + Number(li.line_total ?? 0),
-                    0
-                  );
-                  const statusColors: Record<string, string> = {
-                    draft:    "bg-tint text-[color:var(--color-text-secondary)]",
-                    approved: "bg-pine/10 text-pine",
-                    sent:     "bg-[#5B82B8]/15 text-[#44689A]",
-                    rejected: "bg-red-600/10 text-red-700",
-                    revised:  "bg-honey/10 text-honey",
-                  };
-                  return (
-                    <Link
-                      key={est.id}
-                      href={`/jobs/${job.id}/estimates/${est.id}`}
-                      className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors hover:bg-shade"
-                      style={{ backgroundColor: "rgba(58,47,38,0.05)", borderColor: "var(--color-edge)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm" style={{ color: "#44689A" }}>
-                          v{est.version}
-                        </span>
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[est.status] ?? ""}`}
-                        >
-                          {est.status}
-                        </span>
-                        <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                          {(est.line_items ?? []).length} line items
-                        </span>
-                      </div>
-                      <span className="font-mono font-semibold" style={{ color: "var(--color-text-primary)" }}>
-                        ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
           <div id="invoices" className="scroll-mt-24">
             <div className="mb-4">
               <SectionHeader
@@ -606,7 +546,7 @@ export default async function JobDetailPage({
             </div>
             {!invoices?.length ? (
               <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
-                No invoices yet — approve an estimate to create one.
+                No invoices yet — enter a manual billing amount above and create a draft invoice when needed.
               </p>
             ) : (
               <div className="flex flex-col gap-2">
@@ -882,7 +822,7 @@ export default async function JobDetailPage({
               <SectionHeader
                 title="Activity Timeline"
                 emoji="📜"
-                hint="Every event on this job — emails sent, docs created/sent/signed, moisture readings, equipment deploy/retrieve, estimates approved, payments received — in one chronological feed."
+                hint="Every event on this job — emails sent, docs created/sent/signed, moisture readings, equipment deploy/retrieve, invoices, and payments — in one chronological feed."
               />
             </div>
             <JobActivityTimeline jobId={job.id} />

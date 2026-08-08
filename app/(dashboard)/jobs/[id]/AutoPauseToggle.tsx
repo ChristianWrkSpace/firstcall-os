@@ -16,7 +16,7 @@ export default function AutoPauseToggle({
 
   function toggle() {
     const next = !paused;
-    if (next && !confirm("Pause auto-actions on this job? Agents will stop drafting estimates, AOBs, drying certs, demand letters, and status flips for this job until you unpause.")) {
+    if (next && !confirm("Pause auto-actions on this job? Agents will stop drafting documents, demand letters, and status changes for this job until you unpause.")) {
       return;
     }
     setError(null);
@@ -53,7 +53,7 @@ export default function AutoPauseToggle({
         <p className="text-ink-3 text-[10px] leading-snug mt-0.5">
           {paused
             ? "Litigated / sensitive case — agents won't draft anything for this job."
-            : "Agents will auto-draft estimates, legal docs, drying certs, etc. as conditions are met."}
+            : "Agents may draft legal documents and suggest status changes as conditions are met."}
         </p>
         {error && <p className="text-red-700 text-[10px] mt-1">{error}</p>}
       </div>

@@ -46,7 +46,7 @@ export default async function InvoicesIndex({
         <div className="glass-card p-8 text-center">
           <p className="text-ink-2 text-sm mb-2">No invoices yet for this job.</p>
           <p className="text-ink-3 text-xs">
-            Approve an estimate first, then generate an invoice from it.
+            Enter a manual billing amount on the job, then create a draft invoice when needed.
           </p>
         </div>
       ) : (

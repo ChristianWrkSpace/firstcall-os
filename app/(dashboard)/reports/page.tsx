@@ -32,7 +32,6 @@ export default async function ReportsPage({
     { data: allJobs },
     { data: jobsInWindow },
     { data: callsInWindow },
-    { data: estimatesInWindow },
     { data: invoicesAll },
     { data: payments30 },
   ] = await Promise.all([
@@ -47,10 +46,6 @@ export default async function ReportsPage({
     supabase
       .from("calls")
       .select("id, caller_type, created_at")
-      .gte("created_at", since),
-    supabase
-      .from("estimates")
-      .select("id, status, line_items:estimate_line_items(line_total)")
       .gte("created_at", since),
     supabase
       .from("invoices")
@@ -125,19 +120,13 @@ export default async function ReportsPage({
     .filter((i) => i.status !== "paid" && i.status !== "void" && i.sent_at)
     .reduce((s, i) => s + i.balance, 0);
 
-  // ─── Avg Estimate Value ─────────────────────────────────────────
-  const estimateTotals = (estimatesInWindow ?? [])
-    .map(
-      (e: any) =>
-        (e.line_items ?? []).reduce(
-          (s: number, li: any) => s + Number(li.line_total ?? 0),
-          0
-        ) as number
-    )
-    .filter((t) => t > 0);
-  const avgEstimate =
-    estimateTotals.length > 0
-      ? estimateTotals.reduce((s, v) => s + v, 0) / estimateTotals.length
+  // ─── Average invoice value ───────────────────────────────────────
+  const invoiceTotalsInWindow = allInvoices
+    .filter((i) => new Date(i.created_at) >= new Date(since) && i.status !== "void" && i.total > 0)
+    .map((i) => i.total);
+  const avgInvoice =
+    invoiceTotalsInWindow.length > 0
+      ? invoiceTotalsInWindow.reduce((s, v) => s + v, 0) / invoiceTotalsInWindow.length
       : 0;
 
   // ─── Jobs by Type ─────────────────────────────────────────────────
@@ -284,9 +273,9 @@ export default async function ReportsPage({
         <KPI label="Billed" value={fmt(billedInWindow)} secondary={`last ${windowDays}d`} accent="blue" />
         <KPI label="Collected" value={fmt(collected30)} secondary="last 30d" accent="green" />
         <KPI
-          label="Avg Estimate"
-          value={fmt(avgEstimate)}
-          secondary={`${estimateTotals.length} estimates`}
+          label="Avg Invoice"
+          value={fmt(avgInvoice)}
+          secondary={`${invoiceTotalsInWindow.length} invoices`}
         />
         <KPI label="Open AR" value={fmt(openAR)} secondary="all-time, sent only" accent="amber" />
       </section>

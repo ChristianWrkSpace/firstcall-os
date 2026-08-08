@@ -1,14 +1,18 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { updateManualJobAmount } from "@/app/actions/jobs";
+import CreateManualInvoiceButton from "./CreateManualInvoiceButton";
 
 export default function ManualBillingAmount({
   jobId,
   initialAmount,
+  existingDraftInvoiceId,
 }: {
   jobId: string;
   initialAmount: number | null;
+  existingDraftInvoiceId: string | null;
 }) {
   const [state, action, pending] = useActionState(updateManualJobAmount, undefined);
   const formatted =
@@ -25,7 +29,7 @@ export default function ManualBillingAmount({
         <div>
           <p className="text-sm font-semibold text-ink">Manual Billing Amount</p>
           <p className="mt-1 text-xs text-ink-3">
-            Enter the amount you plan to bill. This does not require or create an AI estimate.
+            Enter the amount you plan to bill and save it. No estimate is required.
           </p>
         </div>
         <p className="font-mono text-xl font-bold text-ink">{formatted}</p>
@@ -65,9 +69,33 @@ export default function ManualBillingAmount({
       {state && "ok" in state && state.ok && (
         <p className="mt-2 text-xs text-pine">Billing amount saved.</p>
       )}
-      <p className="mt-2 text-[11px] text-ink-3">
-        Leave it blank and save to clear the amount. Invoices remain separate.
-      </p>
+      <div className="mt-4 border-t border-edge2 pt-4">
+        {existingDraftInvoiceId ? (
+          <>
+            <Link
+              href={`/jobs/${jobId}/invoices/${existingDraftInvoiceId}`}
+              className="inline-flex rounded-lg border border-cta px-4 py-2 text-sm font-semibold text-cta hover:bg-cta/10"
+            >
+              Open draft invoice
+            </Link>
+            <p className="mt-2 text-[11px] text-ink-3">
+              A manual draft already exists. Open it to review or edit its line items.
+            </p>
+          </>
+        ) : initialAmount != null && initialAmount > 0 ? (
+          <>
+            <CreateManualInvoiceButton jobId={jobId} />
+            <p className="mt-2 text-[11px] text-ink-3">
+              Creates an editable draft invoice for {formatted}. Nothing is sent automatically.
+            </p>
+          </>
+        ) : (
+          <p className="text-[11px] text-ink-3">
+            Save an amount greater than zero to create an invoice.
+          </p>
+        )}
+      </div>
+      <p className="mt-2 text-[11px] text-ink-3">Leave it blank and save to clear the amount.</p>
     </div>
   );
 }

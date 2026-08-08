@@ -41,7 +41,7 @@ describe("hardening regressions", () => {
     expect(autoTriggers).not.toContain('.from("invoices")\n    .insert(');
     expect(autoTriggers).toContain("const jobId = estimate.job_id");
     expect(estimates).toContain("const canonicalJobId = approvedEstimate.job_id");
-    expect(estimates).toContain("autoCreateInvoiceDraft(estimateId, user.id)");
+    expect(estimates).not.toContain("autoCreateInvoiceDraft");
   });
 
   it("uses compare-and-swap semantics for job status transitions", () => {

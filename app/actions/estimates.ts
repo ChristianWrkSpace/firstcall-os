@@ -6,7 +6,6 @@ import { loadPriceBook } from "@/lib/price-book";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { autoCreateInvoiceDraft } from "@/lib/auto-triggers";
 import { resolveApprovalsForEntity } from "@/lib/auto-actions";
 import { logAgentOutcome } from "@/lib/agent-feedback";
 import { requireInputs, PreconditionError } from "@/lib/agent-preconditions";
@@ -279,10 +278,6 @@ export async function approveEstimate(estimateId: string, _jobId: string) {
       delta: wasEdited ? { manual_line_count: manualLineCount } : null,
     })
   );
-
-  // Wire 3: invoice draft creation. Stays in DRAFT status — sending remains
-  // manual per the "no auto-send" rule.
-  after(() => autoCreateInvoiceDraft(estimateId, user.id));
 
   revalidatePath(`/jobs/${canonicalJobId}/estimates/${estimateId}`);
   return { ok: true, error: undefined };
