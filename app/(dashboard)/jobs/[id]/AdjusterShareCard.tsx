@@ -10,11 +10,14 @@ import {
 export default function AdjusterShareCard({
   jobId,
   initialToken,
+  hasActiveLink = false,
 }: {
   jobId: string;
   initialToken: string | null;
+  hasActiveLink?: boolean;
 }) {
   const [token, setToken] = useState<string | null>(initialToken);
+  const [existingLinkActive, setExistingLinkActive] = useState(hasActiveLink);
   const [pending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +26,11 @@ export default function AdjusterShareCard({
     setError(null);
     startTransition(async () => {
       const res = await generateAdjusterToken(jobId);
-      if (res.error) setError(res.error);
-      else setToken(res.token!);
+      if ("error" in res) setError(res.error);
+      else {
+        setToken(res.token);
+        setExistingLinkActive(true);
+      }
     });
   }
 
@@ -32,8 +38,11 @@ export default function AdjusterShareCard({
     if (!confirm("Generate a new link? The old one stops working immediately.")) return;
     startTransition(async () => {
       const res = await regenerateAdjusterToken(jobId);
-      if (res.error) setError(res.error);
-      else setToken(res.token!);
+      if ("error" in res) setError(res.error);
+      else {
+        setToken(res.token);
+        setExistingLinkActive(true);
+      }
     });
   }
 
@@ -41,8 +50,11 @@ export default function AdjusterShareCard({
     if (!confirm("Revoke adjuster access?")) return;
     startTransition(async () => {
       const res = await revokeAdjusterToken(jobId);
-      if (res.error) setError(res.error);
-      else setToken(null);
+      if ("error" in res) setError(res.error);
+      else {
+        setToken(null);
+        setExistingLinkActive(false);
+      }
     });
   }
 
@@ -57,6 +69,26 @@ export default function AdjusterShareCard({
   const url = token
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/adjuster/${token}`
     : null;
+
+  if (!token && existingLinkActive) {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-pine text-xs font-medium">✓ Adjuster portal access is active.</p>
+        <p className="text-ink-3 text-xs">
+          For security, an existing link cannot be displayed again. Replace it only when the adjuster needs a new packet link.
+        </p>
+        <div className="flex gap-3">
+          <button onClick={regen} disabled={pending} className="text-info-deep hover:underline text-xs">
+            {pending ? "Replacing…" : "Replace link"}
+          </button>
+          <button onClick={revoke} disabled={pending} className="text-red-700 hover:underline text-xs">
+            Revoke access
+          </button>
+        </div>
+        {error && <p className="text-red-700 text-xs">{error}</p>}
+      </div>
+    );
+  }
 
   if (!token) {
     return (

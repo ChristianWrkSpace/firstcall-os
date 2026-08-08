@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, NAV_SECTIONS, type NavItem } from "@/lib/nav";
@@ -30,6 +30,10 @@ export default function MobileNav({
   );
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const wasOpenRef = useRef(false);
 
   // Close drawer when route changes
   useEffect(() => {
@@ -48,6 +52,45 @@ export default function MobileNav({
     };
   }, [open]);
 
+  // Move focus into the drawer, contain keyboard focus while it is modal,
+  // support Escape, and return focus to the menu trigger on close.
+  useEffect(() => {
+    if (!open) {
+      if (wasOpenRef.current) triggerRef.current?.focus();
+      wasOpenRef.current = false;
+      return;
+    }
+
+    wasOpenRef.current = true;
+    closeRef.current?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   return (
     <>
       {/* Mobile top bar — pt accounts for iOS status bar / notch when running
@@ -58,8 +101,11 @@ export default function MobileNav({
         style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
       >
         <button
+          ref={triggerRef}
           onClick={() => setOpen(true)}
-          aria-label="Open menu"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-navigation-drawer"
           className="p-2 -ml-2 text-ink hover:text-info-deep transition-colors"
         >
           <svg
@@ -88,12 +134,19 @@ export default function MobileNav({
       {open && (
         <div
           onClick={() => setOpen(false)}
+          aria-hidden="true"
           className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
         />
       )}
 
       {/* Drawer */}
       <aside
+        ref={drawerRef}
+        id="mobile-navigation-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Main navigation"
+        inert={!open}
         className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#FAF6EF]/95 backdrop-blur-sm border-r border-edge2 flex flex-col transform transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -105,6 +158,7 @@ export default function MobileNav({
         >
           <Logo variant="banner" size={28} />
           <button
+            ref={closeRef}
             onClick={() => setOpen(false)}
             aria-label="Close menu"
             className="p-2 text-ink-2 hover:text-ink text-2xl min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -128,6 +182,7 @@ export default function MobileNav({
                     <Link
                       key={item.href}
                       href={item.href}
+                      aria-current={active ? "page" : undefined}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
                         active
                           ? "bg-tint text-ink ring-1 ring-edge2"

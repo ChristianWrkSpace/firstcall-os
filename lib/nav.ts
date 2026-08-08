@@ -26,61 +26,45 @@ const LEAD: readonly Role[] = ["owner", "manager"] as const;
 const ALL_ROLES: readonly Role[] = ["owner", "manager", "office", "technician"] as const;
 
 /**
- * Workflow phases of the org. Order = chronological intent.
- * NOW → WORK → FIELD → MONEY → GROWTH → INTELLIGENCE → SYSTEM.
+ * Primary navigation follows the way a restoration company actually works:
+ * run today's operation, complete the job, close the paperwork, collect cash.
+ *
+ * AI labs and system telemetry still exist at their direct routes, but they are
+ * intentionally absent here. They are optional tools, not the operating model.
  */
 export const NAV_SECTIONS: readonly NavSection[] = [
   {
-    title: "Now",
+    title: "Operations",
     items: [
-      { href: "/command-center", label: "Command Center", icon: "◉", hint: "Live ops view", roles: STAFF },
-      { href: "/my-day",         label: "My Day",         icon: "☀️", hint: "Your jobs today" },
-      { href: "/schedule",       label: "Schedule",       icon: "▥",  hint: "Calendar view" },
+      { href: "/command-center", label: "Home",      icon: "⌂", hint: "What needs attention", roles: STAFF },
+      { href: "/jobs",           label: "Jobs",      icon: "▣", hint: "All active work" },
+      { href: "/schedule",       label: "Schedule",  icon: "▥", hint: "Dispatch and appointments" },
+      { href: "/customers",      label: "Customers", icon: "◉" },
     ],
   },
   {
-    title: "Work",
+    title: "Field Work",
     items: [
-      { href: "/jobs",      label: "Jobs",      icon: "◈" },
-      { href: "/calls",     label: "Calls",     icon: "◎",  hint: "Athena intake" },
-      { href: "/customers", label: "Customers", icon: "◉" },
+      { href: "/my-day",    label: "My Day",    icon: "☀", hint: "Assigned work" },
+      { href: "/equipment", label: "Equipment", icon: "▤", hint: "Inventory and deployment" },
+      { href: "/subs",      label: "Subs",      icon: "◇", hint: "Vendors and invoices", roles: STAFF },
     ],
   },
   {
-    title: "Field",
+    title: "Office",
     items: [
-      { href: "/equipment", label: "Equipment",      icon: "▤" },
-      { href: "/subs",      label: "Subcontractors", icon: "🤝", roles: STAFF },
+      { href: "/documents", label: "Paperwork",   icon: "▧", hint: "Documents and signatures", roles: STAFF },
+      { href: "/ar",        label: "Receivables", icon: "$", hint: "Invoices and payments", roles: STAFF },
+      { href: "/expenses",  label: "Expenses",    icon: "−", hint: "Job and company costs", roles: STAFF },
+      { href: "/reports",   label: "Reports",     icon: "◫", hint: "Performance and profit", roles: LEAD },
     ],
   },
   {
-    title: "Money",
+    title: "More",
     items: [
-      { href: "/ar",       label: "Receivables", icon: "$",  hint: "Invoices owed", roles: STAFF },
-      { href: "/expenses", label: "Expenses",    icon: "🚐", hint: "Van + shared",  roles: STAFF },
-      { href: "/reports",  label: "Reports",     icon: "◊",  hint: "P&L · Tech · Adjusters", roles: LEAD },
-    ],
-  },
-  {
-    title: "Growth",
-    items: [
-      { href: "/partners", label: "Partners", icon: "◐",  hint: "Plumbers + ROI", roles: STAFF },
-      { href: "/activity", label: "Activity", icon: "🎛", hint: "Agent decisions", roles: STAFF },
-    ],
-  },
-  {
-    title: "Intelligence",
-    items: [
-      { href: "/approvals", label: "Approvals", icon: "✓", hint: "Hand-offs", roles: STAFF },
-      { href: "/solomon",   label: "Solomon",   icon: "🧠", hint: "FP&A analyst",  roles: LEAD },
-      { href: "/turing",    label: "Turing",    icon: "🔬", hint: "Self-audit",    roles: LEAD },
-    ],
-  },
-  {
-    title: "System",
-    items: [
-      { href: "/progress", label: "Progress", icon: "▰", hint: "Roadmap", roles: LEAD },
-      { href: "/settings", label: "Settings", icon: "◇", roles: STAFF },
+      { href: "/calls",    label: "Calls",    icon: "◎", hint: "Lead intake" },
+      { href: "/partners", label: "Partners", icon: "◐", hint: "Referral sources", roles: STAFF },
+      { href: "/settings", label: "Settings", icon: "⚙", roles: STAFF },
       { href: "/help",     label: "Help",     icon: "?" },
     ],
   },

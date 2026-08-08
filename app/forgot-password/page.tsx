@@ -28,6 +28,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form action={action} className="flex flex-col gap-3 mt-5">
             <input
+              aria-label="Email"
               name="email"
               type="email"
               required

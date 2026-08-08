@@ -2,7 +2,7 @@
 
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase-server";
-import { headers } from "next/headers";
+import { hashBearerToken } from "@/lib/token-hash";
 
 /**
  * Creates a Stripe Checkout Session for a customer to pay an invoice online.
@@ -18,9 +18,10 @@ export async function createInvoiceCheckout(
   const { data: job } = await admin
     .from("jobs")
     .select(
-      "id, customer_share_token, payment_route, deductible_amount, customers(name, email)"
+      "id, payment_route, deductible_amount, customers(name, email)"
     )
-    .eq("customer_share_token", customerToken)
+    .eq("customer_share_token_hash", hashBearerToken(customerToken))
+    .gt("customer_share_expires_at", new Date().toISOString())
     .single();
   if (!job) return { error: "Invalid portal link." };
 
@@ -82,10 +83,10 @@ export async function createInvoiceCheckout(
   const customer = job.customers as any;
   const stripe = getStripe();
 
-  const hdrs = await headers();
-  const origin =
-    hdrs.get("origin") ??
-    `https://${hdrs.get("host") ?? "firstcall-os.vercel.app"}`;
+  const origin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (!origin || !/^https?:\/\//.test(origin)) {
+    return { error: "Online payments are temporarily unavailable." };
+  }
 
   const isDeductible = paymentRoute === "insurance_with_deductible";
   const productName = isDeductible
@@ -95,6 +96,7 @@ export async function createInvoiceCheckout(
     ? "Customer deductible payment for First Call Mitigation services"
     : "Payment for First Call Mitigation services";
 
+  const balanceState = `${invoice.id}:${Math.round(paid * 100)}:${Math.round(chargeAmount * 100)}`;
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -121,6 +123,10 @@ export async function createInvoiceCheckout(
     },
     success_url: `${origin}/portal/${customerToken}?paid=1`,
     cancel_url: `${origin}/portal/${customerToken}?cancelled=1`,
+  }, {
+    // The same invoice balance state always reuses one Checkout Session, so
+    // retries or parallel tabs cannot create independently chargeable sessions.
+    idempotencyKey: `invoice-checkout:${balanceState}`,
   });
 
   return { ok: true, url: session.url };

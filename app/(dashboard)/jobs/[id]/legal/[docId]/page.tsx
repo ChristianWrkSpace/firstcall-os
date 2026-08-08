@@ -47,7 +47,6 @@ export default async function LegalDocPage({
 
   // Optional columns — degrade gracefully if migrations 022/023 haven't run
   let optional: {
-    signing_token?: string | null;
     signature_data?: any;
     signature_ip?: string | null;
     signature_user_agent?: string | null;
@@ -57,7 +56,7 @@ export default async function LegalDocPage({
     const { data: opt } = await admin
       .from("legal_documents")
       .select(
-        "signing_token, signature_data, signature_ip, signature_user_agent, last_send_attempt"
+        "signature_data, signature_ip, signature_user_agent, last_send_attempt"
       )
       .eq("id", docId)
       .maybeSingle();
@@ -113,10 +112,6 @@ export default async function LegalDocPage({
 
   const meta = LEGAL_DOC_BY_VALUE[doc.doc_type as keyof typeof LEGAL_DOC_BY_VALUE];
   const customer = (job as any).customers;
-  const signingUrl =
-    doc.signing_token && meta?.needsSignature
-      ? `${process.env.NEXT_PUBLIC_APP_URL ?? "https://firstcall-os.vercel.app"}/sign/${doc.signing_token}`
-      : null;
 
   return (
     <div className="p-4 md:p-8 max-w-4xl print-page">
@@ -159,7 +154,7 @@ export default async function LegalDocPage({
             ? "(carrier email)"
             : customer?.email ?? ""
         }
-        signingUrl={signingUrl}
+        signingUrl={null}
         signedByName={doc.signed_by_name ?? null}
         signedAt={doc.signed_at ?? null}
         signatureIp={doc.signature_ip ?? null}

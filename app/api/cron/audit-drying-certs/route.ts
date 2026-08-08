@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auditDryingCertAutoDrafts } from "@/lib/audit-drying-certs";
+import { authorizeCronRequest } from "@/lib/cron-auth";
 
 // Weekly heartbeat: verifies the drying-cert auto-trigger is firing.
 // Logs result to audit_logs (visible in /activity). Empty findings = green.
@@ -8,15 +9,10 @@ import { auditDryingCertAutoDrafts } from "@/lib/audit-drying-certs";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-function authorized(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
-}
-
 export async function GET(req: NextRequest) {
-  if (!authorized(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = authorizeCronRequest(req.headers.get("authorization"), process.env.CRON_SECRET);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
   try {
     const result = await auditDryingCertAutoDrafts();

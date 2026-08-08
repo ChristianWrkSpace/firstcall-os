@@ -3,10 +3,15 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import crypto from "crypto";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { autoNotifyOnStatusChange } from "@/lib/auto-notify";
 import { autoDraftInsuranceLegalDocs } from "@/lib/auto-triggers";
+import { requireAuthenticatedUser, requirePermission } from "@/lib/auth-helpers";
+import {
+  canTransitionJobStatus,
+  normalizeCustomerEmail,
+  normalizeCustomerPhone,
+} from "@/lib/job-workflow";
 
 const VALID_ROUTES = new Set([
   "customer_pay",
@@ -18,6 +23,8 @@ export async function createJob(
   prevState: { error?: string } | undefined,
   formData: FormData
 ) {
+  const auth = await requireAuthenticatedUser();
+  if ("error" in auth) return auth;
   const supabase = await createServerSupabaseClient();
 
   const rawRoute = (formData.get("payment_route") as string) || "customer_pay";
@@ -33,27 +40,52 @@ export async function createJob(
     deductible_amount = parsed;
   }
 
-  const { data: customer, error: customerError } = await supabase
-    .from("customers")
-    .insert({
-      name: formData.get("customer_name") as string,
-      phone: (formData.get("customer_phone") as string) || null,
-      email: (formData.get("customer_email") as string) || null,
-      insurance_company: (formData.get("insurance_company") as string) || null,
-      insurance_policy_number:
-        (formData.get("insurance_policy_number") as string) || null,
-      insurance_claim_number:
-        (formData.get("insurance_claim_number") as string) || null,
-    })
-    .select()
-    .single();
+  const customerName = String(formData.get("customer_name") ?? "").trim();
+  const customerPhone = normalizeCustomerPhone(formData.get("customer_phone") as string | null);
+  const customerEmail = normalizeCustomerEmail(formData.get("customer_email") as string | null);
+  if (!customerName) return { error: "Customer name is required." };
+  if (!customerPhone && !customerEmail) {
+    return { error: "Enter a customer phone number or email." };
+  }
 
-  if (customerError) return { error: customerError.message };
+  let customer: { id: string } | null = null;
+  if (customerEmail) {
+    const { data } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("email", customerEmail)
+      .maybeSingle();
+    customer = data;
+  }
+  if (!customer && customerPhone) {
+    const { data } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("phone", customerPhone)
+      .maybeSingle();
+    customer = data;
+  }
 
-  // Wire 4: auto-generate customer portal token at create. URL-safe random,
-  // matches the existing portal.ts generator. No user interaction needed —
-  // office can copy the link from the customer portal panel immediately.
-  const customerShareToken = crypto.randomBytes(24).toString("base64url");
+  let createdCustomer = false;
+  if (!customer) {
+    const { data, error: customerError } = await supabase
+      .from("customers")
+      .insert({
+        name: customerName,
+        phone: customerPhone,
+        email: customerEmail,
+        insurance_company: (formData.get("insurance_company") as string) || null,
+        insurance_policy_number:
+          (formData.get("insurance_policy_number") as string) || null,
+        insurance_claim_number:
+          (formData.get("insurance_claim_number") as string) || null,
+      })
+      .select("id")
+      .single();
+    if (customerError || !data) return { error: "Unable to save the customer." };
+    customer = data;
+    createdCustomer = true;
+  }
 
   const referredById = (formData.get("referred_by_id") as string) || null;
 
@@ -70,13 +102,17 @@ export async function createJob(
       status: "lead",
       payment_route,
       deductible_amount,
-      customer_share_token: customerShareToken,
       referred_by_id: referredById,
     })
     .select()
     .single();
 
-  if (jobError) return { error: jobError.message };
+  if (jobError) {
+    if (createdCustomer) {
+      await supabase.from("customers").delete().eq("id", customer.id);
+    }
+    return { error: "Unable to create the job." };
+  }
 
   // Wire 2: AOB + Work Auth drafts when insurance route + sufficient
   // customer data. Esquire calls take ~20-40s. We use Next.js `after()`
@@ -92,6 +128,8 @@ export async function updatePaymentRoute(
   prevState: { error?: string; ok?: boolean } | undefined,
   formData: FormData
 ) {
+  const auth = await requireAuthenticatedUser();
+  if ("error" in auth) return auth;
   const supabase = await createServerSupabaseClient();
   const jobId = formData.get("job_id") as string;
   const rawRoute = (formData.get("payment_route") as string) || "customer_pay";
@@ -140,6 +178,8 @@ export async function updateJobIntake(
   jobId: string,
   patch: JobIntakePatch
 ) {
+  const auth = await requireAuthenticatedUser();
+  if ("error" in auth) return auth;
   const supabase = await createServerSupabaseClient();
 
   const update: Record<string, unknown> = {};
@@ -180,19 +220,63 @@ export async function updateJobStatus(
   prevState: { error?: string } | undefined,
   formData: FormData
 ) {
+  const auth = await requireAuthenticatedUser();
+  if ("error" in auth) return auth;
+
   const supabase = await createServerSupabaseClient();
   const jobId = formData.get("job_id") as string;
   const status = formData.get("status") as string;
 
-  const { error } = await supabase
+  if (status === "cancelled") {
+    const permission = await requirePermission("jobs.cancel");
+    if ("error" in permission) return permission;
+  }
+
+  const { data: currentJob, error: currentError } = await supabase
     .from("jobs")
-    .update({ status })
-    .eq("id", jobId);
+    .select("status")
+    .eq("id", jobId)
+    .single();
+  if (currentError || !currentJob) return { error: "Job not found." };
+  if (!canTransitionJobStatus(currentJob.status, status)) {
+    return { error: `Cannot move a job from ${currentJob.status} to ${status}.` };
+  }
 
-  if (error) return { error: error.message };
+  if (status === "completed") {
+    const [{ count: assignedEquipment }, { count: evidenceCount }] = await Promise.all([
+      supabase
+        .from("equipment")
+        .select("id", { count: "exact", head: true })
+        .eq("current_job_id", jobId),
+      supabase
+        .from("job_photos")
+        .select("id", { count: "exact", head: true })
+        .eq("job_id", jobId),
+    ]);
+    if ((assignedEquipment ?? 0) > 0) {
+      return { error: "Remove all equipment from the job before completing it." };
+    }
+    if ((evidenceCount ?? 0) === 0) {
+      return { error: "Add at least one job photo before completing the job." };
+    }
+  }
 
-  // Auto-email customer when status enters a notify-worthy phase. Uses
-  // after() so the SMTP call finishes even after this response goes out.
+  const { data: updatedJob, error } = await supabase
+    .from("jobs")
+    .update({
+      status,
+      completed_at: status === "completed" ? new Date().toISOString() : null,
+    })
+    .eq("id", jobId)
+    .eq("status", currentJob.status)
+    .select("id")
+    .maybeSingle();
+
+  if (error) return { error: "Unable to update job status." };
+  if (!updatedJob) {
+    return { error: "The job changed while you were updating it. Refresh and try again." };
+  }
+
   after(() => autoNotifyOnStatusChange(jobId, status));
 
   revalidatePath(`/jobs/${jobId}`);
@@ -205,8 +289,9 @@ export async function addJobNote(
   prevState: { error?: string; ok?: boolean } | undefined,
   formData: FormData
 ) {
+  const auth = await requireAuthenticatedUser();
+  if ("error" in auth) return auth;
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
   const jobId = formData.get("job_id") as string;
   const content = (formData.get("content") as string).trim();
@@ -215,7 +300,7 @@ export async function addJobNote(
 
   const { error } = await supabase.from("job_notes").insert({
     job_id: jobId,
-    author_id: user?.id ?? null,
+    author_id: auth.user.id,
     content,
     type: "note",
   });

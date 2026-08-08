@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase-server";
+import { hashBearerToken } from "@/lib/token-hash";
 import { notFound } from "next/navigation";
 import { LEGAL_DOC_BY_VALUE, type LegalDocType } from "@/lib/esquire-types";
 import SignForm from "./SignForm";
@@ -14,9 +15,10 @@ export default async function SignPage({
   const { data: doc } = await admin
     .from("legal_documents")
     .select(
-      "id, doc_type, subject, body, status, signed_at, signed_by_name, job_id, signing_token"
+      "id, doc_type, subject, body, status, signed_at, signed_by_name, job_id, signing_token_expires_at"
     )
-    .eq("signing_token", token)
+    .eq("signing_token", hashBearerToken(token))
+    .gt("signing_token_expires_at", new Date().toISOString())
     .single();
 
   if (!doc) notFound();

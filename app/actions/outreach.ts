@@ -1,6 +1,6 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
 import {
   generateColdEmail,
   generateVoicemailScript,
@@ -11,11 +11,10 @@ import { logAgentOutcome } from "@/lib/agent-feedback";
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
 
 async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  return getCurrentUser();
 }
 
 export async function createLead(_prev: any, formData: FormData) {
@@ -299,11 +298,12 @@ export async function convertLeadToPartner(leadId: string) {
 }
 
 export async function deleteLead(leadId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("outreach.delete");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
-  await admin.from("outreach_leads").delete().eq("id", leadId);
+  const { error } = await admin.from("outreach_leads").delete().eq("id", leadId);
+  if (error) return { error: "Unable to delete the outreach lead." };
 
   revalidatePath(`/partners/outreach`);
   redirect(`/partners/outreach`);

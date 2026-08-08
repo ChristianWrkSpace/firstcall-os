@@ -10,11 +10,14 @@ import {
 export default function CustomerShareCard({
   jobId,
   initialToken,
+  hasActiveLink = false,
 }: {
   jobId: string;
   initialToken: string | null;
+  hasActiveLink?: boolean;
 }) {
   const [token, setToken] = useState<string | null>(initialToken);
+  const [existingLinkActive, setExistingLinkActive] = useState(hasActiveLink);
   const [pending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +26,11 @@ export default function CustomerShareCard({
     setError(null);
     startTransition(async () => {
       const res = await generateCustomerShareToken(jobId);
-      if (res.error) setError(res.error);
-      else setToken(res.token!);
+      if ("error" in res) setError(res.error);
+      else {
+        setToken(res.token);
+        setExistingLinkActive(true);
+      }
     });
   }
 
@@ -38,8 +44,11 @@ export default function CustomerShareCard({
     setError(null);
     startTransition(async () => {
       const res = await regenerateCustomerShareToken(jobId);
-      if (res.error) setError(res.error);
-      else setToken(res.token!);
+      if ("error" in res) setError(res.error);
+      else {
+        setToken(res.token);
+        setExistingLinkActive(true);
+      }
     });
   }
 
@@ -49,8 +58,11 @@ export default function CustomerShareCard({
     setError(null);
     startTransition(async () => {
       const res = await revokeCustomerShareToken(jobId);
-      if (res.error) setError(res.error);
-      else setToken(null);
+      if ("error" in res) setError(res.error);
+      else {
+        setToken(null);
+        setExistingLinkActive(false);
+      }
     });
   }
 
@@ -65,6 +77,26 @@ export default function CustomerShareCard({
   const url = token
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/portal/${token}`
     : null;
+
+  if (!token && existingLinkActive) {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-pine text-xs font-medium">✓ Customer portal access is active.</p>
+        <p className="text-ink-3 text-xs">
+          For security, an existing link cannot be displayed again. Replace it only if the customer needs a new link.
+        </p>
+        <div className="flex gap-3">
+          <button onClick={regenerate} disabled={pending} className="text-info-deep hover:underline text-xs">
+            {pending ? "Replacing…" : "Replace link"}
+          </button>
+          <button onClick={revoke} disabled={pending} className="text-red-700 hover:underline text-xs">
+            Revoke access
+          </button>
+        </div>
+        {error && <p className="text-red-700 text-xs">{error}</p>}
+      </div>
+    );
+  }
 
   if (!token) {
     return (

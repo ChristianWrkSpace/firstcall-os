@@ -1,14 +1,13 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient, createServerSupabaseClient } from "@/lib/supabase-server";
+import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 
 const BUCKET = "job-documents";
 
 async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  return getCurrentUser();
 }
 
 export async function recordJobDocument(
@@ -44,8 +43,8 @@ export async function recordJobDocument(
 }
 
 export async function deleteJobDocument(documentId: string, jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("documents.delete");
+  if ("error" in auth) return { error: auth.error };
 
   const admin = createAdminClient();
 
@@ -67,10 +66,21 @@ export async function getDocumentSignedUrl(
   storagePath: string,
   expiresInSeconds: number = 60 * 60
 ) {
-  const admin = createAdminClient();
-  const { data, error } = await admin.storage
+  const user = await requireUser();
+  if (!user) return null;
+
+  const supabase = await createServerSupabaseClient();
+  const { data: document, error: lookupError } = await supabase
+    .from("job_documents")
+    .select("id")
+    .eq("storage_path", storagePath)
+    .maybeSingle();
+  if (lookupError || !document) return null;
+
+  const boundedExpiry = Math.max(30, Math.min(expiresInSeconds, 60 * 60));
+  const { data, error } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(storagePath, expiresInSeconds);
+    .createSignedUrl(storagePath, boundedExpiry);
   if (error || !data) return null;
   return data.signedUrl;
 }
@@ -79,8 +89,8 @@ export async function getShareLink(documentId: string) {
   const user = await requireUser();
   if (!user) return { error: "Not authenticated." };
 
-  const admin = createAdminClient();
-  const { data: doc, error: fetchErr } = await admin
+  const supabase = await createServerSupabaseClient();
+  const { data: doc, error: fetchErr } = await supabase
     .from("job_documents")
     .select("storage_path")
     .eq("id", documentId)
@@ -88,7 +98,7 @@ export async function getShareLink(documentId: string) {
   if (fetchErr || !doc) return { error: "Document not found." };
 
   // 7-day shareable link
-  const { data, error } = await admin.storage
+  const { data, error } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(doc.storage_path, 60 * 60 * 24 * 7);
   if (error || !data) return { error: error?.message ?? "Failed to generate link." };

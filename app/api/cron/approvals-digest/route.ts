@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runApprovalsDigest } from "@/lib/approvals-digest";
+import { authorizeCronRequest } from "@/lib/cron-auth";
 
 // Daily digest of stale approvals (>48h) + failed legal-doc sends.
 // Triggered by Vercel Cron (vercel.json). Sends email to OPERATOR_EMAIL
@@ -8,15 +9,10 @@ import { runApprovalsDigest } from "@/lib/approvals-digest";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-function authorized(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
-}
-
 export async function GET(req: NextRequest) {
-  if (!authorized(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = authorizeCronRequest(req.headers.get("authorization"), process.env.CRON_SECRET);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
   try {
     const result = await runApprovalsDigest();

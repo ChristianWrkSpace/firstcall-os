@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase-server";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { performBackup } from "@/lib/backups";
+import { countBackupMismatches, type BackupEnvelope } from "@/lib/backup-integrity";
 import { logAudit } from "@/lib/audit";
+import { createHash } from "node:crypto";
 
 export async function triggerManualBackup() {
   const user = await getCurrentUser();
@@ -40,6 +42,14 @@ export async function getSignedBackupUrl(storagePath: string) {
     return { error: "Only owners can download backups." };
   }
   const admin = createAdminClient();
+  const { data: backup } = await admin
+    .from("backups_log")
+    .select("id")
+    .eq("storage_path", storagePath)
+    .eq("status", "ok")
+    .maybeSingle();
+  if (!backup) return { error: "Backup not found." };
+
   const { data, error } = await admin.storage
     .from("backups")
     .createSignedUrl(storagePath, 60 * 5); // 5 min
@@ -86,7 +96,7 @@ export async function verifyLatestBackup() {
     return { error: dlErr?.message ?? "Could not download backup file." };
   }
 
-  let parsed: Record<string, any[]>;
+  let parsed: BackupEnvelope;
   try {
     const text = await blob.text();
     parsed = JSON.parse(text);
@@ -95,17 +105,38 @@ export async function verifyLatestBackup() {
   }
 
   const expectedCounts = (latest.row_counts ?? {}) as Record<string, number>;
-  const mismatches: Array<{ table: string; expected: number; actual: number }> = [];
-  let totalRows = 0;
-  for (const [table, expected] of Object.entries(expectedCounts)) {
-    const actual = Array.isArray(parsed[table]) ? parsed[table].length : 0;
-    totalRows += actual;
-    if (actual !== expected) {
-      mismatches.push({ table, expected, actual });
+  const { mismatches, integrityErrors, totalRows } = countBackupMismatches(parsed, expectedCounts);
+
+  if (Array.isArray(parsed.storage_objects)) {
+    for (const rawEntry of parsed.storage_objects) {
+      if (
+        typeof rawEntry !== "object" ||
+        rawEntry === null ||
+        !("backup_path" in rawEntry) ||
+        !("sha256" in rawEntry) ||
+        typeof rawEntry.backup_path !== "string" ||
+        typeof rawEntry.sha256 !== "string"
+      ) {
+        integrityErrors.push("Storage manifest contains an invalid entry.");
+        continue;
+      }
+      const { data: objectBlob, error: objectError } = await admin.storage
+        .from("backups")
+        .download(rawEntry.backup_path);
+      if (objectError || !objectBlob) {
+        integrityErrors.push(`Missing storage backup object: ${rawEntry.backup_path}.`);
+        continue;
+      }
+      const digest = createHash("sha256")
+        .update(Buffer.from(await objectBlob.arrayBuffer()))
+        .digest("hex");
+      if (digest !== rawEntry.sha256) {
+        integrityErrors.push(`Storage checksum mismatch: ${rawEntry.backup_path}.`);
+      }
     }
   }
 
-  const ok = mismatches.length === 0;
+  const ok = mismatches.length === 0 && integrityErrors.length === 0;
 
   logAudit({
     user,
@@ -118,6 +149,7 @@ export async function verifyLatestBackup() {
         (Date.now() - new Date(latest.created_at).getTime()) / 3_600_000,
       total_rows: totalRows,
       mismatches,
+      integrity_errors: integrityErrors,
       ok,
     },
   });
@@ -131,6 +163,7 @@ export async function verifyLatestBackup() {
     totalRows,
     tableCount: Object.keys(expectedCounts).length,
     mismatches,
+    integrityErrors,
     storagePath: latest.storage_path,
   };
 }

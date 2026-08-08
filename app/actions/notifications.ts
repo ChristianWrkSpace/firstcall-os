@@ -1,6 +1,7 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
+import { getCurrentUser } from "@/lib/auth-helpers";
 import { sendEmail } from "@/lib/resend";
 import {
   buildNotificationEmail,
@@ -9,9 +10,7 @@ import {
 import { revalidatePath } from "next/cache";
 
 async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  return getCurrentUser();
 }
 
 export async function sendCustomerNotification(

@@ -1,6 +1,7 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
+import { getCurrentUser } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 
 interface CallExtraction {
@@ -34,10 +35,9 @@ export async function createJobFromCall(
   _prevState: any,
   formData: FormData
 ) {
-  const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
 
   let extraction: CallExtraction;

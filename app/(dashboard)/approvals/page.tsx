@@ -62,6 +62,7 @@ export default async function ApprovalsPage() {
           {items.map((it: any) => (
             <article
               key={it.id}
+              id={`approval-${it.id}`}
               className="glass-card p-5 flex gap-4 items-start"
             >
               <div className="text-2xl shrink-0">

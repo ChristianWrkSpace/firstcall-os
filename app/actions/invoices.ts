@@ -1,83 +1,33 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
 import { sendEmail } from "@/lib/resend";
 import { buildInvoiceEmail, buildReminderEmail } from "@/lib/abacus-templates";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
 
-async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
-
 export async function createInvoiceFromEstimate(estimateId: string, jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("invoices.edit");
+  if ("error" in auth) return auth;
 
-  const admin = createAdminClient();
-
-  // Verify estimate exists and is approved
-  const { data: estimate, error: estErr } = await admin
-    .from("estimates")
-    .select("id, status, job_id")
-    .eq("id", estimateId)
-    .single();
-  if (estErr || !estimate) return { error: "Estimate not found." };
-  if (estimate.status !== "approved" && estimate.status !== "sent") {
-    return { error: "Estimate must be approved before invoicing." };
-  }
-
-  // Pull line items
-  const { data: lineItems } = await admin
-    .from("estimate_line_items")
-    .select("*")
-    .eq("estimate_id", estimateId)
-    .order("sort_order", { ascending: true });
-
-  // Default due date: 30 days from issue
   const due = new Date();
   due.setDate(due.getDate() + 30);
-  const dueStr = due.toISOString().split("T")[0];
 
-  // Create invoice
-  const { data: invoice, error: invErr } = await admin
-    .from("invoices")
-    .insert({
-      job_id: jobId,
-      estimate_id: estimateId,
-      status: "draft",
-      due_date: dueStr,
-      created_by: user.id,
-    })
-    .select("id")
-    .single();
-  if (invErr || !invoice) return { error: invErr?.message ?? "Failed to create invoice." };
-
-  // Copy line items
-  if (lineItems && lineItems.length > 0) {
-    const lineRows = lineItems.map((li) => ({
-      invoice_id: invoice.id,
-      sort_order: li.sort_order,
-      category: li.category,
-      xactimate_code: li.xactimate_code,
-      description: li.description,
-      quantity: li.quantity,
-      unit: li.unit,
-      unit_price: li.unit_price,
-      notes: li.notes,
-    }));
-    const { error: linesErr } = await admin
-      .from("invoice_line_items")
-      .insert(lineRows);
-    if (linesErr) return { error: linesErr.message };
+  const admin = createAdminClient();
+  const { data: invoiceId, error } = await admin.rpc("create_invoice_from_estimate", {
+    p_estimate_id: estimateId,
+    p_job_id: jobId,
+    p_due_date: due.toISOString().split("T")[0],
+    p_created_by: auth.user.id,
+  });
+  if (error || !invoiceId) {
+    return { error: "Unable to create the invoice from this estimate." };
   }
 
   revalidatePath(`/jobs/${jobId}`);
-  redirect(`/jobs/${jobId}/invoices/${invoice.id}`);
+  redirect(`/jobs/${jobId}/invoices/${invoiceId}`);
 }
 
 export async function updateInvoiceLine(
@@ -92,8 +42,8 @@ export async function updateInvoiceLine(
   invoiceId: string,
   jobId: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("invoices.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -103,7 +53,7 @@ export async function updateInvoiceLine(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function addInvoiceLine(
@@ -111,8 +61,8 @@ export async function addInvoiceLine(
   jobId: string,
   formData: FormData
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("invoices.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
 
@@ -140,7 +90,7 @@ export async function addInvoiceLine(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function deleteInvoiceLine(
@@ -148,8 +98,8 @@ export async function deleteInvoiceLine(
   invoiceId: string,
   jobId: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("invoices.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -159,7 +109,7 @@ export async function deleteInvoiceLine(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function updateInvoiceMeta(
@@ -167,8 +117,8 @@ export async function updateInvoiceMeta(
   jobId: string,
   updates: { due_date?: string; notes?: string }
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("invoices.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -178,7 +128,7 @@ export async function updateInvoiceMeta(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 async function loadInvoiceContext(invoiceId: string) {
@@ -289,7 +239,7 @@ export async function sendInvoice(
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function sendReminder(
@@ -297,8 +247,9 @@ export async function sendReminder(
   jobId: string,
   type: "gentle" | "firm" | "final"
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("invoices.send");
+  if ("error" in auth) return auth;
+  const user = auth.user;
 
   const admin = createAdminClient();
 
@@ -341,7 +292,7 @@ export async function sendReminder(
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function recordPayment(
@@ -362,38 +313,21 @@ export async function recordPayment(
   const notes = (formData.get("notes") as string)?.trim() || null;
 
   const admin = createAdminClient();
-  const { error: payErr } = await admin.from("payments").insert({
-    invoice_id: invoiceId,
-    amount,
-    method,
-    reference,
-    received_at: received_at_raw || new Date().toISOString().split("T")[0],
-    notes,
-    recorded_by: user.id,
-  });
-  if (payErr) return { error: payErr.message };
-
-  // Recompute invoice status: sum payments vs total
-  const [{ data: payments }, { data: lines }] = await Promise.all([
-    admin.from("payments").select("amount").eq("invoice_id", invoiceId),
-    admin.from("invoice_line_items").select("line_total").eq("invoice_id", invoiceId),
-  ]);
-  const totalPaid = (payments ?? []).reduce((s, p) => s + Number(p.amount), 0);
-  const totalDue = (lines ?? []).reduce((s, l) => s + Number(l.line_total ?? 0), 0);
-
-  let newStatus: string;
-  if (totalPaid >= totalDue) newStatus = "paid";
-  else if (totalPaid > 0) newStatus = "partial";
-  else newStatus = "sent";
-
-  await admin
-    .from("invoices")
-    .update({
-      status: newStatus,
-      paid_at: newStatus === "paid" ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", invoiceId);
+  const { data: newStatus, error: paymentError } = await admin.rpc(
+    "record_payment_and_reconcile",
+    {
+      p_invoice_id: invoiceId,
+      p_amount: amount,
+      p_method: method,
+      p_reference: reference,
+      p_received_at: received_at_raw || new Date().toISOString().split("T")[0],
+      p_notes: notes,
+      p_recorded_by: user.id,
+    }
+  );
+  if (paymentError) {
+    return { error: "Unable to record and reconcile the payment." };
+  }
 
   await logAudit({
     user,
@@ -405,7 +339,7 @@ export async function recordPayment(
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function deletePayment(
@@ -413,37 +347,19 @@ export async function deletePayment(
   invoiceId: string,
   jobId: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("payments.delete");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
-  await admin.from("payments").delete().eq("id", paymentId);
-
-  // Recompute status
-  const [{ data: payments }, { data: lines }] = await Promise.all([
-    admin.from("payments").select("amount").eq("invoice_id", invoiceId),
-    admin.from("invoice_line_items").select("line_total").eq("invoice_id", invoiceId),
-  ]);
-  const totalPaid = (payments ?? []).reduce((s, p) => s + Number(p.amount), 0);
-  const totalDue = (lines ?? []).reduce((s, l) => s + Number(l.line_total ?? 0), 0);
-
-  let newStatus: string;
-  if (totalPaid >= totalDue && totalDue > 0) newStatus = "paid";
-  else if (totalPaid > 0) newStatus = "partial";
-  else newStatus = "sent";
-
-  await admin
-    .from("invoices")
-    .update({
-      status: newStatus,
-      paid_at: newStatus === "paid" ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", invoiceId);
+  const { error } = await admin.rpc("delete_payment_and_reconcile", {
+    p_payment_id: paymentId,
+    p_invoice_id: invoiceId,
+  });
+  if (error) return { error: "Unable to delete and reconcile the payment." };
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function voidInvoice(invoiceId: string, jobId: string) {
@@ -468,5 +384,5 @@ export async function voidInvoice(invoiceId: string, jobId: string) {
 
   revalidatePath(`/jobs/${jobId}/invoices/${invoiceId}`);
   revalidatePath("/ar");
-  return { ok: true };
+  return { ok: true, error: undefined };
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sweepOverdueInvoicesForDemandLetters } from "@/lib/auto-triggers";
+import { authorizeCronRequest } from "@/lib/cron-auth";
 
 // Daily sweep — drafts demand letters for invoices 60+ days unpaid.
 // Esquire generates each draft; office reviews via /approvals before send.
@@ -8,15 +9,10 @@ import { sweepOverdueInvoicesForDemandLetters } from "@/lib/auto-triggers";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-function authorized(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
-}
-
 export async function GET(req: NextRequest) {
-  if (!authorized(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = authorizeCronRequest(req.headers.get("authorization"), process.env.CRON_SECRET);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
   try {
     const result = await sweepOverdueInvoicesForDemandLetters();

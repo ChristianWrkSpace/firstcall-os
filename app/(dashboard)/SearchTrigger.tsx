@@ -3,7 +3,7 @@
 export default function SearchTrigger({
   variant = "sidebar",
 }: {
-  variant?: "sidebar" | "mobile";
+  variant?: "sidebar" | "mobile" | "command-center";
 }) {
   function open() {
     window.dispatchEvent(new Event("open-command-palette"));
@@ -17,6 +17,24 @@ export default function SearchTrigger({
         className="p-2 -mr-2 text-ink-2 hover:text-ink"
       >
         <SearchIcon className="w-5 h-5" />
+      </button>
+    );
+  }
+
+  if (variant === "command-center") {
+    return (
+      <button
+        type="button"
+        onClick={open}
+        aria-label="Search jobs, customers, equipment, partners, outreach, and calls"
+        className="w-full flex items-center gap-3 p-4 rounded-2xl border animate-spatial-rise text-left transition-colors hover:bg-[color:var(--color-surface-strong)]"
+        style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
+      >
+        <span className="text-lg" aria-hidden>⚡</span>
+        <span className="flex-1 text-base text-[color:var(--color-text-muted)]">
+          Search jobs, customers, equipment, partners, outreach, and calls…
+        </span>
+        <kbd className="hidden md:inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-medium text-[color:var(--color-text-muted)] bg-[color:var(--color-surface-strong)] border border-[color:var(--color-edge)]">⌘K</kbd>
       </button>
     );
   }

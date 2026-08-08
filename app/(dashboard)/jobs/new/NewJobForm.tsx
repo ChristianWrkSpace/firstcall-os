@@ -36,8 +36,8 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         {/* Customer */}
         <section className="glass-card p-6">
           <h2 className="text-ink font-semibold mb-4">Customer</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 flex flex-col gap-1.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 [&>.col-span-2]:!col-span-1 sm:[&>.col-span-2]:!col-span-2">
+            <div className="sm:col-span-2 flex flex-col gap-1.5">
               <label className={LABEL}>Name *</label>
               <input name="customer_name" required className={INPUT} placeholder="John Smith" />
             </div>
@@ -142,8 +142,8 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         {showInsurance && (
           <section className="glass-card p-6">
             <h2 className="text-ink font-semibold mb-4">Insurance</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 flex flex-col gap-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2 flex flex-col gap-1.5">
                 <label className={LABEL}>Insurance Company</label>
                 <input
                   name="insurance_company"
@@ -173,7 +173,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
         {/* Job Details */}
         <section className="glass-card p-6">
           <h2 className="text-ink font-semibold mb-4">Job Details</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 [&>.col-span-2]:!col-span-1 sm:[&>.col-span-2]:!col-span-2">
             <div className="flex flex-col gap-1.5">
               <label className={LABEL}>Type *</label>
               <select name="type" required className={INPUT}>
@@ -184,7 +184,7 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
                 ))}
               </select>
             </div>
-            <div className="col-span-2 flex flex-col gap-1.5">
+            <div className="sm:col-span-2 flex flex-col gap-1.5">
               <label className={LABEL}>Description</label>
               <textarea
                 name="description"

@@ -1,6 +1,6 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
 import { generateEstimate } from "@/lib/ledger";
 import { loadPriceBook } from "@/lib/price-book";
 import { revalidatePath } from "next/cache";
@@ -10,16 +10,12 @@ import { autoCreateInvoiceDraft } from "@/lib/auto-triggers";
 import { resolveApprovalsForEntity } from "@/lib/auto-actions";
 import { logAgentOutcome } from "@/lib/agent-feedback";
 import { requireInputs, PreconditionError } from "@/lib/agent-preconditions";
-
-async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
+import { requirePermission } from "@/lib/auth-helpers";
 
 export async function generateEstimateForJob(jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.edit");
+  if ("error" in auth) return auth;
+  const user = auth.user;
 
   const admin = createAdminClient();
 
@@ -157,8 +153,8 @@ export async function updateLineItem(
   estimateId: string,
   jobId: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -168,7 +164,7 @@ export async function updateLineItem(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function addLineItem(
@@ -176,8 +172,8 @@ export async function addLineItem(
   jobId: string,
   formData: FormData
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
 
@@ -212,7 +208,7 @@ export async function addLineItem(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function deleteLineItem(
@@ -220,8 +216,8 @@ export async function deleteLineItem(
   estimateId: string,
   jobId: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.edit");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -231,15 +227,16 @@ export async function deleteLineItem(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
-export async function approveEstimate(estimateId: string, jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+export async function approveEstimate(estimateId: string, _jobId: string) {
+  const auth = await requirePermission("estimates.approve");
+  if ("error" in auth) return auth;
+  const user = auth.user;
 
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data: approvedEstimate, error } = await admin
     .from("estimates")
     .update({
       status: "approved",
@@ -247,8 +244,13 @@ export async function approveEstimate(estimateId: string, jobId: string) {
       approved_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", estimateId);
-  if (error) return { error: error.message };
+    .eq("id", estimateId)
+    .select("job_id")
+    .single();
+  if (error || !approvedEstimate) {
+    return { error: error?.message ?? "Estimate not found." };
+  }
+  const canonicalJobId = approvedEstimate.job_id;
 
   // Auto-resolve any pending_approvals on this estimate (the office just acted on it)
   after(() => resolveApprovalsForEntity("estimate", estimateId, user.id, "estimate approved"));
@@ -270,7 +272,7 @@ export async function approveEstimate(estimateId: string, jobId: string) {
       agent: "ledger",
       task: "estimate_draft",
       outcome: wasEdited ? "approved_with_edits" : "approved_unchanged",
-      jobId,
+      jobId: canonicalJobId,
       entityType: "estimate",
       entityId: estimateId,
       userId: user.id,
@@ -280,10 +282,10 @@ export async function approveEstimate(estimateId: string, jobId: string) {
 
   // Wire 3: invoice draft creation. Stays in DRAFT status — sending remains
   // manual per the "no auto-send" rule.
-  after(() => autoCreateInvoiceDraft(estimateId, jobId));
+  after(() => autoCreateInvoiceDraft(estimateId, user.id));
 
-  revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
-  return { ok: true };
+  revalidatePath(`/jobs/${canonicalJobId}/estimates/${estimateId}`);
+  return { ok: true, error: undefined };
 }
 
 export async function markEstimateSent(
@@ -291,8 +293,8 @@ export async function markEstimateSent(
   jobId: string,
   sentTo: string
 ) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.send");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -307,12 +309,13 @@ export async function markEstimateSent(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function rejectEstimate(estimateId: string, jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.approve");
+  if ("error" in auth) return auth;
+  const user = auth.user;
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -335,16 +338,16 @@ export async function rejectEstimate(estimateId: string, jobId: string) {
   );
 
   revalidatePath(`/jobs/${jobId}/estimates/${estimateId}`);
-  return { ok: true };
+  return { ok: true, error: undefined };
 }
 
 export async function deleteEstimate(estimateId: string, jobId: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("estimates.delete");
+  if ("error" in auth) return auth;
 
   const admin = createAdminClient();
   const { error } = await admin.from("estimates").delete().eq("id", estimateId);
-  if (error) return { error: error.message };
+  if (error) return { error: "Unable to delete the estimate." };
 
   revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}`);

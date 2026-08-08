@@ -9,14 +9,14 @@ test.describe("public surfaces respond", () => {
     await page.goto("/login");
     await expect(page).toHaveURL(/\/login/);
     // Should have an email + password field
-    await expect(page.getByPlaceholder(/email/i).first()).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
     await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
 
   test("forgot-password page renders", async ({ page }) => {
     await page.goto("/forgot-password");
     await expect(page).toHaveURL(/\/forgot-password/);
-    await expect(page.getByPlaceholder(/email/i).first()).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
   });
 
   test("dashboard redirects unauthenticated user to /login", async ({ page }) => {
@@ -29,9 +29,9 @@ test.describe("public surfaces respond", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("portal/[token] with bogus token shows 404", async ({ page }) => {
-    const res = await page.goto("/portal/this-token-definitely-does-not-exist");
-    expect(res?.status()).toBe(404);
+  test("portal/[token] with bogus token shows not-found UI", async ({ page }) => {
+    await page.goto("/portal/this-token-definitely-does-not-exist");
+    await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
   });
 
   test("adjuster/[token] with bogus token shows 404", async ({ page }) => {
@@ -50,11 +50,8 @@ test.describe("webhook endpoints reject unsigned requests", () => {
 });
 
 test.describe("cron endpoints reject unauthorized callers", () => {
-  test("backup cron rejects when CRON_SECRET is configured and missing", async ({ request }) => {
-    // If CRON_SECRET is configured in production, hitting without bearer
-    // should return 401. If unset (first-deploy), this test will pass anyway
-    // because the route returns 200; that's intentional first-deploy convenience.
+  test("backup cron rejects callers without valid configuration and credentials", async ({ request }) => {
     const res = await request.get("/api/cron/backup");
-    expect([200, 401]).toContain(res.status());
+    expect([401, 503]).toContain(res.status());
   });
 });

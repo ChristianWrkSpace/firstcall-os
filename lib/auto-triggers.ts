@@ -217,58 +217,41 @@ export async function autoDraftEstimate(jobId: string) {
 
 // ─── Wire 3: Auto-create invoice DRAFT when estimate approved ──────────
 
-export async function autoCreateInvoiceDraft(estimateId: string, jobId: string) {
-  if (await isAutoPaused(jobId)) return;
-
+export async function autoCreateInvoiceDraft(estimateId: string, createdBy: string) {
   const admin = createAdminClient();
-
-  // Don't double-create: skip if an invoice already exists for this estimate
-  const { data: existing } = await admin
-    .from("invoices")
-    .select("id")
-    .eq("estimate_id", estimateId)
-    .limit(1);
-  if (existing && existing.length > 0) return;
-
   const { data: estimate } = await admin
     .from("estimates")
-    .select("id, status, line_items:estimate_line_items(*)")
+    .select("id, status, job_id")
     .eq("id", estimateId)
     .single();
-  if (!estimate) return;
-  if (estimate.status !== "approved") return;
+  if (!estimate || estimate.status !== "approved") return;
 
-  const { data: newInv, error: invErr } = await admin
-    .from("invoices")
-    .insert({
-      job_id: jobId,
-      estimate_id: estimateId,
-      status: "draft",
-    })
-    .select("id, invoice_number")
-    .single();
-  if (invErr || !newInv) {
-    console.error("[auto-trigger.invoice]", invErr);
+  const jobId = estimate.job_id;
+  if (await isAutoPaused(jobId)) return;
+
+  const due = new Date();
+  due.setDate(due.getDate() + 30);
+  const { data: invoiceId, error: createError } = await admin.rpc(
+    "create_invoice_from_estimate",
+    {
+      p_estimate_id: estimateId,
+      p_job_id: jobId,
+      p_due_date: due.toISOString().split("T")[0],
+      p_created_by: createdBy,
+    }
+  );
+  if (createError || !invoiceId) {
+    console.error("[auto-trigger.invoice] atomic invoice creation failed");
     return;
   }
 
-  // Copy line items from estimate
-  const lineRows = (estimate.line_items as any[]).map((li: any) => ({
-    invoice_id: newInv.id,
-    sort_order: li.sort_order,
-    category: li.category,
-    xactimate_code: li.xactimate_code,
-    description: li.description,
-    quantity: li.quantity,
-    unit: li.unit,
-    unit_price: li.unit_price,
-    notes: li.notes,
-  }));
-  if (lineRows.length > 0) {
-    await admin.from("invoice_line_items").insert(lineRows);
-  }
+  const [{ data: newInv }, { data: lineRows }] = await Promise.all([
+    admin.from("invoices").select("id, invoice_number").eq("id", invoiceId).single(),
+    admin.from("invoice_line_items").select("quantity, unit_price").eq("invoice_id", invoiceId),
+  ]);
+  if (!newInv) return;
 
-  const total = lineRows.reduce(
+  const total = (lineRows ?? []).reduce(
     (s: number, li: any) => s + Number(li.quantity) * Number(li.unit_price),
     0
   );
@@ -277,10 +260,10 @@ export async function autoCreateInvoiceDraft(estimateId: string, jobId: string) 
     kind: "invoice_draft",
     jobId,
     entityType: "invoice",
-    entityId: newInv.id,
+    entityId: invoiceId,
     title: `Invoice ${newInv.invoice_number} drafted — $${total.toFixed(2)}`,
     detail: `Auto-created from approved estimate. Sending stays manual — review and click Send when ready.`,
-    link: `/jobs/${jobId}/invoices/${newInv.id}`,
+    link: `/jobs/${jobId}/invoices/${invoiceId}`,
   });
 }
 

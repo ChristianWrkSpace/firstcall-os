@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sendEmail, getFromAddress } from "@/lib/resend";
+import { hashBearerToken } from "@/lib/token-hash";
 
 interface SignInput {
   token: string;
@@ -37,11 +38,13 @@ export async function signLegalDoc(
   if (!input.token) return { error: "Missing token." };
 
   const admin = createAdminClient();
+  const tokenHash = hashBearerToken(input.token);
 
   const { data: doc } = await admin
     .from("legal_documents")
-    .select("id, doc_type, status, body, subject, job_id, signing_token, sent_to")
-    .eq("signing_token", input.token)
+    .select("id, doc_type, status, body, subject, job_id, signing_token_expires_at, sent_to")
+    .eq("signing_token", tokenHash)
+    .gt("signing_token_expires_at", new Date().toISOString())
     .single();
   if (!doc) return { error: "This signing link is invalid or has expired." };
 
@@ -75,7 +78,7 @@ export async function signLegalDoc(
       "I agree this typed signature is valid for this document and I consent to do business electronically with First Call Mitigation. (ESIGN Act / Tex. UETA)",
   };
 
-  const { error: updateError } = await admin
+  const { data: signedDocument, error: updateError } = await admin
     .from("legal_documents")
     .update({
       status: "signed",
@@ -84,9 +87,18 @@ export async function signLegalDoc(
       signature_data: signatureData,
       signature_ip: ip,
       signature_user_agent: userAgent,
+      signing_token: null,
     })
-    .eq("id", doc.id);
-  if (updateError) return { error: updateError.message };
+    .eq("id", doc.id)
+    .eq("signing_token", tokenHash)
+    .eq("status", "sent")
+    .gt("signing_token_expires_at", new Date().toISOString())
+    .select("id")
+    .maybeSingle();
+  if (updateError) return { error: "Unable to save the signature. Please try again." };
+  if (!signedDocument) {
+    return { error: "This document was already signed, voided, or the link expired." };
+  }
 
   // Audit log
   await admin.from("audit_logs").insert({

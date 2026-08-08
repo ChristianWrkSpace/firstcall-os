@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
+import { hashBearerToken } from "@/lib/token-hash";
 import Logo from "@/components/Logo";
 import { docTypeMeta } from "@/lib/document-types";
 
@@ -16,7 +17,8 @@ export default async function AdjusterPortal({
     .select(
       "id, job_number, status, type, description, created_at, scheduled_at, site_address, site_city, site_state, site_zip, scope_assessment, scope_analyzed_at, customers(name, email, phone, insurance_company, insurance_policy_number, insurance_claim_number)"
     )
-    .eq("adjuster_share_token", token)
+    .eq("adjuster_share_token_hash", hashBearerToken(token))
+    .gt("adjuster_share_expires_at", new Date().toISOString())
     .single();
 
   if (!job) notFound();
@@ -52,7 +54,7 @@ export default async function AdjusterPortal({
         .order("version", { ascending: false }),
       admin
         .from("legal_documents")
-        .select("id, doc_type, status, signed_at, signed_by_name, sent_at, sent_to, signing_token")
+        .select("id, doc_type, status, signed_at, signed_by_name, sent_at, sent_to")
         .eq("job_id", job.id)
         .in("status", ["sent", "signed"])
         .order("created_at", { ascending: false }),
@@ -269,20 +271,13 @@ export default async function AdjusterPortal({
                           : `Awaiting signature — sent ${new Date(d.sent_at).toLocaleDateString()}`}
                       </p>
                     </div>
-                    {d.signing_token && (
-                      <a
-                        href={`/sign/${d.signing_token}`}
-                        target="_blank"
-                        rel="noopener"
-                        className={`text-[10px] px-2.5 py-1 rounded font-semibold uppercase ${
-                          isSigned
-                            ? "bg-pine/10 text-pine hover:bg-green-500/25"
-                            : "bg-shade text-ink-2"
-                        }`}
-                      >
-                        {isSigned ? "✓ View" : "Pending"}
-                      </a>
-                    )}
+                    <span
+                      className={`text-[10px] px-2.5 py-1 rounded font-semibold uppercase ${
+                        isSigned ? "bg-pine/10 text-pine" : "bg-shade text-ink-2"
+                      }`}
+                    >
+                      {isSigned ? "✓ Signed" : "Pending"}
+                    </span>
                   </li>
                 );
               })}

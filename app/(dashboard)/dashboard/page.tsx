@@ -1,5 +1,4 @@
-// /dashboard forwards straight to /command-center (the canonical home) — previously
-// it was in a custom dashboard state, now aligned.
+// Legacy dashboard URL forwards to the practical operations home.
 import { redirect } from "next/navigation";
 
 export default function DashboardPageRedirect() {

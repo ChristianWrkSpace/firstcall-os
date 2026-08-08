@@ -1,14 +1,13 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
+import { getCurrentUser } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { autoTriggerOnMoistureReading } from "@/lib/auto-triggers";
 
 async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  return getCurrentUser();
 }
 
 export async function recordMoistureReading(jobId: string, formData: FormData) {

@@ -41,26 +41,23 @@ import { STATUS_COLORS, PAYMENT_ROUTE_BY_VALUE, type PaymentRoute } from "@/lib/
 // doc that's already been deleted" 404s.
 export const dynamic = "force-dynamic";
 
-/* ── The spine ─────────────────────────────────────────────────────────────
- * One calm column. "Needs You" stays lit at the top — the agents' derived
- * next actions. Everything else folds into acts named for the agent that
- * runs them; the act for the job's current phase opens by default. The
- * human scans, taps, approves. The agents do the rest.
- * ────────────────────────────────────────────────────────────────────────*/
+/* One practical job file: next steps first, then field work, money,
+ * paperwork, people, and the permanent record. Optional automation remains
+ * inside the relevant section instead of defining the whole experience. */
 
 const PHASES = ["lead", "inspection", "mitigation", "drying", "reconstruction", "completed"] as const;
 
 function Act({
   id,
   title,
-  agent,
+  description,
   accent,
   open,
   children,
 }: {
   id: string;
   title: string;
-  agent: string;
+  description: string;
   accent: string;
   open?: boolean;
   children: React.ReactNode;
@@ -78,7 +75,7 @@ function Act({
           {title}
         </span>
         <span className="hidden sm:inline text-[11px] truncate" style={{ color: "var(--color-text-muted)" }}>
-          {agent}
+          {description}
         </span>
         <span
           className="ml-auto text-xs shrink-0 transition-transform duration-200 group-open:rotate-90"
@@ -338,7 +335,7 @@ export default async function JobDetailPage({
           )}
         </div>
 
-        {/* ── Needs You — always lit. The agents' derived next actions. ── */}
+        {/* Next steps stay visible so the user never has to hunt. */}
         <div
           className="rounded-2xl"
           style={{ boxShadow: "0 0 0 1px rgba(245,158,11,0.18), 0 0 32px -16px rgba(245,158,11,0.25)" }}
@@ -369,11 +366,11 @@ export default async function JobDetailPage({
           />
         </div>
 
-        {/* ── Act I: The Field — Argus runs this ── */}
+        {/* Field work */}
         <Act
           id="act-field"
-          title="The Field"
-          agent="Argus scopes from photos · you approve"
+          title="Field Work"
+          description="scope, photos, drying logs, and equipment"
           accent="#D97757"
           open={fieldOpen}
         >
@@ -394,7 +391,7 @@ export default async function JobDetailPage({
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
               <SectionHeader
                 title="Site Photos & Scope"
-                hint="Argus analyzes photos to produce IICRC S500-compliant scope and equipment list."
+                hint="Photos, dispatch details, and the working scope for this loss."
               />
               <div className="flex gap-2 items-start flex-wrap">
                 {job.scope_assessment && (
@@ -444,7 +441,7 @@ export default async function JobDetailPage({
               <SectionHeader
                 title="Equipment On Site"
                 emoji="🛠"
-                hint="What's currently deployed from your inventory. Compares against Argus's recommended load."
+                hint="What is currently deployed from inventory and what the scope recommends."
               />
               <div className="flex items-center gap-3">
                 {equipmentAssignments && equipmentAssignments.length > 0 && (
@@ -470,11 +467,11 @@ export default async function JobDetailPage({
           </div>
         </Act>
 
-        {/* ── Act II: The Money — Ledger drafts, Abacus collects ── */}
+        {/* Billing and costs */}
         <Act
           id="act-money"
-          title="The Money"
-          agent="Ledger estimates · Abacus invoices & collects"
+          title="Billing & Costs"
+          description="job profit, estimates, invoices, and payments"
           accent="#5B82B8"
           open={moneyOpen}
         >
@@ -527,7 +524,7 @@ export default async function JobDetailPage({
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
               <SectionHeader
                 title="Estimates"
-                hint="Ledger generates Xactimate-style line items from the Argus scope."
+                hint="Build and review the estimate for this job."
               />
               <GenerateEstimateButton
                 jobId={job.id}
@@ -538,7 +535,7 @@ export default async function JobDetailPage({
               <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
                 {job.scope_assessment
                   ? "No estimates yet. Click 'Generate Estimate' to draft one."
-                  : "Run Argus scope analysis first, then generate an estimate."}
+                  : "Complete the scope first, then create an estimate."}
               </p>
             ) : (
               <div className="flex flex-col gap-2">
@@ -588,12 +585,12 @@ export default async function JobDetailPage({
             <div className="mb-4">
               <SectionHeader
                 title="Invoices"
-                hint="Abacus tracks billing, payments, and reminders."
+                hint="Billing, balances, payments, and due dates."
               />
             </div>
             {!invoices?.length ? (
               <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
-                No invoices yet — approve an estimate and Abacus drafts one.
+                No invoices yet — approve an estimate to create one.
               </p>
             ) : (
               <div className="flex flex-col gap-2">
@@ -651,17 +648,17 @@ export default async function JobDetailPage({
           </div>
         </Act>
 
-        {/* ── Act III: The Paperwork — Esquire writes, you approve ── */}
+        {/* Paperwork */}
         <Act
           id="act-paperwork"
-          title="The Paperwork"
-          agent="Esquire drafts · you approve before anything sends"
+          title="Paperwork"
+          description="authorizations, signatures, and uploaded files"
           accent="#C4B5FD"
         >
           <div id="paperwork" className="scroll-mt-24">
             <div className="mb-3 flex items-center gap-2">
               <span className="text-xs uppercase tracking-wide font-semibold" style={{ color: "var(--color-text-secondary)" }}>
-                ⚖️ Esquire-drafted
+                Outgoing documents
               </span>
               <span className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>outgoing</span>
             </div>
@@ -686,11 +683,11 @@ export default async function JobDetailPage({
           </div>
         </Act>
 
-        {/* ── Act IV: The People — contacts, crew, access ── */}
+        {/* Contacts and schedule */}
         <Act
           id="act-people"
-          title="The People"
-          agent="customer · adjuster · crew · portals"
+          title="Contacts & Schedule"
+          description="customer, adjuster, crew, and shared access"
           accent="#44689A"
         >
           <div>
@@ -749,7 +746,7 @@ export default async function JobDetailPage({
               <AdjusterContactCard
                 jobNumber={job.job_number}
                 customer={customer ?? {}}
-                adjusterToken={(job as any).adjuster_share_token ?? null}
+                adjusterToken={null}
                 siteAddress={job.site_address}
               />
             </div>
@@ -785,7 +782,8 @@ export default async function JobDetailPage({
               </div>
               <CustomerShareCard
                 jobId={job.id}
-                initialToken={job.customer_share_token}
+                initialToken={null}
+                hasActiveLink={Boolean((job as any).customer_share_token_hash)}
               />
             </div>
             <div>
@@ -797,7 +795,8 @@ export default async function JobDetailPage({
               </div>
               <AdjusterShareCard
                 jobId={job.id}
-                initialToken={(job as any).adjuster_share_token}
+                initialToken={null}
+                hasActiveLink={Boolean((job as any).adjuster_share_token_hash)}
               />
             </div>
           </div>
@@ -824,11 +823,11 @@ export default async function JobDetailPage({
           </div>
         </Act>
 
-        {/* ── Act V: The Record — notes & full history ── */}
+        {/* Permanent record */}
         <Act
           id="act-record"
-          title="The Record"
-          agent="every note, event, and email — chronological"
+          title="Notes & Activity"
+          description="every note, event, and email in order"
           accent="#8B93A7"
           open={recordOpen}
         >

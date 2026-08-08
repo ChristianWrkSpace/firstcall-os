@@ -50,8 +50,8 @@ export default async function InvoicesIndex({
           </p>
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="glass-card overflow-x-auto">
+          <table className="w-full min-w-[38rem] text-sm">
             <thead>
               <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
                 <th className="px-5 py-3 text-left">Invoice #</th>

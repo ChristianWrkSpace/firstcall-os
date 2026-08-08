@@ -45,7 +45,7 @@ export default function EditableJobDetailsCard({
     setError(null);
     startTransition(async () => {
       const res = await updateJobIntake(jobId, draft);
-      if (res.error) setError(res.error);
+      if ("error" in res) setError(res.error);
       else setEditing(false);
     });
   }

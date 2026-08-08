@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "FirstCall OS — First Call Mitigation",
   description:
-    "AI-powered operating system for First Call Mitigation. Water · Fire · Mold restoration in Austin, TX.",
+    "Operations system for First Call Mitigation. Jobs, field work, paperwork, billing, and reporting.",
   applicationName: "FirstCall OS",
   // PWA + iOS Add-to-Home-Screen
   appleWebApp: {
@@ -49,14 +49,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "FirstCall OS",
-    description: "AI-powered restoration operating system",
+    description: "Restoration operations system",
     images: ["/logo-banner.png"],
     type: "website",
   },
   twitter: {
     card: "summary",
     title: "FirstCall OS",
-    description: "AI-powered restoration operating system",
+    description: "Restoration operations system",
     images: ["/logo-banner.png"],
   },
 };

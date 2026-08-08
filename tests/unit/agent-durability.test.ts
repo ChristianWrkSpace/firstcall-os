@@ -4,7 +4,7 @@ import {
   isFresh,
   PreconditionError,
 } from "@/lib/agent-preconditions";
-import { kindToAgentTask } from "@/lib/agent-feedback";
+import { kindToAgentTask } from "@/lib/agent-feedback-types";
 
 /**
  * Five-Laws stress harness — 100+ scenarios across the new durability layer.

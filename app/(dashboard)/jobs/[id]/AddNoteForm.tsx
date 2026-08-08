@@ -8,7 +8,7 @@ export default function AddNoteForm({ jobId }: { jobId: string }) {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state?.ok) formRef.current?.reset();
+    if (state && "ok" in state && state.ok) formRef.current?.reset();
   }, [state]);
 
   return (
@@ -20,7 +20,7 @@ export default function AddNoteForm({ jobId }: { jobId: string }) {
         placeholder="Add a note…"
         className="w-full px-3 py-2 rounded-lg bg-shade border border-edge2 text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-cta focus:border-transparent text-sm resize-none"
       />
-      {state?.error && (
+      {state && "error" in state && state.error && (
         <p className="text-red-700 text-xs">{state.error}</p>
       )}
       <div className="flex justify-end">

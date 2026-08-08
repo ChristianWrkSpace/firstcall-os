@@ -1,20 +1,20 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient, createServerSupabaseClient } from "@/lib/supabase-server";
 import { assessScope, type ScopeImage, type DispatchInputs } from "@/lib/argus";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { autoDraftEstimate } from "@/lib/auto-triggers";
 import { logAgentOutcome } from "@/lib/agent-feedback";
 import { requireInputs, PreconditionError } from "@/lib/agent-preconditions";
+import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
 
 const BUCKET = "job-photos";
 
 export async function saveDispatchInputs(jobId: string, inputs: DispatchInputs) {
-  const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
 
   const { error } = await admin
@@ -32,10 +32,9 @@ export async function recordJobPhoto(
   storagePath: string,
   source?: { videoId?: string; frameTimestampSec?: number }
 ) {
-  const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
 
   const { error: dbErr } = await admin.from("job_photos").insert({
@@ -65,10 +64,9 @@ export async function recordJobVideo(args: {
   thumbnailPath?: string | null;
   durationSec?: number | null;
 }) {
-  const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
 
   const { data, error } = await admin
@@ -181,10 +179,9 @@ export async function analyzeJobPhotos(
   jobId: string,
   mode: AnalyzeMode = "quick"
 ): Promise<AnalyzeResult> {
-  const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
 
   try {
@@ -325,11 +322,9 @@ export async function analyzeJobPhotos(
 }
 
 export async function deleteJobPhoto(photoId: string, jobId: string) {
-  const supabase = await createServerSupabaseClient();
+  const auth = await requirePermission("documents.delete");
+  if ("error" in auth) return auth;
   const admin = createAdminClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated." };
 
   try {
     const { data: photo, error: fetchErr } = await admin
@@ -350,8 +345,18 @@ export async function deleteJobPhoto(photoId: string, jobId: string) {
 }
 
 export async function getPhotoSignedUrl(storagePath: string) {
-  const admin = createAdminClient();
-  const { data, error } = await admin.storage
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const supabase = await createServerSupabaseClient();
+
+  const { data: photo, error: lookupError } = await supabase
+    .from("job_photos")
+    .select("id")
+    .eq("storage_path", storagePath)
+    .maybeSingle();
+  if (lookupError || !photo) return null;
+
+  const { data, error } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(storagePath, 60 * 60); // 1 hour
   if (error || !data) return null;

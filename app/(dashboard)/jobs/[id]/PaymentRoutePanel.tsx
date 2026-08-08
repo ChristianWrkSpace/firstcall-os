@@ -24,7 +24,7 @@ export default function PaymentRoutePanel({
   const meta = PAYMENT_ROUTE_BY_VALUE[currentRoute];
 
   useEffect(() => {
-    if (state?.ok) setEditing(false);
+    if (state && "ok" in state && state.ok) setEditing(false);
   }, [state]);
 
   if (!editing) {
@@ -108,7 +108,9 @@ export default function PaymentRoutePanel({
         </div>
       )}
 
-      {state?.error && <p className="text-red-700 text-xs">{state.error}</p>}
+      {state && "error" in state && state.error && (
+        <p className="text-red-700 text-xs">{state.error}</p>
+      )}
 
       <div className="flex gap-2 mt-1">
         <button

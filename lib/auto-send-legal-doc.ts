@@ -14,6 +14,7 @@
 //     in-app e-sign in 2 clicks (no DocuSign vendor cost).
 
 import crypto from "node:crypto";
+import { hashBearerToken } from "@/lib/token-hash";
 import { createAdminClient } from "./supabase-server";
 import { sendEmail } from "./resend";
 import type { LegalDocType } from "./esquire-types";
@@ -167,7 +168,7 @@ export async function autoSendLegalDocToCustomer(
   try {
     const { data: doc } = await admin
       .from("legal_documents")
-      .select("id, doc_type, subject, body, status, job_id, signing_token")
+      .select("id, doc_type, subject, body, status, job_id")
       .eq("id", docId)
       .single();
     if (!doc) {
@@ -241,14 +242,23 @@ export async function autoSendLegalDocToCustomer(
       return;
     }
 
-    // Generate signing token if this doc doesn't have one yet
-    let signingToken = doc.signing_token as string | null;
-    if (!signingToken) {
-      signingToken = generateSigningToken();
-      await admin
-        .from("legal_documents")
-        .update({ signing_token: signingToken })
-        .eq("id", docId);
+    // Every send rotates the bearer credential and gives it a short lifetime.
+    // A forwarded or previously logged link therefore stops working after resend.
+    const signingToken = generateSigningToken();
+    const { error: tokenError } = await admin
+      .from("legal_documents")
+      .update({
+        signing_token: hashBearerToken(signingToken),
+        signing_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      })
+      .eq("id", docId);
+    if (tokenError) {
+      await recordAttempt(docId, {
+        attempted_at: new Date().toISOString(),
+        status: "failed",
+        reason: "Could not create a secure signing link.",
+      }, doc.job_id, doc.doc_type);
+      return;
     }
 
     const signUrl = `${APP_BASE_URL}/sign/${signingToken}`;

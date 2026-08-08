@@ -11,17 +11,22 @@ export type Permission =
   // Customers
   | "customers.delete"
   // Estimates / Invoices
+  | "estimates.edit"
   | "estimates.send"
   | "estimates.approve"
+  | "estimates.delete"
+  | "invoices.edit"
   | "invoices.send"
   | "invoices.void"
   | "invoices.record_payment"
   | "invoices.record_payment_view"
+  | "payments.delete"
   // Equipment
   | "equipment.retire"
   | "equipment.delete"
-  // Documents
+  // Documents and public portals
   | "documents.delete"
+  | "portals.manage"
   // Partners / Outreach
   | "partners.delete"
   | "outreach.delete"
@@ -37,10 +42,10 @@ const MATRIX: Record<Role, Permission[]> = {
   owner: [
     "jobs.delete", "jobs.cancel",
     "customers.delete",
-    "estimates.send", "estimates.approve",
-    "invoices.send", "invoices.void", "invoices.record_payment", "invoices.record_payment_view",
+    "estimates.edit", "estimates.send", "estimates.approve", "estimates.delete",
+    "invoices.edit", "invoices.send", "invoices.void", "invoices.record_payment", "invoices.record_payment_view", "payments.delete",
     "equipment.retire", "equipment.delete",
-    "documents.delete",
+    "documents.delete", "portals.manage",
     "partners.delete", "outreach.delete",
     "reports.view_financial", "ar.view",
     "users.manage", "audit.view", "settings.edit",
@@ -48,19 +53,19 @@ const MATRIX: Record<Role, Permission[]> = {
   manager: [
     "jobs.delete", "jobs.cancel",
     "customers.delete",
-    "estimates.send", "estimates.approve",
-    "invoices.send", "invoices.void", "invoices.record_payment", "invoices.record_payment_view",
+    "estimates.edit", "estimates.send", "estimates.approve", "estimates.delete",
+    "invoices.edit", "invoices.send", "invoices.void", "invoices.record_payment", "invoices.record_payment_view", "payments.delete",
     "equipment.retire",
-    "documents.delete",
+    "documents.delete", "portals.manage",
     "partners.delete", "outreach.delete",
     "reports.view_financial", "ar.view",
     "audit.view",
   ],
   office: [
     "jobs.cancel",
-    "estimates.send", "estimates.approve",
-    "invoices.send", "invoices.record_payment", "invoices.record_payment_view",
-    "documents.delete",
+    "estimates.edit", "estimates.send", "estimates.approve",
+    "invoices.edit", "invoices.send", "invoices.record_payment", "invoices.record_payment_view",
+    "documents.delete", "portals.manage",
     "outreach.delete",
     "ar.view",
   ],

@@ -11,10 +11,10 @@ export default function StatusSelector({
   jobId: string;
   currentStatus: string;
 }) {
-  const [, action, pending] = useActionState(updateJobStatus, undefined);
+  const [state, action, pending] = useActionState(updateJobStatus, undefined);
 
   return (
-    <form action={action} className="flex items-center gap-2">
+    <form action={action} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="job_id" value={jobId} />
       <select
         name="status"
@@ -30,6 +30,11 @@ export default function StatusSelector({
         ))}
       </select>
       {pending && <span className="text-ink-3 text-xs">Saving…</span>}
+      {state?.error && (
+        <p role="alert" className="basis-full text-xs text-red-700">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 }

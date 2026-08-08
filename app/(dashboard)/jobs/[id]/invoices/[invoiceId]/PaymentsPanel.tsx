@@ -66,7 +66,7 @@ export default function PaymentsPanel({
       {adding && (
         <form
           action={handleSubmit}
-          className="mb-4 bg-shade border border-edge2 rounded-lg p-3 grid grid-cols-2 gap-3"
+          className="mb-4 bg-shade border border-edge2 rounded-lg p-3 grid grid-cols-1 sm:grid-cols-2 gap-3"
         >
           <div className="flex flex-col gap-1">
             <label className="text-ink-2 text-xs uppercase tracking-wide">Amount *</label>
@@ -99,12 +99,12 @@ export default function PaymentsPanel({
             <label className="text-ink-2 text-xs uppercase tracking-wide">Received Date</label>
             <input name="received_at" type="date" className={INPUT} />
           </div>
-          <div className="col-span-2 flex flex-col gap-1">
+          <div className="sm:col-span-2 flex flex-col gap-1">
             <label className="text-ink-2 text-xs uppercase tracking-wide">Notes</label>
             <input name="notes" className={INPUT} placeholder="optional" />
           </div>
-          {error && <p className="col-span-2 text-red-700 text-xs">{error}</p>}
-          <div className="col-span-2 flex justify-end gap-2">
+          {error && <p className="sm:col-span-2 text-red-700 text-xs">{error}</p>}
+          <div className="sm:col-span-2 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setAdding(false)}
@@ -126,7 +126,8 @@ export default function PaymentsPanel({
       {payments.length === 0 ? (
         <p className="text-ink-3 text-sm italic">No payments recorded.</p>
       ) : (
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[42rem] text-sm">
           <thead>
             <tr className="border-b border-edge2 text-ink-3 text-xs uppercase tracking-wide">
               <th className="text-left py-2">Date</th>
@@ -168,6 +169,7 @@ export default function PaymentsPanel({
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </section>
   );

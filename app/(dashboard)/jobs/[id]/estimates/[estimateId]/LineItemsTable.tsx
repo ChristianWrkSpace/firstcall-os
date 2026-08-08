@@ -60,8 +60,8 @@ export default function LineItemsTable({
   const categories = categoryOrder.filter((c) => itemsByCategory[c]?.length > 0);
 
   return (
-    <div>
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[52rem] text-sm">
         <thead className="bg-tint">
           <tr className="text-ink-3 text-xs uppercase tracking-wide">
             <th className="px-4 py-2 text-left">Code</th>

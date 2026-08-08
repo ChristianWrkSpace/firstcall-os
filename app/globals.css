@@ -161,6 +161,23 @@ body {
 }
 .animate-drift { animation: drift-slow 20s ease-in-out infinite; }
 
+/* Respect the user's motion preference across authored animations and utility
+   transitions without changing the visual design for everyone else. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ─── Print Styles ───────────────────────────────────────────────── */
 @media print {
   aside, nav, .no-print { display: none !important; }

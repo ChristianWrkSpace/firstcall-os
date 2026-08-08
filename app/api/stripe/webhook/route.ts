@@ -21,79 +21,94 @@ export async function POST(req: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-  } catch (err: any) {
-    console.error("[stripe-webhook] signature verification failed:", err.message);
+  } catch {
+    console.error("[stripe-webhook] signature verification failed");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const invoiceId = session.metadata?.invoice_id;
+    const paymentKind = session.metadata?.payment_kind ?? "full";
+    const reference =
+      typeof session.payment_intent === "string" ? session.payment_intent : null;
+    const amountTotal = session.amount_total;
 
-    if (!invoiceId) {
-      console.warn("[stripe-webhook] no invoice_id in metadata");
-      return NextResponse.json({ received: true });
+    if (
+      !event.id ||
+      !invoiceId ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(invoiceId) ||
+      !reference ||
+      !["full", "deductible"].includes(paymentKind)
+    ) {
+      console.warn("[stripe-webhook] invalid payment metadata");
+      return NextResponse.json({ error: "Invalid payment data" }, { status: 400 });
     }
 
-    const amount = (session.amount_total ?? 0) / 100;
-    const reference = session.payment_intent as string;
-    const paymentKind = session.metadata?.payment_kind ?? "full";
+    if (
+      typeof amountTotal !== "number" ||
+      !Number.isSafeInteger(amountTotal) ||
+      amountTotal <= 0
+    ) {
+      console.warn("[stripe-webhook] invalid payment amount");
+      return NextResponse.json({ error: "Invalid payment data" }, { status: 400 });
+    }
+
     const admin = createAdminClient();
-
-    // Insert payment record (paid via Stripe)
-    await admin.from("payments").insert({
-      invoice_id: invoiceId,
-      amount,
-      method: "credit_card",
-      reference: `stripe:${reference}`,
-      received_at: new Date().toISOString().split("T")[0],
-      notes:
-        paymentKind === "deductible"
-          ? "Deductible paid online via Stripe Checkout"
-          : "Paid online via Stripe Checkout",
-    });
-
-    // Recompute invoice status
-    const [{ data: payments }, { data: lines }] = await Promise.all([
-      admin.from("payments").select("amount").eq("invoice_id", invoiceId),
-      admin
-        .from("invoice_line_items")
-        .select("line_total")
-        .eq("invoice_id", invoiceId),
-    ]);
-    const totalPaid = (payments ?? []).reduce((s, p) => s + Number(p.amount), 0);
-    const totalDue = (lines ?? []).reduce(
-      (s, l) => s + Number(l.line_total ?? 0),
-      0
-    );
-
-    let newStatus: string;
-    if (totalPaid >= totalDue) newStatus = "paid";
-    else if (totalPaid > 0) newStatus = "partial";
-    else newStatus = "sent";
-
-    await admin
-      .from("invoices")
-      .update({
-        status: newStatus,
-        paid_at: newStatus === "paid" ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", invoiceId);
-
-    // Audit log it (best-effort)
+    let result;
     try {
-      await admin.from("audit_logs").insert({
-        action: "payment.recorded_via_stripe",
-        entity_type: "invoice",
-        entity_id: invoiceId,
-        details: {
-          amount,
-          reference: `stripe:${reference}`,
-          new_status: newStatus,
-        },
+      result = await admin.rpc("process_stripe_payment", {
+        p_event_id: event.id,
+        p_invoice_id: invoiceId,
+        p_amount: amountTotal / 100,
+        p_reference: reference,
+        p_payment_kind: paymentKind,
       });
-    } catch {}
+    } catch {
+      console.error("[stripe-webhook] durable payment processing failed");
+      return NextResponse.json(
+        { error: "Payment processing failed" },
+        { status: 500 }
+      );
+    }
+
+    const { data, error } = result;
+
+    if (error) {
+      console.error("[stripe-webhook] durable payment processing failed");
+      return NextResponse.json(
+        { error: "Payment processing failed" },
+        { status: 500 }
+      );
+    }
+
+    const outcome = Array.isArray(data) ? data[0] : null;
+    if (!outcome) {
+      console.error("[stripe-webhook] payment RPC returned no outcome");
+      return NextResponse.json(
+        { error: "Payment processing failed" },
+        { status: 500 }
+      );
+    }
+    if (outcome.payment_id == null) {
+      try {
+        await stripe.refunds.create(
+          { payment_intent: reference },
+          { idempotencyKey: `invoice-overpayment-refund:${event.id}` }
+        );
+      } catch {
+        console.error("[stripe-webhook] automatic overpayment refund failed");
+        return NextResponse.json(
+          { error: "Payment refund failed" },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json({ received: true, refunded: true });
+    }
+
+    if (outcome?.already_processed === true) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
   }
 
   return NextResponse.json({ received: true });

@@ -14,6 +14,8 @@ describe("hasPermission", () => {
   });
 
   it("technician has no money or admin perms", () => {
+    expect(hasPermission("technician", "estimates.edit")).toBe(false);
+    expect(hasPermission("technician", "invoices.edit")).toBe(false);
     expect(hasPermission("technician", "invoices.send")).toBe(false);
     expect(hasPermission("technician", "users.manage")).toBe(false);
     expect(hasPermission("technician", "audit.view")).toBe(false);
@@ -21,6 +23,8 @@ describe("hasPermission", () => {
   });
 
   it("office can send invoices but not delete jobs", () => {
+    expect(hasPermission("office", "estimates.edit")).toBe(true);
+    expect(hasPermission("office", "invoices.edit")).toBe(true);
     expect(hasPermission("office", "invoices.send")).toBe(true);
     expect(hasPermission("office", "jobs.delete")).toBe(false);
     expect(hasPermission("office", "users.manage")).toBe(false);
@@ -31,6 +35,22 @@ describe("hasPermission", () => {
     expect(hasPermission("manager", "jobs.delete")).toBe(true);
     expect(hasPermission("manager", "users.manage")).toBe(false);
     expect(hasPermission("manager", "settings.edit")).toBe(false);
+  });
+
+  it("office can manage customer portals but technicians cannot", () => {
+    expect(hasPermission("owner", "portals.manage")).toBe(true);
+    expect(hasPermission("manager", "portals.manage")).toBe(true);
+    expect(hasPermission("office", "portals.manage")).toBe(true);
+    expect(hasPermission("technician", "portals.manage")).toBe(false);
+  });
+
+  it("restricts estimate and payment deletion to owners and managers", () => {
+    for (const permission of ["estimates.delete", "payments.delete"] as const) {
+      expect(hasPermission("owner", permission)).toBe(true);
+      expect(hasPermission("manager", permission)).toBe(true);
+      expect(hasPermission("office", permission)).toBe(false);
+      expect(hasPermission("technician", permission)).toBe(false);
+    }
   });
 
   it("rejects unknown roles and null", () => {

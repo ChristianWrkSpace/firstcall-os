@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
+import { hashBearerToken } from "@/lib/token-hash";
 import Logo from "@/components/Logo";
 import PayInvoiceButton from "./PayInvoiceButton";
 
@@ -38,7 +39,8 @@ export default async function PortalPage({
     .select(
       "id, job_number, status, type, description, created_at, scheduled_at, site_address, site_city, site_state, site_zip, payment_route, deductible_amount, customers(name, insurance_company, insurance_claim_number)"
     )
-    .eq("customer_share_token", token)
+    .eq("customer_share_token_hash", hashBearerToken(token))
+    .gt("customer_share_expires_at", new Date().toISOString())
     .single();
 
   if (!job) notFound();
@@ -82,7 +84,7 @@ export default async function PortalPage({
     // Permanent record of legal docs the customer has signed or received
     admin
       .from("legal_documents")
-      .select("id, doc_type, status, signed_at, signed_by_name, signing_token, sent_at")
+      .select("id, doc_type, status, signed_at, signed_by_name, sent_at")
       .eq("job_id", job.id)
       .in("doc_type", [
         "aob",
@@ -367,23 +369,9 @@ export default async function PortalPage({
                       <p className="text-ink-3 text-[10px]">
                         {isSigned
                           ? `Signed by ${d.signed_by_name ?? "you"} ${new Date(d.signed_at).toLocaleDateString()}`
-                          : `Sent ${new Date(d.sent_at).toLocaleDateString()} — awaiting your signature`}
+                          : `Sent ${new Date(d.sent_at).toLocaleDateString()} — sign using the secure link delivered to you`}
                       </p>
                     </div>
-                    {d.signing_token && (
-                      <a
-                        href={`/sign/${d.signing_token}`}
-                        target="_blank"
-                        rel="noopener"
-                        className={`text-[10px] px-2.5 py-1 rounded font-semibold uppercase ${
-                          isSigned
-                            ? "bg-pine/10 text-pine hover:bg-green-500/25"
-                            : "bg-cta text-white hover:bg-cta-deep"
-                        }`}
-                      >
-                        {isSigned ? "✓ View" : "Sign now →"}
-                      </a>
-                    )}
                   </li>
                 );
               })}

@@ -24,18 +24,11 @@ export const getCurrentUser = cache(async function getCurrentUser(): Promise<Aut
   const admin = createAdminClient();
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, name, email, role")
+    .select("id, name, email, role, active")
     .eq("id", user.id)
     .single();
 
-  if (!profile) {
-    return {
-      id: user.id,
-      email: user.email ?? null,
-      name: user.email ?? "User",
-      role: "technician", // fallback to least-privileged
-    };
-  }
+  if (!profile?.active) return null;
 
   return {
     id: profile.id,
@@ -46,18 +39,29 @@ export const getCurrentUser = cache(async function getCurrentUser(): Promise<Aut
 });
 
 /**
- * Require an authenticated user with a specific permission.
+ * Require an authenticated user with an active profile.
+ * Returns the project's standard action result shape.
+ */
+export async function requireAuthenticatedUser(): Promise<
+  { user: AuthedUser } | { error: string }
+> {
+  const user = await getCurrentUser();
+  return user ? { user } : { error: "Not authenticated." };
+}
+
+/**
+ * Require an authenticated active user with a specific permission.
  * Returns the user if allowed, or an { error } object to bail with.
  */
 export async function requirePermission(
   perm: Permission
 ): Promise<{ user: AuthedUser } | { error: string }> {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Not authenticated." };
-  if (!hasPermission(user.role, perm)) {
+  const auth = await requireAuthenticatedUser();
+  if ("error" in auth) return auth;
+  if (!hasPermission(auth.user.role, perm)) {
     return { error: `Permission denied: ${perm} requires ${getRolesWithPermission(perm).join(", ")}.` };
   }
-  return { user };
+  return auth;
 }
 
 function getRolesWithPermission(perm: Permission): string[] {

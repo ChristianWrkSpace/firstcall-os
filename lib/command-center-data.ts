@@ -44,6 +44,7 @@ export interface Handoff {
   detail: string;
   severity: "high" | "med" | "low";
   ageMinutes: number;
+  href: string;
 }
 
 export interface JobPulseEntry {
@@ -134,7 +135,7 @@ export async function loadCommandCenterData(operator: {
   ] = await Promise.all([
     supabase
       .from("pending_approvals")
-      .select("id, kind, entity_type, entity_id, title, detail, created_at, status")
+      .select("id, kind, job_id, entity_type, entity_id, title, detail, link, created_at, status")
       .eq("status", "pending")
       .gte("created_at", sinceForCutoff)
       .order("created_at", { ascending: false })
@@ -241,6 +242,7 @@ export async function loadCommandCenterData(operator: {
       detail: a.detail ?? "Awaiting your review.",
       severity: meta.sev,
       ageMinutes: Math.max(0, Math.floor(ageMs / 60_000)),
+      href: a.link ?? (a.job_id ? `/jobs/${a.job_id}` : `/approvals#approval-${a.id}`),
     };
   });
 

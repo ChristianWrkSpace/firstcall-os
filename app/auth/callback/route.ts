@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 /**
  * OAuth + email link callback.
@@ -9,7 +10,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/dashboard";
+  const next = safeRedirectPath(url.searchParams.get("next"), "/dashboard");
 
   if (code) {
     const supabase = await createServerSupabaseClient();

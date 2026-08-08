@@ -1,13 +1,12 @@
 "use server";
 
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
+import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 async function requireUser() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  return getCurrentUser();
 }
 
 export async function createEquipment(
@@ -185,6 +184,11 @@ export async function setStatus(
   equipmentId: string,
   newStatus: "available" | "maintenance" | "retired"
 ) {
+  if (newStatus === "retired") {
+    const auth = await requirePermission("equipment.retire");
+    if ("error" in auth) return { error: auth.error };
+  }
+
   const user = await requireUser();
   if (!user) return { error: "Not authenticated." };
 
@@ -206,6 +210,9 @@ export async function setStatus(
 }
 
 export async function getActiveJobs() {
+  const user = await requireUser();
+  if (!user) return [];
+
   const admin = createAdminClient();
   const { data } = await admin
     .from("jobs")
@@ -223,8 +230,8 @@ export async function getActiveJobs() {
 }
 
 export async function deleteEquipment(id: string) {
-  const user = await requireUser();
-  if (!user) return { error: "Not authenticated." };
+  const auth = await requirePermission("equipment.delete");
+  if ("error" in auth) return { error: auth.error };
 
   const admin = createAdminClient();
   const { error } = await admin.from("equipment").delete().eq("id", id);
