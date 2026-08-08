@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import LineItemsTable from "./LineItemsTable";
 import EstimateActions from "./EstimateActions";
-import GenerateInvoiceButton from "./GenerateInvoiceButton";
 
 const STATUS_COLORS: Record<string, string> = {
   draft:    "bg-shade text-ink-2",
@@ -214,15 +213,6 @@ export default async function EstimateDetailPage({
               status={estimate.status}
               total={total}
             />
-            {(estimate.status === "approved" || estimate.status === "sent") && (
-              <div className="mt-3 pt-3 border-t border-edge2">
-                <GenerateInvoiceButton estimateId={estimateId} jobId={jobId} />
-                <p className="text-ink-3 text-[10px] mt-1.5 leading-snug">
-                  Creates a draft invoice with these line items, ready to send to the
-                  carrier.
-                </p>
-              </div>
-            )}
           </section>
 
           <section className="glass-card p-5">

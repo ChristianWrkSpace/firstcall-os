@@ -13,6 +13,8 @@ describe("manual-only billing and invoicing", () => {
     const help = source("app/(dashboard)/help/page.tsx");
     const reports = source("app/(dashboard)/reports/page.tsx");
     const estimateActions = source("app/actions/estimates.ts");
+    const estimatePage = source("app/(dashboard)/jobs/[id]/estimates/[estimateId]/page.tsx");
+    const invoiceActions = source("app/actions/invoices.ts");
 
     expect(jobPage).not.toContain("GenerateEstimateButton");
     expect(jobPage).not.toContain('.from("estimates")');
@@ -25,6 +27,8 @@ describe("manual-only billing and invoicing", () => {
     expect(reports).not.toContain("Avg Estimate");
     expect(reports).toContain("Avg Invoice");
     expect(estimateActions).not.toContain("autoCreateInvoiceDraft");
+    expect(estimatePage).not.toContain("GenerateInvoiceButton");
+    expect(invoiceActions).not.toContain("createInvoiceFromEstimate");
   });
 
   it("creates a draft invoice from the saved manual billing amount", () => {
@@ -61,5 +65,19 @@ describe("manual-only billing and invoicing", () => {
     expect(sql).toContain("revoke all on function public.create_manual_invoice_from_job_amount");
     expect(sql).toContain("grant execute on function public.create_manual_invoice_from_job_amount");
     expect(sql).toContain("to service_role");
+  });
+
+  it("keeps manual provenance immutable and allocates four-digit invoice suffixes", () => {
+    const sql = source("supabase/migrations/036_manual_invoice_guards.sql")
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+    expect(sql).toContain("old.is_manual_billing is distinct from new.is_manual_billing");
+    expect(sql).toContain("old.estimate_id is distinct from new.estimate_id");
+    expect(sql).toContain("new.is_manual_billing := new.estimate_id is null");
+    expect(sql).toContain("before update of is_manual_billing, estimate_id on public.invoices");
+    expect(sql).toContain("substring(invoice_number from 12)");
+    expect(sql).toContain("pg_advisory_xact_lock");
+    expect(sql).toContain("drop function if exists public.create_invoice_from_estimate");
   });
 });

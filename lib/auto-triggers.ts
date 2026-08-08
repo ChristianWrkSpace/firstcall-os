@@ -215,58 +215,6 @@ export async function autoDraftEstimate(jobId: string) {
   });
 }
 
-// ─── Wire 3: Auto-create invoice DRAFT when estimate approved ──────────
-
-export async function autoCreateInvoiceDraft(estimateId: string, createdBy: string) {
-  const admin = createAdminClient();
-  const { data: estimate } = await admin
-    .from("estimates")
-    .select("id, status, job_id")
-    .eq("id", estimateId)
-    .single();
-  if (!estimate || estimate.status !== "approved") return;
-
-  const jobId = estimate.job_id;
-  if (await isAutoPaused(jobId)) return;
-
-  const due = new Date();
-  due.setDate(due.getDate() + 30);
-  const { data: invoiceId, error: createError } = await admin.rpc(
-    "create_invoice_from_estimate",
-    {
-      p_estimate_id: estimateId,
-      p_job_id: jobId,
-      p_due_date: due.toISOString().split("T")[0],
-      p_created_by: createdBy,
-    }
-  );
-  if (createError || !invoiceId) {
-    console.error("[auto-trigger.invoice] atomic invoice creation failed");
-    return;
-  }
-
-  const [{ data: newInv }, { data: lineRows }] = await Promise.all([
-    admin.from("invoices").select("id, invoice_number").eq("id", invoiceId).single(),
-    admin.from("invoice_line_items").select("quantity, unit_price").eq("invoice_id", invoiceId),
-  ]);
-  if (!newInv) return;
-
-  const total = (lineRows ?? []).reduce(
-    (s: number, li: any) => s + Number(li.quantity) * Number(li.unit_price),
-    0
-  );
-
-  await enqueueApproval({
-    kind: "invoice_draft",
-    jobId,
-    entityType: "invoice",
-    entityId: invoiceId,
-    title: `Invoice ${newInv.invoice_number} drafted — $${total.toFixed(2)}`,
-    detail: `Auto-created from approved estimate. Sending stays manual — review and click Send when ready.`,
-    link: `/jobs/${jobId}/invoices/${invoiceId}`,
-  });
-}
-
 // ─── Wire 5: Auto-draft Drying Cert when conditions met ──────────────────
 // ─── Wire 7: Auto-flip mitigation→drying on first reading ────────────────
 // ─── Wire 8: Suggest drying→completed when all-dry streak ≥3 days ────────

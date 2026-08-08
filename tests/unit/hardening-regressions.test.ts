@@ -36,10 +36,10 @@ describe("hardening regressions", () => {
     expect(invoices).not.toContain("async function requireUser");
     expect(invoices).toContain('requirePermission("invoices.edit")');
     expect(invoices).toContain('requirePermission("invoices.send")');
-    expect(invoices).toContain('admin.rpc("create_invoice_from_estimate"');
-    expect(autoTriggers).toContain('"create_invoice_from_estimate"');
+    expect(invoices).toContain('"create_manual_invoice_from_job_amount"');
+    expect(autoTriggers).not.toContain('"create_invoice_from_estimate"');
     expect(autoTriggers).not.toContain('.from("invoices")\n    .insert(');
-    expect(autoTriggers).toContain("const jobId = estimate.job_id");
+
     expect(estimates).toContain("const canonicalJobId = approvedEstimate.job_id");
     expect(estimates).not.toContain("autoCreateInvoiceDraft");
   });

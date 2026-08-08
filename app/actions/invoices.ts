@@ -8,28 +8,6 @@ import { redirect } from "next/navigation";
 import { requirePermission } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
 
-export async function createInvoiceFromEstimate(estimateId: string, jobId: string) {
-  const auth = await requirePermission("invoices.edit");
-  if ("error" in auth) return auth;
-
-  const due = new Date();
-  due.setDate(due.getDate() + 30);
-
-  const admin = createAdminClient();
-  const { data: invoiceId, error } = await admin.rpc("create_invoice_from_estimate", {
-    p_estimate_id: estimateId,
-    p_job_id: jobId,
-    p_due_date: due.toISOString().split("T")[0],
-    p_created_by: auth.user.id,
-  });
-  if (error || !invoiceId) {
-    return { error: "Unable to create the invoice from this estimate." };
-  }
-
-  revalidatePath(`/jobs/${jobId}`);
-  redirect(`/jobs/${jobId}/invoices/${invoiceId}`);
-}
-
 export async function createInvoiceFromManualAmount(jobId: string) {
   const auth = await requirePermission("invoices.edit");
   if ("error" in auth) return auth;
