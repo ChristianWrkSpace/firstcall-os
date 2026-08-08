@@ -50,6 +50,24 @@ describe("hardening regressions", () => {
     expect(jobs).toContain("The job changed while you were updating it");
   });
 
+  it("protects manual job billing updates as back-office financial data", () => {
+    const jobs = source("app/actions/jobs.ts");
+    const editor = source("app/(dashboard)/jobs/[id]/ManualBillingAmount.tsx");
+    const page = source("app/(dashboard)/jobs/[id]/page.tsx");
+    expect(jobs).toContain("export async function updateManualJobAmount");
+    expect(jobs).toContain('requirePermission("estimates.edit")');
+    expect(jobs).toContain("parseManualJobAmount");
+    expect(jobs).toContain("estimated_value: parsed.value");
+    expect(editor).toContain('name="billing_amount"');
+    expect(editor).toContain('id="billing-amount"');
+    expect(editor).toContain('placeholder="1200.00"');
+    expect(editor).toContain("Enter the amount you plan to bill");
+    expect(page).toContain("<ManualBillingAmount");
+    expect(page).toContain('href="#billing-amount"');
+    expect(jobs).toContain('.select("id")');
+    expect(jobs).toContain("if (error || !updatedJob)");
+  });
+
   it("does not log concrete request paths or error messages", () => {
     const instrumentation = source("instrumentation.ts");
     expect(instrumentation).toContain("const route = context.routePath");

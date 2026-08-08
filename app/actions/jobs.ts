@@ -11,6 +11,7 @@ import {
   canTransitionJobStatus,
   normalizeCustomerEmail,
   normalizeCustomerPhone,
+  parseManualJobAmount,
 } from "@/lib/job-workflow";
 
 const VALID_ROUTES = new Set([
@@ -155,6 +156,36 @@ export async function updatePaymentRoute(
   if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}`);
+  return { ok: true };
+}
+
+export async function updateManualJobAmount(
+  prevState: { error?: string; ok?: boolean } | undefined,
+  formData: FormData
+) {
+  const permission = await requirePermission("estimates.edit");
+  if ("error" in permission) return permission;
+
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  if (!jobId) return { error: "Job is required." };
+
+  const parsed = parseManualJobAmount(
+    formData.get("billing_amount") as string | null
+  );
+  if ("error" in parsed) return parsed;
+
+  const supabase = await createServerSupabaseClient();
+  const { data: updatedJob, error } = await supabase
+    .from("jobs")
+    .update({ estimated_value: parsed.value })
+    .eq("id", jobId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !updatedJob) return { error: "Unable to save the billing amount." };
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/jobs");
   return { ok: true };
 }
 

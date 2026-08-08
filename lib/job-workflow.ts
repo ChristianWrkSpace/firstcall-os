@@ -22,6 +22,27 @@ export function normalizeCustomerPhone(value: string | null | undefined): string
   return digits || null;
 }
 
+export function parseManualJobAmount(
+  rawValue: string | null | undefined
+): { value: number | null } | { error: string } {
+  const normalized = rawValue?.trim().replace(/,/g, "") ?? "";
+  if (!normalized) return { value: null };
+  if (!/^-?\d+(?:\.\d+)?$/.test(normalized)) {
+    return { error: "Enter a valid billing amount." };
+  }
+  const decimalPart = normalized.split(".")[1];
+  if (decimalPart && decimalPart.length > 2) {
+    return { error: "Enter no more than two decimal places." };
+  }
+  const value = Number(normalized);
+  if (!Number.isFinite(value)) return { error: "Enter a valid billing amount." };
+  if (value < 0) return { error: "Enter a billing amount of $0 or more." };
+  if (value >= 100_000_000) {
+    return { error: "Billing amount must be less than $100,000,000." };
+  }
+  return { value };
+}
+
 export function canTransitionJobStatus(current: string, next: string): boolean {
   if (!JOB_STATUSES.includes(current as JobStatus) || !JOB_STATUSES.includes(next as JobStatus)) {
     return false;

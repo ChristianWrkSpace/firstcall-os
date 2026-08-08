@@ -31,8 +31,10 @@ import JobCostEntries from "./JobCostEntries";
 import SubInvoices from "./SubInvoices";
 import EditableCustomerCard from "./EditableCustomerCard";
 import EditableJobDetailsCard from "./EditableJobDetails";
+import ManualBillingAmount from "./ManualBillingAmount";
 import OpenActOnHash from "./OpenActOnHash";
 import { getCostBasis } from "@/lib/job-pnl";
+import { getCurrentUser } from "@/lib/auth-helpers";
 import SectionHeader from "@/components/SectionHeader";
 import { STATUS_COLORS, PAYMENT_ROUTE_BY_VALUE, type PaymentRoute } from "@/lib/constants";
 
@@ -215,7 +217,7 @@ export default async function JobDetailPage({
       .order("invoice_date", { ascending: false }),
   ]);
 
-  const costBasis = await getCostBasis();
+  const [costBasis, currentUser] = await Promise.all([getCostBasis(), getCurrentUser()]);
 
   if (!job) notFound();
 
@@ -295,6 +297,17 @@ export default async function JobDetailPage({
                     style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)", backgroundColor: "rgba(58,47,38,0.05)" }}
                   >
                     🧭 <span className="truncate">{job.site_address ?? "Navigate"}</span>
+                  </a>
+                )}
+                {currentUser && ["owner", "manager", "office"].includes(currentUser.role) && (
+                  <a
+                    href="#billing-amount"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors hover:bg-shade"
+                    style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)", backgroundColor: "rgba(58,47,38,0.05)" }}
+                  >
+                    💵 {job.estimated_value == null
+                      ? "Add billing amount"
+                      : `$${Number(job.estimated_value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </a>
                 )}
               </div>
@@ -383,7 +396,6 @@ export default async function JobDetailPage({
               site_city: job.site_city,
               site_state: job.site_state,
               site_zip: job.site_zip,
-              estimated_value: job.estimated_value,
             }}
           />
 
@@ -475,6 +487,10 @@ export default async function JobDetailPage({
           accent="#5B82B8"
           open={moneyOpen}
         >
+          {currentUser && ["owner", "manager", "office"].includes(currentUser.role) && (
+            <ManualBillingAmount jobId={job.id} initialAmount={job.estimated_value} />
+          )}
+
           <div id="pnl" className="scroll-mt-24">
             <div className="mb-4">
               <SectionHeader

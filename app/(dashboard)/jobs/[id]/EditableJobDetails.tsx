@@ -15,7 +15,6 @@ export interface EditableJobDetails {
   site_city: string | null;
   site_state: string | null;
   site_zip: string | null;
-  estimated_value: number | null;
 }
 
 export default function EditableJobDetailsCard({
@@ -85,14 +84,7 @@ export default function EditableJobDetailsCard({
               .join(", ")}
           />
           <Field label="Type" value={job.type} capitalize />
-          <Field
-            label="Estimated Value"
-            value={
-              job.estimated_value
-                ? `$${Number(job.estimated_value).toLocaleString()}`
-                : undefined
-            }
-          />
+
           {job.description && (
             <div className="col-span-2">
               <p className={LABEL}>Description</p>
