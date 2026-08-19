@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { dismissApproval, applySuggestion } from "@/app/actions/approvals";
 
 export function DismissButton({
@@ -10,6 +11,7 @@ export function DismissButton({
   approvalId: string;
   hasUnderlying: boolean;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +30,7 @@ export function DismissButton({
         setError(res.error);
         return;
       }
-      window.location.reload();
+      router.refresh();
     });
   }
 
@@ -61,6 +63,7 @@ export function DismissButton({
 }
 
 export function ApplySuggestionButton({ approvalId }: { approvalId: string }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +75,7 @@ export function ApplySuggestionButton({ approvalId }: { approvalId: string }) {
         setError(res.error);
         return;
       }
-      window.location.reload();
+      router.refresh();
     });
   }
 

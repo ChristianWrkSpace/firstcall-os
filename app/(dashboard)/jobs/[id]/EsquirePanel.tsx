@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { generateLegalDoc } from "@/app/actions/esquire";
 import {
   LEGAL_DOC_TYPES,
@@ -34,6 +35,7 @@ export default function EsquirePanel({
   existingDocs: ExistingDoc[];
   invoices: Invoice[];
 }) {
+  const router = useRouter();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [chosen, setChosen] = useState<LegalDocType | null>(null);
   const [invoiceId, setInvoiceId] = useState<string>("");
@@ -61,7 +63,7 @@ export default function EsquirePanel({
         return;
       }
       // Navigate to the new doc
-      window.location.href = `/jobs/${jobId}/legal/${res.docId}`;
+      router.push(`/jobs/${jobId}/legal/${res.docId}`);
     });
   }
 

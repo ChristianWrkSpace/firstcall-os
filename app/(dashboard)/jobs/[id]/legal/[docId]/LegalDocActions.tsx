@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   approveLegalDoc,
   deleteLegalDoc,
@@ -51,6 +52,7 @@ export default function LegalDocActions({
   lastSendAttempt?: SendAttempt | null;
   canManualSend?: boolean;
 }) {
+  const router = useRouter();
   const [copiedSign, setCopiedSign] = useState(false);
   function copySignUrl() {
     if (!signingUrl) return;
@@ -126,7 +128,7 @@ export default function LegalDocActions({
       if (res.error) {
         setError(res.error);
       } else {
-        window.location.href = `/jobs/${jobId}`;
+        router.push(`/jobs/${jobId}`);
       }
     });
   }
@@ -427,6 +429,7 @@ function ManualSendButton({
   docId: string;
   canForce: boolean;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -456,8 +459,9 @@ function ManualSendButton({
       } else {
         setResult(`Failed: ${a.reason ?? "unknown error"}`);
       }
-      // Soft refresh after a beat so UI shows the new lastSendAttempt
-      setTimeout(() => window.location.reload(), 1500);
+      // Refresh the RSC payload immediately; avoid a full browser reload and
+      // the previous artificial 1.5-second delay.
+      router.refresh();
     });
   }
 

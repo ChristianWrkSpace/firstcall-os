@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { signOut } from "@/app/actions/auth";
 import { navSectionsForRole, navForRole } from "@/lib/nav";
 import { getCurrentUser } from "@/lib/auth-helpers";
@@ -20,7 +21,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="md:flex md:h-screen app-backdrop md:overflow-hidden">
       <CommandPalette />
       <MobileNav items={items} />
-      <NotificationBell />
+      <Suspense fallback={<NotificationBellFallback />}>
+        <NotificationBell />
+      </Suspense>
       <aside className="hidden md:flex w-56 flex-col shrink-0" style={{ backgroundColor: "var(--color-surface)", borderRight: "1px solid var(--color-edge)" }}>
         <div className="flex flex-col gap-1 px-4 py-5" style={{ borderBottom: "1px solid var(--color-edge)" }}>
           <Logo variant="banner" size={32} priority />
@@ -47,5 +50,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {children}
       </main>
     </div>
+  );
+}
+
+function NotificationBellFallback() {
+  return (
+    <div className="hidden md:block fixed top-4 right-20 z-30 h-8 w-14 rounded-full bg-card border border-edge2 animate-pulse" />
   );
 }
