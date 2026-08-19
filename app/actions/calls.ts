@@ -35,10 +35,10 @@ export async function createJobFromCall(
   _prevState: any,
   formData: FormData
 ) {
-  const admin = createAdminClient();
-
   const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
+
+  const admin = createAdminClient();
 
   let extraction: CallExtraction;
   try {
@@ -48,6 +48,7 @@ export async function createJobFromCall(
   }
 
   const transcript = formData.get("transcript") as string;
+  const isTest = formData.get("is_test") === "on";
 
   try {
     // Upsert partner if this is a referral call
@@ -105,6 +106,8 @@ export async function createJobFromCall(
         site_state: extraction.job.site_state ?? "TX",
         site_zip: extraction.job.site_zip ?? null,
         description: extraction.job.description ?? null,
+        is_test: isTest,
+        auto_actions_paused: isTest,
       })
       .select("id, job_number")
       .single();

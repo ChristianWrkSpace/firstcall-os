@@ -38,24 +38,29 @@ export default async function ReportsPage({
     supabase
       .from("jobs")
       .select("id, status, type, created_at, updated_at, completed_at, site_zip")
+      .eq("is_test", false)
       .gte("created_at", allJobsFloor),
     supabase
       .from("jobs")
       .select("id, status, type, created_at, updated_at, completed_at, site_zip, customers(insurance_company)")
+      .eq("is_test", false)
       .gte("created_at", since),
     supabase
       .from("calls")
-      .select("id, caller_type, created_at")
+      .select("id, caller_type, created_at, jobs!inner(is_test)")
+      .eq("jobs.is_test", false)
       .gte("created_at", since),
     supabase
       .from("invoices")
       .select(
-        "id, status, sent_at, paid_at, created_at, line_items:invoice_line_items(line_total), payments(amount)"
+        "id, status, sent_at, paid_at, created_at, jobs!inner(is_test), line_items:invoice_line_items(line_total), payments(amount)"
       )
+      .eq("jobs.is_test", false)
       .gte("created_at", allJobsFloor),
     supabase
       .from("payments")
-      .select("amount, received_at")
+      .select("amount, received_at, invoices!inner(jobs!inner(is_test))")
+      .eq("invoices.jobs.is_test", false)
       .gte("received_at", since30Effective.slice(0, 10)),
   ]);
 

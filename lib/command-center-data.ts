@@ -149,6 +149,7 @@ export async function loadCommandCenterData(operator: {
     supabase
       .from("jobs")
       .select("id, job_number, status, site_city, updated_at, created_at, customers(name)")
+      .eq("is_test", false)
       .in("status", ["lead", "inspection", "mitigation", "drying", "reconstruction"])
       .gte("created_at", sinceForCutoff)
       .order("updated_at", { ascending: false })
@@ -156,14 +157,17 @@ export async function loadCommandCenterData(operator: {
     supabase
       .from("jobs")
       .select("id")
+      .eq("is_test", false)
       .gte("created_at", todayIso),
     supabase
       .from("calls")
-      .select("id")
+      .select("id, jobs!inner(is_test)")
+      .eq("jobs.is_test", false)
       .gte("created_at", todayIso),
     supabase
       .from("invoices")
-      .select("status, sent_at, line_items:invoice_line_items(line_total)")
+      .select("status, sent_at, jobs!inner(is_test), line_items:invoice_line_items(line_total)")
+      .eq("jobs.is_test", false)
       .gte("created_at", todayIso),
     supabase
       .from("audit_logs")

@@ -37,12 +37,13 @@ export interface EnqueueArgs {
 export async function isAutoPaused(jobId: string): Promise<boolean> {
   try {
     const admin = createAdminClient();
-    const { data } = await admin
+    const { data, error } = await admin
       .from("jobs")
-      .select("auto_actions_paused")
+      .select("auto_actions_paused, is_test")
       .eq("id", jobId)
       .single();
-    return !!data?.auto_actions_paused;
+    if (error || !data) return true;
+    return !!data.auto_actions_paused || !!data.is_test;
   } catch {
     // If we can't check, fail closed (treat as paused) — safer.
     return true;

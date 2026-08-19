@@ -21,9 +21,10 @@ interface SendEmailArgs {
   subject: string;
   html: string;
   replyTo?: string;
+  idempotencyKey?: string;
 }
 
-export async function sendEmail({ to, subject, html, replyTo }: SendEmailArgs) {
+export async function sendEmail({ to, subject, html, replyTo, idempotencyKey }: SendEmailArgs) {
   const resend = getResend();
   const { data, error } = await resend.emails.send({
     from: getFromAddress(),
@@ -31,7 +32,7 @@ export async function sendEmail({ to, subject, html, replyTo }: SendEmailArgs) {
     subject,
     html,
     replyTo,
-  });
+  }, idempotencyKey ? { idempotencyKey } : undefined);
   if (error) throw new Error(error.message ?? JSON.stringify(error));
   return data;
 }

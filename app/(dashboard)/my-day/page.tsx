@@ -22,7 +22,7 @@ export default async function MyDayPage() {
   let leadQuery = admin
     .from("jobs")
     .select(
-      "id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, customers(name, phone), created_at"
+      "id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, is_test, customers(name, phone), created_at"
     )
     .eq("lead_tech_id", me.id);
   if (cutoff) leadQuery = leadQuery.gte("created_at", cutoff);
@@ -32,7 +32,7 @@ export default async function MyDayPage() {
     admin
       .from("job_assignments")
       .select(
-        "job_id, jobs(id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, created_at, customers(name, phone))"
+        "job_id, jobs(id, job_number, status, type, scheduled_at, site_address, site_city, lead_tech_id, is_test, created_at, customers(name, phone))"
       )
       .eq("profile_id", me.id),
     leadQuery,
@@ -42,10 +42,10 @@ export default async function MyDayPage() {
   // pulled via the join can predate it).
   const byId = new Map<string, any>();
   for (const a of (assigned ?? []) as any[]) {
-    if (a.jobs && (!cutoff || a.jobs.created_at >= cutoff)) byId.set(a.jobs.id, a.jobs);
+    if (a.jobs && !a.jobs.is_test && (!cutoff || a.jobs.created_at >= cutoff)) byId.set(a.jobs.id, a.jobs);
   }
   for (const j of (leadOnly ?? []) as any[]) {
-    byId.set(j.id, j);
+    if (!j.is_test) byId.set(j.id, j);
   }
 
   // Filter to active jobs only (skip completed/cancelled)

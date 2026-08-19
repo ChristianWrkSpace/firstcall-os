@@ -86,12 +86,10 @@ export async function deleteCustomerPii(
 
   const admin = createAdminClient();
 
-  // Snapshot what's being deleted for the audit log
+  // Confirm the row exists without copying erased PII into durable logs.
   const { data: snapshot } = await admin
     .from("customers")
-    .select(
-      "id, name, email, phone, address, city, state, zip, insurance_company, insurance_policy_number, insurance_claim_number"
-    )
+    .select("id")
     .eq("id", customerId)
     .single();
 
@@ -120,7 +118,7 @@ export async function deleteCustomerPii(
 
   if (redactError) return { error: redactError.message };
 
-  logAudit({
+  await logAudit({
     user,
     action: "customer.pii_redacted",
     entity_type: "customer",
@@ -128,11 +126,19 @@ export async function deleteCustomerPii(
     details: {
       reason: reason.trim(),
       redaction_id: redactionId,
-      original: {
-        name: snapshot.name,
-        email: snapshot.email,
-        phone: snapshot.phone,
-      },
+      fields_redacted: [
+        "name",
+        "email",
+        "phone",
+        "address",
+        "city",
+        "state",
+        "zip",
+        "insurance_company",
+        "insurance_policy_number",
+        "insurance_claim_number",
+        "notes",
+      ],
     },
   });
 

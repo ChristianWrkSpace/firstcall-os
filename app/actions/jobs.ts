@@ -30,6 +30,7 @@ export async function createJob(
 
   const rawRoute = (formData.get("payment_route") as string) || "customer_pay";
   const payment_route = VALID_ROUTES.has(rawRoute) ? rawRoute : "customer_pay";
+  const isTest = formData.get("is_test") === "on";
 
   let deductible_amount: number | null = null;
   if (payment_route === "insurance_with_deductible") {
@@ -104,6 +105,8 @@ export async function createJob(
       payment_route,
       deductible_amount,
       referred_by_id: referredById,
+      is_test: isTest,
+      auto_actions_paused: isTest,
     })
     .select()
     .single();

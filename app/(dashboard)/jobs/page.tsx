@@ -13,12 +13,13 @@ const ACTIVE_STATUSES = [
 const COMPLETED_STATUSES = ["completed", "closed"];
 const CANCELLED_STATUSES = ["cancelled"];
 
-type Filter = "active" | "completed" | "cancelled" | "all";
+type Filter = "active" | "completed" | "cancelled" | "test" | "all";
 
 const TAB_LABELS: Record<Filter, string> = {
   active: "Active",
   completed: "Completed",
   cancelled: "Cancelled",
+  test: "Test",
   all: "All",
 };
 
@@ -32,7 +33,7 @@ export default async function JobsPage({
 }) {
   const params = await searchParams;
   const filter: Filter = (
-    ["active", "completed", "cancelled", "all"].includes(params.filter ?? "")
+    ["active", "completed", "cancelled", "test", "all"].includes(params.filter ?? "")
       ? params.filter
       : "active"
   ) as Filter;
@@ -41,16 +42,22 @@ export default async function JobsPage({
   const cutoff = getDataCutoff();
 
   // Counts for tabs (cheap status-only fetch)
-  let statusQuery = supabase.from("jobs").select("status");
+  let statusQuery = supabase.from("jobs").select("status, is_test");
   if (cutoff) statusQuery = statusQuery.gte("created_at", cutoff);
   const { data: statusRows } = await statusQuery;
   const counts = {
     active: 0,
     completed: 0,
     cancelled: 0,
-    all: statusRows?.length ?? 0,
+    test: 0,
+    all: 0,
   };
   for (const r of statusRows ?? []) {
+    if (r.is_test) {
+      counts.test += 1;
+      continue;
+    }
+    counts.all += 1;
     if (ACTIVE_STATUSES.includes(r.status)) counts.active += 1;
     else if (COMPLETED_STATUSES.includes(r.status)) counts.completed += 1;
     else if (CANCELLED_STATUSES.includes(r.status)) counts.cancelled += 1;
@@ -66,9 +73,13 @@ export default async function JobsPage({
 
   if (cutoff) query = query.gte("created_at", cutoff);
 
-  if (filter === "active") query = query.in("status", ACTIVE_STATUSES);
-  else if (filter === "completed") query = query.in("status", COMPLETED_STATUSES);
-  else if (filter === "cancelled") query = query.in("status", CANCELLED_STATUSES);
+  if (filter === "test") query = query.eq("is_test", true);
+  else {
+    query = query.eq("is_test", false);
+    if (filter === "active") query = query.in("status", ACTIVE_STATUSES);
+    else if (filter === "completed") query = query.in("status", COMPLETED_STATUSES);
+    else if (filter === "cancelled") query = query.in("status", CANCELLED_STATUSES);
+  }
 
   const { data: jobs } = await query;
 
@@ -176,6 +187,11 @@ export default async function JobsPage({
                       >
                         {job.status}
                       </span>
+                      {job.is_test && (
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-honey/10 text-honey">
+                          TEST — AUTOMATION OFF
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs mt-1 truncate" style={{ color: "var(--color-text-muted)" }}>
                       <span className="font-mono">{job.job_number}</span>

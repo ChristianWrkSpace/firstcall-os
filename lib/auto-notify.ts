@@ -38,12 +38,13 @@ export async function autoNotifyOnStatusChange(
     const { data: job } = await admin
       .from("jobs")
       .select(
-        "id, job_number, site_address, customers(name, email, auto_notify_emails)"
+        "id, job_number, site_address, auto_actions_paused, is_test, customers(name, email, auto_notify_emails)"
       )
       .eq("id", jobId)
       .single();
 
     if (!job) return;
+    if (job.is_test || job.auto_actions_paused) return;
     const customer = (job as any).customers;
     if (!customer?.email) return; // no email, can't send
     if (customer.auto_notify_emails === false) return; // opted out
@@ -63,17 +64,49 @@ export async function autoNotifyOnStatusChange(
       site_address: job.site_address ?? null,
     });
 
-    await sendEmail({ to: customer.email, subject, html });
+    const dedupeKey = `lifecycle:${jobId}:${event}:email`;
+    const { data: claim, error: claimError } = await admin
+      .from("customer_notifications")
+      .insert({
+        job_id: jobId,
+        event_type: event,
+        channel: "email",
+        sent_to: customer.email,
+        subject,
+        body: html,
+        sent_by: null,
+        sent_at: null,
+        dedupe_key: dedupeKey,
+      })
+      .select("id")
+      .single();
+    if (claimError?.code === "23505") return;
+    if (claimError || !claim) {
+      console.error("[auto-notify.claim]", claimError?.message ?? "Unable to reserve notification");
+      return;
+    }
 
-    await admin.from("customer_notifications").insert({
-      job_id: jobId,
-      event_type: event,
-      channel: "email",
-      sent_to: customer.email,
-      subject,
-      body: html,
-      sent_by: null, // null = system / auto
-    });
+    // Claim first, then send. If the process dies after delivery, the unique
+    // claim prevents a retry from emailing the customer twice.
+    try {
+      await sendEmail({
+        to: customer.email,
+        subject,
+        html,
+        idempotencyKey: dedupeKey,
+      });
+    } catch (sendError) {
+      // Resend uses the same idempotency key on retry, so releasing a failed
+      // local claim cannot create a second provider delivery.
+      await admin.from("customer_notifications").delete().eq("id", claim.id);
+      throw sendError;
+    }
+
+    const { error: sentError } = await admin
+      .from("customer_notifications")
+      .update({ sent_at: new Date().toISOString() })
+      .eq("id", claim.id);
+    if (sentError) console.error("[auto-notify.sent-at]", sentError.message);
   } catch (err: any) {
     // Auto-notify must never break the user flow that triggered it.
     console.error("[auto-notify]", err?.message ?? err);

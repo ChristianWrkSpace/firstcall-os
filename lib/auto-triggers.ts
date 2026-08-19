@@ -17,6 +17,10 @@ import { generateLegalDocByType, type JobContext, type CustomerContext, type Inv
 import { generateEstimate } from "./ledger";
 import type { LegalDocType } from "./esquire-types";
 
+function isUniqueViolation(error: { code?: string } | null | undefined) {
+  return error?.code === "23505";
+}
+
 function siteLine(j: { site_address: string | null; site_city: string | null; site_state: string | null; site_zip: string | null }) {
   return [j.site_address, j.site_city, j.site_state, j.site_zip].filter(Boolean).join(", ");
 }
@@ -61,8 +65,8 @@ export async function autoDraftInsuranceLegalDocs(jobId: string) {
   };
 
   await Promise.all([
-    draftLegalDoc(jobId, "aob", ctx, "AOB drafted from intake"),
-    draftLegalDoc(jobId, "work_authorization", ctx, "Work Authorization drafted from intake"),
+    draftLegalDoc(jobId, "aob", ctx, "AOB drafted from intake", "insurance-intake:aob"),
+    draftLegalDoc(jobId, "work_authorization", ctx, "Work Authorization drafted from intake", "insurance-intake:work-authorization"),
   ]);
 }
 
@@ -70,16 +74,20 @@ async function draftLegalDoc(
   jobId: string,
   docType: LegalDocType,
   ctx: { job: JobContext; customer: CustomerContext; invoice?: InvoiceContext; moisture?: MoistureContext; disputeSummary?: string },
-  titlePrefix: string
-) {
+  titlePrefix: string,
+  automationKey: string
+): Promise<boolean> {
   try {
-    if (await alreadyEnqueued(jobId, "legal_doc_draft")) {
-      // Don't re-fire the same kind on this job — checks for any pending
-      // legal_doc_draft. (We intentionally don't double-fire AOB+WorkAuth
-      // multiple times if createJob runs twice.)
-    }
-    const drafted = await generateLegalDocByType(docType, ctx);
     const admin = createAdminClient();
+    const { data: existing, error: existingError } = await admin
+      .from("legal_documents")
+      .select("id")
+      .eq("job_id", jobId)
+      .eq("automation_key", automationKey)
+      .maybeSingle();
+    if (existingError || existing) return false;
+
+    const drafted = await generateLegalDocByType(docType, ctx);
     const { data: row, error } = await admin
       .from("legal_documents")
       .insert({
@@ -88,6 +96,7 @@ async function draftLegalDoc(
         subject: drafted.subject,
         body: drafted.body,
         status: "draft",
+        automation_key: automationKey,
         generation_meta: {
           model: "claude-opus-4-7",
           source: "auto-trigger",
@@ -97,8 +106,9 @@ async function draftLegalDoc(
       .select("id")
       .single();
     if (error || !row) {
+      if (isUniqueViolation(error)) return false;
       console.error("[auto-trigger.legal_doc]", error);
-      return;
+      return false;
     }
     await enqueueApproval({
       kind: "legal_doc_draft",
@@ -109,8 +119,10 @@ async function draftLegalDoc(
       detail: `${docType} ready for review. Approve before homeowner / carrier sees it.`,
       link: `/jobs/${jobId}/legal/${row.id}`,
     });
+    return true;
   } catch (err: any) {
     console.error(`[auto-trigger.${docType}]`, err?.message ?? err);
+    return false;
   }
 }
 
@@ -306,7 +318,8 @@ export async function autoTriggerOnMoistureReading(
       jobId,
       "drying_certificate",
       ctx,
-      "Drying Certificate drafted"
+      "Drying Certificate drafted",
+      "drying-certificate:completion"
     );
   }
 
@@ -396,13 +409,14 @@ export async function sweepOverdueInvoicesForDemandLetters() {
         } as InvoiceContext,
       };
 
-      await draftLegalDoc(
+      const created = await draftLegalDoc(
         inv.job_id,
         "demand_letter",
         ctx,
-        `Demand Letter drafted — ${days_overdue}d overdue`
+        `Demand Letter drafted — ${days_overdue}d overdue`,
+        `demand-letter:${inv.id}`
       );
-      drafted++;
+      if (created) drafted++;
     } catch (err: any) {
       console.error("[demand-sweep]", err?.message ?? err);
     }

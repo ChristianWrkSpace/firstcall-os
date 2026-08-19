@@ -195,6 +195,15 @@ export default function NewJobForm({ partners }: { partners: PartnerOption[] }) 
             </div>
             <AddressAutocomplete />
           </div>
+          <label className="mt-5 flex items-start gap-3 rounded-xl border border-honey/30 bg-honey/5 px-4 py-3 cursor-pointer">
+            <input name="is_test" type="checkbox" className="mt-1" />
+            <span>
+              <span className="block text-sm font-medium text-ink">Training / test job</span>
+              <span className="block text-xs text-ink-3 mt-0.5">
+                Keeps this job out of normal operations and disables automated emails, drafts, and agent actions.
+              </span>
+            </span>
+          </label>
         </section>
 
         {state?.error && (

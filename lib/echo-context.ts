@@ -27,12 +27,14 @@ export async function buildEchoContext(operator: { name: string; role: string })
     admin
       .from("jobs")
       .select("id, job_number, status, type, site_city, customers(name, insurance_company), created_at, updated_at")
+      .eq("is_test", false)
       .in("status", ["lead", "inspection", "mitigation", "drying", "reconstruction"])
       .order("updated_at", { ascending: false })
       .limit(15),
     admin
       .from("invoices")
-      .select("status, sent_at, line_items:invoice_line_items(line_total), payments(amount)")
+      .select("status, sent_at, jobs!inner(is_test), line_items:invoice_line_items(line_total), payments(amount)")
+      .eq("jobs.is_test", false)
       .gte("created_at", monthStart),
     admin
       .from("pending_approvals")

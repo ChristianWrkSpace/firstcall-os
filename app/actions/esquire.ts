@@ -138,6 +138,7 @@ export async function generateLegalDoc(input: GenerateInput) {
         "id, invoice_number, status, sent_at, due_date, line_items:invoice_line_items(line_total), payments(amount)"
       )
       .eq("id", input.invoiceId)
+      .eq("job_id", input.jobId)
       .single();
 
     if (!invoice) return { error: "Invoice not found." };
@@ -447,7 +448,7 @@ export async function deleteLegalDoc(docId: string) {
   const admin = createAdminClient();
   const { data: existing } = await admin
     .from("legal_documents")
-    .select("job_id, doc_type, status")
+    .select("job_id, doc_type, status, automation_key")
     .eq("id", docId)
     .single();
   if (!existing) return { error: "Document not found." };
@@ -461,6 +462,34 @@ export async function deleteLegalDoc(docId: string) {
     };
   }
 
+  // Automated drafts keep their stable automation key as a tombstone. If we
+  // physically delete it, the next cron sweep would recreate the same draft.
+  if (existing.automation_key) {
+    if (existing.status === "void") return { ok: true };
+
+    const { data: archived, error } = await admin
+      .from("legal_documents")
+      .update({ status: "void" })
+      .eq("id", docId)
+      .eq("status", "draft")
+      .select("id")
+      .maybeSingle();
+    if (error) return { error: error.message };
+    if (!archived) {
+      return { error: "The document changed before it could be archived. Refresh and try again." };
+    }
+
+    await logAudit({
+      user,
+      action: "legal_doc.voided",
+      entity_type: "legal_document",
+      entity_id: docId,
+      details: { doc_type: existing.doc_type, automation_key: existing.automation_key },
+    });
+    revalidatePath(`/jobs/${existing.job_id}`);
+    return { ok: true };
+  }
+
   const { error } = await admin
     .from("legal_documents")
     .delete()
@@ -468,7 +497,7 @@ export async function deleteLegalDoc(docId: string) {
 
   if (error) return { error: error.message };
 
-  logAudit({
+  await logAudit({
     user,
     action: "legal_doc.deleted",
     entity_type: "legal_document",

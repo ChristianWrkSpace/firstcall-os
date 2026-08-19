@@ -55,10 +55,11 @@ export default async function AdjusterScoringPage() {
       `id,
        status,
        sent_at,
-       jobs!inner(id, customers!inner(insurance_company)),
+       jobs!inner(id, is_test, customers!inner(insurance_company)),
        line_items:invoice_line_items(line_total),
        payments(amount, created_at)`
     )
+    .eq("jobs.is_test", false)
     .neq("status", "void");
   if (cutoff) invQuery = invQuery.gte("created_at", cutoff);
   const { data: invoices } = await invQuery;

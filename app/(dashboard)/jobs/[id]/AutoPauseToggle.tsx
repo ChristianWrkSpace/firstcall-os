@@ -6,9 +6,11 @@ import { setJobAutoPaused } from "@/app/actions/approvals";
 export default function AutoPauseToggle({
   jobId,
   initial,
+  isTest,
 }: {
   jobId: string;
   initial: boolean;
+  isTest: boolean;
 }) {
   const [paused, setPaused] = useState(initial);
   const [pending, startTransition] = useTransition();
@@ -34,7 +36,7 @@ export default function AutoPauseToggle({
     <div className="flex items-start gap-2">
       <button
         onClick={toggle}
-        disabled={pending}
+        disabled={pending || isTest}
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${
           paused ? "bg-amber-500" : "bg-shade"
         } disabled:opacity-50`}
@@ -48,10 +50,12 @@ export default function AutoPauseToggle({
       </button>
       <div className="flex-1 min-w-0">
         <p className={`text-xs font-medium ${paused ? "text-honey" : "text-ink-2"}`}>
-          {paused ? "Auto-actions PAUSED" : "Auto-actions enabled"}
+          {isTest ? "Test job — automation locked off" : paused ? "Auto-actions PAUSED" : "Auto-actions enabled"}
         </p>
         <p className="text-ink-3 text-[10px] leading-snug mt-0.5">
-          {paused
+          {isTest
+            ? "Test jobs cannot send automated emails or create automated drafts."
+            : paused
             ? "Litigated / sensitive case — agents won't draft anything for this job."
             : "Agents may draft legal documents and suggest status changes as conditions are met."}
         </p>

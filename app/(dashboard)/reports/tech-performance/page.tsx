@@ -35,8 +35,9 @@ export default async function TechPerformancePage({
     .select(
       `id, hours, hourly_rate, work_date, profile_id, created_at,
        profiles(name),
-       jobs(id, type, invoices(status, sent_at, line_items:invoice_line_items(line_total)))`
+       jobs!inner(id, is_test, type, invoices(status, sent_at, line_items:invoice_line_items(line_total)))`
     )
+    .eq("jobs.is_test", false)
     .gte("work_date", since);
   if (cutoff) laborQuery = laborQuery.gte("created_at", cutoff);
   const { data: labor } = await laborQuery;

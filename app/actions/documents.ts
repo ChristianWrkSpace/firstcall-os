@@ -3,6 +3,7 @@
 import { createAdminClient, createServerSupabaseClient } from "@/lib/supabase-server";
 import { getCurrentUser, requirePermission } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 
 const BUCKET = "job-documents";
 
@@ -50,15 +51,58 @@ export async function deleteJobDocument(documentId: string, jobId: string) {
 
   const { data: doc, error: fetchErr } = await admin
     .from("job_documents")
-    .select("storage_path")
+    .select("*")
     .eq("id", documentId)
     .single();
   if (fetchErr || !doc) return { error: "Document not found." };
+  if (doc.signed || doc.signed_at) {
+    return { error: "Signed documents are permanent records and cannot be deleted." };
+  }
 
-  await admin.storage.from(BUCKET).remove([doc.storage_path]);
-  await admin.from("job_documents").delete().eq("id", documentId);
+  // Win the database race before touching the binary. The signed-state
+  // predicates and DB trigger prevent a file signed concurrently from being
+  // removed after our initial read.
+  const { data: deleted, error: deleteError } = await admin
+    .from("job_documents")
+    .delete()
+    .eq("id", documentId)
+    .eq("signed", false)
+    .is("signed_at", null)
+    .select("id")
+    .maybeSingle();
+  if (deleteError) {
+    return { error: "Unable to delete the document record. The stored file was kept." };
+  }
+  if (!deleted) {
+    return { error: "The document changed or was signed. Nothing was deleted." };
+  }
 
-  revalidatePath(`/jobs/${jobId}`);
+  const { error: storageError } = await admin.storage
+    .from(BUCKET)
+    .remove([doc.storage_path]);
+  if (storageError) {
+    // The binary still exists. Restore its metadata so it remains reachable
+    // and a later cleanup can retry safely.
+    const { error: restoreError } = await admin.from("job_documents").insert(doc);
+    if (restoreError) {
+      console.error("[deleteJobDocument.restore]", restoreError);
+      return { error: "The file was kept, but its metadata could not be restored. Contact support." };
+    }
+    return { error: "Unable to remove the stored file. The document record was restored." };
+  }
+
+  await logAudit({
+    user: auth.user,
+    action: "job_document.deleted",
+    entity_type: "job_document",
+    entity_id: documentId,
+    details: {
+      job_id: doc.job_id,
+      doc_type: doc.doc_type,
+    },
+  });
+
+  revalidatePath(`/jobs/${doc.job_id || jobId}`);
   return { ok: true };
 }
 

@@ -201,7 +201,7 @@ export async function autoSendLegalDocToCustomer(
     const { data: job } = await admin
       .from("jobs")
       .select(
-        "id, job_number, auto_actions_paused, customers(name, email, auto_notify_emails)"
+        "id, job_number, auto_actions_paused, is_test, customers(name, email, auto_notify_emails)"
       )
       .eq("id", doc.job_id)
       .single();
@@ -210,6 +210,15 @@ export async function autoSendLegalDocToCustomer(
         attempted_at: new Date().toISOString(),
         status: "skipped",
         reason: "Job not found",
+      }, doc.job_id, doc.doc_type);
+      return;
+    }
+
+    if (job.is_test) {
+      await recordAttempt(docId, {
+        attempted_at: new Date().toISOString(),
+        status: "skipped",
+        reason: "Test jobs cannot send customer documents.",
       }, doc.job_id, doc.doc_type);
       return;
     }

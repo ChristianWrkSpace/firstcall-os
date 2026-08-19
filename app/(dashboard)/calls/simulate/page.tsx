@@ -401,6 +401,7 @@ export default function SimulateCallPage() {
           <form action={submitAction} className="flex gap-3">
             <input type="hidden" name="extraction" value={JSON.stringify(extraction)} />
             <input type="hidden" name="transcript" value={transcript} />
+            <input type="hidden" name="is_test" value="on" />
             <button
               type="button"
               onClick={() => {

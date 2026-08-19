@@ -23,16 +23,19 @@ export async function runSolomonReport(windowDays: number = 90) {
         .select(
           "id, type, site_zip, customers(insurance_company)"
         )
+        .eq("is_test", false)
         .gte("created_at", since),
       supabase
         .from("invoices")
         .select(
-          "id, job_id, status, sent_at, line_items:invoice_line_items(line_total), payments(amount, received_at)"
+          "id, job_id, status, sent_at, jobs!inner(is_test), line_items:invoice_line_items(line_total), payments(amount, received_at)"
         )
+        .eq("jobs.is_test", false)
         .gte("created_at", since),
       supabase
         .from("payments")
-        .select("amount, received_at, invoice_id")
+        .select("amount, received_at, invoice_id, invoices!inner(jobs!inner(is_test))")
+        .eq("invoices.jobs.is_test", false)
         .gte("received_at", since.split("T")[0]),
     ]);
 

@@ -31,16 +31,16 @@ export default async function PaperworkPage({
   const [{ data: generated }, { data: uploads }] = await Promise.all([
     supabase
       .from("legal_documents")
-      .select("id, job_id, doc_type, subject, status, created_at, sent_at, signed_at, jobs(job_number, customers(name))")
+      .select("id, job_id, doc_type, subject, status, created_at, sent_at, signed_at, jobs(job_number, is_test, customers(name))")
       .order("created_at", { ascending: false }),
     supabase
       .from("job_documents")
-      .select("id, job_id, doc_type, filename, signed, signed_at, created_at, jobs(job_number, customers(name))")
+      .select("id, job_id, doc_type, filename, signed, signed_at, created_at, jobs(job_number, is_test, customers(name))")
       .order("created_at", { ascending: false }),
   ]);
 
   const allDocuments = [
-    ...(generated ?? []).map((doc: any) => ({
+    ...(generated ?? []).filter((doc: any) => !normalizeJob(doc.jobs).isTest).map((doc: any) => ({
       id: `generated-${doc.id}`,
       docId: doc.id,
       jobId: doc.job_id,
@@ -53,7 +53,7 @@ export default async function PaperworkPage({
       createdAt: doc.created_at,
       job: normalizeJob(doc.jobs),
     })),
-    ...(uploads ?? []).map((doc: any) => ({
+    ...(uploads ?? []).filter((doc: any) => !normalizeJob(doc.jobs).isTest).map((doc: any) => ({
       id: `upload-${doc.id}`,
       docId: doc.id,
       jobId: doc.job_id,
@@ -175,7 +175,7 @@ function Status({ value }: { value: string }) {
 function normalizeJob(value: any) {
   const job = Array.isArray(value) ? value[0] : value;
   const customer = Array.isArray(job?.customers) ? job.customers[0] : job?.customers;
-  return { jobNumber: job?.job_number ?? null, customer: customer?.name ?? null };
+  return { jobNumber: job?.job_number ?? null, customer: customer?.name ?? null, isTest: Boolean(job?.is_test) };
 }
 
 function humanize(value: string | null) {

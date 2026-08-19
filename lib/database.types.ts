@@ -350,6 +350,7 @@ export type Database = {
           channel: string
           created_at: string | null
           custom_message: string | null
+          dedupe_key: string | null
           event_type: string
           id: string
           job_id: string
@@ -363,6 +364,7 @@ export type Database = {
           channel?: string
           created_at?: string | null
           custom_message?: string | null
+          dedupe_key?: string | null
           event_type: string
           id?: string
           job_id: string
@@ -376,6 +378,7 @@ export type Database = {
           channel?: string
           created_at?: string | null
           custom_message?: string | null
+          dedupe_key?: string | null
           event_type?: string
           id?: string
           job_id?: string
@@ -1198,6 +1201,7 @@ export type Database = {
           dispatch_inputs: Json | null
           estimated_value: number | null
           id: string
+          is_test: boolean
           job_number: string | null
           lead_tech_id: string | null
           payment_route: string | null
@@ -1225,6 +1229,7 @@ export type Database = {
           dispatch_inputs?: Json | null
           estimated_value?: number | null
           id?: string
+          is_test?: boolean
           job_number?: string | null
           lead_tech_id?: string | null
           payment_route?: string | null
@@ -1252,6 +1257,7 @@ export type Database = {
           dispatch_inputs?: Json | null
           estimated_value?: number | null
           id?: string
+          is_test?: boolean
           job_number?: string | null
           lead_tech_id?: string | null
           payment_route?: string | null
@@ -1295,6 +1301,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          automation_key: string | null
           body: string
           created_at: string | null
           doc_type: string
@@ -1318,6 +1325,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          automation_key?: string | null
           body: string
           created_at?: string | null
           doc_type: string
@@ -1341,6 +1349,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          automation_key?: string | null
           body?: string
           created_at?: string | null
           doc_type?: string

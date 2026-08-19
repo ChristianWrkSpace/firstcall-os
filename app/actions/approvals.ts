@@ -22,6 +22,9 @@ export async function listPendingApprovals(limit: number = 25) {
 export async function dismissApproval(approvalId: string, deleteUnderlying: boolean = false) {
   const user = await getCurrentUser();
   if (!user) return { error: "Not authenticated." };
+  if (deleteUnderlying && user.role !== "owner" && user.role !== "manager") {
+    return { error: "Only owners and managers can delete underlying drafts." };
+  }
 
   const admin = createAdminClient();
   const { data: row } = await admin
@@ -31,7 +34,7 @@ export async function dismissApproval(approvalId: string, deleteUnderlying: bool
     .single();
   if (!row) return { error: "Approval not found." };
 
-  await admin
+  const { error: dismissError } = await admin
     .from("pending_approvals")
     .update({
       status: "rejected",
@@ -39,61 +42,58 @@ export async function dismissApproval(approvalId: string, deleteUnderlying: bool
       resolved_by: user.id,
     })
     .eq("id", approvalId);
+  if (dismissError) return { error: "Unable to dismiss the approval." };
 
   // Optional: delete the underlying draft if asked. Hard rule: NEVER delete
   // the underlying entity if it's already been approved/sent/signed/paid.
   // Once a doc is committed, it's a permanent record on the job.
   let underlyingDeleted = false;
+  let underlyingArchived = false;
   let refusedReason: string | null = null;
   if (deleteUnderlying && row.entity_type && row.entity_id) {
     if (row.entity_type === "legal_document") {
       const { data: ld } = await admin
         .from("legal_documents")
-        .select("status")
+        .select("status, automation_key")
         .eq("id", row.entity_id)
         .single();
-      if (ld && ld.status !== "draft" && ld.status !== "void") {
+      if (!ld) {
+        refusedReason = "legal document no longer exists";
+      } else if (ld.status !== "draft" && ld.status !== "void") {
         refusedReason = `legal doc is ${ld.status}, cannot delete a committed record`;
+      } else if (ld.automation_key) {
+        if (ld.status === "void") {
+          underlyingArchived = true;
+        } else {
+          const { data: archived, error: archiveError } = await admin
+            .from("legal_documents")
+            .update({ status: "void" })
+            .eq("id", row.entity_id)
+            .eq("status", "draft")
+            .select("id")
+            .maybeSingle();
+          if (archiveError || !archived) {
+            refusedReason = "automated draft changed before it could be archived";
+          } else {
+            underlyingArchived = true;
+          }
+        }
       } else {
-        await admin.from("legal_documents").delete().eq("id", row.entity_id);
-        underlyingDeleted = true;
+        refusedReason = "manual legal drafts must be deleted from the document page";
       }
-    } else if (row.entity_type === "estimate") {
-      const { data: est } = await admin
-        .from("estimates")
-        .select("status")
-        .eq("id", row.entity_id)
-        .single();
-      if (est && est.status !== "draft") {
-        refusedReason = `estimate is ${est.status}, cannot delete after approval/send`;
-      } else {
-        await admin.from("estimate_line_items").delete().eq("estimate_id", row.entity_id);
-        await admin.from("estimates").delete().eq("id", row.entity_id);
-        underlyingDeleted = true;
-      }
-    } else if (row.entity_type === "invoice") {
-      const { data: inv } = await admin
-        .from("invoices")
-        .select("status")
-        .eq("id", row.entity_id)
-        .single();
-      if (inv && inv.status !== "draft") {
-        refusedReason = `invoice is ${inv.status}, cannot delete after send/payment`;
-      } else {
-        await admin.from("invoice_line_items").delete().eq("invoice_id", row.entity_id);
-        await admin.from("invoices").delete().eq("id", row.entity_id);
-        underlyingDeleted = true;
-      }
+    } else if (row.entity_type === "estimate" || row.entity_type === "invoice") {
+      refusedReason = `${row.entity_type} drafts must be removed from their dedicated workflow`;
     }
   }
 
-  logAudit({
+  await logAudit({
     user,
     action: "approval.dismissed",
     entity_type: "pending_approval",
     entity_id: approvalId,
     details: {
       deleted_underlying: underlyingDeleted,
+      archived_underlying: underlyingArchived,
       delete_refused: refusedReason,
       kind: row.kind,
     },
@@ -112,7 +112,11 @@ export async function dismissApproval(approvalId: string, deleteUnderlying: bool
         entityType: row.entity_type ?? null,
         entityId: row.entity_id ?? null,
         userId: user.id,
-        delta: { via: "approval.dismissed", deleted_underlying: underlyingDeleted },
+        delta: {
+          via: "approval.dismissed",
+          deleted_underlying: underlyingDeleted,
+          archived_underlying: underlyingArchived,
+        },
       })
     );
   }
@@ -122,7 +126,7 @@ export async function dismissApproval(approvalId: string, deleteUnderlying: bool
   if (refusedReason) {
     return {
       ok: true,
-      message: `Inbox entry dismissed, but the ${row.entity_type} was kept on the job because it has been committed (${refusedReason}).`,
+      message: `Inbox entry dismissed, but the ${row.entity_type} was kept (${refusedReason}).`,
     };
   }
   return { ok: true };
@@ -216,6 +220,16 @@ export async function setJobAutoPaused(jobId: string, paused: boolean) {
   }
 
   const admin = createAdminClient();
+  const { data: job } = await admin
+    .from("jobs")
+    .select("is_test")
+    .eq("id", jobId)
+    .single();
+  if (!job) return { error: "Job not found." };
+  if (job.is_test && !paused) {
+    return { error: "Test jobs must keep automation paused." };
+  }
+
   const { error } = await admin
     .from("jobs")
     .update({ auto_actions_paused: paused })

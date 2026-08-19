@@ -687,6 +687,7 @@ export default async function JobDetailPage({
               <AutoPauseToggle
                 jobId={job.id}
                 initial={!!(job as any).auto_actions_paused}
+                isTest={!!(job as any).is_test}
               />
             </div>
           </div>

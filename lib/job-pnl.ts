@@ -298,6 +298,7 @@ export async function computePortfolioPnl(opts: {
        equipment_assignments(deployed_at, retrieved_at, equipment:equipment_id(daily_cost)),
        sub_invoices(amount)`
     )
+    .eq("is_test", false)
     .gte("created_at", effectiveSince)
     .order("created_at", { ascending: false });
 
