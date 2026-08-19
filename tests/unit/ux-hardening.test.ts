@@ -27,7 +27,9 @@ describe("UX hardening", () => {
 
     expect(home).toContain('const BUSINESS_TIME_ZONE = "America/Chicago"');
     expect(home).toContain("if (cutoff) invoicesQuery = invoicesQuery.gte");
-    expect(home).not.toContain('.limit(8);');
+    expect(home).toContain('{ count: "exact" }');
+    expect(home).toContain("count: activeJobsCount");
+    expect(home).toContain('.limit(8);');
     expect(paperwork).toContain('await requireRoles(["owner", "manager", "office"])');
     expect(paperwork).toContain('["draft", "approved", "sent"].includes(doc.status)');
   });

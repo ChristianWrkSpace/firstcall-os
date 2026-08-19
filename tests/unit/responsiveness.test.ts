@@ -17,6 +17,19 @@ describe("dashboard responsiveness", () => {
     expect(layout).toContain("NotificationBellFallback");
   });
 
+  it("parallelizes high-traffic server data and bounds dashboard reads", () => {
+    const jobs = source("app/(dashboard)/jobs/page.tsx");
+    const jobDetail = source("app/(dashboard)/jobs/[id]/page.tsx");
+    const commandCenter = source("app/(dashboard)/command-center/page.tsx");
+
+    expect(jobs).toContain("await Promise.all([statusQuery, query])");
+    expect(jobs).not.toContain('select(\n      "*, customers');
+    expect(jobDetail).toContain("getCostBasis(),");
+    expect(jobDetail).toContain("getCurrentUser(),");
+    expect(commandCenter).toContain(".limit(8)");
+    expect(commandCenter).toContain('{ count: "exact", head: true }');
+  });
+
   it("uses client navigation instead of full-page reloads for core workflows", () => {
     const approvals = source("app/(dashboard)/approvals/ApprovalActions.tsx");
     const esquire = source("app/(dashboard)/jobs/[id]/EsquirePanel.tsx");
@@ -30,5 +43,13 @@ describe("dashboard responsiveness", () => {
     expect(legal).not.toContain("setTimeout(() => window.location.reload(), 1500)");
     expect(legal).toContain("router.refresh()");
     expect(legal).toContain("router.push(");
+  });
+
+  it("keeps authored entry animations below perceptible-delay thresholds", () => {
+    const css = source("app/globals.css");
+    expect(css).toContain("spatial-rise-in 160ms");
+    expect(css).toContain("spatial-fade-in 180ms");
+    expect(css).not.toContain("spatial-rise-in 420ms");
+    expect(css).not.toContain("spatial-fade-in 500ms");
   });
 });

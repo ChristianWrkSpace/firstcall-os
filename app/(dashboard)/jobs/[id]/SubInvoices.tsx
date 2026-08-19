@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useTransition } from "react";
+import Link from "next/link";
 import { logSubInvoice, markSubInvoicePaid } from "@/app/actions/subs";
 
 const INPUT =
@@ -36,9 +37,9 @@ export default function SubInvoices({
       {subs.length === 0 ? (
         <p className="text-sm italic text-ink-3">
           No subcontractors on file yet — add one under{" "}
-          <a href="/subs" className="text-info hover:underline not-italic">
+          <Link href="/subs" className="text-info hover:underline not-italic">
             Subcontractors
-          </a>
+          </Link>
           , then log their invoices here.
         </p>
       ) : (

@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDataCutoff } from "@/lib/data-cutoff";
 import { requireRoles } from "@/components/RoleGate";
+import Link from "next/link";
 import ExpenseForm from "./ExpenseForm";
 import DeleteButton from "./DeleteButton";
 
@@ -59,12 +60,12 @@ export default async function ExpensesPage({
           <h1 className="text-2xl font-bold text-ink">Vehicle & Shared Expenses</h1>
           <p className="text-ink-2 text-sm mt-0.5">
             Truck/van costs that don't belong to a single job. Feed your real
-            monthly overhead estimate at <a href="/settings/cost-basis" className="text-info hover:underline">Settings → Cost Basis</a>.
+            monthly overhead estimate at <Link href="/settings/cost-basis" className="text-info hover:underline">Settings → Cost Basis</Link>.
           </p>
         </div>
         <div className="flex items-center gap-1">
           {[7, 30, 90, 365].map((d) => (
-            <a
+            <Link
               key={d}
               href={`/expenses?window=${d}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
@@ -74,7 +75,7 @@ export default async function ExpensesPage({
               }`}
             >
               {d === 365 ? "1y" : `${d}d`}
-            </a>
+            </Link>
           ))}
         </div>
       </div>

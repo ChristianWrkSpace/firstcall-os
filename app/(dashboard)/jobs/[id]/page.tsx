@@ -120,6 +120,8 @@ export default async function JobDetailPage({
     { data: consumableEntries },
     { data: activeSubs },
     { data: subInvoices },
+    costBasis,
+    currentUser,
   ] = await Promise.all([
     supabase
       .from("jobs")
@@ -208,9 +210,9 @@ export default async function JobDetailPage({
       .select("id, invoice_number, invoice_date, amount, paid_at, description, subcontractors(name)")
       .eq("job_id", id)
       .order("invoice_date", { ascending: false }),
+    getCostBasis(),
+    getCurrentUser(),
   ]);
-
-  const [costBasis, currentUser] = await Promise.all([getCostBasis(), getCurrentUser()]);
 
   if (!job) notFound();
 

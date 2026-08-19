@@ -41,10 +41,30 @@ export default async function JobsPage({
   const supabase = await createServerSupabaseClient();
   const cutoff = getDataCutoff();
 
-  // Counts for tabs (cheap status-only fetch)
+  // Build the count and filtered-list reads first so they leave for Supabase
+  // together instead of creating a second network waterfall.
   let statusQuery = supabase.from("jobs").select("status, is_test");
   if (cutoff) statusQuery = statusQuery.gte("created_at", cutoff);
-  const { data: statusRows } = await statusQuery;
+
+  // Pull only fields rendered by this page plus the nested A/R inputs.
+  let query = supabase
+    .from("jobs")
+    .select(
+      "id, status, is_test, job_number, type, site_address, site_city, created_at, customers(name), invoices(id, status, sent_at, line_items:invoice_line_items(line_total), payments(amount))"
+    )
+    .order("created_at", { ascending: false });
+
+  if (cutoff) query = query.gte("created_at", cutoff);
+
+  if (filter === "test") query = query.eq("is_test", true);
+  else {
+    query = query.eq("is_test", false);
+    if (filter === "active") query = query.in("status", ACTIVE_STATUSES);
+    else if (filter === "completed") query = query.in("status", COMPLETED_STATUSES);
+    else if (filter === "cancelled") query = query.in("status", CANCELLED_STATUSES);
+  }
+
+  const [{ data: statusRows }, { data: jobs }] = await Promise.all([statusQuery, query]);
   const counts = {
     active: 0,
     completed: 0,
@@ -62,26 +82,6 @@ export default async function JobsPage({
     else if (COMPLETED_STATUSES.includes(r.status)) counts.completed += 1;
     else if (CANCELLED_STATUSES.includes(r.status)) counts.cancelled += 1;
   }
-
-  // Filtered list — also pull invoices/payments so we can flag A/R-pending jobs
-  let query = supabase
-    .from("jobs")
-    .select(
-      "*, customers(name, phone), invoices(id, status, sent_at, line_items:invoice_line_items(line_total), payments(amount))"
-    )
-    .order("created_at", { ascending: false });
-
-  if (cutoff) query = query.gte("created_at", cutoff);
-
-  if (filter === "test") query = query.eq("is_test", true);
-  else {
-    query = query.eq("is_test", false);
-    if (filter === "active") query = query.in("status", ACTIVE_STATUSES);
-    else if (filter === "completed") query = query.in("status", COMPLETED_STATUSES);
-    else if (filter === "cancelled") query = query.in("status", CANCELLED_STATUSES);
-  }
-
-  const { data: jobs } = await query;
 
   function arBalance(job: any): number {
     let bal = 0;

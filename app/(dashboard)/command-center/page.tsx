@@ -37,9 +37,10 @@ export default async function OperationsHomePage() {
 
   let activeJobsQuery = supabase
     .from("jobs")
-    .select("id, job_number, status, type, scheduled_at, site_address, site_city, updated_at, customers(name, phone)")
+    .select("id, job_number, status, type, scheduled_at, site_address, site_city, updated_at, customers(name, phone)", { count: "exact" })
     .in("status", ACTIVE_STATUSES)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .limit(8);
   if (cutoff) activeJobsQuery = activeJobsQuery.gte("created_at", cutoff);
 
   let invoicesQuery = supabase
@@ -50,11 +51,11 @@ export default async function OperationsHomePage() {
   if (cutoff) invoicesQuery = invoicesQuery.gte("created_at", cutoff);
 
   const [
-    { data: activeJobs },
+    { data: activeJobs, count: activeJobsCount },
     { data: scheduledCandidates },
     { data: invoices },
     { data: pendingApprovals },
-    { data: unsignedDocuments },
+    { count: unsignedDocumentsCount },
   ] = await Promise.all([
     activeJobsQuery,
     supabase
@@ -73,7 +74,7 @@ export default async function OperationsHomePage() {
       .limit(5),
     supabase
       .from("legal_documents")
-      .select("id, status, signed_at")
+      .select("id", { count: "exact", head: true })
       .is("signed_at", null)
       .in("status", ["draft", "approved", "sent"]),
   ]);
@@ -104,8 +105,8 @@ export default async function OperationsHomePage() {
     ...(receivables > 0
       ? [{ id: "receivables", title: `${money.format(receivables)} still to collect`, detail: "Review sent invoices and record payments.", href: "/ar" }]
       : []),
-    ...((unsignedDocuments?.length ?? 0) > 0
-      ? [{ id: "paperwork", title: `${unsignedDocuments?.length ?? 0} documents need completion`, detail: "Review drafts, sends, and missing signatures.", href: "/documents" }]
+    ...((unsignedDocumentsCount ?? 0) > 0
+      ? [{ id: "paperwork", title: `${unsignedDocumentsCount ?? 0} documents need completion`, detail: "Review drafts, sends, and missing signatures.", href: "/documents" }]
       : []),
   ].slice(0, 6);
 
@@ -130,10 +131,10 @@ export default async function OperationsHomePage() {
         </div>
 
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Metric label="Active jobs" value={String(activeJobs?.length ?? 0)} href="/jobs" />
+          <Metric label="Active jobs" value={String(activeJobsCount ?? 0)} href="/jobs" />
           <Metric label="Scheduled today" value={String(scheduledToday?.length ?? 0)} href="/schedule" />
           <Metric label="To collect" value={money.format(receivables)} href="/ar" warn={receivables > 0} />
-          <Metric label="Open paperwork" value={String(unsignedDocuments?.length ?? 0)} href="/documents" warn={(unsignedDocuments?.length ?? 0) > 0} />
+          <Metric label="Open paperwork" value={String(unsignedDocumentsCount ?? 0)} href="/documents" warn={(unsignedDocumentsCount ?? 0) > 0} />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
