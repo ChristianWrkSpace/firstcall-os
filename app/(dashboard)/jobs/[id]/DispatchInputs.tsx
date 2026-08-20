@@ -19,7 +19,7 @@ export default function DispatchInputsForm({
   jobId: string;
   initial?: Inputs | null;
 }) {
-  const [open, setOpen] = useState(!initial || Object.keys(initial ?? {}).length === 0);
+  const [open, setOpen] = useState(false);
   const [inputs, setInputs] = useState<Inputs>(initial ?? {});
   const [pending, startTransition] = useTransition();
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -45,14 +45,14 @@ export default function DispatchInputsForm({
     if (inputs.year_built) parts.push(`built ${inputs.year_built}`);
     if (inputs.stories) parts.push(`${inputs.stories} ${inputs.stories === 1 ? "story" : "stories"}`);
     if (inputs.water_source_secured === false) parts.push("⚠ source NOT secured");
-    return parts.join(" · ") || "Not set — Argus will use defaults";
+    return parts.join(" · ") || "Optional — add known property and access details";
   })();
 
   return (
     <div className="bg-tint border border-edge2 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h3 className="text-ink text-sm font-semibold">Dispatch Inputs</h3>
+          <h3 className="text-ink text-sm font-semibold">Property details</h3>
           <p className="text-ink-2 text-xs mt-0.5">{summary}</p>
         </div>
         <button
@@ -60,7 +60,7 @@ export default function DispatchInputsForm({
           onClick={() => setOpen((v) => !v)}
           className="text-info hover:text-info-deep text-xs font-medium"
         >
-          {open ? "Cancel" : "Edit"}
+          {open ? "Close" : "Edit"}
         </button>
       </div>
 
@@ -160,14 +160,14 @@ export default function DispatchInputsForm({
               disabled={pending}
               className="px-4 py-2 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
-              {pending ? "Saving…" : "Save Inputs"}
+              {pending ? "Saving…" : "Save details"}
             </button>
           </div>
         </div>
       )}
 
       {savedAt && !open && (
-        <p className="text-pine text-xs mt-2">✓ Saved — next analysis will use these values</p>
+        <p className="text-pine text-xs mt-2">✓ Saved</p>
       )}
     </div>
   );

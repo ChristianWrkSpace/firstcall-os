@@ -50,12 +50,12 @@ export default function AnalyzeButton({
         >
           {pending && pendingMode === "quick" ? (
             <>
-              <Spinner /> Argus analyzing…
+              <Spinner /> Analyzing photos…
             </>
           ) : hasScope ? (
-            <>🔄 Re-analyze</>
+            <>Update scope</>
           ) : (
-            <>✨ Analyze with Argus</>
+            <>Analyze photos</>
           )}
         </button>
         {showDeepOption && (
@@ -63,7 +63,7 @@ export default function AnalyzeButton({
             type="button"
             onClick={() => run("deep")}
             disabled={pending || !hasPhotos}
-            title={`Run Argus on every one of ${photoCount} photos in batches, then synthesize one unified scope. Slower (~60-90s) and pricier (~$0.30-0.50) but covers everything.`}
+            title={`Analyze all ${photoCount} photos instead of the first 16. This takes longer but covers the full job.`}
             className="px-3 py-2 bg-tint hover:bg-shade border border-edge2 disabled:opacity-50 disabled:cursor-not-allowed text-ink/85 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
           >
             {pending && pendingMode === "deep" ? (
@@ -71,14 +71,14 @@ export default function AnalyzeButton({
                 <Spinner /> Deep scan…
               </>
             ) : (
-              <>🔬 Deep scan all {photoCount}</>
+              <>Analyze all {photoCount}</>
             )}
           </button>
         )}
       </div>
       {showDeepOption && !pending && !lastResult && (
         <p className="text-ink/40 text-[10px]">
-          Quick mode samples 16 of {photoCount} photos · Deep scans every one
+          Standard analysis uses 16 photos · full analysis uses every photo
         </p>
       )}
       {lastResult?.photosAnalyzed != null && (

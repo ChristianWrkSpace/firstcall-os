@@ -127,7 +127,7 @@ export default async function PaperworkPage({
               {visible.map((doc) => (
                 <Link
                   key={doc.id}
-                  href={doc.generated ? `/jobs/${doc.jobId}/legal/${doc.docId}` : `/jobs/${doc.jobId}#act-paperwork`}
+                  href={doc.generated ? `/jobs/${doc.jobId}/legal/${doc.docId}` : `/jobs/${doc.jobId}#paperwork`}
                   className="flex items-center gap-3 px-4 py-3.5 hover:bg-shade/70 transition-colors group"
                 >
                   <span className="w-9 h-9 rounded-lg bg-shade border border-edge2 flex items-center justify-center text-ink-2 shrink-0">▧</span>

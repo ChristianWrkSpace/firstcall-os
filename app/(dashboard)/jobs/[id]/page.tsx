@@ -223,9 +223,10 @@ export default async function JobDetailPage({
 
   const status: string = job.status ?? "lead";
   const phaseIdx = PHASES.indexOf(status as (typeof PHASES)[number]);
-  const fieldOpen = ["lead", "inspection", "mitigation", "drying", "reconstruction"].includes(status);
-  const moneyOpen = status === "completed";
-  const recordOpen = status === "cancelled";
+  const setupOpen = ["lead", "inspection"].includes(status);
+  const fieldOpen = ["mitigation", "drying", "reconstruction"].includes(status);
+  const billingOpen = status === "completed";
+  const moreOpen = status === "cancelled";
 
   const fullAddress = [job.site_address, job.site_city, job.site_state, job.site_zip]
     .filter(Boolean)
@@ -378,13 +379,13 @@ export default async function JobDetailPage({
           />
         </div>
 
-        {/* Field work */}
+        {/* Start with the facts and the appointment. */}
         <Act
-          id="act-field"
-          title="Field Work"
-          description="scope, photos, drying logs, and equipment"
-          accent="#D97757"
-          open={fieldOpen}
+          id="act-setup"
+          title="Job setup"
+          description="customer, loss details, schedule, and crew"
+          accent="#44689A"
+          open={setupOpen}
         >
           <EditableJobDetailsCard
             jobId={job.id}
@@ -398,12 +399,52 @@ export default async function JobDetailPage({
             }}
           />
 
+          {customer ? (
+            <EditableCustomerCard
+              jobId={job.id}
+              showInsurance={isInsurance}
+              customer={{
+                id: customer.id,
+                name: customer.name,
+                phone: customer.phone,
+                email: customer.email,
+                insurance_company: customer.insurance_company,
+                insurance_policy_number: customer.insurance_policy_number,
+                insurance_claim_number: customer.insurance_claim_number,
+              }}
+            />
+          ) : (
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No customer linked.</p>
+          )}
+
+          <div>
+            <div className="mb-3">
+              <SectionHeader title="Schedule & Crew" hint="Set the appointment and assign the people doing the work." />
+            </div>
+            <SchedulingPanel
+              jobId={job.id}
+              scheduledAt={job.scheduled_at}
+              leadTechId={job.lead_tech_id}
+              assignments={(assignments ?? []).map((a: any) => ({
+                id: a.id,
+                profile_id: a.profile_id,
+                profiles: Array.isArray(a.profiles) ? a.profiles[0] : a.profiles,
+              }))}
+              availableTechs={availableTechs ?? []}
+            />
+          </div>
+        </Act>
+
+        <Act
+          id="act-field"
+          title="Field work"
+          description="photos, drying logs, and equipment"
+          accent="#D97757"
+          open={fieldOpen}
+        >
           <div id="photos-scope" className="scroll-mt-24">
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-              <SectionHeader
-                title="Site Photos & Scope"
-                hint="Photos, dispatch details, and the working scope for this loss."
-              />
+              <SectionHeader title="Photos & Scope" hint="Document the loss and keep the working scope with the job." />
               <div className="flex gap-2 items-start flex-wrap">
                 {job.scope_assessment && (
                   <Link
@@ -411,7 +452,7 @@ export default async function JobDetailPage({
                     className="px-4 py-2 border rounded-lg text-sm font-medium transition-colors hover:bg-shade"
                     style={{ borderColor: "var(--color-edge)", color: "var(--color-text-secondary)" }}
                   >
-                    📋 Loadout Sheet
+                    Loadout sheet
                   </Link>
                 )}
                 <PhotoUploader jobId={job.id} />
@@ -428,42 +469,28 @@ export default async function JobDetailPage({
             <PhotoGallery jobId={job.id} photos={photos ?? []} />
             {job.scope_assessment && (
               <div className="mt-6 pt-6 border-t" style={{ borderColor: "var(--color-edge)" }}>
-                <ScopeAssessment
-                  scope={job.scope_assessment}
-                  analyzedAt={job.scope_analyzed_at}
-                />
+                <ScopeAssessment scope={job.scope_assessment} analyzedAt={job.scope_analyzed_at} />
               </div>
             )}
           </div>
 
           <div id="moisture" className="scroll-mt-24">
             <div className="mb-4">
-              <SectionHeader
-                title="Moisture Readings"
-                emoji="💧"
-                hint="Daily psychrometric capture per IICRC S500. Required to certify drying."
-              />
+              <SectionHeader title="Moisture Readings" hint="Record daily readings until every affected area is dry." />
             </div>
             <MoistureLog jobId={job.id} readings={(moistureReadings ?? []) as any} />
           </div>
 
           <div id="equipment" className="scroll-mt-24">
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-              <SectionHeader
-                title="Equipment On Site"
-                emoji="🛠"
-                hint="What is currently deployed from inventory and what the scope recommends."
-              />
+              <SectionHeader title="Equipment On Site" hint="Track what is running at this property." />
               <div className="flex items-center gap-3">
-                {equipmentAssignments && equipmentAssignments.length > 0 && (
+                {(equipmentAssignments?.length ?? 0) > 0 && (
                   <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                    {equipmentAssignments.length} deployed
+                    {equipmentAssignments?.length} deployed
                   </span>
                 )}
-                <DeployEquipmentPicker
-                  jobId={job.id}
-                  available={availableEquipment ?? []}
-                />
+                <DeployEquipmentPicker jobId={job.id} available={availableEquipment ?? []} />
               </div>
             </div>
             <JobEquipment
@@ -478,14 +505,14 @@ export default async function JobDetailPage({
           </div>
         </Act>
 
-        {/* Billing and costs */}
         <Act
-          id="act-money"
-          title="Billing & Costs"
-          description="manual billing, invoices, payments, and job costs"
+          id="act-billing"
+          title="Billing & paperwork"
+          description="amount, invoice, authorization, and files"
           accent="#5B82B8"
-          open={moneyOpen}
+          open={billingOpen}
         >
+          <span id="act-paperwork" className="sr-only" aria-hidden="true" />
           {currentUser && ["owner", "manager", "office"].includes(currentUser.role) && (
             <ManualBillingAmount
               jobId={job.id}
@@ -494,108 +521,55 @@ export default async function JobDetailPage({
             />
           )}
 
-          <div id="pnl" className="scroll-mt-24">
-            <div className="mb-4">
-              <SectionHeader
-                title="Job P&L"
-                emoji="💰"
-                hint="Live revenue minus all COGS (labor + consumables + equipment + van). Updates the moment you log entries below. Tune defaults in Settings → Cost Basis."
-              />
-            </div>
-            <JobPnlCard jobId={job.id} />
-            <div className="mt-5">
-              <JobCostEntries
-                jobId={job.id}
-                defaultHourlyRate={costBasis.default_hourly_rate}
-                techs={(availableTechs ?? []).map((t: any) => ({ id: t.id, name: t.name }))}
-                laborEntries={(laborEntries ?? []).map((e: any) => ({
-                  id: e.id,
-                  work_date: e.work_date,
-                  hours: e.hours,
-                  hourly_rate: e.hourly_rate,
-                  profile_id: e.profile_id,
-                  profiles: Array.isArray(e.profiles) ? e.profiles[0] : e.profiles,
-                }))}
-                consumableEntries={consumableEntries ?? []}
-              />
-            </div>
-            <div className="mt-5">
-              <div className="mb-3">
-                <SectionHeader
-                  title="Sub Invoices"
-                  emoji="🔧"
-                  size="sm"
-                  hint="Outside companies billed to this job — counts against P&L and feeds 1099-NEC tracking."
-                />
-              </div>
-              <SubInvoices
-                jobId={job.id}
-                subs={(activeSubs ?? []) as any}
-                invoices={(subInvoices ?? []).map((s: any) => ({
-                  ...s,
-                  subcontractors: Array.isArray(s.subcontractors) ? s.subcontractors[0] : s.subcontractors,
-                }))}
-              />
-            </div>
-          </div>
-
           <div id="invoices" className="scroll-mt-24">
             <div className="mb-4">
-              <SectionHeader
-                title="Invoices"
-                hint="Billing, balances, payments, and due dates."
-              />
+              <SectionHeader title="Invoices" hint="Open, print, send, and record payments from the invoice." />
             </div>
             {!invoices?.length ? (
               <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
-                No invoices yet — enter a manual billing amount above and create a draft invoice when needed.
+                No invoice yet. Save a billing amount above when the job is ready to bill.
               </p>
             ) : (
               <div className="flex flex-col gap-2">
                 {invoices.map((inv: any) => {
                   const total = (inv.line_items ?? []).reduce(
-                    (s: number, li: any) => s + Number(li.line_total ?? 0),
+                    (sum: number, line: any) => sum + Number(line.line_total ?? 0),
                     0
                   );
                   const paid = (inv.payments ?? []).reduce(
-                    (s: number, p: any) => s + Number(p.amount),
+                    (sum: number, payment: any) => sum + Number(payment.amount ?? 0),
                     0
                   );
                   const balance = total - paid;
                   const statusColors: Record<string, string> = {
-                    draft:   "bg-tint text-[color:var(--color-text-secondary)]",
-                    sent:    "bg-[#5B82B8]/15 text-[#44689A]",
+                    draft: "bg-tint text-[color:var(--color-text-secondary)]",
+                    sent: "bg-[#5B82B8]/15 text-[#44689A]",
                     partial: "bg-honey/10 text-honey",
-                    paid:    "bg-pine/10 text-pine",
+                    paid: "bg-pine/10 text-pine",
                     overdue: "bg-red-600/10 text-red-700",
-                    void:    "bg-tint text-[color:var(--color-text-muted)]",
+                    void: "bg-tint text-[color:var(--color-text-muted)]",
                   };
                   return (
                     <Link
                       key={inv.id}
                       href={`/jobs/${job.id}/invoices/${inv.id}`}
-                      className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors hover:bg-shade"
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border transition-colors hover:bg-shade"
                       style={{ backgroundColor: "rgba(58,47,38,0.05)", borderColor: "var(--color-edge)" }}
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm" style={{ color: "#44689A" }}>
-                          {inv.invoice_number}
-                        </span>
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[inv.status] ?? ""}`}
-                        >
-                          {inv.status}
-                        </span>
-                        {paid > 0 && balance > 0 && (
-                          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                            ${paid.toFixed(0)} of ${total.toFixed(0)} paid
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-sm" style={{ color: "#44689A" }}>{inv.invoice_number}</span>
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[inv.status] ?? ""}`}>
+                            {inv.status}
                           </span>
+                        </div>
+                        {paid > 0 && balance > 0 && (
+                          <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+                            ${paid.toFixed(0)} of ${total.toFixed(0)} paid
+                          </p>
                         )}
                       </div>
-                      <span
-                        className="font-mono font-semibold"
-                        style={{ color: balance > 0 ? "var(--color-text-primary)" : "#2E7D5B" }}
-                      >
+                      <span className="font-mono font-semibold shrink-0" style={{ color: balance > 0 ? "var(--color-text-primary)" : "#2E7D5B" }}>
                         ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </Link>
@@ -604,86 +578,80 @@ export default async function JobDetailPage({
               </div>
             )}
           </div>
-        </Act>
 
-        {/* Paperwork */}
-        <Act
-          id="act-paperwork"
-          title="Paperwork"
-          description="authorizations, signatures, and uploaded files"
-          accent="#C4B5FD"
-        >
           <div id="paperwork" className="scroll-mt-24">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wide font-semibold" style={{ color: "var(--color-text-secondary)" }}>
-                Outgoing documents
-              </span>
-              <span className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>outgoing</span>
+            <div className="mb-4">
+              <SectionHeader title="Authorizations & Signatures" hint="Create, send, and track documents that need a signature." />
             </div>
             <EsquirePanel
               jobId={job.id}
               existingDocs={(legalDocs ?? []) as any}
-              invoices={(invoices ?? []).map((i: any) => ({
-                id: i.id,
-                invoice_number: i.invoice_number,
-                status: i.status,
+              invoices={(invoices ?? []).map((invoice: any) => ({
+                id: invoice.id,
+                invoice_number: invoice.invoice_number,
+                status: invoice.status,
               }))}
             />
             <div className="mt-6 pt-6 border-t" style={{ borderColor: "var(--color-edge)" }}>
-              <div className="mb-3 flex items-center gap-2">
-                <span className="text-xs uppercase tracking-wide font-semibold" style={{ color: "var(--color-text-secondary)" }}>
-                  📎 Uploaded files
-                </span>
-                <span className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>incoming</span>
+              <div className="mb-3">
+                <SectionHeader title="Uploaded Files" hint="Claim files, reports, receipts, and other records received for this job." />
               </div>
               <DocumentsVault jobId={job.id} documents={documents ?? []} />
             </div>
           </div>
         </Act>
 
-        {/* Contacts and schedule */}
         <Act
-          id="act-people"
-          title="Contacts & Schedule"
-          description="customer, adjuster, crew, and shared access"
-          accent="#44689A"
+          id="act-more"
+          title="More & history"
+          description="costs, sharing, messages, notes, and activity"
+          accent="#8B93A7"
+          open={moreOpen}
         >
-          <div>
-            {customer ? (
-              <EditableCustomerCard
+          <div id="pnl" className="scroll-mt-24">
+            <div className="mb-4">
+              <SectionHeader title="Job Costs & P&L" hint="Optional cost tracking and profitability details." />
+            </div>
+            <JobPnlCard jobId={job.id} />
+            <div className="mt-5">
+              <JobCostEntries
                 jobId={job.id}
-                showInsurance={isInsurance}
-                customer={{
-                  id: customer.id,
-                  name: customer.name,
-                  phone: customer.phone,
-                  email: customer.email,
-                  insurance_company: customer.insurance_company,
-                  insurance_policy_number: customer.insurance_policy_number,
-                  insurance_claim_number: customer.insurance_claim_number,
-                }}
+                defaultHourlyRate={costBasis.default_hourly_rate}
+                techs={(availableTechs ?? []).map((tech: any) => ({ id: tech.id, name: tech.name }))}
+                laborEntries={(laborEntries ?? []).map((entry: any) => ({
+                  id: entry.id,
+                  work_date: entry.work_date,
+                  hours: entry.hours,
+                  hourly_rate: entry.hourly_rate,
+                  profile_id: entry.profile_id,
+                  profiles: Array.isArray(entry.profiles) ? entry.profiles[0] : entry.profiles,
+                }))}
+                consumableEntries={consumableEntries ?? []}
               />
-            ) : (
-              <>
-                <h2 className="font-semibold mb-2" style={{ color: "var(--color-text-primary)" }}>Customer</h2>
-                <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No customer linked.</p>
-              </>
-            )}
+            </div>
+            <div className="mt-5">
+              <div className="mb-3">
+                <SectionHeader title="Subcontractor Invoices" hint="Outside-company costs attached to this job." />
+              </div>
+              <SubInvoices
+                jobId={job.id}
+                subs={(activeSubs ?? []) as any}
+                invoices={(subInvoices ?? []).map((invoice: any) => ({
+                  ...invoice,
+                  subcontractors: Array.isArray(invoice.subcontractors) ? invoice.subcontractors[0] : invoice.subcontractors,
+                }))}
+              />
+            </div>
           </div>
 
           <div>
             <div className="mb-3">
-              <SectionHeader
-                title="Payment Route"
-                hint="Drives the customer-portal billing UX."
-              />
+              <SectionHeader title="Payment Route" hint="Change who pays and the customer deductible when needed." />
             </div>
             <PaymentRoutePanel
               jobId={job.id}
               currentRoute={paymentRoute}
-              currentDeductible={
-                job.deductible_amount != null ? Number(job.deductible_amount) : null
-              }
+              currentDeductible={job.deductible_amount != null ? Number(job.deductible_amount) : null}
             />
             <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--color-edge)" }}>
               <AutoPauseToggle
@@ -697,10 +665,7 @@ export default async function JobDetailPage({
           {isInsurance && (
             <div>
               <div className="mb-3">
-                <SectionHeader
-                  title="Contact Adjuster"
-                  hint="Carrier info + draft outreach for the insurance adjuster."
-                />
+                <SectionHeader title="Adjuster" hint="Review carrier information and prepare adjuster outreach." />
               </div>
               <AdjusterContactCard
                 jobNumber={job.job_number}
@@ -711,34 +676,9 @@ export default async function JobDetailPage({
             </div>
           )}
 
-          <div>
-            <div className="mb-3">
-              <SectionHeader
-                title="Schedule & Crew"
-                hint="Set the appointment time and assign techs."
-              />
-            </div>
-            <SchedulingPanel
-              jobId={job.id}
-              scheduledAt={job.scheduled_at}
-              leadTechId={job.lead_tech_id}
-              assignments={(assignments ?? []).map((a: any) => ({
-                id: a.id,
-                profile_id: a.profile_id,
-                profiles: Array.isArray(a.profiles) ? a.profiles[0] : a.profiles,
-              }))}
-              availableTechs={availableTechs ?? []}
-            />
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <div className="mb-3">
-                <SectionHeader
-                  title="Customer Portal"
-                  hint="Share a public link so the customer can track progress, no login."
-                />
-              </div>
+              <div className="mb-3"><SectionHeader title="Customer Portal" hint="Create or manage customer access." /></div>
               <CustomerShareCard
                 jobId={job.id}
                 initialToken={null}
@@ -746,12 +686,7 @@ export default async function JobDetailPage({
               />
             </div>
             <div>
-              <div className="mb-3">
-                <SectionHeader
-                  title="Adjuster Portal"
-                  hint="Read-only claim packet for the insurance adjuster."
-                />
-              </div>
+              <div className="mb-3"><SectionHeader title="Adjuster Portal" hint="Create or manage adjuster access." /></div>
               <AdjusterShareCard
                 jobId={job.id}
                 initialToken={null}
@@ -761,12 +696,7 @@ export default async function JobDetailPage({
           </div>
 
           <div>
-            <div className="mb-3">
-              <SectionHeader
-                title="Notify Customer"
-                hint={`Branded touchpoints. Reduces "where's the tech?" calls.`}
-              />
-            </div>
+            <div className="mb-3"><SectionHeader title="Customer Messages" hint="Send an intentional update and review recent delivery history." /></div>
             <CustomerNotifications
               jobId={job.id}
               customerEmail={customer?.email}
@@ -780,29 +710,15 @@ export default async function JobDetailPage({
               />
             )}
           </div>
-        </Act>
 
-        {/* Permanent record */}
-        <Act
-          id="act-record"
-          title="Notes & Activity"
-          description="every note, event, and email in order"
-          accent="#8B93A7"
-          open={recordOpen}
-        >
           <div>
-            <div className="mb-4">
-              <VoiceNote jobId={job.id} />
-            </div>
+            <div className="mb-4"><VoiceNote jobId={job.id} /></div>
             <AddNoteForm jobId={job.id} />
             {notes && notes.length > 0 && (
               <div className="mt-5 flex flex-col gap-4 border-t pt-5" style={{ borderColor: "var(--color-edge)" }}>
                 {notes.map((note) => (
                   <div key={note.id} className="flex gap-3">
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: "rgba(58,47,38,0.05)" }}
-                    >
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "rgba(58,47,38,0.05)" }}>
                       <span className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
                         {((note.profiles as any)?.name ?? "?")[0].toUpperCase()}
                       </span>
@@ -810,8 +726,7 @@ export default async function JobDetailPage({
                     <div className="flex-1 min-w-0">
                       <p className="text-sm" style={{ color: "var(--color-text-primary)" }}>{note.content}</p>
                       <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
-                        {(note.profiles as any)?.name ?? "Unknown"} ·{" "}
-                        {new Date(note.created_at).toLocaleString()}
+                        {(note.profiles as any)?.name ?? "Unknown"} · {new Date(note.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -822,11 +737,7 @@ export default async function JobDetailPage({
 
           <div id="timeline" className="scroll-mt-24">
             <div className="mb-4">
-              <SectionHeader
-                title="Activity Timeline"
-                emoji="📜"
-                hint="Every event on this job — emails sent, docs created/sent/signed, moisture readings, equipment deploy/retrieve, invoices, and payments — in one chronological feed."
-              />
+              <SectionHeader title="Activity History" hint="A chronological record of job events, messages, documents, equipment, invoices, and payments." />
             </div>
             <JobActivityTimeline jobId={job.id} />
           </div>

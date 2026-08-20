@@ -106,7 +106,7 @@ export default function EsquirePanel({
           onClick={() => setPickerOpen(true)}
           className="w-full px-3 py-2 bg-cta hover:bg-cta-deep text-white text-xs font-medium rounded-lg"
         >
-          ⚖️ Generate Legal Document
+          Create document
         </button>
       ) : (
         <div className="flex flex-col gap-2 bg-shade rounded-lg p-3">
@@ -189,7 +189,7 @@ export default function EsquirePanel({
               }
               className="flex-1 px-3 py-1.5 bg-cta hover:bg-cta-deep disabled:opacity-50 text-white text-xs font-medium rounded"
             >
-              {pending ? "Drafting…" : "Generate Draft"}
+              {pending ? "Creating…" : "Create draft"}
             </button>
             <button
               onClick={() => {

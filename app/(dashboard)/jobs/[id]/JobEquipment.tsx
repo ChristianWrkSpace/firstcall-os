@@ -51,7 +51,7 @@ export default function JobEquipment({
     grouped.get(t)!.push(a);
   }
 
-  // Compare deployed vs recommended (from Argus scope)
+  // Compare deployed equipment with the saved scope recommendation.
   const deployedCounts: Record<string, number> = {};
   for (const [type, list] of grouped) deployedCounts[type] = list.length;
 
@@ -89,7 +89,7 @@ export default function JobEquipment({
         {compareRows.length > 0 && (
           <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3">
             <p className="text-honey text-xs uppercase tracking-wide font-semibold mb-2">
-              Argus recommends
+              Scope recommends
             </p>
             <div className="flex flex-wrap gap-2">
               {compareRows.map((r) => (

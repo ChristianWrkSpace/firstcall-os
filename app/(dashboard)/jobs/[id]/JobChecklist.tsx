@@ -86,7 +86,7 @@ function computeSteps(input: ChecklistInput): Step[] {
       label: "Site photos taken (4+ angles)",
       done: photoCount >= 4,
       required: true,
-      hint: "Walk every damaged room, snap at least 4 angles per area. Argus needs them to scope.",
+      hint: "Walk every damaged room and take at least 4 clear angles per area.",
       anchor: "photos-scope",
     },
     {
@@ -94,7 +94,7 @@ function computeSteps(input: ChecklistInput): Step[] {
       label: "Damage scope analyzed",
       done: !!job.scope_assessment,
       required: true,
-      hint: "Hit Analyze on the photos. Argus generates the IICRC S500 scope + equipment list.",
+      hint: "Analyze photos to create the working scope and equipment list.",
       anchor: "photos-scope",
     },
     {
@@ -103,8 +103,8 @@ function computeSteps(input: ChecklistInput): Step[] {
       done: !!workAuth?.signed_at,
       required: true,
       hint: workAuth
-        ? "Doc exists — send the customer the sign link from Esquire."
-        : "Generate a Work Authorization in Esquire, then send for signature.",
+        ? "The document is ready — send the customer the signing link."
+        : "Create and send the Work Authorization for signature.",
       anchor: "paperwork",
     },
     {
@@ -138,7 +138,7 @@ function computeSteps(input: ChecklistInput): Step[] {
       required: false,
       hint: drying.complete
         ? "Drying Cert was auto-drafted. Approve & send from Paperwork."
-        : "After 3+ days at target MC, Esquire auto-drafts the Drying Certificate.",
+        : "After 3+ days at target MC, the Drying Certificate is drafted automatically.",
       anchor: "paperwork",
     },
     {

@@ -22,7 +22,7 @@ interface TimelineEvent {
   icon: string;
   title: string;
   detail?: string;
-  actor?: string | null;  // "Office", "Tech", "System / Esquire", etc.
+  actor?: string | null;  // "Office", "Tech", "System", etc.
 }
 
 const KIND_COLOR: Record<EventKind, string> = {
@@ -127,7 +127,7 @@ export default async function JobActivityTimeline({ jobId }: { jobId: string }) 
       kind: "job_created",
       icon: "🚨",
       title: "Job created",
-      detail: "Intake captured. Argus + Esquire start drafting.",
+      detail: "Customer and loss information captured.",
       actor: "System",
     });
   }
@@ -152,8 +152,8 @@ export default async function JobActivityTimeline({ jobId }: { jobId: string }) 
         kind: "legal_doc_created",
         icon: "⚖️",
         title: `${docLabel} drafted`,
-        detail: "Esquire generated draft. Awaiting approval.",
-        actor: "Esquire",
+        detail: "Draft created and awaiting approval.",
+        actor: "System",
       });
     }
     if (d.sent_at) {
