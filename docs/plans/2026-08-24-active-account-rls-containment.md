@@ -123,15 +123,15 @@ coalesce(public.can_access_job_storage(job_id::text), false)
 
 This allows owner/manager/office and assigned/lead technicians, denies inactive/missing profiles, and aligns metadata access with the hardened storage path policy. Seed both assigned and unassigned technicians in integration tests to catch accidental broadening.
 
-#### Audit logs — active owner/manager read only
+#### Audit logs — active supported Activity roles, read only
 
-- `active audit viewers read audit`: SELECT with role owner/manager.
+- `active audit viewers read audit`: SELECT with role owner/manager/office. This preserves the existing `/activity` route contract while still denying technicians, inactive profiles, and anonymous callers; narrower detail exposure remains owned by SEC-07.
 - Preserve migration `013` policy `auth insert audit`; it already calls `public.is_authenticated()` and is not an `auth.role()`-only policy. Do not add UPDATE or DELETE policies.
 
 Predicate:
 
 ```sql
-coalesce(public.current_user_role() in ('owner', 'manager'), false)
+coalesce(public.current_user_role() in ('owner', 'manager', 'office'), false)
 ```
 
 #### Solomon reports — active owner/manager only
