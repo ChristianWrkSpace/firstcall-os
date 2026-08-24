@@ -3,6 +3,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import LineItemsTable from "./LineItemsTable";
 import EstimateActions from "./EstimateActions";
+import {
+  loadArtifactForJob,
+  requireArtifactForJob,
+  requireFinancialQueryData,
+  summarizePrintLineItems,
+} from "@/lib/financial-document-integrity";
 
 const STATUS_COLORS: Record<string, string> = {
   draft:    "bg-shade text-ink-2",
@@ -20,14 +26,16 @@ export default async function EstimateDetailPage({
   const { id: jobId, estimateId } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const [{ data: estimate }, { data: lineItems }, { data: job }] = await Promise.all([
-    supabase
-      .from("estimates")
-      .select(
-        "*, generated:profiles!generated_by(name), approver:profiles!approved_by(name)"
-      )
-      .eq("id", estimateId)
-      .single(),
+  const [estimateResult, lineItemsResult, jobResult] = await Promise.all([
+    loadArtifactForJob(
+      supabase
+        .from("estimates")
+        .select(
+          "*, generated:profiles!generated_by(name), approver:profiles!approved_by(name)"
+        ),
+      estimateId,
+      jobId
+    ),
     supabase
       .from("estimate_line_items")
       .select("*")
@@ -37,13 +45,18 @@ export default async function EstimateDetailPage({
       .from("jobs")
       .select("job_number, customers(name, insurance_company)")
       .eq("id", jobId)
-      .single(),
+      .maybeSingle(),
   ]);
 
-  if (!estimate) notFound();
+  if (estimateResult.error) throw new Error("Unable to load estimate");
+  if (jobResult.error) throw new Error("Unable to load estimate job");
+  const estimate = requireArtifactForJob(estimateResult.data, jobId, notFound);
+  if (!jobResult.data) notFound();
+  const job = jobResult.data;
+  const lineItems = requireFinancialQueryData(lineItemsResult, "estimate line items");
 
-  const items = lineItems ?? [];
-  const total = items.reduce((sum, li: any) => sum + Number(li.line_total ?? 0), 0);
+  const items = lineItems;
+  const { byCategory, grandTotal: total } = summarizePrintLineItems(items, []);
   const meta = estimate.generation_meta ?? {};
   const isLocked = estimate.status === "approved" || estimate.status === "sent";
 
@@ -68,13 +81,6 @@ export default async function EstimateDetailPage({
   const taggedCount = bookCount + guessedCount;
   const bookPctOfTotal = total > 0 ? (bookSubtotal / total) * 100 : 0;
 
-  // Group line items by category
-  const byCategory: Record<string, any[]> = {};
-  for (const li of items) {
-    const cat = li.category ?? "Other";
-    if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(li);
-  }
 
   return (
     <div className="p-4 md:p-8">

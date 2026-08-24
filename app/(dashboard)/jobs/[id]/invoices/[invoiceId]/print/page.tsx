@@ -3,6 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import PrintTrigger from "./PrintTrigger";
+import {
+  loadArtifactForJob,
+  requireArtifactForJob,
+  requireFinancialQueryData,
+  sumFiniteFinancialAmounts,
+  summarizePrintLineItems,
+} from "@/lib/financial-document-integrity";
 
 export default async function InvoicePrintPage({
   params,
@@ -12,9 +19,13 @@ export default async function InvoicePrintPage({
   const { id: jobId, invoiceId } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const [{ data: invoice }, { data: lineItems }, { data: payments }, { data: job }] =
+  const [invoiceResult, lineItemsResult, paymentsResult, jobResult] =
     await Promise.all([
-      supabase.from("invoices").select("*").eq("id", invoiceId).single(),
+      loadArtifactForJob(
+        supabase.from("invoices").select("*"),
+        invoiceId,
+        jobId
+      ),
       supabase
         .from("invoice_line_items")
         .select("*")
@@ -25,21 +36,23 @@ export default async function InvoicePrintPage({
         .from("jobs")
         .select("*, customers(*)")
         .eq("id", jobId)
-        .single(),
+        .maybeSingle(),
     ]);
 
-  if (!invoice || !job) notFound();
+  if (invoiceResult.error) throw new Error("Unable to load invoice");
+  if (jobResult.error) throw new Error("Unable to load invoice job");
+  const invoice = requireArtifactForJob(invoiceResult.data, jobId, notFound);
+  if (!jobResult.data) notFound();
+  const job = jobResult.data;
+  const lineItems = requireFinancialQueryData(lineItemsResult, "invoice line items");
+  const payments = requireFinancialQueryData(paymentsResult, "invoice payments");
 
   const customer = (job as any).customers ?? {};
-  const items = lineItems ?? [];
-  const totalPaid = (payments ?? []).reduce((s, p) => s + Number(p.amount), 0);
+  const items = lineItems;
+  const totalPaid = sumFiniteFinancialAmounts(
+    payments.map((payment) => payment.amount)
+  );
 
-  const byCategory: Record<string, any[]> = {};
-  for (const li of items) {
-    const cat = li.category ?? "Other";
-    if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(li);
-  }
   const categoryOrder = [
     "Services",
     "Water Extraction",
@@ -50,18 +63,8 @@ export default async function InvoicePrintPage({
     "Containment",
     "Other",
   ];
-  const categories = categoryOrder.filter((c) => byCategory[c]?.length > 0);
-
-  const subtotalsByCategory: Record<string, number> = {};
-  let grandTotal = 0;
-  for (const cat of categories) {
-    const subtotal = byCategory[cat].reduce(
-      (sum, li) => sum + Number(li.line_total ?? 0),
-      0
-    );
-    subtotalsByCategory[cat] = subtotal;
-    grandTotal += subtotal;
-  }
+  const { byCategory, categories, subtotalsByCategory, grandTotal } =
+    summarizePrintLineItems(items, categoryOrder);
 
   const balance = grandTotal - totalPaid;
 

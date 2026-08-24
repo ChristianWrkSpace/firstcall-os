@@ -5,6 +5,13 @@ import InvoiceLineTable from "./InvoiceLineTable";
 import InvoiceActions from "./InvoiceActions";
 import PaymentsPanel from "./PaymentsPanel";
 import RemindersPanel from "./RemindersPanel";
+import {
+  loadArtifactForJob,
+  requireArtifactForJob,
+  requireFinancialQueryData,
+  sumFiniteFinancialAmounts,
+  summarizePrintLineItems,
+} from "@/lib/financial-document-integrity";
 
 const STATUS_COLORS: Record<string, string> = {
   draft:   "bg-shade text-ink-2",
@@ -23,18 +30,13 @@ export default async function InvoiceDetail({
   const { id: jobId, invoiceId } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const [
-    { data: invoice },
-    { data: lineItems },
-    { data: payments },
-    { data: reminders },
-    { data: job },
-  ] = await Promise.all([
-    supabase
-      .from("invoices")
-      .select("*, creator:profiles!created_by(name)")
-      .eq("id", invoiceId)
-      .single(),
+  const [invoiceResult, lineItemsResult, paymentsResult, remindersResult, jobResult] =
+    await Promise.all([
+    loadArtifactForJob(
+      supabase.from("invoices").select("*, creator:profiles!created_by(name)"),
+      invoiceId,
+      jobId
+    ),
     supabase
       .from("invoice_line_items")
       .select("*")
@@ -54,24 +56,24 @@ export default async function InvoiceDetail({
       .from("jobs")
       .select("job_number, customers(name, insurance_company, email)")
       .eq("id", jobId)
-      .single(),
+      .maybeSingle(),
   ]);
 
-  if (!invoice) notFound();
+  if (invoiceResult.error) throw new Error("Unable to load invoice");
+  if (jobResult.error) throw new Error("Unable to load invoice job");
+  const invoice = requireArtifactForJob(invoiceResult.data, jobId, notFound);
+  if (!jobResult.data) notFound();
+  const job = jobResult.data;
+  const lineItems = requireFinancialQueryData(lineItemsResult, "invoice line items");
+  const payments = requireFinancialQueryData(paymentsResult, "invoice payments");
+  const reminders = requireFinancialQueryData(remindersResult, "invoice reminders");
 
-  const items = lineItems ?? [];
-  const total = items.reduce((s, li: any) => s + Number(li.line_total ?? 0), 0);
-  const paid = (payments ?? []).reduce((s, p) => s + Number(p.amount), 0);
+  const items = lineItems;
+  const { byCategory, grandTotal: total } = summarizePrintLineItems(items, []);
+  const paid = sumFiniteFinancialAmounts(payments.map((payment) => payment.amount));
   const balance = total - paid;
   const locked = invoice.status !== "draft";
 
-  // Group by category
-  const byCategory: Record<string, any[]> = {};
-  for (const li of items) {
-    const cat = li.category ?? "Other";
-    if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(li);
-  }
 
   // Days outstanding
   const daysOutstanding = invoice.sent_at
@@ -156,8 +158,8 @@ export default async function InvoiceDetail({
             invoiceLocked={invoice.status === "void"}
           />
 
-          {(reminders ?? []).length > 0 && (
-            <RemindersPanel reminders={reminders ?? []} />
+          {reminders.length > 0 && (
+            <RemindersPanel reminders={reminders} />
           )}
         </div>
 
