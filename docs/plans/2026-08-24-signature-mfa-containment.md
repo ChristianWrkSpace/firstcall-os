@@ -62,7 +62,7 @@ Definition of done:
 
 **Files:**
 - Create: `tests/unit/signature-evidence-migration.test.ts`
-- Create later: `supabase/migrations/042_signature_mfa_containment.sql` (if another migration lands first, preserve the suffix and use the next available numeric prefix everywhere)
+- Create later: `supabase/migrations/043_signature_mfa_containment.sql` (if another migration lands first, preserve the suffix and use the next available numeric prefix everywhere)
 
 **Steps:**
 
@@ -86,7 +86,7 @@ Definition of done:
 **Objective:** Make signature integrity a database invariant even against service-role application mistakes.
 
 **Files:**
-- Create: `supabase/migrations/042_signature_mfa_containment.sql`
+- Create: `supabase/migrations/043_signature_mfa_containment.sql`
 - Regenerate after migration: `lib/database.types.ts`
 - Test: `tests/unit/signature-evidence-migration.test.ts`
 
@@ -120,7 +120,7 @@ Definition of done:
    - return `{ event_id, document_id, job_id, signed }` as a typed row.
 9. Revoke all RPC execution from `PUBLIC`/`anon`, grant only to `authenticated`. The application must call these RPCs with the cookie-bound server client, never `createAdminClient()`, so `auth.uid()` and AAL JWT claims remain available.
 10. Run the unit migration test, then regenerate types against the disposable database using `npx supabase gen types typescript --local > /tmp/database.types.ts` and replace `lib/database.types.ts` only after reviewing the diff.
-11. Commit: `git add supabase/migrations/042_signature_mfa_containment.sql lib/database.types.ts tests/unit/signature-evidence-migration.test.ts && git commit -m "feat: make document signature evidence append-only"`.
+11. Commit: `git add supabase/migrations/043_signature_mfa_containment.sql lib/database.types.ts tests/unit/signature-evidence-migration.test.ts && git commit -m "feat: make document signature evidence append-only"`.
 
 ---
 
@@ -314,7 +314,7 @@ npx supabase db lint --local
 npx supabase migration list --local
 ```
 
-Expected: all tests/typecheck/build/lint pass, zero production dependency vulnerabilities, and migration `042` applied locally. Review `git diff --check` and `git status --short`; only intended source/tests/docs/migration/type changes should appear.
+Expected: all tests/typecheck/build/lint pass, zero production dependency vulnerabilities, and migration `043` applied locally. Review `git diff --check` and `git status --short`; only intended source/tests/docs/migration/type changes should appear.
 
 **Staged rollout:**
 

@@ -4,9 +4,9 @@
 
 **Goal:** Fix SEC-01 so deactivating an account immediately makes every retained JWT ineffective at the database boundary and prevents future sign-in/refresh, while replacing every effective application policy that relies only on `auth.role()`.
 
-**Architecture:** Migration `039` removes all twelve surviving legacy policies and recreates least-privilege policies through the active-profile-aware helpers introduced by migration `031`. The application performs state changes in a fail-closed order: deactivate the profile first and then ban the Auth user; unban first and reactivate the profile last. Local migrated-Supabase tests prove the effective catalog and a role/JWT matrix, while unit/static tests protect the action sequencing and historical policy cleanup.
+**Architecture:** Migration `039` removes all twelve surviving legacy policies and recreates least-privilege policies through active-profile-aware helpers. Migration `040` adds the durable cross-system account-transition ledger, leases, compare-and-set RPCs, append-only evidence, and profile-state guard defined in `2026-08-24-account-active-transition-state-machine.md`; PostgreSQL serializes transitions while Supabase Auth remains the idempotently retried external step. Disposable migrated-database tests prove policy, concurrency, and retained-JWT behavior before any application rollout.
 
-**Tech Stack:** Next.js 16 server actions, TypeScript, Supabase JS/Auth JS `2.105.1`, PostgreSQL RLS, Supabase CLI `2.115.0`, Vitest 4, local Docker-backed Supabase.
+**Tech Stack:** Next.js 16 server actions, TypeScript, Supabase JS/Auth JS `2.105.1`, PostgreSQL RLS and SECURITY DEFINER RPCs, Supabase CLI `2.105.0`, Vitest 4, and a disposable Docker-backed or isolated preview Supabase environment.
 
 ---
 
@@ -369,43 +369,23 @@ npm test -- --run tests/unit/security-migration.test.ts tests/unit/rls-storage-t
 
 Expected: all tests PASS.
 
-### Task 2: Prove deactivation sequencing before changing the action
+### Task 2: Implement the durable account-active transition state machine
 
-**Files:**
-- Create: `tests/unit/users-active-state.test.ts`
-- Modify: `app/actions/users.ts`
-- Modify: `app/(dashboard)/settings/users/UserRoleEditor.tsx`
+**Authoritative design:** `docs/plans/2026-08-24-account-active-transition-state-machine.md`
 
-**RED tracer 1:** Mock the authenticated owner, profile update, Auth admin API, audit, and revalidation. Assert deactivation writes `profiles.active=false` before `updateUserById(...ban...)` and reports success.
+The original direct profile/Auth sequence was rejected during independent review because zero-row writes and cross-instance activate/deactivate races could return false success or leave profile/provider state divergent. Do not repair that rejected implementation incrementally.
 
-**GREEN tracer 1:** Implement the minimum deactivation path.
+**Required migration order:**
 
-**RED tracer 2:** Make provider ban fail. Assert the profile remains inactive, success is not reported, retryable containment status is returned, and no `user.deactivated` success audit is emitted.
+- `039_active_account_rls_containment.sql` — effective-policy containment (this plan's completed Task 1).
+- `040_account_active_transitions.sql` — durable transition ledger, append-only events, profile-state guard, advisory/row locks, leases, compare-and-set RPCs, and atomic redacted audit.
+- `041_invoice_lifecycle_rbac_expand.sql`.
+- `042_invoice_lifecycle_rbac_contract.sql`.
+- `043_signature_mfa_containment.sql`.
 
-**GREEN tracer 2:** Add partial-failure handling.
+Execute the state-machine plan in strict RED/GREEN slices: migration contract; same-key/opposite claims; provider lease and stale-token handling; finalize/profile guard; durable partial-failure evidence; server orchestration; rendered UI/accessibility; bounded recovery worker; unsupported UUID sign-out removal; then disposable-DB concurrency and preview-provider verification.
 
-**RED tracer 3:** Assert activation unbans first and writes `profiles.active=true` only after provider success. Add provider-failure and profile-failure cases.
-
-**GREEN tracer 3:** Add activation path.
-
-**RED tracer 4:** Assert self-deactivation/nonexistent target make no writes, and repeating deactivate/activate converges without error.
-
-**GREEN tracer 4:** Add validation/idempotency.
-
-Run after each tracer:
-
-```bash
-npm test -- --run tests/unit/users-active-state.test.ts
-```
-
-Then:
-
-```bash
-npm run typecheck
-npm test -- --run tests/unit/auth-helpers.test.ts tests/unit/users-active-state.test.ts
-```
-
-Expected: PASS with no type errors.
+Do not deploy application transition code until migrations `039` and `040` have passed disposable database tests and the isolated provider ban/unban gate.
 
 ### Task 3: Remove the unsupported target UUID sign-out path
 

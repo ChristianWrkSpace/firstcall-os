@@ -4,7 +4,7 @@
 
 **Goal:** Remove direct browser-role invoice mutations and enforce draft editing, send, payment, and void transitions through narrow, role-checked, transactional database functions without regressing the existing manual/Stripe payment paths.
 
-**Architecture:** Use an expand/application/contract rollout. Migration `040` adds role-checked service-role RPCs, a send claim/evidence mechanism, and lifecycle triggers while preserving compatibility with the currently deployed actions. The application then routes every invoice parent/line mutation through those RPCs. Migration `041` removes all remaining direct INSERT/UPDATE/DELETE policies and retires the old payment-delete signature only after the new application is healthy. Triggers enforce financial evidence even for service-role mistakes; RPCs lock the invoice row and validate an active actor for human operations.
+**Architecture:** Use an expand/application/contract rollout. Migration `041` adds role-checked service-role RPCs, a send claim/evidence mechanism, and lifecycle triggers while preserving compatibility with the currently deployed actions. The application then routes every invoice parent/line mutation through those RPCs. Migration `042` removes all remaining direct INSERT/UPDATE/DELETE policies and retires the old payment-delete signature only after the new application is healthy. Triggers enforce financial evidence even for service-role mistakes; RPCs lock the invoice row and validate an active actor for human operations.
 
 **Tech Stack:** PostgreSQL 15 / Supabase migrations and RLS, PL/pgSQL security-definer functions, Next.js 16 server actions, Supabase JS, Resend idempotency keys, Vitest, pgTAP via `supabase test db`.
 
@@ -57,7 +57,7 @@ The delegated task identifies SEC-02 as broad direct invoice parent UPDATE plus 
 
 1. `draft`: editable only through draft RPCs; no active send claim is allowed during edits.
 2. Send claim: invoice remains `draft`; one UUID claim freezes parent draft metadata and line items. Same recipient retries return the existing claim; a different recipient conflicts. A stale claim is **not** automatically stolen. An authorized actor must release it after a confirmed send failure, or operations must resolve it manually after checking Resend.
-3. `sent`: transition only through completion of the matching claim and requires nonblank `sent_to`, nonnull `sent_at`, and nonblank `sent_message_id` (Resend provider ID). Existing pre-040 sent rows are grandfathered; the trigger enforces evidence on new transitions or changed evidence.
+3. `sent`: transition only through completion of the matching claim and requires nonblank `sent_to`, nonnull `sent_at`, and nonblank `sent_message_id` (Resend provider ID). Existing pre-041 sent rows are grandfathered; the trigger enforces evidence on new transitions or changed evidence.
 4. `partial`: requires `0 < SUM(payments.amount) < SUM(invoice_line_items.line_total)`. It may originate from draft or sent so current manual/Stripe payment behavior remains compatible.
 5. `paid`: requires positive total due, `SUM(payments.amount) >= total due`, and nonnull `paid_at`.
 6. Payment deletion reconciliation returns to `sent` only when valid send evidence exists; otherwise it returns to `draft`. This avoids manufacturing sent evidence.
@@ -70,8 +70,8 @@ The delegated task identifies SEC-02 as broad direct invoice parent UPDATE plus 
 
 ### Migration files
 
-- Create: `supabase/migrations/040_invoice_lifecycle_rbac_expand.sql`
-- Create: `supabase/migrations/041_invoice_lifecycle_rbac_contract.sql`
+- Create: `supabase/migrations/041_invoice_lifecycle_rbac_expand.sql`
+- Create: `supabase/migrations/042_invoice_lifecycle_rbac_contract.sql`
 
 Both migrations must be replay-safe for a database that already has migrations `001`–`038`. Use `ADD COLUMN IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `DROP TRIGGER IF EXISTS` followed by `CREATE TRIGGER`, `DROP POLICY IF EXISTS`, and guarded constraint creation through `pg_constraint`. Never wrap `CREATE POLICY` in a create-if-missing branch when its definition may need replacement; drop and recreate by exact name.
 
@@ -88,7 +88,7 @@ voided_by uuid references public.profiles(id) on delete set null,
 void_reason text
 ```
 
-Do not backfill provider IDs or void actors. Trigger logic must grandfather unchanged legacy states using `OLD` versus `NEW`, while enforcing evidence whenever status/evidence is newly changed after `040`.
+Do not backfill provider IDs or void actors. Trigger logic must grandfather unchanged legacy states using `OLD` versus `NEW`, while enforcing evidence whenever status/evidence is newly changed after `041`.
 
 ### Shared actor helper
 
@@ -204,7 +204,7 @@ public.delete_payment_and_reconcile(
 ```
 
 Require owner/manager and preserve the current invoice lock, exact payment linkage delete, total recomputation, and atomic parent update. When no payments remain, choose `sent` only if `sent_at`, nonblank `sent_to`, and nonblank `sent_message_id` are present; otherwise choose `draft`.
-4. Keep the old two-argument delete function only through expand/application rollout. `041` revokes and drops `public.delete_payment_and_reconcile(uuid,uuid)` after the application has switched.
+4. Keep the old two-argument delete function only through expand/application rollout. `042` revokes and drops `public.delete_payment_and_reconcile(uuid,uuid)` after the application has switched.
 5. Do not change Stripe event keys, amount-positive constraint, overpayment rejection, or transaction boundaries.
 
 ### Trigger functions and exact trigger names
@@ -230,7 +230,7 @@ Reuse the existing line trigger name so replay replaces migration `032` behavior
 
 ### Final RLS policy names
 
-`040` may add RPCs/triggers without removing policies. `041` must idempotently drop every known direct-write policy name:
+`041` may add RPCs/triggers without removing policies. `042` must idempotently drop every known direct-write policy name:
 
 ```sql
 DROP POLICY IF EXISTS "auth all invoices" ON public.invoices;
@@ -261,7 +261,7 @@ USING (
 );
 ```
 
-There must be no authenticated INSERT, UPDATE, or DELETE policy on either table after `041`. Do not add service-role policies; service role bypasses RLS and is limited by server-only credentials plus RPC grants.
+There must be no authenticated INSERT, UPDATE, or DELETE policy on either table after `042`. Do not add service-role policies; service role bypasses RLS and is limited by server-only credentials plus RPC grants.
 
 ## 3. Task 1 — Write RED static migration/application contract tests
 
@@ -270,8 +270,8 @@ There must be no authenticated INSERT, UPDATE, or DELETE policy on either table 
 - Test references (read-only): `tests/unit/security-migration.test.ts`, `tests/unit/rls-storage-token-migration.test.ts`, `tests/unit/stripe-webhook.test.ts`, `tests/unit/manual-invoice-flow.test.ts`, `tests/unit/permissions.test.ts`
 
 **Steps:**
-1. Assert `040` defines all exact signatures, locks parent rows, checks active actor roles, validates claim/evidence, reuses `require_draft_invoice_for_line_change`, grants only service role, and preserves `process_stripe_payment` plus `record_payment_and_reconcile` signatures.
-2. Assert `041` drops every policy listed above, creates only the two exact read policies, drops the old two-argument delete RPC, and does not create any direct invoice/line write policy.
+1. Assert `041` defines all exact signatures, locks parent rows, checks active actor roles, validates claim/evidence, reuses `require_draft_invoice_for_line_change`, grants only service role, and preserves `process_stripe_payment` plus `record_payment_and_reconcile` signatures.
+2. Assert `042` drops every policy listed above, creates only the two exact read policies, drops the old two-argument delete RPC, and does not create any direct invoice/line write policy.
 3. Parse individual function bodies with statement-bounded regex (`[^;]+`) so comments/later functions cannot satisfy mutation assertions.
 4. Assert `app/actions/invoices.ts` contains calls to the new RPCs and no `.from("invoices").update`, `.from("invoice_line_items").insert/update/delete`, or old two-argument payment-delete call.
 5. Assert send order is `claim_invoice_send` → `sendEmail` with the exact idempotency key → `complete_invoice_send`, and release occurs only on confirmed provider error.
@@ -281,12 +281,12 @@ There must be no authenticated INSERT, UPDATE, or DELETE policy on either table 
 npm test -- tests/unit/invoice-lifecycle-rbac.test.ts
 ```
 
-Expected: FAIL because `040`, `041`, and application RPC calls do not yet exist.
+Expected: FAIL because `041`, `042`, and application RPC calls do not yet exist.
 
-## 4. Task 2 — Implement migration 040 expand objects and lifecycle invariants
+## 4. Task 2 — Implement migration 041 expand objects and lifecycle invariants
 
 **Files:**
-- Create: `supabase/migrations/040_invoice_lifecycle_rbac_expand.sql`
+- Create: `supabase/migrations/041_invoice_lifecycle_rbac_expand.sql`
 - Modify only after tests are red: `tests/unit/invoice-lifecycle-rbac.test.ts`
 
 **Steps:**
@@ -316,7 +316,7 @@ Expected: migration assertions PASS; application-switch assertions remain RED un
 **Required matrix assertions:**
 
 1. owner/manager/office can read parent/lines; technician/anon/inactive cannot.
-2. After `041`, authenticated owner/manager/office direct parent/line INSERT/UPDATE/DELETE affect zero rows or raise RLS denial.
+2. After `042`, authenticated owner/manager/office direct parent/line INSERT/UPDATE/DELETE affect zero rows or raise RLS denial.
 3. Draft meta and all three line RPCs allow owner/manager/office and reject technician/inactive/unknown/null actor.
 4. Line ID from another invoice cannot be updated/deleted even when caller supplies a valid target invoice.
 5. Draft RPCs reject sent/paid/void and claimed invoices.
@@ -344,7 +344,7 @@ supabase db reset
 supabase test db supabase/tests/invoice_lifecycle_rbac.test.sql
 ```
 
-Expected: `db reset` applies `001`–`040`; pgTAP passes expand-phase assertions. Run again after `041` for final direct-write denial assertions.
+Expected: `db reset` applies `001`–`041`; pgTAP passes expand-phase assertions. Run again after `042` for final direct-write denial assertions.
 
 ## 6. Task 4 — Switch server actions to narrow RPCs
 
@@ -379,14 +379,14 @@ npm run typecheck
 
 Expected: all targeted tests and typecheck PASS.
 
-## 7. Task 5 — Implement migration 041 contract and final RLS
+## 7. Task 5 — Implement migration 042 contract and final RLS
 
 **Files:**
-- Create: `supabase/migrations/041_invoice_lifecycle_rbac_contract.sql`
+- Create: `supabase/migrations/042_invoice_lifecycle_rbac_contract.sql`
 - Test: `tests/unit/invoice-lifecycle-rbac.test.ts`
 - Test: `supabase/tests/invoice_lifecycle_rbac.test.sql`
 
-**Prerequisite:** Do not apply `041` until the deployed application version from Task 4 is healthy and no prior application instances call direct invoice writes or the old payment-delete signature.
+**Prerequisite:** Do not apply `042` until the deployed application version from Task 4 is healthy and no prior application instances call direct invoice writes or the old payment-delete signature.
 
 **Steps:**
 1. Drop every historical/broad policy name listed in Section 2.
@@ -463,15 +463,15 @@ Any paid invoice without payment evidence is a stop-the-line reconciliation issu
 
 ### Gate B — Preview/staging expand
 
-1. Apply `040` only to preview/staging using the repository’s approved migration pipeline (not ad-hoc SQL paste).
+1. Apply `041` only to preview/staging using the repository’s approved migration pipeline (not ad-hoc SQL paste).
 2. Deploy the application switch.
 3. Exercise owner/manager/office/technician matrix, send failure/retry, manual partial/full payment, delete reconciliation, void rejection, and Stripe replay.
 4. Observe at least one complete send claim with persisted provider ID and no duplicate email.
-5. Confirm old application version still functions during `040` expand window.
+5. Confirm old application version still functions during `041` expand window.
 
 ### Gate C — Production expand/application
 
-1. Apply `040` in a low-traffic window.
+1. Apply `041` in a low-traffic window.
 2. Verify columns, triggers, function definitions/checksums, grants, and migration ledger.
 3. Deploy the application immediately; retain rollback to the pre-switch application while old signatures/policies still exist.
 4. Smoke-test with a designated test job/invoice only. Do not send customer email; use an approved internal recipient and clearly marked test invoice.
@@ -481,7 +481,7 @@ Any paid invoice without payment evidence is a stop-the-line reconciliation issu
 
 After all old application instances are drained and at least one successful human path plus Stripe replay is verified:
 
-1. Apply `041`.
+1. Apply `042`.
 2. Run read-only policy/grant probes and authenticated role matrix probes.
 3. Confirm no INSERT/UPDATE/DELETE policy exists on invoice parents/lines.
 4. Confirm the two-argument delete payment function no longer exists.
@@ -490,7 +490,7 @@ After all old application instances are drained and at least one successful huma
 ### Gate E — Post-deploy monitoring and rollback
 
 - Monitor for one full billing cycle or at least 24 hours, whichever is longer: failed claims, stuck claims, duplicate provider IDs, payment reconciliation errors, and RLS denials.
-- Application rollback is safe between `040` and `041`. After `041`, rollback requires the new application or an explicit forward-fix migration; do **not** recreate broad write policies as an emergency shortcut.
+- Application rollback is safe between `041` and `042`. After `042`, rollback requires the new application or an explicit forward-fix migration; do **not** recreate broad write policies as an emergency shortcut.
 - Database rollback is forward-only: disable/fix new functions with a new migration. Never remove evidence columns or rewrite historical state during incident response.
 
 ## 10. Implementation completion checklist
@@ -498,11 +498,11 @@ After all old application instances are drained and at least one successful huma
 - [ ] Canonical SEC-02 wording reviewed.
 - [ ] Finance decisions on void/payment semantics approved.
 - [ ] Static tests observed RED before SQL/application implementation.
-- [ ] `040` is idempotent and locally replayed.
+- [ ] `041` is idempotent and locally replayed.
 - [ ] pgTAP role matrix and real concurrency tests pass.
 - [ ] Application uses only narrow mutation RPCs.
 - [ ] Resend claim/idempotency/provider evidence path is tested.
 - [ ] Existing manual and Stripe payment transaction tests pass.
-- [ ] `041` removes all direct parent/line writes and old delete signature.
+- [ ] `042` removes all direct parent/line writes and old delete signature.
 - [ ] Full test/typecheck/build/DB reset/lint pass.
 - [ ] Backup/restore, preview, production expand, and production contract gates approved and recorded.
