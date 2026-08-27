@@ -98,7 +98,7 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-info/15 bg-info/5 p-5">
+        <section className="rounded-lg border border-info/15 bg-info/5 p-5">
           <h2 className="font-semibold text-ink">About automation</h2>
           <p className="text-sm text-ink-2 mt-2 leading-relaxed">
             Optional AI tools remain available inside certain job actions and advanced settings, but they are not required to run the business. The operating workflow and stored job records work independently of them.

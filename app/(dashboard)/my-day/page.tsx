@@ -235,7 +235,7 @@ function JobCard({ job }: { job: any }) {
         {customer?.phone ? (
           <a
             href={`tel:${customer.phone}`}
-            className="flex items-center justify-center gap-1.5 py-3 bg-cta hover:bg-cta-deep text-white text-sm font-medium rounded-lg min-h-[48px] shadow-[0_4px_14px_-4px_rgba(217,119,87,0.5)] active:opacity-90 transition-all"
+            className="flex items-center justify-center gap-1.5 py-3 bg-cta hover:bg-cta-deep text-white text-sm font-medium rounded-[6px] min-h-[48px] active:opacity-90 transition-colors"
           >
             📞 <span>Call</span>
           </a>

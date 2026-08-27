@@ -1,43 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
-export default function SectionHeader({
-  title,
-  hint,
-  emoji,
-  size = "md",
-}: {
+export default function SectionHeader({ title, hint, size = "md" }: {
   title: string;
   hint?: string;
-  emoji?: string;
   size?: "sm" | "md";
 }) {
   const [open, setOpen] = useState(false);
+  const hintId = useId();
+
   return (
     <div className="flex flex-col gap-1.5 min-w-0">
-      <div className="flex items-center gap-1.5">
-        <h2
-          className={`text-ink font-semibold ${size === "sm" ? "text-sm" : ""}`}
-        >
-          {emoji && <span className="mr-1.5">{emoji}</span>}
-          {title}
-        </h2>
+      <div className="flex items-center gap-2">
+        <h2 className={`text-[color:var(--color-text-primary)] font-semibold leading-tight ${size === "sm" ? "text-sm" : "text-base"}`}>{title}</h2>
         {hint && (
           <button
             type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-label={open ? "Hide details" : "What is this?"}
+            onClick={() => setOpen((value) => !value)}
+            aria-label={open ? "Hide details" : `About ${title}`}
             aria-expanded={open}
-            className="text-ink-3 hover:text-ink text-[10px] w-4 h-4 rounded-full border border-edge2 hover:border-zinc-500 flex items-center justify-center transition-colors leading-none shrink-0"
+            aria-controls={hintId}
+            className="text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text-primary)] w-6 h-6 rounded-[6px] border border-[color:var(--color-edge)] hover:border-[color:var(--color-edge-strong)] flex items-center justify-center transition-colors leading-none shrink-0"
           >
-            ?
+            <span aria-hidden="true">?</span>
           </button>
         )}
       </div>
-      {open && hint && (
-        <p className="text-ink-3 text-xs leading-relaxed">{hint}</p>
-      )}
+      {open && hint && <p id={hintId} className="text-[color:var(--color-text-muted)] text-sm leading-relaxed max-w-prose">{hint}</p>}
     </div>
   );
 }

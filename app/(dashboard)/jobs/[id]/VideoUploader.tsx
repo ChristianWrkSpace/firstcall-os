@@ -186,7 +186,7 @@ export default function VideoUploader({ jobId }: { jobId: string }) {
           </div>
           <div className="h-1 bg-tint rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#E08A63] to-[#C4663F] transition-all duration-300"
+              className="h-full bg-cta transition-[width] duration-150"
               style={{ width: `${progress.pct}%` }}
             />
           </div>
@@ -196,7 +196,7 @@ export default function VideoUploader({ jobId }: { jobId: string }) {
           <button
             type="button"
             onClick={() => cameraRef.current?.click()}
-            className="px-4 py-2 bg-gradient-to-br from-[#E08A63] to-[#C4663F] text-white text-sm font-medium rounded-lg shadow-[0_0_18px_rgba(217,119,87,0.25)] active:opacity-90 transition-opacity flex items-center gap-2"
+            className="px-4 py-2 bg-cta hover:bg-cta-deep text-white text-sm font-medium rounded-[6px] active:opacity-90 transition-colors flex items-center gap-2"
           >
             🎥 Record Video
           </button>

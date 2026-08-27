@@ -1,7 +1,7 @@
+import type { NavIconName } from "@/components/icons/nav-icons";
 import type { Role } from "./permissions";
 
-// Workflow-grouped navigation. The sections mirror how work actually flows
-// in this org — Now → Work → Field → Money → Growth → Intelligence → System.
+// Workflow-grouped navigation mirrors how work actually flows through the org.
 //
 // Each item carries an optional `roles` allowlist; omit it to make the item
 // visible to everyone. The dashboard layout filters by current user's role
@@ -11,13 +11,13 @@ import type { Role } from "./permissions";
 export interface NavItem {
   href: string;
   label: string;
-  icon: string;
+  icon: NavIconName;
   hint?: string;                 // optional subtitle shown beneath the label
   roles?: readonly Role[];
 }
 
 export interface NavSection {
-  title: string;                 // shown as a small uppercase header
+  title: string;
   items: readonly NavItem[];
 }
 
@@ -36,36 +36,36 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   {
     title: "Operations",
     items: [
-      { href: "/command-center", label: "Home",      icon: "⌂", hint: "What needs attention", roles: STAFF },
-      { href: "/jobs",           label: "Jobs",      icon: "▣", hint: "All active work" },
-      { href: "/schedule",       label: "Schedule",  icon: "▥", hint: "Dispatch and appointments" },
-      { href: "/customers",      label: "Customers", icon: "◉" },
+      { href: "/command-center", label: "Home",      icon: "home", hint: "What needs attention", roles: STAFF },
+      { href: "/jobs",           label: "Jobs",      icon: "jobs", hint: "All active work" },
+      { href: "/schedule",       label: "Schedule",  icon: "schedule", hint: "Dispatch and appointments" },
+      { href: "/customers",      label: "Customers", icon: "customers" },
     ],
   },
   {
     title: "Field Work",
     items: [
-      { href: "/my-day",    label: "My Day",    icon: "☀", hint: "Assigned work" },
-      { href: "/equipment", label: "Equipment", icon: "▤", hint: "Inventory and deployment" },
-      { href: "/subs",      label: "Subs",      icon: "◇", hint: "Vendors and invoices", roles: STAFF },
+      { href: "/my-day",    label: "My Day",    icon: "my-day", hint: "Assigned work" },
+      { href: "/equipment", label: "Equipment", icon: "equipment", hint: "Inventory and deployment" },
+      { href: "/subs",      label: "Subs",      icon: "subs", hint: "Vendors and invoices", roles: STAFF },
     ],
   },
   {
     title: "Office",
     items: [
-      { href: "/documents", label: "Paperwork",   icon: "▧", hint: "Documents and signatures", roles: STAFF },
-      { href: "/ar",        label: "Receivables", icon: "$", hint: "Invoices and payments", roles: STAFF },
-      { href: "/expenses",  label: "Expenses",    icon: "−", hint: "Job and company costs", roles: STAFF },
-      { href: "/reports",   label: "Reports",     icon: "◫", hint: "Performance and profit", roles: LEAD },
+      { href: "/documents", label: "Paperwork",   icon: "documents", hint: "Documents and signatures", roles: STAFF },
+      { href: "/ar",        label: "Receivables", icon: "receivables", hint: "Invoices and payments", roles: STAFF },
+      { href: "/expenses",  label: "Expenses",    icon: "expenses", hint: "Job and company costs", roles: STAFF },
+      { href: "/reports",   label: "Reports",     icon: "reports", hint: "Performance and profit", roles: LEAD },
     ],
   },
   {
     title: "More",
     items: [
-      { href: "/calls",    label: "Calls",    icon: "◎", hint: "Lead intake" },
-      { href: "/partners", label: "Partners", icon: "◐", hint: "Referral sources", roles: STAFF },
-      { href: "/settings", label: "Settings", icon: "⚙", roles: STAFF },
-      { href: "/help",     label: "Help",     icon: "?" },
+      { href: "/calls",    label: "Calls",    icon: "calls", hint: "Lead intake" },
+      { href: "/partners", label: "Partners", icon: "partners", hint: "Referral sources", roles: STAFF },
+      { href: "/settings", label: "Settings", icon: "settings", roles: STAFF },
+      { href: "/help",     label: "Help",     icon: "help" },
     ],
   },
 ] as const;

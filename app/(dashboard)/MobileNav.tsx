@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { NAV_ITEMS, NAV_SECTIONS, type NavItem } from "@/lib/nav";
 import { signOut } from "@/app/actions/auth";
 import Logo from "@/components/Logo";
+import { CloseIcon, NavIcon, SignOutIcon } from "@/components/icons/nav-icons";
 import SearchTrigger from "./SearchTrigger";
 
 export default function MobileNav({
@@ -97,7 +98,7 @@ export default function MobileNav({
           as installed PWA (display:standalone) so the hamburger isn't tucked
           under the system clock. */}
       <header
-        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-[#FAF6EF]/90 backdrop-blur-sm border-b border-edge2"
+        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 pb-3 bg-[color:var(--color-bg-deep)]/92 backdrop-blur-md border-b border-[color:var(--color-edge)]"
         style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
       >
         <button
@@ -106,7 +107,7 @@ export default function MobileNav({
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="mobile-navigation-drawer"
-          className="p-2 -ml-2 text-ink hover:text-info-deep transition-colors"
+          className="p-2 -ml-2 rounded-[6px] text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-text-primary)] transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +126,7 @@ export default function MobileNav({
         </button>
         <div className="flex items-center gap-2">
           <Logo variant="mark" size={28} />
-          <p className="text-ink text-sm font-semibold">FirstCall OS</p>
+          <p className="text-[color:var(--color-text-primary)] text-sm font-semibold">FirstCall OS</p>
         </div>
         <SearchTrigger variant="mobile" />
       </header>
@@ -135,7 +136,7 @@ export default function MobileNav({
         <div
           onClick={() => setOpen(false)}
           aria-hidden="true"
-          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          className="md:hidden fixed inset-0 z-40 bg-black/70"
         />
       )}
 
@@ -147,13 +148,13 @@ export default function MobileNav({
         aria-modal="true"
         aria-label="Main navigation"
         inert={!open}
-        className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#FAF6EF]/95 backdrop-blur-sm border-r border-edge2 flex flex-col transform transition-transform duration-200 ${
+        className={`md:hidden fixed top-0 bottom-0 left-0 z-50 w-72 bg-[color:var(--color-bg-deep)]/96 backdrop-blur-md border-r border-[color:var(--color-edge)] flex flex-col transform transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand + close — top padding respects notch when drawer is open */}
         <div
-          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-edge2"
+          className="flex items-center justify-between gap-2.5 px-4 pb-5 border-b border-[color:var(--color-edge)]"
           style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}
         >
           <Logo variant="banner" size={28} />
@@ -161,9 +162,9 @@ export default function MobileNav({
             ref={closeRef}
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="p-2 text-ink-2 hover:text-ink text-2xl min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 rounded-[6px] text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
-            ✕
+            <CloseIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -171,7 +172,7 @@ export default function MobileNav({
         <nav className="flex-1 px-2 py-2 flex flex-col gap-0.5 overflow-y-auto">
           {sections.map((section, i) => (
             <div key={section.title} className={i === 0 ? "" : "mt-3"}>
-              <p className="px-3 pt-2 pb-1 text-[9px] uppercase tracking-[0.2em] text-ink/30 font-semibold">
+              <p className="px-3 pt-2 pb-2 text-xs font-medium text-[color:var(--color-text-muted)]">
                 {section.title}
               </p>
               <div className="flex flex-col gap-0.5">
@@ -183,17 +184,17 @@ export default function MobileNav({
                       key={item.href}
                       href={item.href}
                       aria-current={active ? "page" : undefined}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-[6px] border-l-2 transition-colors text-sm ${
                         active
-                          ? "bg-tint text-ink ring-1 ring-edge2"
-                          : "text-ink/55 hover:text-ink hover:bg-shade"
+                          ? "bg-[color:var(--color-surface-strong)] text-[color:var(--color-text-primary)] border-l-[color:var(--color-text-muted)]"
+                          : "text-[color:var(--color-text-secondary)] border-l-transparent hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface)]"
                       }`}
                     >
-                      <span className="text-lg leading-none w-5 text-center">{item.icon}</span>
+                      <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
                       <span className="flex-1 leading-tight">
                         {item.label}
                         {item.hint && (
-                          <span className="block text-[10px] text-ink/35 mt-0.5">
+                          <span className="block text-xs text-[color:var(--color-text-muted)] mt-0.5">
                             {item.hint}
                           </span>
                         )}
@@ -207,13 +208,13 @@ export default function MobileNav({
         </nav>
 
         {/* Sign out */}
-        <div className="px-2 py-3 border-t border-edge2">
+        <div className="px-2 py-3 border-t border-[color:var(--color-edge)]">
           <form action={signOut}>
             <button
               type="submit"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink/55 hover:text-ink hover:bg-shade transition-colors text-sm text-left"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface)] transition-colors text-sm text-left"
             >
-              <span className="text-lg leading-none w-5 text-center">→</span>
+              <SignOutIcon className="h-[18px] w-[18px] shrink-0" />
               Sign out
             </button>
           </form>

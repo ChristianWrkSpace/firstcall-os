@@ -9,7 +9,7 @@ export default async function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-card p-4">
-      <div className="w-full max-w-sm bg-card border border-edge2 rounded-2xl p-8">
+      <div className="w-full max-w-sm bg-card border border-edge2 rounded-lg p-8">
         <div className="flex flex-col items-center mb-6">
           <Logo variant="banner" size={40} priority />
           <p className="text-ink-3 text-xs mt-3">Set a new password</p>

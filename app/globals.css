@@ -1,64 +1,39 @@
 @import "tailwindcss";
 
-/* ─── Daylight — warm light theme ──────────────────────────────────────
-   Morning-coffee palette: warm cream base, white paper cards, terracotta
-   for live/agents, marigold for needs-you, dusty blue for money/info.
-   Solid cards (no backdrop-filter) — cheaper to composite than glass. */
-
-.glass-card {
-  border-radius: 1rem;
-  background-color: #FFFDF9;
-  border: 1px solid #EAE1D2;
-  box-shadow:
-    0 1px 2px rgba(58, 47, 38, 0.04),
-    0 8px 24px -12px rgba(58, 47, 38, 0.10);
-}
-
-.glass-card-strong {
-  border-radius: 1rem;
-  background-color: #FFFFFF;
-  border: 1px solid #E5DBC9;
-  box-shadow:
-    0 1px 3px rgba(58, 47, 38, 0.06),
-    0 16px 40px -16px rgba(58, 47, 38, 0.14);
-}
-
-.glass-row {
-  border-radius: 0.75rem;
-  background-color: #FFFDF9;
-  border: 1px solid #EDE5D7;
-  transition: background-color 180ms ease;
-}
-.glass-row:hover {
-  background-color: #FBF5EA;
-}
-
-/* App backdrop — warm cream + faint sunrise tints. */
-.app-backdrop {
-  background-color: #FAF6EF;
-  background-image:
-    radial-gradient(circle at 18% 12%, rgba(217, 119, 87, 0.05) 0%, transparent 38%),
-    radial-gradient(circle at 82% 88%, rgba(233, 162, 59, 0.05) 0%, transparent 42%);
-  color: #2A2520;
-}
-
-/* ─── Semantic Color Tokens ───────────────────────────────────────── */
+/* Field Ledger: a restrained operational palette for field records. */
 :root {
-  color-scheme: light;
-  --color-primary: #D97757;            /* terracotta — live, agents, CTAs */
-  --color-positive: #2E7D5B;           /* pine — paid, dry, done */
-  --color-caution: #B97718;            /* deep marigold — needs you (text-safe) */
-  --color-danger: #C0392B;
-  --color-surface: #FFFDF9;            /* paper card */
-  --color-surface-strong: #F4EDE0;     /* warm shade panel */
-  --color-edge: #EAE1D2;               /* warm hairline */
-  --color-text-primary: #2A2520;       /* warm ink */
-  --color-text-secondary: #5A5248;
-  --color-text-muted: #8A8071;
-  --color-bg-deep: #F3EDE0;
-  --color-bg-base: #FAF6EF;
-  --background: #FAF6EF;
-  --foreground: #2A2520;
+  color-scheme: dark;
+  --color-bg-deep: #0c0e0f;
+  --color-bg-base: #111315;
+  --color-surface: #181b1d;
+  --color-surface-strong: #202428;
+  --color-surface-raised: #262b2f;
+  --color-edge: #30363a;
+  --color-edge-strong: #434a4f;
+  --color-text-primary: #f1f3f3;
+  --color-text-secondary: #b4babd;
+  --color-text-muted: #81898d;
+
+  --color-water: #67a7cf;
+  --color-water-muted: #172b37;
+  --color-water-edge: #31566d;
+  --color-attention: #d8a24c;
+  --color-attention-muted: #302617;
+  --color-attention-edge: #664c25;
+  --color-verified: #72a77d;
+  --color-verified-muted: #1b2b20;
+  --color-verified-edge: #36543d;
+  --color-blocker: #df6b68;
+  --color-blocker-muted: #321b1b;
+  --color-blocker-edge: #693332;
+
+  /* Compatibility aliases keep untouched Phase 2 surfaces legible. */
+  --color-primary: #d7dcde;
+  --color-positive: var(--color-verified);
+  --color-caution: var(--color-attention);
+  --color-danger: var(--color-blocker);
+  --background: var(--color-bg-base);
+  --foreground: var(--color-text-primary);
 }
 
 @theme inline {
@@ -66,6 +41,10 @@
   --color-positive: var(--color-positive);
   --color-caution: var(--color-caution);
   --color-danger: var(--color-danger);
+  --color-water: var(--color-water);
+  --color-attention: var(--color-attention);
+  --color-verified: var(--color-verified);
+  --color-blocker: var(--color-blocker);
   --color-surface: var(--color-surface);
   --color-surface-strong: var(--color-surface-strong);
   --color-edge: var(--color-edge);
@@ -79,22 +58,24 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Utility palette for the Daylight sweep — usable as text-ink, bg-card,
-     border-edge2, bg-cta, text-info, etc. */
-  --color-ink: #2A2520;
-  --color-ink-2: #5A5248;
-  --color-ink-3: #8A8071;
-  --color-card: #FFFDF9;
-  --color-shade: #F1EAE0;
-  --color-tint: rgba(58, 47, 38, 0.05);
-  --color-edge2: #E5DBC9;
-  --color-cta: #D97757;
-  --color-cta-deep: #C4663F;
-  --color-info: #5B82B8;
-  --color-info-deep: #44689A;
-  --color-pine: #2E7D5B;
-  --color-honey: #B97718;
+  --color-ink: var(--color-text-primary);
+  --color-ink-2: var(--color-text-secondary);
+  --color-ink-3: var(--color-text-muted);
+  --color-card: var(--color-surface);
+  --color-shade: var(--color-surface-strong);
+  --color-tint: #24292c;
+  --color-edge2: var(--color-edge);
+  --color-cta: #31566d;
+  --color-cta-deep: #254354;
+  --color-info: #b4babd;
+  --color-info-deep: #f1f3f3;
+  --color-pine: var(--color-verified);
+  --color-honey: var(--color-attention);
 }
+
+* { border-color: var(--color-edge); }
+
+html { background: var(--color-bg-deep); }
 
 body {
   background: var(--color-bg-base);
@@ -103,74 +84,61 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.safe-bottom {
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+::selection {
+  background: var(--color-edge-strong);
+  color: var(--color-text-primary);
 }
 
-.safe-top {
-  padding-top: max(0.75rem, env(safe-area-inset-top));
+.app-backdrop {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
 }
 
-/* ─── Spatial Motion Keyframes ──────────────────────────────────── */
-@keyframes spatial-rise-in {
-  0%   { transform: translateY(12px) translateZ(-20px) scale(0.96); opacity: 0; }
-  100% { transform: translateY(0) translateZ(0) scale(1); opacity: 1; }
+/* Legacy names remain during migration; these are opaque record surfaces. */
+.glass-card {
+  border-radius: 8px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-edge);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.24);
 }
 
-@keyframes spatial-fade-in {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+.glass-card-strong {
+  border-radius: 8px;
+  background-color: var(--color-surface-strong);
+  border: 1px solid var(--color-edge-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
 }
 
-@keyframes ping-ambient {
-  0%   { box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.35); }
-  70%  { box-shadow: 0 0 0 12px rgba(217, 119, 87, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(217, 119, 87, 0); }
+.glass-row {
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-edge);
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
 
-@keyframes pulse-ambient {
-  0%, 100% { opacity: 0.3; }
-  50%      { opacity: 0.7; }
+.glass-row:hover {
+  background-color: var(--color-surface-strong);
+  border-color: var(--color-edge-strong);
 }
 
-@keyframes shimmer-sweep {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-@keyframes drift-slow {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(0.5%, 0.3%) scale(1.02); }
-  100% { transform: translate(0, 0) scale(1); }
-}
+.safe-bottom { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+.safe-top { padding-top: max(0.75rem, env(safe-area-inset-top)); }
 
 @keyframes toast-in {
-  0%   { transform: translateY(8px) scale(0.97); opacity: 0; }
-  100% { transform: translateY(0) scale(1);      opacity: 1; }
+  0% { transform: translateY(4px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
-.animate-toast-in { animation: toast-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2); }
-.animate-spatial-rise { animation: spatial-rise-in 160ms cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-spatial-fade { animation: spatial-fade-in 180ms ease-out; }
-.animate-ping-ambient { animation: ping-ambient 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
-.animate-pulse-ambient { animation: pulse-ambient 3s ease-in-out infinite; }
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(58, 47, 38, 0.04) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: shimmer-sweep 2.4s ease-in-out infinite;
-}
-.animate-drift { animation: drift-slow 20s ease-in-out infinite; }
+.animate-toast-in { animation: toast-in 160ms ease-out; }
 
-/* Respect the user's motion preference across authored animations and utility
-   transitions without changing the visual design for everyone else. */
+:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto !important;
-  }
-
-  *,
-  *::before,
-  *::after {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -178,7 +146,6 @@ body {
   }
 }
 
-/* ─── Print Styles ───────────────────────────────────────────────── */
 @media print {
   aside, nav, .no-print { display: none !important; }
   main { padding: 0 !important; overflow: visible !important; }
@@ -188,7 +155,4 @@ body {
   .page-break-inside-avoid { page-break-inside: avoid; }
 }
 
-@page {
-  size: letter;
-  margin: 0.5in;
-}
+@page { size: letter; margin: 0.5in; }

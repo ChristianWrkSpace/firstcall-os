@@ -149,7 +149,7 @@ export default function NewCallPage() {
           <div
             className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
               state === "recording"
-                ? "bg-red-600 shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse"
+                ? "bg-red-600 animate-pulse"
                 : "bg-shade hover:bg-shade"
             }`}
           >

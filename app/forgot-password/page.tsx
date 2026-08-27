@@ -10,7 +10,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-card p-4">
-      <div className="w-full max-w-sm bg-card border border-edge2 rounded-2xl p-8">
+      <div className="w-full max-w-sm bg-card border border-edge2 rounded-lg p-8">
         <div className="flex justify-center mb-6">
           <Logo variant="banner" size={40} priority />
         </div>

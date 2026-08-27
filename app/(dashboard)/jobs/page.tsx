@@ -115,8 +115,7 @@ export default async function JobsPage({
           </div>
           <Link
             href="/jobs/new"
-            className="px-4 py-2 text-sm font-medium rounded-xl text-ink transition-opacity hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #E08A63, #C4663F)" }}
+            className="px-4 py-2 text-sm font-medium rounded-[6px] bg-cta text-white transition-colors hover:bg-cta-deep"
           >
             + New Job
           </Link>
@@ -150,7 +149,7 @@ export default async function JobsPage({
         {/* Flowing rows — the whole row is the tap target */}
         {!jobs?.length ? (
           <div
-            className="rounded-2xl border px-6 py-14 text-center"
+            className="rounded-lg border px-6 py-14 text-center"
             style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
           >
             <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -174,7 +173,7 @@ export default async function JobsPage({
                 <Link
                   key={job.id}
                   href={`/jobs/${job.id}`}
-                  className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-colors hover:bg-shade"
+                  className="group flex items-center gap-4 px-4 py-3.5 rounded-lg border transition-colors hover:bg-shade"
                   style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
                 >
                   <div className="min-w-0 flex-1">
