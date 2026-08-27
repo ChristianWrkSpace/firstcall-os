@@ -1,4 +1,5 @@
-import { createServerSupabaseClient, createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
+import { accountActiveResultFromSnapshot, type AccountActiveSnapshot } from "@/lib/account-active-transitions";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +20,13 @@ export default async function UsersPage() {
     .select("id, name, email, role, active, created_at")
     .order("active", { ascending: false })
     .order("name", { ascending: true });
+  const { data: transitionRows } = await admin.rpc("list_latest_account_active_transitions", {});
+  const transitionByProfile = new Map<string, ReturnType<typeof accountActiveResultFromSnapshot>>();
+  for (const row of (Array.isArray(transitionRows) ? transitionRows : []) as AccountActiveSnapshot[]) {
+    if (row && typeof row.target_profile_id === "string") {
+      transitionByProfile.set(row.target_profile_id, accountActiveResultFromSnapshot(row));
+    }
+  }
 
   const counts: Record<Role, number> = {
     owner: 0,
@@ -106,6 +114,7 @@ export default async function UsersPage() {
                     currentRole={p.role}
                     canEdit={canManage && p.id !== me.id}
                     isActive={p.active}
+                    initialTransition={transitionByProfile.get(p.id) ?? null}
                   />
                 </td>
                 <td className="px-5 py-3 text-ink-2 text-xs">

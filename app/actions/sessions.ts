@@ -29,35 +29,6 @@ export async function signOutOtherSessions() {
 }
 
 /**
- * Sign out a target user from EVERY device, immediately.
- * Owner-only. Used when an account is compromised or an employee leaves.
- */
-export async function forceSignOutUser(userId: string) {
-  const me = await getCurrentUser();
-  if (!me) return { error: "Not authenticated." };
-  if (me.role !== "owner") return { error: "Owner only." };
-
-  const admin = createAdminClient();
-  // signOut takes a JWT, not a userId — but we can use the admin endpoint
-  // to invalidate all refresh tokens for the user via admin.signOut(jwt) is
-  // not directly available. Instead invalidate by deleting + re-creating
-  // the refresh tokens via admin.updateUserById with a no-op metadata bump.
-  // Simpler: use the dedicated admin endpoint.
-  const { error } = await admin.auth.admin.signOut(userId, "global");
-  if (error) return { error: error.message };
-
-  logAudit({
-    user: me,
-    action: "session.force_signout",
-    entity_type: "user",
-    entity_id: userId,
-    details: { scope: "global" },
-  });
-  revalidatePath("/settings/security");
-  return { ok: true };
-}
-
-/**
  * Owner view: list every user in the org with their last sign-in time so
  * stale accounts surface. Powered by Supabase auth.admin.listUsers.
  */

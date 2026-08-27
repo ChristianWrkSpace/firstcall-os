@@ -3,6 +3,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import PrintTrigger from "./PrintTrigger";
+import {
+  loadArtifactForJob,
+  requireArtifactForJob,
+  requireFinancialQueryData,
+  summarizePrintLineItems,
+} from "@/lib/financial-document-integrity";
 
 export default async function EstimatePrintPage({
   params,
@@ -12,14 +18,16 @@ export default async function EstimatePrintPage({
   const { id: jobId, estimateId } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const [{ data: estimate }, { data: lineItems }, { data: job }] = await Promise.all([
-    supabase
-      .from("estimates")
-      .select(
-        "*, generated:profiles!generated_by(name), approver:profiles!approved_by(name)"
-      )
-      .eq("id", estimateId)
-      .single(),
+  const [estimateResult, lineItemsResult, jobResult] = await Promise.all([
+    loadArtifactForJob(
+      supabase
+        .from("estimates")
+        .select(
+          "*, generated:profiles!generated_by(name), approver:profiles!approved_by(name)"
+        ),
+      estimateId,
+      jobId
+    ),
     supabase
       .from("estimate_line_items")
       .select("*")
@@ -29,22 +37,19 @@ export default async function EstimatePrintPage({
       .from("jobs")
       .select("*, customers(*)")
       .eq("id", jobId)
-      .single(),
+      .maybeSingle(),
   ]);
 
-  if (!estimate || !job) notFound();
+  if (estimateResult.error) throw new Error("Unable to load estimate");
+  if (jobResult.error) throw new Error("Unable to load estimate job");
+  const estimate = requireArtifactForJob(estimateResult.data, jobId, notFound);
+  if (!jobResult.data) notFound();
+  const job = jobResult.data;
+  const lineItems = requireFinancialQueryData(lineItemsResult, "estimate line items");
 
   const customer = (job as any).customers ?? {};
-  const items = lineItems ?? [];
+  const items = lineItems;
   const meta = (estimate as any).generation_meta ?? {};
-
-  // Group line items by category
-  const byCategory: Record<string, any[]> = {};
-  for (const li of items) {
-    const cat = li.category ?? "Other";
-    if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(li);
-  }
 
   const categoryOrder = [
     "Water Extraction",
@@ -55,19 +60,8 @@ export default async function EstimatePrintPage({
     "Containment",
     "Other",
   ];
-  const categories = categoryOrder.filter((c) => byCategory[c]?.length > 0);
-
-  // Calculate totals
-  const subtotalsByCategory: Record<string, number> = {};
-  let grandTotal = 0;
-  for (const cat of categories) {
-    const subtotal = byCategory[cat].reduce(
-      (sum, li) => sum + Number(li.line_total ?? 0),
-      0
-    );
-    subtotalsByCategory[cat] = subtotal;
-    grandTotal += subtotal;
-  }
+  const { byCategory, categories, subtotalsByCategory, grandTotal } =
+    summarizePrintLineItems(items, categoryOrder);
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-US", {

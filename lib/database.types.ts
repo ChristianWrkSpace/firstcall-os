@@ -14,6 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_active_transition_events: {
+        Row: {
+          attempt_number: number | null
+          error_code: string | null
+          event_type: string
+          id: string
+          occurred_at: string
+          provider_state: string | null
+          transition_id: string
+        }
+        Insert: {
+          attempt_number?: number | null
+          error_code?: string | null
+          event_type: string
+          id?: string
+          occurred_at?: string
+          provider_state?: string | null
+          transition_id: string
+        }
+        Update: {
+          attempt_number?: number | null
+          error_code?: string | null
+          event_type?: string
+          id?: string
+          occurred_at?: string
+          provider_state?: string | null
+          transition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_active_transition_events_transition_fkey"
+            columns: ["transition_id"]
+            isOneToOne: false
+            referencedRelation: "account_active_transitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      account_active_transitions: {
+        Row: {
+          actor_id: string | null
+          attempt_count: number
+          completed_at: string | null
+          created_at: string
+          desired_active: boolean
+          id: string
+          idempotency_key: string
+          last_error_code: string | null
+          lease_expires_at: string | null
+          lease_token: string | null
+          provider_observed_at: string | null
+          provider_state: string
+          status: string
+          target_profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          attempt_count?: number
+          completed_at?: string | null
+          created_at?: string
+          desired_active: boolean
+          id?: string
+          idempotency_key: string
+          last_error_code?: string | null
+          lease_expires_at?: string | null
+          lease_token?: string | null
+          provider_observed_at?: string | null
+          provider_state?: string
+          status: string
+          target_profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          attempt_count?: number
+          completed_at?: string | null
+          created_at?: string
+          desired_active?: boolean
+          id?: string
+          idempotency_key?: string
+          last_error_code?: string | null
+          lease_expires_at?: string | null
+          lease_token?: string | null
+          provider_observed_at?: string | null
+          provider_state?: string
+          status?: string
+          target_profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_active_transitions_actor_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_active_transitions_target_profile_fkey"
+            columns: ["target_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_invocations: {
         Row: {
           agent: string | null
@@ -2179,9 +2286,127 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_account_provider_work: {
+        Args: { p_lease_seconds?: number; p_transition_id: string; p_worker_token: string }
+        Returns: {
+          attempt_number: number
+          desired_active: boolean
+          target_profile_id: string
+          transition_id: string
+          transition_status: string
+        }[]
+      }
+      claim_account_active_transition: {
+        Args: {
+          p_actor_id: string
+          p_desired_active: boolean
+          p_idempotency_key: string
+          p_target_profile_id: string
+        }
+        Returns: {
+          attempt_count: number
+          desired_active: boolean
+          profile_active: boolean
+          provider_state: string
+          retryable: boolean
+          transition_id: string
+          transition_status: string
+        }[]
+      }
+      close_account_active_transition_inactive: {
+        Args: { p_actor_id: string; p_transition_id: string }
+        Returns: {
+          desired_active: boolean
+          profile_active: boolean
+          provider_state: string
+          retryable: boolean
+          transition_id: string
+          transition_status: string
+        }[]
+      }
       current_user_role: { Args: never; Returns: string }
+      finalize_account_active_transition: {
+        Args: { p_transition_id: string }
+        Returns: {
+          desired_active: boolean
+          profile_active: boolean
+          provider_state: string
+          retryable: boolean
+          transition_id: string
+          transition_status: string
+        }[]
+      }
+      get_account_active_transition: {
+        Args: { p_transition_id: string }
+        Returns: {
+          attempt_count: number
+          desired_active: boolean
+          last_error_code: string | null
+          profile_active: boolean
+          provider_observed_at: string | null
+          provider_state: string
+          retryable: boolean
+          target_profile_id: string
+          transition_id: string
+          transition_status: string
+        }[]
+      }
+      get_account_active_transition_for_target: {
+        Args: { p_target_profile_id: string }
+        Returns: {
+          attempt_count: number
+          desired_active: boolean
+          last_error_code: string | null
+          profile_active: boolean
+          provider_observed_at: string | null
+          provider_state: string
+          retryable: boolean
+          target_profile_id: string
+          transition_id: string
+          transition_status: string
+        }[]
+      }
       is_authenticated: { Args: never; Returns: boolean }
       is_owner_or_manager: { Args: never; Returns: boolean }
+      list_latest_account_active_transitions: {
+        Args: never
+        Returns: {
+          attempt_count: number
+          desired_active: boolean
+          last_error_code: string | null
+          profile_active: boolean
+          provider_observed_at: string | null
+          provider_state: string
+          retryable: boolean
+          target_profile_id: string
+          transition_id: string
+          transition_status: string
+        }[]
+      }
+      list_recoverable_account_active_transitions: {
+        Args: { p_limit?: number }
+        Returns: {
+          transition_id: string
+          transition_status: string
+          updated_at: string
+        }[]
+      }
+      record_account_provider_result: {
+        Args: {
+          p_error_code?: string | null
+          p_provider_state: string
+          p_succeeded: boolean
+          p_transition_id: string
+          p_worker_token: string
+        }
+        Returns: {
+          profile_active: boolean
+          provider_state: string
+          retryable: boolean
+          transition_id: string
+          transition_status: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
