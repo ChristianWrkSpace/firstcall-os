@@ -157,7 +157,7 @@ function ProgressBar({ percent, thin }: { percent: number; thin?: boolean }) {
       className={`bg-shade rounded-full overflow-hidden ${thin ? "h-1.5" : "h-3"}`}
     >
       <div
-        className="h-full bg-gradient-to-r from-blue-600 to-green-500 transition-all duration-700"
+        className="h-full bg-[color:var(--color-verified)] transition-[width] duration-150"
         style={{ width: `${percent}%` }}
       />
     </div>

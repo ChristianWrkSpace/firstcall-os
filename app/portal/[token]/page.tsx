@@ -213,7 +213,7 @@ export default async function PortalPage({
             </div>
             <div className="relative h-2 bg-shade rounded-full overflow-hidden">
               <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-green-500 transition-all"
+                className="absolute inset-y-0 left-0 bg-[color:var(--color-verified)] transition-[width]"
                 style={{
                   width: `${currentStage >= 0 ? ((currentStage + 1) / STAGES.length) * 100 : 0}%`,
                 }}

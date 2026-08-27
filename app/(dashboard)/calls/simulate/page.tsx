@@ -286,7 +286,7 @@ export default function SimulateCallPage() {
                 className={`flex ${turn.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
+                  className={`max-w-[75%] px-4 py-2.5 rounded-lg text-sm ${
                     turn.role === "user"
                       ? "bg-cta text-white rounded-br-sm"
                       : "bg-shade text-ink rounded-bl-sm"
@@ -298,7 +298,7 @@ export default function SimulateCallPage() {
             ))}
             {thinking && (
               <div className="flex justify-start">
-                <div className="bg-shade text-ink-2 px-4 py-2.5 rounded-2xl rounded-bl-sm text-sm">
+                <div className="bg-shade text-ink-2 px-4 py-2.5 rounded-lg rounded-bl-sm text-sm">
                   <span className="inline-block animate-pulse">Athena is thinking…</span>
                 </div>
               </div>
@@ -316,7 +316,7 @@ export default function SimulateCallPage() {
               disabled={thinking}
               className={`flex-1 py-4 rounded-lg font-medium text-ink transition-all select-none ${
                 holding
-                  ? "bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]"
+                  ? "bg-red-600"
                   : "bg-cta hover:bg-cta-deep"
               } ${thinking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             >

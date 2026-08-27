@@ -45,11 +45,11 @@ describe("dashboard responsiveness", () => {
     expect(legal).toContain("router.push(");
   });
 
-  it("keeps authored entry animations below perceptible-delay thresholds", () => {
+  it("limits authored UI animation to the short functional toast transition", () => {
     const css = source("app/globals.css");
-    expect(css).toContain("spatial-rise-in 160ms");
-    expect(css).toContain("spatial-fade-in 180ms");
-    expect(css).not.toContain("spatial-rise-in 420ms");
-    expect(css).not.toContain("spatial-fade-in 500ms");
+    expect(css).toContain("toast-in 160ms");
+    expect(css).not.toContain("spatial-rise-in");
+    expect(css).not.toContain("spatial-fade-in");
+    expect(css).not.toMatch(/animation:[^;]*(?:infinite|drift|shimmer|glow)/);
   });
 });

@@ -67,7 +67,7 @@ function Act({
     <details
       id={id}
       open={open}
-      className="group rounded-2xl border scroll-mt-24"
+      className="group rounded-lg border scroll-mt-24"
       style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
     >
       <summary className="cursor-pointer list-none select-none flex items-center gap-3 px-4 md:px-5 py-4 min-h-[52px] [&::-webkit-details-marker]:hidden">
@@ -334,7 +334,7 @@ export default async function JobDetailPage({
                       className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider whitespace-nowrap"
                       style={
                         current
-                          ? { backgroundColor: "rgba(217,119,87,0.15)", color: "#D97757", boxShadow: "0 0 0 1px rgba(217,119,87,0.3)" }
+                          ? { backgroundColor: "rgba(217,119,87,0.15)", color: "#D97757", border: "1px solid rgba(217,119,87,0.3)" }
                           : done
                             ? { color: "rgba(217,119,87,0.6)" }
                             : { color: "var(--color-text-muted)" }
@@ -350,10 +350,7 @@ export default async function JobDetailPage({
         </div>
 
         {/* Next steps stay visible so the user never has to hunt. */}
-        <div
-          className="rounded-2xl"
-          style={{ boxShadow: "0 0 0 1px rgba(245,158,11,0.18), 0 0 32px -16px rgba(245,158,11,0.25)" }}
-        >
+        <div className="rounded-lg border border-[color:var(--color-attention-edge)]">
           <JobChecklist
             input={{
               job: {

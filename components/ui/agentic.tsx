@@ -97,7 +97,7 @@ export function AgentPulse({
       <span
         className={cn(
           "relative flex h-2 w-2",
-          active && "animate-pulse-ambient"
+          active && ""
         )}
       >
         <span

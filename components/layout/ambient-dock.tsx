@@ -11,7 +11,7 @@ interface DockItem {
 
 export function AmbientDock({ items }: { items: DockItem[] }) {
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-2 rounded-2xl border animate-spatial-rise" style={{ backgroundColor: "rgba(250,246,239,0.92)", borderColor: "var(--color-edge)", boxShadow: "0 8px 24px -8px rgba(58,47,38,0.25), 0 0 0 1px rgba(58,47,38,0.04) inset" }}>
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-2 rounded-lg border bg-[color:var(--color-surface)] shadow-sm" style={{ borderColor: "var(--color-edge)" }}>
       {items.map((item, i) => (
         <a
           key={i}

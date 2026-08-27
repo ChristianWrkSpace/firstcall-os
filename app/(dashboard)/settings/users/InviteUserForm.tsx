@@ -16,7 +16,7 @@ export default function InviteUserForm() {
   return (
     <form
       action={action}
-      className="rounded-2xl border p-4 md:p-5 mb-6"
+      className="rounded-lg border p-4 md:p-5 mb-6"
       style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-edge)" }}
     >
       <p className="text-sm font-semibold mb-3" style={{ color: "var(--color-text-primary)" }}>
@@ -55,8 +55,7 @@ export default function InviteUserForm() {
         <button
           type="submit"
           disabled={pending}
-          className="px-5 py-2.5 rounded-xl text-sm font-medium text-ink transition-opacity hover:opacity-90 disabled:opacity-50 min-h-[44px]"
-          style={{ background: "linear-gradient(135deg, #E08A63, #C4663F)" }}
+          className="px-5 py-2.5 rounded-[6px] bg-cta text-sm font-medium text-white transition-colors hover:bg-cta-deep disabled:opacity-50 min-h-[44px]"
         >
           {pending ? "Sending…" : "Send invite"}
         </button>
