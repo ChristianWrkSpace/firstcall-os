@@ -6,6 +6,10 @@ import { requirePermission } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { ALL_ROLES, type Role } from "@/lib/permissions";
+import {
+  orchestrateAccountActiveTransition,
+  type AccountActiveTransitionResult,
+} from "@/lib/account-active-transitions";
 
 /**
  * Invite a new user by email.
@@ -114,35 +118,50 @@ export async function changeUserRole(profileId: string, newRole: Role) {
   return { ok: true };
 }
 
-export async function setUserActive(profileId: string, active: boolean) {
-  const check = await requirePermission("users.manage");
-  if ("error" in check) return { error: check.error };
-
-  if (profileId === check.user.id && !active) {
-    return { error: "You can't deactivate yourself." };
-  }
-
-  const admin = createAdminClient();
-  const { data: target } = await admin
-    .from("profiles")
-    .select("name")
-    .eq("id", profileId)
-    .single();
-
-  const { error } = await admin
-    .from("profiles")
-    .update({ active })
-    .eq("id", profileId);
-  if (error) return { error: error.message };
-
-  await logAudit({
-    user: check.user,
-    action: active ? "user.activated" : "user.deactivated",
-    entity_type: "profile",
-    entity_id: profileId,
-    details: { target_user: target?.name },
+export async function setUserActive(
+  profileId: string,
+  desiredActive: boolean,
+  idempotencyKey: string
+): Promise<AccountActiveTransitionResult> {
+  const failure = (message: string, retryable: boolean): AccountActiveTransitionResult => ({
+    outcome: "error",
+    transitionId: null,
+    desiredActive: typeof desiredActive === "boolean" ? desiredActive : false,
+    profileActive: null,
+    providerState: "unknown",
+    transitionStatus: "unavailable",
+    retryable,
+    message,
   });
 
-  revalidatePath("/settings/users");
-  return { ok: true };
+  try {
+    const check = await requirePermission("users.manage");
+    if ("error" in check) return failure("You do not have permission to manage users.", false);
+
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuid.test(profileId) || typeof desiredActive !== "boolean" ||
+        typeof idempotencyKey !== "string" || !uuid.test(idempotencyKey)) {
+      return failure("Invalid account change request.", false);
+    }
+    if (profileId === check.user.id && !desiredActive) {
+      return failure("You can't deactivate yourself.", false);
+    }
+
+    return await orchestrateAccountActiveTransition({
+      targetProfileId: profileId,
+      desiredActive,
+      idempotencyKey,
+      actorId: check.user.id,
+    });
+  } catch {
+    return failure("Account status could not be confirmed. Please retry.", true);
+  } finally {
+    for (const path of ["/settings/users", "/settings/security"]) {
+      try {
+        revalidatePath(path);
+      } catch {
+        // Cache invalidation must not replace the authoritative transition result.
+      }
+    }
+  }
 }

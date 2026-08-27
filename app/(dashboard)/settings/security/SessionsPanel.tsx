@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { signOutOtherSessions, forceSignOutUser } from "@/app/actions/sessions";
+import Link from "next/link";
+import { signOutOtherSessions } from "@/app/actions/sessions";
 
 interface UserSession {
   id: string;
@@ -57,23 +58,6 @@ export default function SessionsPanel({
     });
   }
 
-  function forceOut(userId: string, name: string) {
-    if (
-      !confirm(
-        `Force-sign-out ${name} from EVERY device? They'll need to sign in again.`
-      )
-    )
-      return;
-    setMsg(null);
-    start(async () => {
-      const res = await forceSignOutUser(userId);
-      if (res.error) setMsg(res.error);
-      else {
-        setMsg(`✓ ${name} signed out everywhere.`);
-        router.refresh();
-      }
-    });
-  }
 
   return (
     <section className="glass-card p-5 mt-6">
@@ -98,8 +82,12 @@ export default function SessionsPanel({
             All Org Users (Owner-only)
           </h3>
           <p className="text-ink-3 text-xs mb-3 leading-relaxed">
-            Last sign-in per user. Force sign-out a compromised or
-            departed account from every device.
+            Last sign-in per user. To contain a compromised or departed account,
+            use the canonical activation/deactivation workflow in{" "}
+            <Link href="/settings/users" className="text-info hover:underline">
+              Users &amp; Permissions
+            </Link>
+            . Deactivation keeps application access inactive until Auth blocking is confirmed.
           </p>
           <ul className="flex flex-col gap-1.5">
             {users.map((u) => (
@@ -126,16 +114,6 @@ export default function SessionsPanel({
                     {u.email} · last sign-in {fmtAgo(u.lastSignInAt)}
                   </p>
                 </div>
-                {u.id !== currentUserId && (
-                  <button
-                    type="button"
-                    onClick={() => forceOut(u.id, u.name)}
-                    disabled={pending}
-                    className="text-ink-3 hover:text-red-700 text-xs disabled:opacity-50 shrink-0"
-                  >
-                    Force sign-out
-                  </button>
-                )}
               </li>
             ))}
           </ul>

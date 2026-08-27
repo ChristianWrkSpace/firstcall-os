@@ -183,6 +183,7 @@ declare
   v_target_found boolean := false;
   v_actor_found boolean := false;
   v_updated_id uuid;
+  v_latest_transition_id uuid;
 begin
   if p_target_profile_id is null or p_desired_active is null
      or p_idempotency_key is null or p_actor_id is null then
@@ -231,6 +232,17 @@ begin
   if found then
     if v_transition.desired_active is distinct from p_desired_active then
       raise exception 'account_transition_idempotency_conflict' using errcode = 'P0001';
+    end if;
+    if v_transition.status in ('succeeded', 'closed_inactive') then
+      select t.id into v_latest_transition_id
+      from public.account_active_transitions t
+      where t.target_profile_id = p_target_profile_id
+      order by (t.status not in ('succeeded', 'closed_inactive')) desc,
+        t.created_at desc, t.id desc
+      limit 1;
+      if v_latest_transition_id is distinct from v_transition.id then
+        raise exception 'account_transition_stale_replay' using errcode = 'P0001';
+      end if;
     end if;
   else
     select t.* into v_transition
@@ -771,6 +783,66 @@ as $function$
   where t.id = p_transition_id;
 $function$;
 
+drop function if exists public.get_account_active_transition_for_target(uuid);
+create or replace function public.get_account_active_transition_for_target(p_target_profile_id uuid)
+returns table (
+  transition_id uuid,
+  target_profile_id uuid,
+  desired_active boolean,
+  transition_status text,
+  profile_active boolean,
+  provider_state text,
+  provider_observed_at timestamptz,
+  attempt_count integer,
+  last_error_code text,
+  retryable boolean
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $function$
+  select t.id, t.target_profile_id, t.desired_active, t.status, p.active,
+    t.provider_state, t.provider_observed_at, t.attempt_count, t.last_error_code,
+    t.status in ('provider_pending', 'provider_in_progress', 'provider_failed', 'provider_applied')
+  from public.account_active_transitions t
+  join public.profiles p on p.id = t.target_profile_id
+  where t.target_profile_id = p_target_profile_id
+  order by (t.status not in ('succeeded', 'closed_inactive')) desc,
+    t.created_at desc, t.id desc
+  limit 1;
+$function$;
+
+drop function if exists public.list_latest_account_active_transitions();
+create or replace function public.list_latest_account_active_transitions()
+returns table (
+  transition_id uuid,
+  target_profile_id uuid,
+  desired_active boolean,
+  transition_status text,
+  profile_active boolean,
+  provider_state text,
+  provider_observed_at timestamptz,
+  attempt_count integer,
+  last_error_code text,
+  retryable boolean
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $function$
+  select distinct on (t.target_profile_id)
+    t.id, t.target_profile_id, t.desired_active, t.status, p.active,
+    t.provider_state, t.provider_observed_at, t.attempt_count, t.last_error_code,
+    t.status in ('provider_pending', 'provider_in_progress', 'provider_failed', 'provider_applied')
+  from public.account_active_transitions t
+  join public.profiles p on p.id = t.target_profile_id
+  order by t.target_profile_id,
+    (t.status not in ('succeeded', 'closed_inactive')) desc,
+    t.created_at desc, t.id desc;
+$function$;
+
 drop function if exists public.list_recoverable_account_active_transitions(integer);
 create or replace function public.list_recoverable_account_active_transitions(p_limit integer default 25)
 returns table (
@@ -808,6 +880,10 @@ revoke all on function public.close_account_active_transition_inactive(uuid, uui
 grant execute on function public.close_account_active_transition_inactive(uuid, uuid) to service_role;
 revoke all on function public.get_account_active_transition(uuid) from public, anon, authenticated;
 grant execute on function public.get_account_active_transition(uuid) to service_role;
+revoke all on function public.get_account_active_transition_for_target(uuid) from public, anon, authenticated;
+grant execute on function public.get_account_active_transition_for_target(uuid) to service_role;
+revoke all on function public.list_latest_account_active_transitions() from public, anon, authenticated;
+grant execute on function public.list_latest_account_active_transitions() to service_role;
 revoke all on function public.list_recoverable_account_active_transitions(integer) from public, anon, authenticated;
 grant execute on function public.list_recoverable_account_active_transitions(integer) to service_role;
 
@@ -1009,6 +1085,8 @@ begin
     ('finalize_account_active_transition', 'uuid'),
     ('close_account_active_transition_inactive', 'uuid, uuid'),
     ('get_account_active_transition', 'uuid'),
+    ('get_account_active_transition_for_target', 'uuid'),
+    ('list_latest_account_active_transitions', ''),
     ('list_recoverable_account_active_transitions', 'integer')
   ) expected(name, signature)
   loop

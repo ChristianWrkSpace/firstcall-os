@@ -33,6 +33,8 @@ const signatures = {
   closeInactive: "uuid, uuid",
   get: "uuid",
   list: "integer",
+  getForTarget: "uuid",
+  listLatest: "",
 } as const;
 
 const rpcNames = [
@@ -42,6 +44,8 @@ const rpcNames = [
   ["finalize_account_active_transition", signatures.finalize],
   ["close_account_active_transition_inactive", signatures.closeInactive],
   ["get_account_active_transition", signatures.get],
+  ["get_account_active_transition_for_target", signatures.getForTarget],
+  ["list_latest_account_active_transitions", signatures.listLatest],
   ["list_recoverable_account_active_transitions", signatures.list],
 ] as const;
 
@@ -177,6 +181,8 @@ describe("040 durable account-active transition migration", () => {
       finalize_account_active_transition: /finalize_account_active_transition\s*\(\s*p_transition_id uuid\s*\)/,
       close_account_active_transition_inactive: /close_account_active_transition_inactive\s*\(\s*p_transition_id uuid,\s*p_actor_id uuid\s*\)/,
       get_account_active_transition: /get_account_active_transition\s*\(\s*p_transition_id uuid\s*\)/,
+      get_account_active_transition_for_target: /get_account_active_transition_for_target\s*\(\s*p_target_profile_id uuid\s*\)/,
+      list_latest_account_active_transitions: /list_latest_account_active_transitions\s*\(\s*\)/,
       list_recoverable_account_active_transitions: /list_recoverable_account_active_transitions\s*\(\s*p_limit integer default 25\s*\)/,
     };
     for (const [name, signature] of rpcNames) {
@@ -206,6 +212,7 @@ describe("040 durable account-active transition migration", () => {
     expect(body).toMatch(/if not v_target_found then[\s\S]*errcode = 'p0002'/);
     expect(body).toMatch(/where t\.target_profile_id = p_target_profile_id and t\.idempotency_key = p_idempotency_key/);
     expect(body).toMatch(/desired_active is distinct from p_desired_active[\s\S]*account_transition_idempotency_conflict/);
+    expect(body).toMatch(/v_transition\.status in \('succeeded', 'closed_inactive'\)[\s\S]*v_latest_transition_id is distinct from v_transition\.id[\s\S]*account_transition_stale_replay/);
     expect(body).toMatch(/status not in \('succeeded', 'closed_inactive'\)[\s\S]*account_transition_conflict/);
     expect(body).toMatch(/insert into public\.account_active_transitions[^;]+returning \* into/);
     expect(body).toMatch(/insert into public\.account_active_transition_events[^;]+'claimed'/);
@@ -301,12 +308,20 @@ describe("040 durable account-active transition migration", () => {
     expectRedactedAudit(body);
   });
 
-  it("returns authoritative snapshots and bounded oldest-first recovery candidates", () => {
+  it("returns authoritative target/latest snapshots and bounded oldest-first recovery candidates", () => {
     const get = functionSql("get_account_active_transition", signatures.get);
     expect(get).toMatch(/join public\.profiles[^;]+p\.id = t\.target_profile_id/);
     for (const field of ["t.id", "t.target_profile_id", "t.desired_active", "t.status", "p.active", "t.provider_state", "t.provider_observed_at", "t.attempt_count", "t.last_error_code"]) {
       expect(get).toContain(field);
     }
+
+    const getForTarget = functionSql("get_account_active_transition_for_target", signatures.getForTarget);
+    expect(getForTarget).toMatch(/where t\.target_profile_id = p_target_profile_id/);
+    expect(getForTarget).toMatch(/order by \(t\.status not in \('succeeded', 'closed_inactive'\)\) desc, t\.created_at desc, t\.id desc limit 1/);
+
+    const listLatest = functionSql("list_latest_account_active_transitions", signatures.listLatest);
+    expect(listLatest).toMatch(/distinct on \(t\.target_profile_id\)/);
+    expect(listLatest).toMatch(/order by t\.target_profile_id, \(t\.status not in \('succeeded', 'closed_inactive'\)\) desc, t\.created_at desc, t\.id desc/);
 
     const list = functionSql("list_recoverable_account_active_transitions", signatures.list);
     expect(list).toMatch(/greatest\(1, least\(coalesce\(p_limit, 25\), 100\)\)/);
@@ -380,9 +395,19 @@ describe("040 durable account-active transition migration", () => {
     expect(runtimeVerification).toBe(false);
   });
 
+  it("keeps generated database types aligned with transition tables and RPCs", () => {
+    const types = readFileSync(path.resolve(process.cwd(), "lib/database.types.ts"), "utf8");
+    for (const table of ["account_active_transitions", "account_active_transition_events"]) {
+      expect(types).toContain(`${table}: {`);
+    }
+    for (const [name] of rpcNames) {
+      expect(types).toContain(`${name}: {`);
+    }
+  });
+
   it("contains complete static statements but does not claim parser or concurrency execution", () => {
-    expect((sql.match(/create or replace function public\./g) ?? []).length).toBe(9);
-    expect((sql.match(/\$function\$;/g) ?? []).length).toBe(9);
+    expect((sql.match(/create or replace function public\./g) ?? []).length).toBe(11);
+    expect((sql.match(/\$function\$;/g) ?? []).length).toBe(11);
     expect(sql.endsWith("$verification$;")).toBe(true);
     expect(runtimeVerification).toBe(false);
   });
